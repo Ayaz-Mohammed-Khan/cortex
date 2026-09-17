@@ -88,6 +88,23 @@
 body {
   font-family: var(--font-sans);
 }
+
+/*
+ * Global horizontal-overflow guard.
+ *
+ * Prevents the whole page from ever scrolling sideways on narrow/mobile
+ * viewports: if any single descendant is intrinsically wider than the screen
+ * it is clipped at the document edge rather than widening the layout and
+ * pushing content (cards, headings) off-screen. Wide *content* that needs to
+ * scroll — rendered tables, code blocks, display math — keeps its own
+ * `overflow-x: auto` on `.note-body` (defined below) and scrolls locally,
+ * unaffected by this clamp.
+ */
+html,
+body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
 ::selection {
   background: #ddd6fe; /* violet-200 */
   color: #0f172a; /* slate-900 */
