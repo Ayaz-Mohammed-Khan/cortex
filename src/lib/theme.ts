@@ -30,24 +30,24 @@ export type OsPreference = ThemeMode | null | undefined;
 /**
  * Resolve the initial Theme_Mode.
  *
- * Precedence (Req 8.1, 8.2, 8.5, 8.6):
+ * Precedence:
  *   1. the stored Theme_Mode when present;
- *   2. otherwise the OS preference when determinable;
- *   3. otherwise `light`.
+ *   2. otherwise `dark` — dark is the site default for first-time visitors,
+ *      independent of the OS preference.
  *
  * Because a selected mode is persisted as `stored`, re-resolving after a
- * selection returns that same mode (Req 8.4).
+ * selection returns that same mode (a visitor who toggles to light keeps it).
+ *
+ * `osPref` is accepted for signature/backwards compatibility but no longer
+ * influences the default (the site is dark-by-default, not OS-driven).
  *
  * This function is pure: same inputs always yield the same output.
  */
-export function resolveTheme(stored: StoredTheme, osPref: OsPreference): ThemeMode {
+export function resolveTheme(stored: StoredTheme, _osPref?: OsPreference): ThemeMode {
   if (stored === 'light' || stored === 'dark') {
     return stored;
   }
-  if (osPref === 'light' || osPref === 'dark') {
-    return osPref;
-  }
-  return 'light';
+  return 'dark';
 }
 
 // ---------------------------------------------------------------------------

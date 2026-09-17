@@ -61,19 +61,17 @@ const notesLanding = '/' + tree.slug;
       (() => {
         const KEY = 'theme';
         const setTheme = () => {
-          let theme = 'light';
+          // Dark is the default: a first-time visitor (no stored preference)
+          // always gets dark, regardless of their OS setting. A visitor who has
+          // explicitly toggled to light keeps that choice (it is persisted).
+          let theme = 'dark';
           try {
             const stored = localStorage.getItem(KEY);
             if (stored === 'light' || stored === 'dark') {
               theme = stored;
-            } else if (
-              window.matchMedia &&
-              window.matchMedia('(prefers-color-scheme: dark)').matches
-            ) {
-              theme = 'dark';
             }
           } catch (e) {
-            theme = 'light';
+            theme = 'dark';
           }
           document.documentElement.dataset.theme = theme;
         };
