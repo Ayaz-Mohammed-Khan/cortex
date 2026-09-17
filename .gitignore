@@ -26,3 +26,22 @@ pnpm-debug.log*
 
 # generated content mirror (synced from CONTENT_ROOT by scripts/sync-content.ts)
 src/content/notes/
+
+# ---------------------------------------------------------------------------
+# Build-irrelevant files: kept locally, excluded from the repo so GitHub (and
+# therefore the Cloudflare Pages build) only receives what the production build
+# `npm ci && npm run build` (prebuild sync -> astro build -> pagefind) needs.
+# These still live on disk, so local `npm run dev`, `npm run new`, and
+# `npm test` keep working.
+# ---------------------------------------------------------------------------
+
+# tests (Cloudflare does not run them)
+**/*.test.ts
+**/*.property.test.ts
+tests/
+vitest.config.ts
+
+# dev-only / local-authoring scripts (not part of the prod build chain)
+scripts/dev.mjs
+scripts/watch-content.ts
+scripts/new-note.ts
