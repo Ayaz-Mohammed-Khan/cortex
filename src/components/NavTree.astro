@@ -114,7 +114,7 @@ const IDLE =
                 href={node.route}
                 aria-current={selected ? 'page' : undefined}
                 class:list={[
-                  'flex min-h-8 flex-1 items-center gap-2 truncate rounded-md px-2 py-1 text-sm font-medium leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+                  'flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-sm font-medium leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
                   selected ? `font-semibold ${ACTIVE}` : IDLE,
                 ]}
               >
@@ -149,7 +149,7 @@ const IDLE =
             href={node.route}
             aria-current={selected ? 'page' : undefined}
             class:list={[
-              'flex min-h-8 items-center gap-2 truncate rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+              'flex min-h-8 min-w-0 items-center gap-2 rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
               selected ? ACTIVE : IDLE,
             ]}
           >
