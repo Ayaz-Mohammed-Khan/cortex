@@ -1,0 +1,147 @@
+---
+/**
+ * Note and Category listing routes (tasks 9.1 + 21.1).
+ *
+ * `getStaticPaths` emits, from the ingested notes tree, one pre-rendered route
+ * per published Note and one listing route per Category (including the section
+ * root `/notes`). Everything is derived once by the memoized `loadSite()`
+ * bridge, so this file only maps that data to Astro paths and composes the
+ * presentation components:
+ *
+ *   Layout (shell + nav + theme + search)
+ *     ├─ SeoHead            → head slot (title/description/canonical/JSON-LD)
+ *     ├─ Breadcrumbs        → ancestor chain
+ *     ├─ NoteContent        → rendered Markdown (note routes)   OR
+ *     │  CategoryListing    → child listing (category routes)
+ *     └─ TableOfContents    → toc slot (note routes with ≥2 headings)
+ *
+ * All output is static (`prerender = true`) so each Note is delivered as HTML
+ * pre-rendered at build time (Req 9.1).
+ */
+import { loadSite, renderNote } from '@/lib/content';
+import { buildToc, type TocEntry } from '@/lib/toc';
+import type { CategoryRef } from '@/lib/ingest/types';
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import Layout from '@/components/Layout.astro';
+import SeoHead from '@/components/SeoHead.astro';
+import Breadcrumbs from '@/components/Breadcrumbs.astro';
+import NoteContent from '@/components/NoteContent.astro';
+import PrevNext from '@/components/PrevNext.astro';
+import Backlinks from '@/components/Backlinks.astro';
+import CategoryListing from '@/components/CategoryListing.astro';
+import TableOfContents from '@/components/TableOfContents.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const site = await loadSite();
+  return site.paths.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { route: entry.route },
+  }));
+}
+
+interface Props {
+  route: string;
+}
+
+const { route } = Astro.props;
+const site = await loadSite();
+const data = site.byRoute.get(route);
+if (!data) {
+  throw new Error(`No page data for route "${route}"`);
+}
+
+const siteBase = Astro.site?.href;
+
+let toc: TocEntry[] = [];
+let Content: AstroComponentFactory | undefined;
+let categoryPath = '';
+let breadcrumbs: CategoryRef[] = [];
+let body: string | null = null;
+let description: string | null = null;
+
+// Prev/next published-Note neighbours (Tier 3). `site.entries` is already in
+// display order, so the neighbours are simply the adjacent entries.
+type NoteLink = { route: string; displayName: string };
+let prev: NoteLink | undefined;
+let next: NoteLink | undefined;
+
+// Backlinks ("Linked mentions"): other published notes that link TO this one.
+// Precomputed once per build by `loadSite()`; empty array when none resolve.
+const backlinks = data.kind === 'note' ? (site.backlinks.get(route) ?? []) : [];
+
+const displayName =
+  data.kind === 'note' ? data.content.displayName : data.node.displayName;
+
+if (data.kind === 'note') {
+  const rendered = await renderNote(data.entry);
+  Content = rendered.Content;
+  toc = buildToc(
+    rendered.headings.map((h) => ({ depth: h.depth, text: h.text, slug: h.slug })),
+  );
+  breadcrumbs = data.content.ancestors;
+  // Category path excludes the section landing (index 0) and the Note itself.
+  categoryPath = data.content.ancestors
+    .slice(1)
+    .map((ancestor) => ancestor.displayName)
+    .join(' / ');
+  body = data.content.body;
+  description = data.content.description ?? null;
+
+  const currentIndex = site.entries.findIndex((entry) => entry.route === route);
+  if (currentIndex !== -1) {
+    const prevEntry = site.entries[currentIndex - 1];
+    const nextEntry = site.entries[currentIndex + 1];
+    if (prevEntry) prev = { route: prevEntry.route, displayName: prevEntry.displayName };
+    if (nextEntry) next = { route: nextEntry.route, displayName: nextEntry.displayName };
+  }
+} else {
+  breadcrumbs = data.ancestors;
+}
+---
+
+<Layout
+  tree={site.tree}
+  siteModel={site.siteModel}
+  currentRoute={route}
+  sectionSlug={site.tree.slug}
+>
+  <SeoHead
+    slot="head"
+    displayName={displayName}
+    route={route}
+    site={siteBase}
+    body={body}
+    description={description}
+    article={data.kind === 'note' ? data.content : undefined}
+  />
+
+  {data.kind === 'note' && toc.length > 0 && (
+    <TableOfContents slot="toc" entries={toc} />
+  )}
+
+  {breadcrumbs.length > 0 && (
+    <Breadcrumbs ancestors={breadcrumbs} current={displayName} />
+  )}
+
+  <div class="mt-4">
+    {data.kind === 'note' && Content ? (
+      <NoteContent
+        displayName={displayName}
+        categoryPath={categoryPath}
+        Content={Content}
+      />
+    ) : (
+      data.kind === 'category' && <CategoryListing node={data.node} />
+    )}
+
+    {data.kind === 'note' && backlinks.length > 0 && (
+      <Backlinks refs={backlinks} />
+    )}
+
+    {data.kind === 'note' && (prev || next) && (
+      <PrevNext prev={prev} next={next} />
+    )}
+  </div>
+</Layout>

@@ -1,0 +1,70 @@
+---
+/**
+ * Prev/next Note navigation (Tier 3).
+ *
+ * Rendered at the bottom of a Note page (below `NoteContent`). Shows a bordered
+ * rounded card link to the previous published Note on the left and the next on
+ * the right; at `sm+` they sit in a two-column row, stacking on mobile. Either
+ * side is omitted when there is no neighbour (first/last Note), and the layout
+ * keeps the remaining card anchored to its side via `justify-between` + an empty
+ * spacer.
+ *
+ * The nav is `data-pagefind-ignore` so these link labels don't pollute the
+ * search index, and each card carries a hover state + visible focus ring for
+ * keyboard operability.
+ */
+interface NoteLink {
+  route: string;
+  displayName: string;
+}
+
+interface Props {
+  prev?: NoteLink;
+  next?: NoteLink;
+}
+
+const { prev, next } = Astro.props;
+---
+
+<nav
+  aria-label="Note navigation"
+  data-pagefind-ignore
+  class="mt-12 flex flex-col gap-4 border-t border-gray-200 pt-8 sm:flex-row sm:justify-between dark:border-white/10"
+>
+  {
+    prev ? (
+      <a
+        href={prev.route}
+        rel="prev"
+        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-left transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+      >
+        <span class="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          <span aria-hidden="true">&larr;</span> Previous
+        </span>
+        <span class="font-semibold text-gray-900 group-hover:text-violet-700 dark:text-gray-100 dark:group-hover:text-violet-300">
+          {prev.displayName}
+        </span>
+      </a>
+    ) : (
+      <span class="hidden flex-1 sm:block sm:max-w-[48%]" aria-hidden="true" />
+    )
+  }
+  {
+    next ? (
+      <a
+        href={next.route}
+        rel="next"
+        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-right transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+      >
+        <span class="flex items-center justify-end gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          Next <span aria-hidden="true">&rarr;</span>
+        </span>
+        <span class="font-semibold text-gray-900 group-hover:text-violet-700 dark:text-gray-100 dark:group-hover:text-violet-300">
+          {next.displayName}
+        </span>
+      </a>
+    ) : (
+      <span class="hidden flex-1 sm:block sm:max-w-[48%]" aria-hidden="true" />
+    )
+  }
+</nav>

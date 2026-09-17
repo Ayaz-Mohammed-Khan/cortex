@@ -1,0 +1,49 @@
+---
+/**
+ * Rendered Note content region (task 17.3; Req 3.1, 3.8, 6.1).
+ *
+ * Wraps the sanitized Markdown output (the `Content` component produced by
+ * Astro's `render()`, already run through the KaTeX/Shiki/sanitize pipeline)
+ * in the search-indexed body region. The region is marked `data-pagefind-body`
+ * so Pagefind indexes it, and carries the Display_Name (as the page `h1`) and
+ * the Category path as Pagefind meta + searchable text (Req 6.1, 6.7). The
+ * `./image-fallback` island supplies alt/placeholder fallback for broken
+ * images (Req 3.8). The `./code-block` and `./image-zoom` islands add the
+ * Tier-2 reading polish (code copy button + language label; image captions +
+ * click-to-zoom lightbox) as progressive, client-side enhancements.
+ */
+import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+
+interface Props {
+  /** The Note Display_Name, rendered as the page title heading. */
+  displayName: string;
+  /** Human-readable Category path, e.g. "AI-ML / SelfNotes". */
+  categoryPath: string;
+  /** The rendered Markdown component from `render(entry)`. */
+  Content: AstroComponentFactory;
+}
+
+const { displayName, categoryPath, Content } = Astro.props;
+---
+
+<article data-pagefind-body class="min-w-0">
+  <h1 data-pagefind-meta="displayName" class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+    {displayName}
+  </h1>
+  {
+    categoryPath && (
+      <span class="sr-only" data-pagefind-meta="categoryPath">
+        {categoryPath}
+      </span>
+    )
+  }
+  <div class="note-body mt-6">
+    <Content />
+  </div>
+</article>
+
+<script>
+  import './image-fallback';
+  import './code-block';
+  import './image-zoom';
+</script>

@@ -1,0 +1,44 @@
+---
+/**
+ * Not-found page (task 19.3; Req 2.5).
+ *
+ * Served for any route that maps to no content entry. It reuses the full shell
+ * (so navigation/search remain available) and contains a prominent link back
+ * to the notes Section landing page.
+ */
+import { loadSite } from '@/lib/content';
+import Layout from '@/components/Layout.astro';
+import SeoHead from '@/components/SeoHead.astro';
+
+export const prerender = true;
+
+const site = await loadSite();
+const notesLanding = '/' + site.tree.slug;
+---
+
+<Layout
+  tree={site.tree}
+  siteModel={site.siteModel}
+  currentRoute="/404"
+  sectionSlug={site.tree.slug}
+>
+  <SeoHead slot="head" displayName="Page not found" route="/404" site={Astro.site?.href} />
+
+  <div class="mx-auto max-w-lg py-16 text-center">
+    <p class="text-sm font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+      404
+    </p>
+    <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+      Page not found
+    </h1>
+    <p class="mt-3 text-gray-600 dark:text-gray-400">
+      We couldn't find the page you were looking for.
+    </p>
+    <a
+      href={notesLanding}
+      class="mt-6 inline-flex items-center rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-300"
+    >
+      Go to the notes home
+    </a>
+  </div>
+</Layout>

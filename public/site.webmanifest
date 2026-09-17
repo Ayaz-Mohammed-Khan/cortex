@@ -1,0 +1,16 @@
+{
+  "name": "Cortex",
+  "short_name": "Cortex",
+  "start_url": "/notes",
+  "display": "standalone",
+  "theme_color": "#7c3aed",
+  "background_color": "#0b1120",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}

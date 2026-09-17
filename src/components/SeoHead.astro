@@ -1,0 +1,74 @@
+---
+/**
+ * SEO metadata for the document head (task 19.1; Req 10.1, 10.3–10.6).
+ *
+ * Emits a page title (≤60 chars), a meta description (≤160 chars, derived from
+ * body content with a Display_Name fallback), a canonical URL, Open Graph
+ * article tags, and — for Note pages — schema.org Article JSON-LD. All derived
+ * values come from the pure helpers in `src/lib/seo.ts`, so the truncation and
+ * fallback rules are the property-tested ones.
+ *
+ * Rendered into `Layout`'s `head` slot (`<SeoHead slot="head" … />`).
+ */
+import type { ContentEntry } from '@/lib/ingest/types';
+import {
+  pageTitle,
+  metaDescription,
+  canonicalUrl,
+  articleJsonLd,
+} from '@/lib/seo';
+
+interface Props {
+  /** Display_Name of the page (Note or Category). */
+  displayName: string;
+  /** Absolute route of the page (e.g. "/notes/ai-ml/intro"). */
+  route: string;
+  /** Absolute site base URL (e.g. Astro.site?.href); canonical omitted if absent. */
+  site?: string | undefined;
+  /** Raw body content used to derive the description (Notes). */
+  body?: string | null;
+  /** Optional frontmatter description override; preferred when present. */
+  description?: string | null;
+  /** When provided, emit Article JSON-LD for this Note (Req 10.4). */
+  article?: ContentEntry;
+}
+
+const { displayName, route, site, body, description, article } = Astro.props;
+
+/** Brand/wordmark shown in the document title suffix and og:site_name. */
+const SITE_NAME = "Cortex";
+/** Upper bound for the composed `<title>` so long note names don't overflow. */
+const TITLE_SUFFIX_MAX_LENGTH = 65;
+
+// `title` still comes from the property-tested `pageTitle` (≤60 chars); we only
+// add the site-name suffix HERE, in the component layer, and drop it when the
+// composed title would get too long.
+const title = pageTitle(displayName);
+const suffixed = `${title} · ${SITE_NAME}`;
+const documentTitle =
+  suffixed.length <= TITLE_SUFFIX_MAX_LENGTH ? suffixed : title;
+// Prefer an explicit frontmatter description; otherwise derive from the body.
+const descriptionSource =
+  description && description.trim().length > 0 ? description : (body ?? null);
+const metaDesc = metaDescription(descriptionSource, displayName);
+const canonical = site ? canonicalUrl(site, route) : route;
+const jsonLd = article ? articleJsonLd(article, canonical) : null;
+---
+
+<title>{documentTitle}</title>
+<meta name="description" content={metaDesc} />
+<meta name="author" content="Ayaz Mohammed Khan" />
+<link rel="canonical" href={canonical} />
+
+<meta property="og:title" content={title} />
+<meta property="og:description" content={metaDesc} />
+<meta property="og:type" content="article" />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={SITE_NAME} />
+<meta name="twitter:card" content="summary" />
+
+{
+  jsonLd && (
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  )
+}

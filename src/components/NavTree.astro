@@ -1,0 +1,181 @@
+---
+/**
+ * Hierarchical navigation tree (task 16.1; Req 5.1, 5.3, 5.4).
+ *
+ * Renders Categories and Notes in their computed display order (the tree is
+ * already ordered by the Ingestion Domain, so this is a straight recursive
+ * render — Req 5.1). The active path is marked using `nav-state.ts`
+ * (`computeNavState`): the current Note is `aria-current="page"` and each of
+ * its ancestor Categories starts expanded so the full path is visible
+ * (Req 5.4). For Category listing pages, the branch containing the current
+ * route is also expanded via a prefix check.
+ *
+ * Expansion is a progressive-enhancement disclosure: branches render open/closed
+ * on the server and the `nav-drawer.ts` island toggles them on the client.
+ * The component recurses through `Astro.self`.
+ *
+ * Visual design (docs-style sidebar):
+ *  - top-level Categories read as bold-ish section rows; nested Notes sit under
+ *    subtle vertical INDENT GUIDES (a hairline left border per nested group);
+ *  - hover gives a calm background + text lift;
+ *  - the ACTIVE Note/Category gets a tinted pill, a left accent bar (inset
+ *    shadow, so it adds no layout shift), accent text, and heavier weight —
+ *    far more than "just blue text".
+ * All the data hooks (`data-nav-toggle`, `data-nav-children`, `aria-expanded`)
+ * and the `<a href={node.route}>` tree links are preserved for the island +
+ * the a11y / keyboard tests, and every control keeps a visible focus ring.
+ */
+import type { TreeNode } from '@/lib/ingest/types';
+import type { NavState } from '@/lib/nav-state';
+
+interface Props {
+  /** Sibling nodes to render at this level, in display order. */
+  nodes: TreeNode[];
+  /** Precomputed active-path state (from `computeNavState`). */
+  navState: NavState;
+  /** The current page's route, for selection + prefix-based expansion. */
+  currentRoute: string;
+  /** Nesting depth (0 at the top level), used for the indent guides. */
+  level?: number;
+  /** Optional muted section label rendered once above the top-level tree. */
+  label?: string;
+}
+
+const { nodes, navState, currentRoute, level = 0, label } = Astro.props;
+
+/** A Category is open when it is an active-path ancestor or contains the route. */
+function isExpanded(route: string): boolean {
+  return (
+    navState.isExpanded(route) ||
+    currentRoute === route ||
+    currentRoute.startsWith(route + '/')
+  );
+}
+
+/**
+ * Active-state chrome shared by Categories and Notes: a tinted pill, an inset
+ * left accent bar (no layout shift), accent text, and heavier weight.
+ */
+const ACTIVE =
+  'bg-violet-50 text-violet-700 font-medium shadow-[inset_2px_0_0_#7c3aed] dark:bg-violet-950/50 dark:text-violet-200 dark:shadow-[inset_2px_0_0_#a78bfa]';
+
+/** Idle (inactive) row chrome: muted text, calm hover background + text lift. */
+const IDLE =
+  'text-gray-600 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800/70 dark:hover:text-gray-100';
+---
+
+{
+  level === 0 && label && (
+    <p class="mb-2 px-2 text-[0.7rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+      {label}
+    </p>
+  )
+}
+
+<ul
+  role={level === 0 ? 'tree' : 'group'}
+  class:list={[
+    'space-y-0.5',
+    // Nested groups sit under a thin vertical INDENT RAIL + consistent inset.
+    level > 0 && 'ml-3.5 border-l border-gray-200 pl-2 dark:border-white/10',
+  ]}
+>
+  {
+    nodes.map((node) => {
+      const selected = currentRoute === node.route || navState.isSelected(node.route);
+      if (node.kind === 'category') {
+        const open = isExpanded(node.route);
+        return (
+          <li role="treeitem" aria-expanded={open}>
+            <div class="flex items-center gap-0.5">
+              <button
+                type="button"
+                data-nav-toggle
+                aria-expanded={open}
+                aria-label={`Toggle ${node.displayName}`}
+                class="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-200/60 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-500 dark:hover:bg-gray-700/50 dark:hover:text-gray-300"
+              >
+                {/* Chevron: rotates smoothly from ▶ to ▼ when the branch opens. */}
+                <svg
+                  class="h-4 w-4 transition-transform duration-200"
+                  style={open ? 'transform: rotate(90deg)' : ''}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M7.21 4.3a1 1 0 0 1 1.42 0l5 5a1 1 0 0 1 0 1.4l-5 5a1 1 0 1 1-1.42-1.4L11.5 10 7.21 5.7a1 1 0 0 1 0-1.4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <a
+                href={node.route}
+                aria-current={selected ? 'page' : undefined}
+                class:list={[
+                  'flex min-h-8 flex-1 items-center gap-2 truncate rounded-md px-2 py-1 text-sm font-medium leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+                  selected ? `font-semibold ${ACTIVE}` : IDLE,
+                ]}
+              >
+                {/* Folder icon leads a Category row. */}
+                <svg
+                  class="h-4 w-4 shrink-0 opacity-70"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path d="M3.5 4A1.5 1.5 0 0 0 2 5.5v9A1.5 1.5 0 0 0 3.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 16.5 6H10L8.6 4.4A1.5 1.5 0 0 0 7.46 4H3.5z" />
+                </svg>
+                <span class="truncate">
+                  {node.hasPrefix ? `${node.order}. ${node.displayName}` : node.displayName}
+                </span>
+              </a>
+            </div>
+            <div data-nav-children hidden={!open}>
+              <Astro.self
+                nodes={node.children}
+                navState={navState}
+                currentRoute={currentRoute}
+                level={level + 1}
+              />
+            </div>
+          </li>
+        );
+      }
+      return (
+        <li role="treeitem">
+          <a
+            href={node.route}
+            aria-current={selected ? 'page' : undefined}
+            class:list={[
+              'flex min-h-8 items-center gap-2 truncate rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+              selected ? ACTIVE : IDLE,
+            ]}
+          >
+            {/* Document/hash icon leads a Note row. */}
+            <svg
+              class="h-4 w-4 shrink-0 opacity-70"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4.5 3A1.5 1.5 0 0 0 3 4.5v11A1.5 1.5 0 0 0 4.5 17h11a1.5 1.5 0 0 0 1.5-1.5V8.12a1.5 1.5 0 0 0-.44-1.06l-3.62-3.62A1.5 1.5 0 0 0 11.38 3H4.5zm7 1.5 3.5 3.5H12a.5.5 0 0 1-.5-.5V4.5z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            <span class="truncate">
+              {node.hasPrefix ? `${node.order}. ${node.displayName}` : node.displayName}
+            </span>
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<script>
+  import './nav-drawer';
+</script>

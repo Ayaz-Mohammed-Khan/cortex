@@ -1,0 +1,98 @@
+---
+/**
+ * Search control + modal dialog (task 18.1; Req 6.2–6.7).
+ *
+ * A header button opens a native `<dialog>` (keyboard accessible, Escape to
+ * close, focus contained while open) holding the query input, a live status
+ * line (min-length / searching / no-results / count), and the results list.
+ * All behavior — lazy Pagefind load, min-length gating, result capping, and
+ * rendering Display_Name + Category path per result — lives in the `./search`
+ * island. Pagefind indexes the built site in the `postbuild` step.
+ */
+---
+
+{/*
+  Search trigger. It is a real <button data-search-open> that opens the dialog
+  below, dressed as a Fumadocs-style search FIELD: a full-width rounded control
+  showing the search icon, a muted "Search notes…" placeholder, and a
+  right-aligned ⌘K / Ctrl K keyboard-shortcut hint chip. This component now
+  lives in the LEFT SIDEBAR header (the layout renders it once), so the trigger
+  is full-width in its container and always shows the field styling. All the
+  dialog hooks + behavior live in the `./search` island.
+*/}
+<button
+  type="button"
+  data-search-open
+  aria-label="Search notes"
+  aria-keyshortcuts="Control+K"
+  class="inline-flex h-9 w-full items-center gap-2 rounded-lg border border-gray-300 bg-gray-50 px-2.5 text-sm text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
+>
+  <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <path
+      fill-rule="evenodd"
+      d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+      clip-rule="evenodd"></path>
+  </svg>
+  <span>Search notes…</span>
+  <kbd class="kbd-hint ml-auto inline-flex items-center">
+    <span class="hidden lg:inline">Ctrl&nbsp;K</span>
+    <span class="lg:hidden">⌘K</span>
+  </kbd>
+</button>
+
+{/*
+  Fumadocs-style centered search modal. A native <dialog> opened via
+  showModal() (see ./search) — it centers by default; the margin/positioning
+  utilities float it near the TOP-center (~12vh from top) with a comfortable
+  max-width, full-width with side padding on small screens. Layout is three
+  stacked bands:
+    1. SEARCH ROW  — magnifier icon + input ("Search") + an `ESC` <kbd>-style
+       chip on the far right (this chip IS the `data-search-close` control).
+    2. STATUS + RESULTS — unchanged hooks driven by ./search.
+  All `data-*` hooks + ARIA are preserved so ./search keeps working untouched.
+*/}
+<dialog
+  data-search-dialog
+  aria-label="Search notes"
+  class="mx-auto mt-[12vh] w-[calc(100%-2rem)] max-w-[640px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 text-left shadow-2xl backdrop:bg-gray-900/40 backdrop:backdrop-blur-sm dark:border-white/10 dark:bg-gray-900"
+>
+  <div class="flex items-center gap-3 border-b border-gray-100 px-4 py-3.5 focus-within:ring-2 focus-within:ring-violet-500/40 dark:border-white/5">
+    <svg class="h-5 w-5 shrink-0 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path
+        fill-rule="evenodd"
+        d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+        clip-rule="evenodd"></path>
+    </svg>
+    <input
+      type="search"
+      data-search-input
+      placeholder="Search"
+      aria-label="Search query"
+      autocomplete="off"
+      class="min-w-0 flex-1 rounded-md bg-transparent px-1 py-2 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/40 dark:text-gray-100"
+    />
+    <button
+      type="button"
+      data-search-close
+      aria-label="Close search"
+      class="shrink-0 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1 text-[0.7rem] font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+    >
+      Esc
+    </button>
+  </div>
+
+  <p
+    data-search-status
+    role="status"
+    aria-live="polite"
+    class="px-4 py-2.5 text-sm text-gray-500 dark:text-gray-400"
+  >
+    Type at least 2 characters to search.
+  </p>
+
+  <ul data-search-results class="app-scroll max-h-[50vh] overflow-y-auto p-2 pt-0"></ul>
+</dialog>
+
+<script>
+  import './search';
+</script>

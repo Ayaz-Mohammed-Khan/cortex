@@ -1,0 +1,956 @@
+/* Global stylesheet: pulls in Tailwind CSS v4 and configures theming. */
+@import "tailwindcss";
+
+/*
+ * KaTeX stylesheet for rendered mathematics (Req 3.4, 3.5).
+ *
+ * rehype-katex emits KaTeX markup at build time; this stylesheet provides the
+ * fonts and layout rules that make that markup render as formatted math. It is
+ * imported here (rather than in a base Layout) so math renders correctly at
+ * build time today; the future Layout (task 15.1) inherits this global sheet.
+ * Vite resolves the bare `katex/...` specifier from node_modules.
+ */
+@import "katex/dist/katex.min.css";
+
+/*
+ * Dark mode strategy: data-attribute selector.
+ *
+ * By default Tailwind v4 activates `dark:` utilities via the
+ * `prefers-color-scheme` media query. We override that so dark styles instead
+ * activate whenever `[data-theme="dark"]` is present on an element or any of
+ * its ancestors. The no-flash theme script sets
+ * `document.documentElement.dataset.theme` before paint, so `<html>` carries
+ * `data-theme="dark"` and every descendant's `dark:` utilities resolve
+ * correctly. (Equivalent to Tailwind v3's
+ * `darkMode: ['selector', '[data-theme="dark"]']`.)
+ *
+ * Requirements: 7.1 (styling foundation), 8.7 (data-theme-driven dark theme).
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Shiki dual-theme dark switching (Req 3.2, 3.3, 8.7).
+ *
+ * Shiki dual themes render each token once, emitting inline CSS variables
+ * (`--shiki-light` / `--shiki-dark` and their `-bg` / font-style variants).
+ * By default the light values are applied inline, and Shiki's own switching
+ * relies on the `prefers-color-scheme` media query. Our theming strategy is
+ * driven by the `[data-theme="dark"]` attribute set by the no-flash script,
+ * NOT by the media query, so we wire the dark variables to that selector here.
+ * This keeps code blocks consistent with the rest of the dark color scheme
+ * (Req 8.7) regardless of the OS preference.
+ */
+/*
+ * Astro 7's Shiki output no longer carries an `.astro-code` class; it renders a
+ * `<pre data-language="…">` whose `<pre>`/`<span>` elements carry inline
+ * `--shiki-dark` / `--shiki-dark-bg` CSS variables (the light values are applied
+ * inline by default). Under `[data-theme="dark"]` we swap each element to its
+ * dark variables so code blocks follow the site theme (Req 8.7). Both selectors
+ * are kept for forward/backward compatibility.
+ */
+[data-theme="dark"] .astro-code,
+[data-theme="dark"] .astro-code span,
+[data-theme="dark"] pre[data-language],
+[data-theme="dark"] pre[data-language] span {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
+  /* Preserve dark-theme font styling where the theme defines it. */
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
+/*
+ * Rendered Note body typography (task 17.3).
+ *
+ * The `<Content />` component emits arbitrary sanitized Markdown HTML, so these
+ * rules are global (targeting `.note-body` descendants) rather than scoped.
+ * They provide readable defaults for headings, paragraphs, lists, tables,
+ * blockquotes, code, links, and images in both themes. Shiki code blocks and
+ * KaTeX math bring their own styling (configured above); these rules only add
+ * spacing/wrapping around them.
+ */
+/*
+ * Refined reading typography (Tier 2 polish).
+ *
+ * Dependency-free: a refined system sans stack for prose/UI and a monospace
+ * stack for code (no web-font downloads). Exposed as custom properties so the
+ * same stacks drive the app shell, the prose, and the injected code-block /
+ * lightbox chrome. Body text is a touch softer than near-black to reduce eye
+ * strain while staying comfortably above WCAG AA contrast in both themes.
+ */
+:root {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "JetBrains Mono", "Fira Code",
+    Consolas, "Liberation Mono", Menlo, monospace;
+}
+body {
+  font-family: var(--font-sans);
+}
+::selection {
+  background: #ddd6fe; /* violet-200 */
+  color: #0f172a; /* slate-900 */
+}
+[data-theme="dark"] ::selection {
+  background: #4c1d95; /* violet-900 */
+  color: #f8fafc; /* slate-50 */
+}
+
+/* Note title (the page `h1` rendered by NoteContent, a sibling of .note-body). */
+article[data-pagefind-body] > h1 {
+  font-family: var(--font-sans);
+  font-size: clamp(2.1rem, 1.5rem + 2.2vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.35rem;
+  text-wrap: balance;
+}
+
+.note-body {
+  font-family: var(--font-sans);
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: #374151; /* gray-700 — softer than near-black, still AA on white */
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+[data-theme="dark"] .note-body {
+  color: #d1d5db; /* gray-300 */
+}
+.note-body :where(h2) {
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.014em;
+  color: #111827; /* gray-900 */
+  scroll-margin-top: 4.5rem; /* clear the sticky header when anchored */
+}
+[data-theme="dark"] .note-body :where(h2) {
+  color: #f3f4f6; /* gray-100 */
+}
+.note-body :where(h3) {
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: #1f2937; /* gray-800 */
+  scroll-margin-top: 4.5rem;
+}
+[data-theme="dark"] .note-body :where(h3) {
+  color: #e5e7eb; /* gray-200 */
+}
+.note-body :where(h4, h5, h6) {
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 1.075rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: #1f2937; /* gray-800 */
+  scroll-margin-top: 4.5rem;
+}
+[data-theme="dark"] .note-body :where(h4, h5, h6) {
+  color: #e5e7eb; /* gray-200 */
+}
+.note-body :where(p, ul, ol, blockquote, table, pre) {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+.note-body :where(ul) {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.note-body :where(ol) {
+  list-style: decimal;
+  padding-left: 1.5rem;
+}
+.note-body :where(li) {
+  margin-top: 0.35rem;
+  padding-left: 0.15rem;
+}
+.note-body :where(li)::marker {
+  color: #6b7280; /* gray-500 */
+}
+[data-theme="dark"] .note-body :where(li)::marker {
+  color: #9ca3af; /* gray-400 */
+}
+.note-body :where(a) {
+  color: #6d28d9; /* violet-700 */
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  transition: color 0.15s, text-decoration-color 0.15s;
+}
+.note-body :where(a:hover) {
+  color: #5b21b6; /* violet-800 */
+  text-decoration-color: currentColor;
+}
+[data-theme="dark"] .note-body :where(a) {
+  color: #c4b5fd; /* violet-300 */
+}
+[data-theme="dark"] .note-body :where(a:hover) {
+  color: #ddd6fe; /* violet-200 */
+}
+.note-body :where(blockquote) {
+  border-left: 3px solid #cbd5e1; /* slate-300 */
+  padding: 0.15rem 0 0.15rem 1.15rem;
+  color: #4b5563; /* gray-600 */
+  font-style: italic;
+}
+[data-theme="dark"] .note-body :where(blockquote) {
+  border-left-color: #475569; /* slate-600 */
+  color: #9ca3af; /* gray-400 */
+}
+/* Inline code chips (not inside a Shiki `pre`). */
+.note-body :where(code):not(pre code) {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  border-radius: 0.375rem;
+  background: #f1f5f9; /* slate-100 */
+  border: 1px solid #e2e8f0; /* slate-200 */
+  padding: 0.08rem 0.4rem;
+  color: #334155; /* slate-700 */
+}
+[data-theme="dark"] .note-body :where(code):not(pre code) {
+  background: #1e293b; /* slate-800 */
+  border-color: #334155; /* slate-700 */
+  color: #e2e8f0; /* slate-200 */
+}
+.note-body :where(pre) {
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  padding: 1rem 1.1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  font-family: var(--font-mono);
+}
+.note-body :where(pre code) {
+  font-family: var(--font-mono);
+}
+.note-body :where(img) {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+}
+.note-body :where(hr) {
+  border: 0;
+  height: 1px;
+  margin: 2.25rem 0;
+  background: linear-gradient(to right, transparent, #d1d5db, transparent);
+}
+[data-theme="dark"] .note-body :where(hr) {
+  background: linear-gradient(to right, transparent, #374151, transparent);
+}
+/*
+ * Tables: a subtle header band, zebra rows, rounded outer corners, and
+ * horizontal scroll on small screens (the block-level table becomes its own
+ * scroll container while its rows still form aligned columns).
+ */
+.note-body :where(table) {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 0.5rem;
+  font-size: 0.925rem;
+}
+[data-theme="dark"] .note-body :where(table) {
+  border-color: #374151; /* gray-700 */
+}
+.note-body :where(th, td) {
+  border-bottom: 1px solid #e5e7eb; /* gray-200 */
+  border-right: 1px solid #e5e7eb;
+  padding: 0.55rem 0.85rem;
+  text-align: left;
+}
+[data-theme="dark"] .note-body :where(th, td) {
+  border-color: #374151; /* gray-700 */
+}
+.note-body :where(tr > *:last-child) {
+  border-right: 0;
+}
+.note-body :where(tr:last-child > *) {
+  border-bottom: 0;
+}
+.note-body :where(tbody tr:nth-child(even)) {
+  background: #f9fafb; /* gray-50 */
+}
+[data-theme="dark"] .note-body :where(tbody tr:nth-child(even)) {
+  background: rgba(255, 255, 255, 0.03);
+}
+.note-body :where(th) {
+  background: #f3f4f6; /* gray-100 */
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+}
+[data-theme="dark"] .note-body :where(th) {
+  background: #111827; /* gray-900 */
+  color: #f3f4f6; /* gray-100 */
+}
+/*
+ * Rendered mathematics (KaTeX) — spacing + overflow fixes (Task 1; Req 3.4, 3.5).
+ *
+ * Root cause of "squashed" math: `.note-body { line-height: 1.7 }` cascades
+ * into KaTeX's vertical-stack spans (fractions, sub/superscripts, limits) and
+ * compresses them, and without any `.katex-display` rules a wide equation is
+ * clipped by the content column. These rules undo both:
+ *   - reset line-height to `normal` inside KaTeX so its own precise vertical
+ *     metrics are honored (fractions/limits stack correctly);
+ *   - give display (block) equations vertical breathing room and let them
+ *     scroll horizontally instead of clipping/squashing when too wide;
+ *   - nudge the on-screen math size up slightly for readability.
+ * KaTeX's own stylesheet (imported above) supplies the glyph fonts/layout;
+ * these only adjust the surrounding spacing so they never fight KaTeX.
+ */
+.note-body :where(.katex) {
+  line-height: normal;
+  font-size: 1.05em;
+}
+.note-body :where(.katex-display) {
+  margin: 1.25rem 0;
+  padding: 0.5rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+/* Display math is centered by KaTeX; slightly larger than inline for emphasis. */
+.note-body :where(.katex-display) > .katex {
+  font-size: 1.15em;
+}
+
+/*
+ * Obsidian callouts (Task 2).
+ *
+ * `remark-callouts.ts` emits class-only markup:
+ *   <blockquote class="callout callout-<type>">
+ *     <div class="callout-title"><span class="callout-title-text">…</span></div>
+ *     <div class="callout-body">…</div>   (omitted when the callout has no body)
+ *   </blockquote>
+ * Fumadocs-style neutral card: the box itself is a subtle NEUTRAL surface with a
+ * thin neutral border, soft rounded corners, and a very subtle shadow. The only
+ * place the per-type color appears strongly is the INNER ACCENT LINE (a thin
+ * rounded vertical rule inset inside the card via `.callout::before`) plus the
+ * decorative CSS `::before` icon next to the title. The
+ * icon is a single-color MASKED SVG (Lucide-style stroke glyph) tinted with
+ * `background-color: var(--callout-accent)`, so it inherits the per-type accent
+ * in BOTH light and dark themes (unlike the old fixed multicolor emoji, which
+ * CSS could not recolor). The title text is neutral/high-contrast and the body
+ * text is muted, so both stay AA-readable on the neutral surface in BOTH themes.
+ * The `--callout-accent` custom property (set per type) drives only the inner
+ * accent line and the icon tint; neutral surface/border/text tokens are shared and
+ * theme-aware. `--callout-icon` holds an SVG data-URI used as the mask image.
+ */
+.note-body blockquote.callout {
+  /* Sensible defaults (also the fallback for an unknown type -> "note"). */
+  --callout-accent: #3b82f6; /* blue-500 */
+  /* Default icon (info circle) so an unknown type still shows a glyph. */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='10'/%3E%3Cpath%20d='M12%2016v-4'/%3E%3Cpath%20d='M12%208h.01'/%3E%3C/svg%3E");
+  /* Neutral card tokens (light theme; overridden for dark below). */
+  --callout-surface: #f9fafb; /* gray-50 */
+  --callout-border: #e5e7eb; /* gray-200 */
+  --callout-title-color: #111827; /* gray-900 */
+  --callout-body-color: #4b5563; /* gray-600 */
+  position: relative;
+  margin: 1.25rem 0;
+  /* Extra left padding makes room for the inner accent line + its inset. */
+  padding: 0.85rem 1rem 0.85rem 1.5rem;
+  /* Uniform neutral border on all four sides (no colored edge). */
+  border: 1px solid var(--callout-border);
+  border-radius: 0.75rem;
+  background: var(--callout-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* Reset the inherited blockquote prose styling (italic / gray left rule). */
+  color: var(--callout-body-color);
+  font-style: normal;
+}
+/* Fumadocs-style inner accent line: a thin rounded vertical rule INSIDE the
+   card, inset from the rounded left edge (so it reads as a rule, not a border)
+   and spanning the content height. Tinted with the per-type accent. */
+.note-body blockquote.callout::before {
+  content: "";
+  position: absolute;
+  left: 0.75rem;
+  top: 0.85rem;
+  bottom: 0.85rem;
+  width: 2px;
+  border-radius: 9999px;
+  background: var(--callout-accent);
+}
+.note-body :where(.callout-title) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  color: var(--callout-title-color);
+  line-height: 1.3;
+}
+/* Per-type decorative icon: a single-color SVG masked box tinted by the accent.
+   Using a mask (alpha-only) means the icon follows `--callout-accent` in both
+   themes; the stroke color inside the SVG data-URI is irrelevant. */
+.note-body :where(.callout-title)::before {
+  content: "";
+  width: 1.15em;
+  height: 1.15em;
+  flex-shrink: 0;
+  background-color: var(--callout-accent);
+  -webkit-mask: var(--callout-icon) center / contain no-repeat;
+  mask: var(--callout-icon) center / contain no-repeat;
+}
+/* Body sits below the title; first/last children lose their outer margins so
+   the padded box hugs the content. */
+.note-body :where(.callout-body) {
+  margin-top: 0.5rem;
+  color: var(--callout-body-color);
+}
+.note-body :where(.callout-body) > :first-child {
+  margin-top: 0;
+}
+.note-body :where(.callout-body) > :last-child {
+  margin-bottom: 0;
+}
+
+/* Per-type accents (light theme). */
+.note-body blockquote.callout-note {
+  --callout-accent: #475569; /* slate-600 */
+  --callout-tint: rgba(71, 85, 105, 0.08);
+  /* pencil / edit */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M12%2020h9'/%3E%3Cpath%20d='M16.5%203.5a2.12%202.12%200%200%201%203%203L7%2019l-4%201%201-4Z'/%3E%3C/svg%3E");
+}
+.note-body blockquote.callout-info {
+  --callout-accent: #2563eb; /* blue-600 */
+  --callout-tint: rgba(37, 99, 235, 0.08);
+  /* info circle */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='12'%20cy='12'%20r='10'/%3E%3Cpath%20d='M12%2016v-4'/%3E%3Cpath%20d='M12%208h.01'/%3E%3C/svg%3E");
+}
+.note-body blockquote.callout-tip {
+  --callout-accent: #16a34a; /* green-600 */
+  --callout-tint: rgba(22, 163, 74, 0.08);
+  /* lightbulb */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M9%2018h6'/%3E%3Cpath%20d='M10%2022h4'/%3E%3Cpath%20d='M15.09%2014c.18-.98.65-1.74%201.41-2.5A4.65%204.65%200%200%200%2012%204a4.65%204.65%200%200%200-4.5%207.5c.76.76%201.23%201.52%201.41%202.5'/%3E%3C/svg%3E");
+}
+.note-body blockquote.callout-warning {
+  --callout-accent: #d97706; /* amber-600 */
+  --callout-tint: rgba(217, 119, 6, 0.09);
+  /* triangle-alert */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M10.29%203.86%201.82%2018a2%202%200%200%200%201.71%203h16.94a2%202%200%200%200%201.71-3L13.71%203.86a2%202%200%200%200-3.42%200Z'/%3E%3Cpath%20d='M12%209v4'/%3E%3Cpath%20d='M12%2017h.01'/%3E%3C/svg%3E");
+}
+.note-body blockquote.callout-example {
+  --callout-accent: #7c3aed; /* violet-600 */
+  --callout-tint: rgba(124, 58, 237, 0.08);
+  /* search / magnifier */
+  --callout-icon: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='white'%20stroke-width='2'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Ccircle%20cx='11'%20cy='11'%20r='8'/%3E%3Cpath%20d='m21%2021-4.3-4.3'/%3E%3C/svg%3E");
+}
+
+/* Dark theme: neutral light-on-dark surface + border, lighter accent for the
+   left bar/icon, and high-contrast neutral title over muted neutral body. */
+[data-theme="dark"] .note-body blockquote.callout {
+  --callout-accent: #60a5fa; /* blue-400 */
+  --callout-surface: rgba(255, 255, 255, 0.03);
+  --callout-border: rgba(255, 255, 255, 0.08);
+  --callout-title-color: #f3f4f6; /* gray-100 */
+  --callout-body-color: #9ca3af; /* gray-400 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+[data-theme="dark"] .note-body blockquote.callout-note {
+  --callout-accent: #94a3b8; /* slate-400 */
+  --callout-tint: rgba(148, 163, 184, 0.13);
+}
+[data-theme="dark"] .note-body blockquote.callout-info {
+  --callout-accent: #60a5fa; /* blue-400 */
+  --callout-tint: rgba(96, 165, 250, 0.13);
+}
+[data-theme="dark"] .note-body blockquote.callout-tip {
+  --callout-accent: #4ade80; /* green-400 */
+  --callout-tint: rgba(74, 222, 128, 0.13);
+}
+[data-theme="dark"] .note-body blockquote.callout-warning {
+  --callout-accent: #fbbf24; /* amber-400 */
+  --callout-tint: rgba(251, 191, 36, 0.13);
+}
+[data-theme="dark"] .note-body blockquote.callout-example {
+  --callout-accent: #a78bfa; /* violet-400 */
+  --callout-tint: rgba(167, 139, 250, 0.13);
+}
+
+/*
+ * Wikilinks (Task 3).
+ *
+ * `remark-wikilinks.ts` emits `<a class="wikilink" href="/notes/…">` for
+ * resolved targets and `<a class="wikilink wikilink-missing" href="#"
+ * aria-disabled="true">` for unresolved ones. Resolved links get a subtle
+ * accent + solid violet underline; missing links look muted with a dashed
+ * underline and a not-allowed cursor so a broken reference is visually obvious.
+ *
+ * These rules intentionally avoid `:where()` so they carry real class
+ * specificity (0,1,1 light / 0,2,1 dark). This lets them win over the muted
+ * callout body color (`.note-body blockquote.callout { color: … }`, same
+ * specificity) — the dark rule equals the dark callout body rule but wins on
+ * source order because this block sits AFTER the callout block. The resolved
+ * rule is guarded with `:not(.wikilink-missing)` so a missing link (which
+ * carries BOTH classes) keeps its muted look with no color conflict.
+ */
+.note-body a.wikilink:not(.wikilink-missing) {
+  color: #6d28d9; /* violet-700 */
+  text-decoration: underline;
+  text-decoration-style: solid;
+  text-decoration-color: #6d28d9;
+  text-underline-offset: 2px;
+}
+.note-body a.wikilink:not(.wikilink-missing):hover {
+  color: #5b21b6; /* violet-800 */
+  text-decoration-color: #5b21b6;
+}
+[data-theme="dark"] .note-body a.wikilink:not(.wikilink-missing) {
+  color: #a78bfa; /* violet-400 */
+  text-decoration-color: #a78bfa;
+}
+[data-theme="dark"] .note-body a.wikilink:not(.wikilink-missing):hover {
+  color: #c4b5fd; /* violet-300 */
+  text-decoration-color: #c4b5fd;
+}
+.note-body a.wikilink-missing {
+  color: #9ca3af; /* gray-400 */
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  cursor: not-allowed;
+}
+[data-theme="dark"] .note-body a.wikilink-missing {
+  color: #6b7280; /* gray-500 */
+}
+
+/* Autolinked heading anchors (rehype-autolink-headings, behavior: 'append'). */
+.note-body :where(.heading-anchor) {
+  margin-left: 0.4rem;
+  color: #9ca3af;
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.note-body :where(h2:hover, h3:hover, h4:hover) .heading-anchor {
+  opacity: 1;
+}
+.note-body :where(.heading-anchor)::after {
+  content: "#";
+}
+
+/*
+ * Code-block chrome (Tier 2 — `code-block.ts` island).
+ *
+ * The island wraps each Shiki `<pre data-language>` in a `.code-block`
+ * (position: relative) and floats a language label (top-left) plus a copy
+ * button (top-right) over it. The `<pre>` gains extra top padding so its first
+ * line clears the chrome, and the button is absolutely positioned so it stays
+ * put while the code scrolls horizontally. Without JS the bare `<pre>` still
+ * renders normally — this only decorates the enhanced markup.
+ */
+.note-body .code-block {
+  position: relative;
+  margin: 1.25rem 0;
+}
+.note-body .code-block > pre {
+  margin: 0;
+  padding-top: 2.6rem;
+}
+.note-body .code-block__lang {
+  position: absolute;
+  top: 0.55rem;
+  left: 0.85rem;
+  z-index: 1;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #64748b; /* slate-500 */
+  pointer-events: none;
+  user-select: none;
+}
+[data-theme="dark"] .note-body .code-block__lang {
+  color: #94a3b8; /* slate-400 */
+}
+.note-body .code-block__copy {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.5rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid #cbd5e1; /* slate-300 */
+  border-radius: 0.375rem;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.22rem 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  color: #334155; /* slate-700 */
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.note-body .code-block__copy:hover {
+  background: #ffffff;
+  border-color: #94a3b8; /* slate-400 */
+  color: #0f172a; /* slate-900 */
+}
+.note-body .code-block__copy:focus-visible {
+  outline: 2px solid #7c3aed; /* visible focus ring (violet-600) */
+  outline-offset: 2px;
+}
+.note-body .code-block__copy.is-copied {
+  border-color: #16a34a; /* green-600 */
+  color: #15803d; /* green-700 */
+  background: #f0fdf4; /* green-50 */
+}
+.note-body .code-block__copy.is-error {
+  border-color: #dc2626; /* red-600 */
+  color: #b91c1c; /* red-700 */
+  background: #fef2f2; /* red-50 */
+}
+.note-body .code-block__icon {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: none;
+}
+[data-theme="dark"] .note-body .code-block__copy {
+  border-color: #334155; /* slate-700 */
+  background: rgba(15, 23, 42, 0.7); /* slate-900 / 70% */
+  color: #cbd5e1; /* slate-300 */
+}
+[data-theme="dark"] .note-body .code-block__copy:hover {
+  background: #1e293b; /* slate-800 */
+  border-color: #475569; /* slate-600 */
+  color: #f1f5f9; /* slate-100 */
+}
+[data-theme="dark"] .note-body .code-block__copy:focus-visible {
+  outline-color: #a78bfa; /* violet-400 */
+}
+[data-theme="dark"] .note-body .code-block__copy.is-copied {
+  border-color: #22c55e; /* green-500 */
+  color: #86efac; /* green-300 */
+  background: rgba(22, 101, 52, 0.35);
+}
+[data-theme="dark"] .note-body .code-block__copy.is-error {
+  border-color: #ef4444; /* red-500 */
+  color: #fca5a5; /* red-300 */
+  background: rgba(153, 27, 27, 0.35);
+}
+
+/*
+ * Figure + caption and zoomable images (Tier 2 — `image-zoom.ts` island).
+ *
+ * Images with alt text are wrapped in a centered `<figure>` with a small, muted
+ * caption. Every eligible content image gets a zoom-in cursor and a visible
+ * focus ring so it reads as an activatable control (it is `role="button"`,
+ * `tabindex="0"` and opens the lightbox on click / Enter / Space).
+ */
+.note-body .note-figure {
+  margin: 1.5rem auto;
+  text-align: center;
+}
+.note-body .note-figure > img {
+  display: inline-block;
+  margin: 0 auto;
+}
+.note-body .note-figure > figcaption {
+  margin-top: 0.6rem;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: #4b5563; /* gray-600 */
+  text-align: center;
+}
+[data-theme="dark"] .note-body .note-figure > figcaption {
+  color: #9ca3af; /* gray-400 */
+}
+.note-body img.is-zoomable {
+  cursor: zoom-in;
+  transition: filter 0.15s, box-shadow 0.15s;
+}
+.note-body img.is-zoomable:hover {
+  filter: brightness(0.96);
+}
+.note-body img.is-zoomable:focus-visible {
+  outline: 3px solid #7c3aed; /* violet-600 */
+  outline-offset: 2px;
+}
+[data-theme="dark"] .note-body img.is-zoomable:focus-visible {
+  outline-color: #a78bfa; /* violet-400 */
+}
+
+/*
+ * Image lightbox (Tier 2 — `image-zoom.ts` island).
+ *
+ * A modal dialog overlay (appended to <body>, so it is NOT scoped to
+ * .note-body): dimmed backdrop, centered enlarged image, visible close button.
+ * Focus trapping / Escape / body-scroll lock are handled in JS; these rules
+ * cover layout, the entrance transition, and the reduced-motion opt-out.
+ */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(15, 23, 42, 0.82); /* slate-900 / 82% */
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.lightbox[hidden] {
+  display: none;
+}
+.lightbox.is-open {
+  opacity: 1;
+}
+/*
+ * The dialog sizes to its image (`width: max-content`) and is the positioning
+ * context for the close button, so the button anchors to the IMAGE's top-right
+ * corner (not the viewport corner) and moves/stays with the image regardless of
+ * aspect ratio. It stays centered in the overlay via the flex parent.
+ */
+.lightbox__dialog {
+  position: relative;
+  display: inline-block;
+  width: max-content;
+  max-width: 92vw;
+  max-height: 92vh;
+}
+.lightbox__image {
+  display: block;
+  max-width: 92vw;
+  max-height: 92vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 0.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  transform: scale(0.96);
+  transition: transform 0.2s ease;
+}
+.lightbox.is-open .lightbox__image {
+  transform: scale(1);
+}
+.lightbox__image:focus-visible {
+  outline: 3px solid #a78bfa; /* violet-400 */
+  outline-offset: 3px;
+}
+/*
+ * Close button: anchored just inside the image's top-right corner (nudged
+ * slightly so it overlaps the corner and stays visible over any image). A
+ * solid circular background keeps it legible in both themes; a generous hit
+ * target (>= 36px) keeps it comfortably clickable on small images too.
+ */
+.lightbox__close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #0f172a; /* slate-900 */
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.15s, transform 0.15s;
+}
+.lightbox__close:hover {
+  background: #f1f5f9; /* slate-100 */
+  transform: scale(1.05);
+}
+.lightbox__close:focus-visible {
+  outline: 3px solid #a78bfa; /* violet-400 */
+  outline-offset: 2px;
+}
+.lightbox__close svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+@media (prefers-reduced-motion: reduce) {
+  .lightbox,
+  .lightbox__image,
+  .lightbox__close,
+  .note-body img.is-zoomable {
+    transition: none;
+  }
+  .lightbox__image {
+    transform: none;
+  }
+}
+
+/*
+ * Left navigation sidebar surface (Fumadocs-style soft diffusion).
+ *
+ * Replaces the previous flat `bg-gray-50` / `dark:bg-gray-900/40` tint on the
+ * `<aside data-nav-drawer>` panel with a gentle gradient wash: a barely-there
+ * violet-accent (#7c3aed / violet-400 in dark) radial glow diffusing from the
+ * top-left, fading into a near-neutral base. Only a few percent alpha, so it
+ * reads as a calm premium shade — nav text keeps AA legibility over it.
+ *
+ * The panel is `overflow-hidden` and only the inner nav scrolls, so this
+ * background is naturally anchored to the panel (no `background-attachment`
+ * needed) and the inner scroll region paints no opaque bg over it. No outline
+ * reset is introduced here (keyboard-nav test forbids it).
+ */
+.nav-surface {
+  /* Plain white base on the far left; a subtle violet wash ramps up
+     horizontally and is strongest at the sidebar's right border (border-r). */
+  background-color: #ffffff;
+  background-image: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 45%,
+    rgba(124, 58, 237, 0.05) 100%
+  );
+}
+[data-theme="dark"] .nav-surface {
+  /* Let the dark page base show on the left; a faint violet glow builds
+     toward the right border. */
+  background-color: transparent;
+  background-image: linear-gradient(
+    to right,
+    transparent 0%,
+    transparent 40%,
+    rgba(139, 92, 246, 0.1) 100%
+  );
+}
+
+/* Mobile only (< lg): the sidebar is a fixed off-canvas drawer overlaying the
+   page, so in dark mode it needs a SOLID background (the desktop sticky sidebar
+   stays transparent — unchanged). The violet gradient overlay above still
+   layers on top since only background-color is overridden here. */
+@media (max-width: 1023.98px) {
+  [data-theme="dark"] .nav-surface {
+    background-color: #0b1120; /* solid dark base (near gray-950) so the drawer is opaque */
+  }
+}
+
+/*
+ * Thin, subtle custom scrollbars + smooth anchor scrolling (Tier 2 chrome).
+ *
+ * The nav sidebar and the on-this-page TOC opt in via `.app-scroll`, and a
+ * lighter global treatment keeps every other scroll container consistent. The
+ * track is transparent and the thumb is a muted, rounded hairline so the bars
+ * read as part of the chrome rather than a heavy default control. Themed for
+ * light + dark. NOTE: no blanket outline reset is introduced anywhere here —
+ * the keyboard-nav test forbids stripping the native focus outline, and focus
+ * rings stay on the interactive controls via `:focus-visible` utilities.
+ */
+.app-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.35) transparent; /* slate-500 @ 35% */
+}
+.app-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.app-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.app-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.32); /* slate-500 @ 32% */
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.app-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 116, 139, 0.5);
+}
+[data-theme="dark"] .app-scroll {
+  scrollbar-color: rgba(148, 163, 184, 0.28) transparent; /* slate-400 @ 28% */
+}
+[data-theme="dark"] .app-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.24); /* slate-400 @ 24% */
+}
+[data-theme="dark"] .app-scroll:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.42);
+}
+
+/* A lighter global scrollbar so the page/body bars match the chrome too. */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+}
+[data-theme="dark"] html {
+  scrollbar-color: rgba(148, 163, 184, 0.24) transparent;
+}
+
+/*
+ * Smooth anchor jumps (TOC links, heading anchors), opted out for users who
+ * prefer reduced motion so it never fights their accessibility preference.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Keyboard-shortcut hint chip used in the search trigger (`<kbd>`). */
+kbd.kbd-hint {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  line-height: 1;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #64748b; /* slate-500 */
+  background: #f1f5f9; /* slate-100 */
+  border: 1px solid #e2e8f0; /* slate-200 */
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.35rem;
+}
+[data-theme="dark"] kbd.kbd-hint {
+  color: #94a3b8; /* slate-400 */
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/*
+ * Reading-progress bar (Tier 3, decorative / aria-hidden).
+ *
+ * A thin fixed rail at the very top edge of the viewport, sitting ABOVE the
+ * sticky header (`z-30`). The track is transparent; the inner fill is the
+ * violet accent and grows left→right as `reading-progress.ts` sets its width.
+ * Subtle and premium: 3px tall with a soft violet glow. The width transition is
+ * disabled for users who prefer reduced motion (the fill value still updates).
+ */
+[data-reading-progress] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 50;
+  pointer-events: none;
+  background: transparent;
+}
+[data-reading-progress] > [data-reading-progress-fill] {
+  width: 0;
+  height: 100%;
+  background: #7c3aed; /* violet-600 (light accent) */
+  box-shadow: 0 0 6px rgba(124, 58, 237, 0.55);
+  transition: width 120ms linear;
+}
+[data-theme="dark"] [data-reading-progress] > [data-reading-progress-fill] {
+  background: #a78bfa; /* violet-400 (dark accent) */
+  box-shadow: 0 0 6px rgba(167, 139, 250, 0.55);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-reading-progress] > [data-reading-progress-fill] {
+    transition: none;
+  }
+}

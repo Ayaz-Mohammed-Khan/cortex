@@ -1,0 +1,57 @@
+---
+/**
+ * Theme toggle control (task 15.2).
+ *
+ * A single button that flips light/dark. The actual behavior lives in the
+ * bundled `./theme` island so it is shared and runs on the client; this
+ * component only renders the control and its two icons. The initial applied
+ * theme is set before paint by the no-flash inline script in `Layout.astro`,
+ * so this control never causes a flash and applies changes without a reload
+ * (Req 8.3, 8.4, 8.7).
+ *
+ * Accessibility: it is a real `<button>` (keyboard reachable/operable),
+ * carries an `aria-pressed` + `aria-label` that the island keeps in sync with
+ * the active theme, and shows a visible focus ring (Req 7.7, 7.8).
+ */
+---
+
+<button
+  type="button"
+  data-theme-toggle
+  aria-pressed="false"
+  aria-label="Switch to dark theme"
+  title="Switch to dark theme"
+  class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800 dark:focus-visible:ring-violet-300 dark:focus-visible:ring-offset-gray-950"
+>
+  {/* Sun icon: shown in dark mode (activating switches to light). */}
+  <svg
+    class="hidden h-5 w-5 dark:block"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M4.93 19.07l1.41-1.41m11.32-11.32 1.41-1.41"></path>
+  </svg>
+  {/* Moon icon: shown in light mode (activating switches to dark). */}
+  <svg
+    class="block h-5 w-5 dark:hidden"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+  </svg>
+</button>
+
+<script>
+  import './theme';
+</script>

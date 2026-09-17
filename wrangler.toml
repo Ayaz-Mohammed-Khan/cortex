@@ -1,0 +1,20 @@
+# Cloudflare Pages configuration (infrastructure-as-code) for the static Astro
+# notes site.
+#
+# This project deploys as a **Cloudflare Pages** project connected to the GitHub
+# repo, with auto-deploy on every push to the production branch (`main`). The
+# whole publishing loop is:
+#
+#   write a note in content/ -> git commit -> git push -> Cloudflare Pages runs
+#   the build command -> the new note is live in ~1-2 min.
+#
+# Cloudflare Pages reads the build settings you configure in the dashboard the
+# first time you connect the repo (see DEPLOY.md). This file mainly declares the
+# Pages project name and the directory the build emits, and is also used by the
+# `wrangler` CLI if you ever deploy manually.
+name = "cortex-notes"
+compatibility_date = "2026-01-01"
+
+# Directory `astro build` emits (output: 'static' -> ./dist). Cloudflare Pages
+# uploads the contents of this directory to its global CDN.
+pages_build_output_dir = "dist"

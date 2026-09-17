@@ -1,0 +1,44 @@
+---
+/**
+ * Breadcrumb trail (tasks 16.3; Req 5.5, 5.6).
+ *
+ * Renders the ordered ancestor chain (section landing → … → immediate parent)
+ * as links to each Category listing, followed by the current page's own label
+ * as plain (non-link) text marking the current location. The `ancestors` list
+ * is exactly the chain the Ingestion Domain attaches to each ContentEntry /
+ * Category, so this component is a thin, ordered render of that data.
+ */
+import type { CategoryRef } from '@/lib/ingest/types';
+
+interface Props {
+  /** Ordered ancestor Categories (root → immediate parent), excluding current. */
+  ancestors: CategoryRef[];
+  /** Display_Name of the current page (Note or Category). */
+  current: string;
+}
+
+const { ancestors, current } = Astro.props;
+---
+
+<nav aria-label="Breadcrumb" class="text-sm text-gray-600 dark:text-gray-400">
+  <ol class="flex flex-wrap items-center gap-x-1.5 gap-y-1">
+    {
+      ancestors.map((ancestor) => (
+        <li class="flex items-center gap-x-1.5">
+          <a
+            href={ancestor.route}
+            class="rounded transition-colors hover:text-violet-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:hover:text-violet-300"
+          >
+            {ancestor.displayName}
+          </a>
+          <span aria-hidden="true" class="text-gray-400 dark:text-gray-600">/</span>
+        </li>
+      ))
+    }
+    <li>
+      <span aria-current="page" class="font-medium text-gray-900 dark:text-gray-100">
+        {current}
+      </span>
+    </li>
+  </ol>
+</nav>

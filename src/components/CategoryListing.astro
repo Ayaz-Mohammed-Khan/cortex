@@ -1,0 +1,69 @@
+---
+/**
+ * Category listing page body (task 17.4; Req 5.2, 5.7).
+ *
+ * Lists a Category's child Categories and Notes in display order (the tree is
+ * pre-ordered by the Ingestion Domain). When the Category has no children, a
+ * "no content" message is shown instead (Req 5.7).
+ */
+import type { CategoryNode } from '@/lib/ingest/types';
+
+interface Props {
+  node: CategoryNode;
+}
+
+const { node } = Astro.props;
+const children = node.children;
+---
+
+<div class="min-w-0">
+  <h1 class="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+    {node.displayName}
+  </h1>
+
+  {
+    children.length === 0 ? (
+      <p class="mt-6 rounded-md border border-dashed border-gray-300 px-4 py-6 text-gray-600 dark:border-gray-700 dark:text-gray-400">
+        This category has no content yet.
+      </p>
+    ) : (
+      <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+        {children.map((child) => (
+          <li>
+            <a
+              href={child.route}
+              class="flex items-start gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-violet-500 hover:bg-violet-50/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-violet-500 dark:hover:bg-violet-950/30"
+            >
+              <span
+                aria-hidden="true"
+                class="mt-0.5 text-gray-400 dark:text-gray-500"
+              >
+                {child.kind === 'category' ? (
+                  <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M3 5a2 2 0 0 1 2-2h3l2 2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5z" />
+                  </svg>
+                ) : (
+                  <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fill-rule="evenodd"
+                      d="M4 4a2 2 0 0 1 2-2h5.586A2 2 0 0 1 13 2.586L15.414 5A2 2 0 0 1 16 6.414V16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4zm2 6a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1zm1 3a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2H7z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                )}
+              </span>
+              <span class="min-w-0">
+                <span class="block truncate font-medium text-gray-900 dark:text-gray-100">
+                  {child.displayName}
+                </span>
+                <span class="mt-0.5 block text-xs uppercase tracking-wide text-gray-400 dark:text-gray-500">
+                  {child.kind === 'category' ? 'Category' : 'Note'}
+                </span>
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</div>

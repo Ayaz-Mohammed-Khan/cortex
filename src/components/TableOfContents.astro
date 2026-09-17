@@ -1,0 +1,77 @@
+---
+/**
+ * In-page table of contents (task 17.1; Req 4.1, 4.2, 4.5).
+ *
+ * Pure rendering over the entries produced by `buildToc` (from `src/lib/toc.ts`):
+ * entries are already in document order, capped, and carry a per-level `indent`.
+ * When `buildToc` returns `[]` (fewer than two qualifying headings) the whole
+ * component renders nothing, omitting the Table_Of_Contents (Req 4.5).
+ *
+ * Interactions (scroll-to, missing-target indication, scroll-spy) are added by
+ * the `./toc` island (Req 4.3, 4.4).
+ */
+import type { TocEntry } from '@/lib/toc';
+
+interface Props {
+  entries: TocEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{
+  entries.length > 0 && (
+    <nav aria-label="Table of contents" class="text-sm">
+      <p class="mb-3 flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+        {/* Small list icon leading the "On this page" label. */}
+        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path d="M4 5h12a1 1 0 1 1 0 2H4a1 1 0 0 1 0-2zm0 4h12a1 1 0 1 1 0 2H4a1 1 0 0 1 0-2zm0 4h8a1 1 0 1 1 0 2H4a1 1 0 0 1 0-2z" />
+        </svg>
+        On this page
+      </p>
+      <div
+        data-toc-status
+        role="status"
+        aria-live="polite"
+        class="hidden mb-2 rounded bg-amber-100 px-2 py-1 text-xs text-amber-900 dark:bg-amber-950 dark:text-amber-200"
+      >
+      </div>
+      {/* Continuous vertical rail: a left border on the list, with each entry's
+          own left border overlapping it (−ml-px). The active entry paints its
+          segment of the rail in the accent color (see the .toc-active rule). */}
+      <ul class="space-y-0.5 border-l border-gray-200 dark:border-white/10">
+        {entries.map((entry) => (
+          <li>
+            <a
+              href={`#${entry.slug}`}
+              data-toc-link
+              data-target={entry.slug}
+              style={{ paddingLeft: `${0.85 + entry.indent}rem` }}
+              class="-ml-px block border-l-2 border-transparent py-1 leading-snug text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-100"
+            >
+              {entry.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<style>
+  /* Active entry: an accent left bar sitting on the rail, accent text, medium
+     weight — a clear docs-style marker, not just a color change. */
+  .toc-active {
+    border-inline-start-color: #7c3aed; /* violet-600 */
+    color: #6d28d9; /* violet-700 */
+    font-weight: 600;
+  }
+  :global([data-theme='dark']) .toc-active {
+    border-inline-start-color: #a78bfa; /* violet-400 */
+    color: #c4b5fd; /* violet-300 */
+  }
+</style>
+
+<script>
+  import './toc';
+</script>

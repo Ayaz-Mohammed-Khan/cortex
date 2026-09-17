@@ -1,0 +1,324 @@
+---
+/**
+ * Application shell (task 15.1; Req 7.1, 8.1, 8.2, 8.6, 9.3, 9.4).
+ *
+ * Provides:
+ *  - a no-flash inline theme script that sets `data-theme` before paint from
+ *    `localStorage` → OS preference → light (Req 8.1, 8.2, 8.6), re-applied
+ *    after each View Transition swap;
+ *  - Astro View Transitions (`<ClientRouter />`) for fast client-side
+ *    navigation with an automatic full-load fallback (Req 9.3, 9.4);
+ *  - a persistent ≥2-column layout at ≥1024px (sidebar Navigation_Tree + main
+ *    content), collapsing the sidebar into a drawer below 1024px (Req 7.1, 7.2);
+ *  - the site header (Section switcher, Search, theme toggle) and the shared
+ *    Navigation_Tree, rendered on every page.
+ *
+ * Page-specific content goes in the default slot; note pages may fill the
+ * `toc` slot with a Table_Of_Contents and the `head` slot with SEO tags.
+ */
+import '@/styles/global.css';
+import { ClientRouter } from 'astro:transitions';
+import type { CategoryNode } from '@/lib/ingest/types';
+import type { SiteModel } from '@/lib/section';
+import { computeNavState } from '@/lib/nav-state';
+import NavTree from './NavTree.astro';
+import SectionNav from './SectionNav.astro';
+import ThemeToggle from './ThemeToggle.astro';
+import Search from './Search.astro';
+
+interface Props {
+  /** The notes Section navigation tree root. */
+  tree: CategoryNode;
+  /** Whole-site model, for the Section switcher. */
+  siteModel: SiteModel;
+  /** Absolute route of the current page (active-path + Section highlight). */
+  currentRoute: string;
+  /** Slug of the Section the current page belongs to. */
+  sectionSlug: string;
+  /** Document language. */
+  lang?: string;
+}
+
+const { tree, siteModel, currentRoute, sectionSlug, lang = 'en' } = Astro.props;
+
+const navState = computeNavState(tree, currentRoute);
+const notesLanding = '/' + tree.slug;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="/favicon.svg" color="#7c3aed" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <meta name="theme-color" content="#7c3aed" />
+
+    {/* No-flash theme: set data-theme before first paint, and after each swap. */}
+    <script is:inline>
+      (() => {
+        const KEY = 'theme';
+        const setTheme = () => {
+          let theme = 'light';
+          try {
+            const stored = localStorage.getItem(KEY);
+            if (stored === 'light' || stored === 'dark') {
+              theme = stored;
+            } else if (
+              window.matchMedia &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches
+            ) {
+              theme = 'dark';
+            }
+          } catch (e) {
+            theme = 'light';
+          }
+          document.documentElement.dataset.theme = theme;
+        };
+        setTheme();
+        document.addEventListener('astro:after-swap', setTheme);
+      })();
+    </script>
+
+    <ClientRouter />
+    <slot name="head" />
+  </head>
+
+  <body class="min-h-screen bg-white text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-100">
+    {/*
+      Decorative reading-progress bar (Tier 3). Fixed at the very top edge of
+      the viewport, above the sticky header, driven by `./reading-progress`.
+      aria-hidden because it conveys no information beyond the scrollbar itself.
+    */}
+    <div data-reading-progress aria-hidden="true"></div>
+
+    <a
+      href="#main-content"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-violet-800 focus:ring-2 focus:ring-violet-600 dark:focus:bg-gray-900 dark:focus:text-violet-200"
+    >
+      Skip to content
+    </a>
+
+    {/*
+      Full-bleed sticky app bar. Horizontal padding lives on the INNER row and
+      matches the sidebar's inner-content left padding (`lg:pl-6`) so the logo
+      lines up with the navigation labels below it at large widths, while the
+      panels themselves reach the viewport edges. The sticky blur + bottom
+      hairline keep it distinct while scrolling.
+
+      Fumadocs-style layout decision: the Search FIELD, the Section switcher,
+      and the theme toggle now live in the LEFT SIDEBAR (see the <aside> below).
+      At <lg the sidebar is an off-canvas drawer (closed by default), so Search
+      and the theme toggle would be unreachable there — so the header keeps a
+      COMPACT Search icon trigger + a ThemeToggle, shown ONLY below lg
+      (`lg:hidden`). Crucially there is still exactly ONE <Search /> instance in
+      the whole document (rendered in the sidebar), so there is exactly one
+      `[data-search-dialog]` + one set of dialog-scoped IDs — no duplicate-ID or
+      duplicate-<dialog> conflicts (the axe audit and search tests stay green).
+      The header's compact button is just a bare `[data-search-open]` trigger;
+      `search.ts` delegates on the document and happily supports multiple such
+      triggers driving the single dialog. `theme.ts` uses `querySelectorAll`,
+      so multiple `[data-theme-toggle]` controls are also safe.
+    */}
+    <header
+      data-pagefind-ignore
+      class="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/85"
+    >
+      <div class="mx-auto flex h-14 w-full max-w-[1400px] items-center gap-3 px-4 sm:px-6 lg:pl-6 lg:pr-8">
+        <button
+          type="button"
+          data-nav-drawer-toggle
+          aria-expanded="false"
+          aria-controls="nav-drawer"
+          aria-label="Toggle navigation"
+          class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+        >
+          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd" d="M3 5h14a1 1 0 1 1 0 2H3a1 1 0 0 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2z" clip-rule="evenodd"></path>
+          </svg>
+        </button>
+
+        <a
+          href={notesLanding}
+          class="flex min-w-0 items-center gap-2 rounded-md py-1 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-50"
+        >
+          {/*
+            Cortex neural-node badge: a rounded-square violet mark whose white
+            glyph is a tiny "connected nodes" graph (three nodes + linking
+            edges) — a nod to the site's wikilinks/backlinks knowledge web.
+            Drawn in white on the violet badge so it stays legible in both
+            themes and crisp down to 16px. aria-hidden because the wordmark
+            text supplies the accessible name.
+          */}
+          <svg
+            class="h-6 w-6 shrink-0"
+            viewBox="0 0 32 32"
+            fill="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect width="32" height="32" rx="8" fill="#7c3aed" />
+            <g stroke="#fff" stroke-width="2" stroke-linecap="round">
+              <line x1="10" y1="11" x2="21" y2="9" />
+              <line x1="10" y1="11" x2="13" y2="22" />
+              <line x1="13" y1="22" x2="21" y2="9" />
+            </g>
+            <g fill="#fff">
+              <circle cx="10" cy="11" r="3.2" />
+              <circle cx="21" cy="9" r="3.2" />
+              <circle cx="13" cy="22" r="3.2" />
+            </g>
+          </svg>
+          <span class="truncate text-base font-bold tracking-tight">Cortex</span>
+        </a>
+
+        {/*
+          Small-screen-only controls (`lg:hidden`). These reach the ONE Search
+          dialog + theme via the shared delegated islands. At lg+ the sidebar
+          copies take over and these are hidden, so there is never a duplicate
+          on screen at the same breakpoint.
+        */}
+        <div class="ml-auto flex items-center gap-2 lg:hidden">
+          <button
+            type="button"
+            data-search-open
+            aria-label="Search notes"
+            aria-keyshortcuts="Control+K"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </button>
+          <ThemeToggle />
+        </div>
+      </div>
+    </header>
+
+    {/*
+      Body: a full-width, edge-anchored shell. NO horizontal padding lives on
+      this shell — each region owns its own internal padding instead. That lets
+      the left Navigation panel's tinted background + right hairline run FLUSH to
+      the viewport's left edge (a continuous rail from the header border down),
+      and the right TOC panel's left hairline run flush to the right edge, while
+      the reading column keeps a comfortable centered measure with its own
+      padding. `min-w-0` on the flex children lets wide code/tables/math scroll
+      internally instead of forcing horizontal page scroll.
+    */}
+    <div class="mx-auto flex w-full max-w-[1400px]">
+      {/*
+        Sidebar: a persistent, sticky panel at >=1024px, collapsing to an
+        off-canvas drawer below. Its tinted background + right hairline reach the
+        viewport's LEFT edge. It is now a Fumadocs-style vertical flex COLUMN:
+
+          ┌──────────────────────────────┐
+          │ header  → Search field        │  (fixed, doesn't scroll)
+          │           Section switcher     │
+          ├──────────────────────────────┤
+          │ nav     → NavTree (flex-1,     │  (the only scrolling region)
+          │           overflow-y-auto)     │
+          ├──────────────────────────────┤
+          │ footer  → GitHub · ThemeToggle │  (pinned to the bottom)
+          └──────────────────────────────┘
+
+        The panel itself no longer scrolls (`overflow-hidden`); only the middle
+        `.app-scroll` NavTree region does, so the search field + footer stay put
+        like Fumadocs. Internal left padding (`lg:pl-6`, matching the header
+        logo) insets the content; each region keeps a `pr-3`/gutter so the thin
+        scrollbar clears the tree labels.
+      */}
+      <aside
+        id="nav-drawer"
+        data-nav-drawer
+        aria-hidden="true"
+        aria-label="Notes navigation"
+        class="nav-surface fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col overflow-hidden border-r border-gray-200 transition-transform duration-200 lg:sticky lg:top-14 lg:z-auto lg:h-[calc(100vh-3.5rem)] lg:w-64 lg:shrink-0 lg:translate-x-0 dark:border-white/10"
+      >
+        {/* Header block: full-width Search field + Section switcher. */}
+        <div class="flex flex-col gap-2 px-4 pb-3 pt-4 lg:px-5">
+          <Search />
+          <SectionNav siteModel={siteModel} currentSectionSlug={sectionSlug} />
+        </div>
+
+        {/* Scroll region: the navigation tree. */}
+        <nav
+          aria-label="Notes navigation tree"
+          class="app-scroll min-h-0 flex-1 overflow-y-auto px-3 pb-4 lg:pl-5 lg:pr-3"
+        >
+          <NavTree
+            nodes={tree.children}
+            navState={navState}
+            currentRoute={currentRoute}
+            label={tree.displayName}
+          />
+        </nav>
+
+        {/* Footer: pinned to the bottom — GitHub link + theme toggle. */}
+        <div
+          class="flex items-center justify-between border-t border-gray-200 px-4 py-3 lg:px-5 dark:border-white/10"
+        >
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+          >
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                fill-rule="evenodd"
+                d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+                clip-rule="evenodd"></path>
+            </svg>
+          </a>
+          <ThemeToggle />
+        </div>
+      </aside>
+
+      {/* Backdrop for the mobile drawer. */}
+      <div
+        data-nav-backdrop
+        aria-hidden="true"
+        class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"
+      >
+      </div>
+
+      {/* Center: the reading column, centered and capped, with its own padding. */}
+      <main id="main-content" class="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-10">
+        {/*
+          Constrain the reading column on large screens so prose lines don't
+          stretch edge-to-edge on big monitors. Wide tables / math / code inside
+          `.note-body` keep their own horizontal overflow scrolling, so they
+          still use the full column width.
+        */}
+        <div class="mx-auto w-full max-w-3xl xl:max-w-4xl">
+          <slot />
+        </div>
+      </main>
+
+      {/*
+        Right column: Table_Of_Contents on note pages (empty otherwise). Its
+        left hairline runs flush to the viewport's RIGHT edge; `pr-6` reserves a
+        comfortable gutter between the panel edge and its content, and the inner
+        scroll container adds `pr-3` so the custom scrollbar clears the text.
+      */}
+      <aside
+        data-pagefind-ignore
+        class="hidden w-64 shrink-0 border-l border-gray-200 py-8 pl-6 pr-6 xl:block dark:border-white/10"
+      >
+        <div class="app-scroll sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-3">
+          <slot name="toc" />
+        </div>
+      </aside>
+    </div>
+
+    <script>
+      import './reading-progress';
+    </script>
+  </body>
+</html>

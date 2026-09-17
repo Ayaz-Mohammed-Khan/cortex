@@ -1,0 +1,69 @@
+---
+/**
+ * Representative rendered-Markdown body used by the accessibility (axe-core)
+ * tests (task 20.1). It stands in for the HTML that Astro's Markdown pipeline
+ * (`render(entry)`) hands to `NoteContent.astro` as its `Content` component, so
+ * the a11y audit runs over markup shaped like a real Note without booting the
+ * whole content collection / build.
+ *
+ * It deliberately exercises the rich elements a Note can contain — headings
+ * (starting at h2, below the Note's h1), paragraphs, links, inline + block
+ * code, ordered/unordered lists, a blockquote, a data table, and images — and
+ * it models the two image cases the accessibility requirements distinguish:
+ *   - a content image carrying descriptive alt text (Req 7.4), and
+ *   - a decorative image marked so assistive tech ignores it, i.e. alt=""
+ *     (Req 7.5).
+ * The headings descend one level at a time so the audit's heading-order check
+ * is meaningful rather than accidentally violated by the scaffold.
+ */
+---
+
+<h2 id="overview">Overview</h2>
+<p>
+  An introductory paragraph with an <a href="https://example.com/reference">external reference</a>
+  and some <code>inline code</code> to render.
+</p>
+
+<h3 id="details">Details</h3>
+<ul>
+  <li>First bullet point</li>
+  <li>Second bullet point</li>
+</ul>
+<ol>
+  <li>Step one</li>
+  <li>Step two</li>
+</ol>
+
+<blockquote>
+  <p>A representative blockquote of authored prose.</p>
+</blockquote>
+
+<pre><code class="language-ts">const answer: number = 42;</code></pre>
+
+<figure>
+  <img src="./diagram.png" alt="Diagram of the ingestion pipeline transforming Markdown into pages" />
+  <figcaption>Figure 1. The ingestion pipeline.</figcaption>
+</figure>
+
+<!-- Decorative divider: empty alt so assistive technology skips it (Req 7.5). -->
+<img src="./divider.png" alt="" />
+
+<table>
+  <caption>Sample measurements</caption>
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Value</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Alpha</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <td>Beta</td>
+      <td>2</td>
+    </tr>
+  </tbody>
+</table>

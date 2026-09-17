@@ -1,0 +1,52 @@
+---
+/**
+ * Site-level Section switcher (task 16.4; Req 11.2, 11.4, 11.5).
+ *
+ * Lists every available Section by Display_Name — the notes Section first,
+ * then the remaining Sections in configured order — using the pure
+ * `sectionNavItems` helper, and links each to that Section's landing route.
+ * Adding a Section later surfaces here automatically without touching existing
+ * routes (Req 11.4).
+ */
+import type { SiteModel } from '@/lib/section';
+import { sectionNavItems } from '@/lib/section';
+
+interface Props {
+  siteModel: SiteModel;
+  /** Slug of the Section the current page belongs to (for active styling). */
+  currentSectionSlug: string;
+}
+
+const { siteModel, currentSectionSlug } = Astro.props;
+
+const items = sectionNavItems(siteModel);
+// Resolve each nav item's landing route from the authoritative Section model.
+const landingBySlug = new Map(siteModel.sections.map((s) => [s.slug, s.landingRoute]));
+---
+
+{
+  items.length > 1 && (
+    <nav
+      aria-label="Sections"
+      class="flex w-full items-center gap-1 rounded-lg border border-gray-200 bg-white p-1 dark:border-white/10 dark:bg-gray-900/60"
+    >
+      {items.map((item) => {
+        const isActive = item.slug === currentSectionSlug;
+        return (
+          <a
+            href={landingBySlug.get(item.slug) ?? `/${item.slug}`}
+            aria-current={isActive ? 'page' : undefined}
+            class:list={[
+              'inline-flex h-8 flex-1 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+              isActive
+                ? 'bg-violet-600 text-white dark:bg-violet-600 dark:text-white'
+                : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5',
+            ]}
+          >
+            {item.displayName}
+          </a>
+        );
+      })}
+    </nav>
+  )
+}
