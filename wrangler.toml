@@ -12,7 +12,7 @@
 # first time you connect the repo (see DEPLOY.md). This file mainly declares the
 # Pages project name and the directory the build emits, and is also used by the
 # `wrangler` CLI if you ever deploy manually.
-name = "cortex-notes"
+name = "cortex"
 compatibility_date = "2026-01-01"
 
 # Directory `astro build` emits (output: 'static' -> ./dist). Cloudflare Pages

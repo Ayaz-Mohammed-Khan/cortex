@@ -64,10 +64,10 @@ export default defineConfig({
   },
 
   // Absolute base URL of the deployed site. Used for canonical URLs (Req 10.3)
-  // and the generated sitemap (Req 10.2). CHANGE THIS to the real production
-  // origin before deploying.
-  // TODO: set to the real deployed origin before deploy
-  site: 'https://example.com',
+  // and the generated sitemap (Req 10.2). This is the live Cloudflare Pages
+  // origin; update it here (then commit + push) if the site ever moves to a
+  // custom domain.
+  site: 'https://cortex-5om.pages.dev',
 
   // The site root resolves to the notes Section landing (Req 11.3, 11.7). A
   // static redirect keeps a single canonical location for the landing content

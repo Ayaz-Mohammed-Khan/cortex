@@ -78,11 +78,11 @@ build without committing.
      (Cloudflare also reads the committed `.nvmrc` / `.node-version`, both `22`,
      but setting the variable makes it explicit.)
 
-   The committed `wrangler.toml` records the project name (`cortex-notes`) and
+   The committed `wrangler.toml` records the project name (`cortex`) and
    the build output dir (`dist`) as code.
 
    Click **Save and Deploy**. Cloudflare runs the build and publishes to a URL
-   like `https://cortex-notes.pages.dev`.
+   like `https://cortex.pages.dev`.
 
 3. **Auto-deploy is on by default.** Cloudflare Pages watches the connected repo
    and rebuilds on every push to `main`. Pushes to other branches produce
@@ -94,7 +94,7 @@ build without committing.
 
    > **TODO:** update `site:` in `astro.config.mjs` from the placeholder
    > `https://example.com` to your real Pages origin (e.g.
-   > `https://cortex-notes.pages.dev`), then commit + push. This is required for
+   > `https://cortex.pages.dev`), then commit + push. This is required for
    > correct canonical URLs and the generated sitemap. Do this once the URL is
    > known.
 
