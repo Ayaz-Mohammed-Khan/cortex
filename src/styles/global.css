@@ -103,7 +103,16 @@ body {
 html,
 body {
   max-width: 100%;
-  overflow-x: hidden;
+  /*
+   * `clip` (not `hidden`) is deliberate. Both prevent sideways scrolling, but
+   * `overflow: hidden` turns the root into a scroll container, which breaks
+   * `position: sticky` on descendants — it made the sticky sidebar (nav tree)
+   * and the right-hand Table_Of_Contents scroll away with the page instead of
+   * staying put. `overflow-x: clip` clips the same horizontal overflow WITHOUT
+   * establishing a scroll container, so the sticky panels stick to the viewport
+   * as intended while wide content is still clamped on narrow screens.
+   */
+  overflow-x: clip;
 }
 ::selection {
   background: #ddd6fe; /* violet-200 */
