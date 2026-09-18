@@ -980,3 +980,34 @@ kbd.kbd-hint {
     transition: none;
   }
 }
+
+/*
+ * Search-term highlight marks (see `search-highlight.ts`).
+ *
+ * Pagefind wraps each matched word in `<mark class="pagefind-highlight">`. We
+ * style them to match the site's violet accent in both themes, and give the
+ * CURRENTLY-FOCUSED match (`.pagefind-highlight-active`, set as the reader steps
+ * through matches with the prev/next toolbar) a stronger, ring-outlined look so
+ * it stands out from the other highlights. `scroll-margin-top` keeps a focused
+ * match clear of the sticky header when it is scrolled into view.
+ */
+mark.pagefind-highlight {
+  background: #ede9fe; /* violet-100 */
+  color: inherit;
+  border-radius: 0.2rem;
+  padding: 0.02em 0.15em;
+  scroll-margin-top: 5rem;
+}
+[data-theme="dark"] mark.pagefind-highlight {
+  background: #5b21b6; /* violet-800 */
+  color: #f5f3ff; /* violet-50 */
+}
+mark.pagefind-highlight.pagefind-highlight-active {
+  background: #c4b5fd; /* violet-300 */
+  outline: 2px solid #7c3aed; /* violet-600 */
+  outline-offset: 1px;
+}
+[data-theme="dark"] mark.pagefind-highlight.pagefind-highlight-active {
+  background: #7c3aed; /* violet-600 */
+  outline-color: #c4b5fd; /* violet-300 */
+}

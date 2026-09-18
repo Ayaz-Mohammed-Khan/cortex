@@ -1,13 +1,23 @@
 /**
- * Search-term highlighting on note pages.
+ * Search-term highlighting on note pages, with a navigation + dismiss toolbar.
  *
  * When a visitor clicks a search result, the link carries a `?highlight=<query>`
  * query parameter (added by Pagefind — see `search.ts`, which calls
  * `pagefind.options({ highlightParam: 'highlight' })`). This island loads
  * Pagefind's highlight runtime on the destination page and instantiates
  * `PagefindHighlight`, which reads that parameter and wraps the matched words in
- * `<mark>` elements inside the `[data-pagefind-body]` region — so the reader is
- * pointed straight at the word they searched for.
+ * `<mark class="pagefind-highlight">` elements inside the `[data-pagefind-body]`
+ * region — so the reader is pointed straight at the words they searched for.
+ *
+ * After highlighting, a small floating toolbar is shown so the reader can:
+ *   - jump between every matched word with prev (‹) / next (›), like a browser's
+ *     find bar (wrapping around, with the active match scrolled into view and
+ *     given a distinct style), tracked by an "N of M" counter; and
+ *   - dismiss highlighting entirely with the clear (✕) button — which unwraps
+ *     every <mark> (restoring the original text), removes the toolbar, and
+ *     strips the `?highlight=` param from the URL so a refresh/share is clean.
+ *   - Keyboard while highlights are active: Enter = next, Shift+Enter = prev,
+ *     Escape = clear (unless a dialog such as search is open).
  *
  * Like the Pagefind runtime itself, `/pagefind/pagefind-highlight.js` only
  * exists in the BUILT site (emitted by the `postbuild` step) and is absent
@@ -18,9 +28,134 @@
  */
 
 const HIGHLIGHT_PARAM = 'highlight';
+const MARK_CLASS = 'pagefind-highlight';
+const ACTIVE_MARK_CLASS = 'pagefind-highlight-active';
+const TOOLBAR_ID = 'search-highlight-toolbar';
 
 interface PagefindHighlightCtor {
-  new (opts: { highlightParam: string }): unknown;
+  new (opts: { highlightParam: string; markOptions?: { className?: string } }): unknown;
+}
+
+/** All highlight marks in document order, and the currently focused index. */
+let marks: HTMLElement[] = [];
+let activeIndex = -1;
+
+/** Remove the `?highlight=` query param from the address bar without a reload. */
+function stripHighlightParam(): void {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(HIGHLIGHT_PARAM)) return;
+  url.searchParams.delete(HIGHLIGHT_PARAM);
+  history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+}
+
+/** Unwrap every highlight <mark>, restoring the original text nodes. */
+function removeHighlights(): void {
+  document.querySelectorAll<HTMLElement>(`mark.${MARK_CLASS}`).forEach((mark) => {
+    const parent = mark.parentNode;
+    if (!parent) return;
+    // Replace the <mark> with its own children (the original text), then merge
+    // adjacent text nodes so the DOM matches its pre-highlight state.
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+    parent.normalize();
+  });
+}
+
+/** Tear down highlighting entirely: marks, the toolbar, listeners, and the URL param. */
+function clearHighlighting(): void {
+  removeHighlights();
+  document.getElementById(TOOLBAR_ID)?.remove();
+  document.removeEventListener('keydown', onKeydown);
+  marks = [];
+  activeIndex = -1;
+  stripHighlightParam();
+}
+
+/** Update the "N of M" counter in the toolbar. */
+function updateCounter(): void {
+  const counter = document.querySelector<HTMLElement>(`#${TOOLBAR_ID} [data-hl-counter]`);
+  if (counter) {
+    counter.textContent = marks.length ? `${activeIndex + 1} of ${marks.length}` : '0';
+  }
+}
+
+/** Focus a match by index (wrapping), scroll it into view, and style it active. */
+function goToMatch(index: number): void {
+  if (marks.length === 0) return;
+  // Wrap around both directions.
+  activeIndex = ((index % marks.length) + marks.length) % marks.length;
+  marks.forEach((m, i) => m.classList.toggle(ACTIVE_MARK_CLASS, i === activeIndex));
+  const target = marks[activeIndex];
+  target?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  updateCounter();
+}
+
+function nextMatch(): void {
+  goToMatch(activeIndex + 1);
+}
+function prevMatch(): void {
+  goToMatch(activeIndex - 1);
+}
+
+function makeButton(label: string, ariaLabel: string, onClick: () => void): HTMLButtonElement {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.textContent = label;
+  btn.setAttribute('aria-label', ariaLabel);
+  btn.className =
+    'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium ' +
+    'text-violet-700 transition-colors hover:bg-violet-50 focus-visible:outline-none ' +
+    'focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-violet-200 dark:hover:bg-gray-800';
+  btn.addEventListener('click', onClick);
+  return btn;
+}
+
+/** Show the floating prev / counter / next / clear toolbar (once). */
+function showToolbar(): void {
+  if (document.getElementById(TOOLBAR_ID)) return;
+  const bar = document.createElement('div');
+  bar.id = TOOLBAR_ID;
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Search highlight navigation');
+  bar.className =
+    'fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full ' +
+    'border border-violet-300 bg-white/95 px-2 py-1 shadow-lg backdrop-blur ' +
+    'dark:border-violet-500/50 dark:bg-gray-900/95';
+
+  const prev = makeButton('‹', 'Previous match', prevMatch);
+  const counter = document.createElement('span');
+  counter.setAttribute('data-hl-counter', '');
+  counter.setAttribute('aria-live', 'polite');
+  counter.className = 'px-1 text-xs tabular-nums text-gray-600 dark:text-gray-300';
+  const next = makeButton('›', 'Next match', nextMatch);
+
+  // A thin separator before the clear action.
+  const sep = document.createElement('span');
+  sep.setAttribute('aria-hidden', 'true');
+  sep.className = 'mx-0.5 h-5 w-px bg-gray-300 dark:bg-white/15';
+
+  const clear = makeButton('✕', 'Clear search highlights', clearHighlighting);
+
+  bar.append(prev, counter, next, sep, clear);
+  document.body.appendChild(bar);
+  document.addEventListener('keydown', onKeydown);
+}
+
+function onKeydown(event: KeyboardEvent): void {
+  if (marks.length === 0) return;
+  // Don't hijack keys while a dialog (e.g. the search modal) is open.
+  if (document.querySelector('dialog[open]')) return;
+
+  if (event.key === 'Escape') {
+    clearHighlighting();
+    return;
+  }
+  if (event.key === 'Enter') {
+    // Enter = next match, Shift+Enter = previous — mirrors a browser find bar.
+    event.preventDefault();
+    if (event.shiftKey) prevMatch();
+    else nextMatch();
+  }
 }
 
 async function applyHighlight(): Promise<void> {
@@ -34,7 +169,18 @@ async function applyHighlight(): Promise<void> {
     const Ctor =
       module.PagefindHighlight ??
       (globalThis as unknown as { PagefindHighlight?: PagefindHighlightCtor }).PagefindHighlight;
-    if (Ctor) new Ctor({ highlightParam: HIGHLIGHT_PARAM });
+    if (!Ctor) return;
+    // Pin the mark class so we can find, navigate, and unwrap the marks.
+    new Ctor({ highlightParam: HIGHLIGHT_PARAM, markOptions: { className: MARK_CLASS } });
+    // After marks are in place, collect them and reveal the toolbar. Focus the
+    // first match (Pagefind already scrolled to the section; this centers the
+    // exact word and starts the "1 of M" counter).
+    requestAnimationFrame(() => {
+      marks = Array.from(document.querySelectorAll<HTMLElement>(`mark.${MARK_CLASS}`));
+      if (marks.length === 0) return;
+      showToolbar();
+      goToMatch(0);
+    });
   } catch (error) {
     if (import.meta.env?.DEV) {
       console.warn('[search-highlight] Pagefind highlight failed to load:', error);
@@ -43,6 +189,12 @@ async function applyHighlight(): Promise<void> {
 }
 
 void applyHighlight();
-// View Transitions swap the DOM without a full reload; re-apply after each swap
-// so highlighting works when navigating between notes client-side.
-document.addEventListener('astro:after-swap', () => void applyHighlight());
+// View Transitions swap the DOM without a full reload; clean up any stale
+// toolbar/listeners and re-apply on the new page for client-side navigation.
+document.addEventListener('astro:after-swap', () => {
+  document.getElementById(TOOLBAR_ID)?.remove();
+  document.removeEventListener('keydown', onKeydown);
+  marks = [];
+  activeIndex = -1;
+  void applyHighlight();
+});
