@@ -286,8 +286,16 @@ const notesLanding = '/' + tree.slug;
       >
       </div>
 
-      {/* Center: the reading column, centered and capped, with its own padding. */}
-      <main id="main-content" class="min-w-0 flex-1 px-4 py-8 sm:px-6 lg:px-10">
+      {/*
+        Center: the reading column, centered and capped, with its own padding.
+        A flex COLUMN with a min-height of the viewport (minus the 3.5rem sticky
+        header) so that on short pages the footer's `mt-auto` pushes it to the
+        bottom of the screen, while on long pages it simply follows the content.
+      */}
+      <main
+        id="main-content"
+        class="flex min-h-[calc(100vh-3.5rem)] min-w-0 flex-1 flex-col px-4 pt-8 sm:px-6 lg:px-10"
+      >
         {/*
           Constrain the reading column on large screens so prose lines don't
           stretch edge-to-edge on big monitors. Wide tables / math / code inside
@@ -297,6 +305,28 @@ const notesLanding = '/' + tree.slug;
         <div class="mx-auto w-full max-w-3xl xl:max-w-4xl">
           <slot />
         </div>
+
+        {/*
+          Page footer. `mt-auto` pins it to the bottom of the viewport on short
+          pages and leaves normal spacing on long ones. Its divider line is
+          aligned with the SIDEBAR footer's divider: the sidebar footer row is
+          `border-t` + `py-3` around an `h-9` control (0.75 + 2.25 + 0.75 =
+          3.75rem tall, flush to the viewport bottom). This footer mirrors that
+          exactly — a `border-t` row `h-[3.75rem]` (`py-3`, items centered) with
+          NO bottom padding on `<main>` — so both hairlines land at the same
+          height across the page. It keeps the content's centered, width-capped
+          measure so it stays aligned and never overflows. `data-pagefind-ignore`
+          keeps its boilerplate out of the search index. The GitHub link is
+          intentionally omitted — it already lives in the sidebar footer.
+        */}
+        <footer
+          data-pagefind-ignore
+          class="mt-auto border-t border-gray-200 dark:border-white/10"
+        >
+          <div class="mx-auto flex h-[3.75rem] w-full max-w-3xl items-center text-sm text-gray-500 xl:max-w-4xl dark:text-gray-400">
+            <p>&copy; {new Date().getFullYear()} Cortex. A personal notes project.</p>
+          </div>
+        </footer>
       </main>
 
       {/*
