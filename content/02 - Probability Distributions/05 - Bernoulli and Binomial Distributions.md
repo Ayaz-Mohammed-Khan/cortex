@@ -13,7 +13,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> These notes continue from the distributions arc that ended with [[05 - Non-Gaussian Distributions and Transformations|Non-Gaussian Distributions and Transformations]]. Those notes covered continuous distributions (normal, uniform, log-normal, Pareto). Here we cover two closely related **discrete** distributions that show up constantly in machine learning classification problems, and that also become the building blocks for the [[07 - Central Limit Theorem|Central Limit Theorem]].
+> These notes continue from the distributions arc that ended with [[Non-Gaussian Distributions and Transformations|Non-Gaussian Distributions and Transformations]]. Those notes covered continuous distributions (normal, uniform, log-normal, Pareto). Here we cover two closely related **discrete** distributions that show up constantly in machine learning classification problems, and that also become the building blocks for the [[Central Limit Theorem|Central Limit Theorem]].
 
 ---
 

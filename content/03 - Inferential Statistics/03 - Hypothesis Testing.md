@@ -12,7 +12,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[08 - Confidence Intervals|Confidence Intervals]]. Hypothesis testing is one of the most important topics in inferential statistics and a favorite in data-science and data-analyst interviews. This note covers the **why**, the core vocabulary, and the **rejection-region approach**. The follow-up, [[10 - P-values and T-tests|P-values and T-tests]], covers the more refined p-value approach and specific tests.
+> Continues from [[Confidence Intervals|Confidence Intervals]]. Hypothesis testing is one of the most important topics in inferential statistics and a favorite in data-science and data-analyst interviews. This note covers the **why**, the core vocabulary, and the **rejection-region approach**. The follow-up, [[P-values and T-tests|P-values and T-tests]], covers the more refined p-value approach and specific tests.
 
 ---
 
@@ -170,7 +170,7 @@ This approach gives a **binary** answer (reject or not) but ignores **how strong
 > [!example]
 > If the critical value is 1.96 and your statistic is 1.97, you reject; if it's 1.95, you don't, even though the two are almost identical. And a statistic of 15 (very strong evidence) is treated the same as one of 2 (borderline). The rejection-region approach can't express this difference in strength.
 
-The fix is the **p-value approach**, covered in [[10 - P-values and T-tests|P-values and T-tests]].
+The fix is the **p-value approach**, covered in [[P-values and T-tests|P-values and T-tests]].
 
 ---
 

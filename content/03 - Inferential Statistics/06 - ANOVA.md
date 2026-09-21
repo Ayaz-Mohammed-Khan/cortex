@@ -15,13 +15,13 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[11 - Chi-Square Tests|Chi-Square Tests]]. A [[10 - P-values and T-tests|two-sample t-test]] compares the means of **two** groups. ANOVA generalizes this to **three or more** groups. This note first introduces the **F-distribution** it relies on, then covers **one-way ANOVA**.
+> Continues from [[Chi-Square Tests|Chi-Square Tests]]. A [[P-values and T-tests|two-sample t-test]] compares the means of **two** groups. ANOVA generalizes this to **three or more** groups. This note first introduces the **F-distribution** it relies on, then covers **one-way ANOVA**.
 
 ---
 
 ## The F-distribution
 
-Just as the [[11 - Chi-Square Tests|chi-square distribution]] is related to the normal, the **F-distribution** is related to the chi-square.
+Just as the [[Chi-Square Tests|chi-square distribution]] is related to the normal, the **F-distribution** is related to the chi-square.
 
 If you take two independent chi-square distributions and divide each by its degrees of freedom, then take their ratio, you get an F-distribution:
 

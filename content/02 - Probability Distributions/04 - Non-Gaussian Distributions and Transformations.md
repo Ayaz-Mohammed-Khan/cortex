@@ -15,7 +15,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[04 - Skewness, Kurtosis and Normality Checks|Skewness, Kurtosis and Normality Checks]]. Once you know a column isn't normal, you have two options: model it with a different distribution, or reshape it toward normal. This note covers the common **non-Gaussian continuous distributions** (uniform, log-normal, Pareto) and the **mathematical transformations** used to normalize data for distribution-sensitive algorithms.
+> Continues from [[Skewness, Kurtosis and Normality Checks|Skewness, Kurtosis and Normality Checks]]. Once you know a column isn't normal, you have two options: model it with a different distribution, or reshape it toward normal. This note covers the common **non-Gaussian continuous distributions** (uniform, log-normal, Pareto) and the **mathematical transformations** used to normalize data for distribution-sensitive algorithms.
 
 ---
 
@@ -169,4 +169,4 @@ Apply any function you like via `FunctionTransformer(func=...)`.
 ---
 
 > [!info] Continues to
-> That completes the distributions arc. The story now shifts to two key **discrete** distributions in [[06 - Bernoulli and Binomial Distributions|Bernoulli and Binomial Distributions]], which open the door to inferential statistics.
+> That completes the distributions arc. The story now shifts to two key **discrete** distributions in [[Bernoulli and Binomial Distributions|Bernoulli and Binomial Distributions]], which open the door to inferential statistics.

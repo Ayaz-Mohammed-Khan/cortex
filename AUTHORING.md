@@ -5,8 +5,8 @@ A practical guide to writing notes for this site. You write plain Markdown in
 
 ## Where notes live
 
-- Notes live under `content/`. **Each top-level folder is a category** (e.g.
-  `content/Statistics & Probability/`).
+- Notes live under `content/`. **Each top-level folder is a category**, named
+  after a roadmap track (e.g. `content/03 - Inferential Statistics/`).
 - You edit files in `content/` only. A sync step mirrors `content/` into the
   generated `src/content/notes/` that Astro reads — that folder is generated,
   never edit it by hand.
@@ -89,7 +89,7 @@ created: 2026-07-08
 
 ```powershell
 npm run new -- "Central Limit Theorem"
-npm run new -- "Central Limit Theorem" --category "Statistics & Probability"
+npm run new -- "Central Limit Theorem" --category "03 - Inferential Statistics"
 npm run new -- "Central Limit Theorem" --order 07
 ```
 

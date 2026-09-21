@@ -15,7 +15,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[02 - Probability Distributions|Probability Distributions]], which built the PMF/PDF/CDF machinery. This note zooms in on the **normal (Gaussian) distribution**, the single most important continuous distribution, and everything that follows from it: the standard normal variate, Z-tables, the empirical rule, and where it shows up in data science.
+> Continues from [[Probability Distributions|Probability Distributions]], which built the PMF/PDF/CDF machinery. This note zooms in on the **normal (Gaussian) distribution**, the single most important continuous distribution, and everything that follows from it: the standard normal variate, Z-tables, the empirical rule, and where it shows up in data science.
 
 ---
 
@@ -195,4 +195,4 @@ The integral just accumulates the area under the PDF up to that point.
 ---
 
 > [!info] Continues to
-> Real data is rarely perfectly normal. The next note measures *how far* a distribution departs from normal with [[04 - Skewness, Kurtosis and Normality Checks|skewness, kurtosis, and normality checks]].
+> Real data is rarely perfectly normal. The next note measures *how far* a distribution departs from normal with [[Skewness, Kurtosis and Normality Checks|skewness, kurtosis, and normality checks]].

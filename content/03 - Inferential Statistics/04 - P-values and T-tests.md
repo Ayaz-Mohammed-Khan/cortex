@@ -14,7 +14,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[09 - Hypothesis Testing|Hypothesis Testing]]. That note used the rejection-region approach, which only gives a yes/no answer. Here we learn the **p-value approach**, which also measures the **strength** of the evidence, and then apply it through the three main **t-tests**.
+> Continues from [[Hypothesis Testing|Hypothesis Testing]]. That note used the rejection-region approach, which only gives a yes/no answer. Here we learn the **p-value approach**, which also measures the **strength** of the evidence, and then apply it through the three main **t-tests**.
 
 ---
 
@@ -28,7 +28,7 @@ created: 2026-07-09
 ### Building intuition with a coin
 
 > [!example] Is a coin fair?
-> Toss a coin 100 times and count heads. This follows a [[06 - Bernoulli and Binomial Distributions|binomial distribution]], and its PMF is roughly bell-shaped, peaking at 50 heads.
+> Toss a coin 100 times and count heads. This follows a [[Bernoulli and Binomial Distributions|binomial distribution]], and its PMF is roughly bell-shaped, peaking at 50 heads.
 > - $H_0$: the coin is fair, $P(\text{head}) = P(\text{tail})$.
 > - $H_1$: the coin is rigged, $P(\text{head}) > P(\text{tail})$.
 >
@@ -66,7 +66,7 @@ The rejection-region approach only says "reject or not". The p-value also encode
 
 ## P-value with a Z-test
 
-Same setup as the Z-test in [[09 - Hypothesis Testing|Hypothesis Testing]], but now we read off a p-value instead of comparing to a critical value.
+Same setup as the Z-test in [[Hypothesis Testing|Hypothesis Testing]], but now we read off a p-value instead of comparing to a critical value.
 
 > [!example] Training program (one-tailed)
 > $H_0: \mu = 50$, $H_1: \mu > 50$, $\bar{x} = 53$, $\sigma = 5$, $n = 30$.
@@ -91,7 +91,7 @@ A **t-test** is very similar to a Z-test, with one key difference.
 | Distribution used | normal | Student's t-distribution |
 | Good for | large samples | works well for small samples too |
 
-Because we substitute the sample standard deviation $s$ for the unknown $\sigma$, we use the **t-distribution** (see [[08 - Confidence Intervals|Confidence Intervals]] for its properties: fatter tails, parameter = degrees of freedom).
+Because we substitute the sample standard deviation $s$ for the unknown $\sigma$, we use the **t-distribution** (see [[Confidence Intervals|Confidence Intervals]] for its properties: fatter tails, parameter = degrees of freedom).
 
 There are **three** t-tests, each for a different situation.
 

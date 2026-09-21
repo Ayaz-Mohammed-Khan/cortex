@@ -12,7 +12,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[07 - Central Limit Theorem|Central Limit Theorem]]. The CLT told us the sampling distribution of the mean is normal. Here we use that fact to put a **range** around a population parameter, instead of guessing a single number. This is a core inferential-statistics tool and a common interview topic.
+> Continues from [[Central Limit Theorem|Central Limit Theorem]]. The CLT told us the sampling distribution of the mean is normal. Here we use that fact to put a **range** around a population parameter, instead of guessing a single number. This is a core inferential-statistics tool and a common interview topic.
 
 ---
 
@@ -36,7 +36,7 @@ A **point estimate** is a single value, calculated from a sample, used as the be
 > [!example]
 > To estimate the average age of a YouTube channel's subscribers, hold a live class, ask 100 attendees their age, and compute the sample mean (say 28). That 28 is the point estimate for the whole subscriber base.
 
-You can make a point estimate stronger by taking **many samples** and averaging their means (an application of the [[07 - Central Limit Theorem|Central Limit Theorem]]), but it is still a single number.
+You can make a point estimate stronger by taking **many samples** and averaging their means (an application of the [[Central Limit Theorem|Central Limit Theorem]]), but it is still a single number.
 
 ### The problem with point estimates
 

@@ -13,7 +13,7 @@ created: 2026-07-08
 
 
 > [!info] Where this fits
-> These notes continue from [[01 - Descriptive Statistics|Descriptive Statistics]]. Descriptive statistics summarized the data we already have. Probability distributions sit on the boundary between statistics and probability, and they are the doorway into inferential statistics, where we predict things about a population from a sample. This note covers the **core machinery** (random variables, PMF, PDF, CDF, density estimation); the specific distributions come in the notes that follow.
+> These notes continue from the descriptive statistics track, which ends at [[Bivariate and Multivariate Analysis|Bivariate and Multivariate Analysis]]. Descriptive statistics summarized the data we already have. Probability distributions sit on the boundary between statistics and probability, and they are the doorway into inferential statistics, where we predict things about a population from a sample. This note covers the **core machinery** (random variables, PMF, PDF, CDF, density estimation); the specific distributions come in the notes that follow.
 
 ---
 
@@ -302,4 +302,4 @@ Because you may not have enough data, or your sample may not represent the popul
 ---
 
 > [!info] Continues to
-> With the machinery in place, the next note studies the single most important distribution in detail: [[03 - The Normal Distribution|The Normal Distribution]].
+> With the machinery in place, the next note studies the single most important distribution in detail: [[The Normal Distribution|The Normal Distribution]].

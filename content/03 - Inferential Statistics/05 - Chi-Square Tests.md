@@ -13,7 +13,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[10 - P-values and T-tests|P-values and T-tests]]. Z-tests and t-tests work on **numerical** data. The **chi-square test** works on **categorical** data. It is a non-parametric test (it makes no assumption about the data's distribution) and is very common in feature selection.
+> Continues from [[P-values and T-tests|P-values and T-tests]]. Z-tests and t-tests work on **numerical** data. The **chi-square test** works on **categorical** data. It is a non-parametric test (it makes no assumption about the data's distribution) and is very common in feature selection.
 
 ---
 

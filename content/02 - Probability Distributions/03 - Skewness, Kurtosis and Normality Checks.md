@@ -17,7 +17,7 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[03 - The Normal Distribution|The Normal Distribution]]. Real data is rarely perfectly normal. This note covers the two shape measures that quantify the departure from normal, **skewness** (asymmetry) and **kurtosis** (tail heaviness), and then the practical tools for **checking whether data is normal**, culminating in the QQ plot.
+> Continues from [[The Normal Distribution|The Normal Distribution]]. Real data is rarely perfectly normal. This note covers the two shape measures that quantify the departure from normal, **skewness** (asymmetry) and **kurtosis** (tail heaviness), and then the practical tools for **checking whether data is normal**, culminating in the QQ plot.
 
 ---
 
@@ -148,4 +148,4 @@ By definition, a QQ plot compares *any* two distributions. Pass a theoretical **
 ---
 
 > [!info] Continues to
-> When data isn't normal, we either model it with another distribution or reshape it. That's the subject of [[05 - Non-Gaussian Distributions and Transformations|non-Gaussian distributions and transformations]].
+> When data isn't normal, we either model it with another distribution or reshape it. That's the subject of [[Non-Gaussian Distributions and Transformations|non-Gaussian distributions and transformations]].

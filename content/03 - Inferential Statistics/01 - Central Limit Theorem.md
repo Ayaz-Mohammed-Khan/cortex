@@ -15,13 +15,13 @@ created: 2026-07-09
 
 
 > [!info] Where this fits
-> Continues from [[06 - Bernoulli and Binomial Distributions|Bernoulli and Binomial Distributions]]. This is the point where we cross fully into **inferential statistics**, using a sample to say something about a population. The central limit theorem (CLT) is one of the most powerful and surprising results in all of statistics, and it is the foundation for [[08 - Confidence Intervals|Confidence Intervals]] and [[09 - Hypothesis Testing|Hypothesis Testing]].
+> Continues from [[Bernoulli and Binomial Distributions|Bernoulli and Binomial Distributions]]. This is the point where we cross fully into **inferential statistics**, using a sample to say something about a population. The central limit theorem (CLT) is one of the most powerful and surprising results in all of statistics, and it is the foundation for [[Confidence Intervals|Confidence Intervals]] and [[Hypothesis Testing|Hypothesis Testing]].
 
 ---
 
 ## Prerequisite: sampling distribution
 
-Recall from [[01 - Descriptive Statistics|Descriptive Statistics]] the idea of **population vs sample**. Because a population is usually too large to measure, we draw a sample and infer from it.
+Recall from [[Foundations and Central Tendency|Foundations and Central Tendency]] the idea of **population vs sample**. Because a population is usually too large to measure, we draw a sample and infer from it.
 
 A **sampling distribution** is the probability distribution of a **sample statistic** (like the mean or variance), computed from **many independent samples of the same size** drawn from a population.
 
@@ -104,7 +104,7 @@ Rather than reporting a single point estimate ("the mean is exactly 32.5"), we u
 > $$\text{population mean lies within } \bar{x} \pm 2\cdot\frac{\sigma}{\sqrt{n}} \text{ with ~95\% confidence}$$
 > For the Titanic fare sample this gave a range like 30.36 to 34.80, and the true population mean (≈ 33.29) fell inside it.
 
-This is exactly the idea developed fully in [[08 - Confidence Intervals|Confidence Intervals]].
+This is exactly the idea developed fully in [[Confidence Intervals|Confidence Intervals]].
 
 ---
 
