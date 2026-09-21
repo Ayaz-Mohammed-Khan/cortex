@@ -14,6 +14,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "astro check",
+    "audit:syllabus": "node --experimental-strip-types scripts/audit-syllabus.ts",
     "test": "vitest run",
     "test:watch": "vitest"
   },
