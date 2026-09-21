@@ -763,9 +763,14 @@ const totalSteps = nodes.filter((n) => n.main).length;
         type="button"
         data-rm-close
         aria-label="Close"
-        class="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
+        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
       >
-        Esc
+        {/* X icon is the obvious click target for a mouse or touch at any size;
+            the "Esc" text stays alongside it as the keyboard hint. */}
+        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
+          <path d="M5 5l10 10M15 5L5 15" />
+        </svg>
+        <span>Esc</span>
       </button>
     </div>
 
