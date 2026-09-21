@@ -45,3 +45,4 @@ vitest.config.ts
 scripts/dev.mjs
 scripts/watch-content.ts
 scripts/new-note.ts
+/docs

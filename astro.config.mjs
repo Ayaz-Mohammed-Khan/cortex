@@ -29,15 +29,21 @@ import { createWikilinkResolver } from './src/lib/markdown/wikilink-index.ts';
 // an empty index (every wikilink then reported unresolved) if the directory is
 // not present yet.
 //
-// NOTE (dev auto-refresh): we deliberately rely on the resolver's mtime-signature
-// auto-refresh rather than wiring a bespoke dev-only Vite watcher + cache
-// `invalidate()`. Editing a note already triggers Astro content-collection HMR
-// (that note re-renders and resolves via the fresh signature). For the edge
-// case where page A links to a NEWLY-ADDED note B (and A itself did not change),
-// the signature check guarantees the NEXT render of A resolves the link
-// correctly — a manual browser refresh shows the resolved link, no server
-// restart. A watcher would only save that one manual refresh at the cost of
-// extra machinery in the config, so it is intentionally omitted.
+// NOTE (dev auto-refresh): a fresh INDEX is not a fresh RENDER, and this is worth
+// being precise about, because an earlier version of this comment claimed a
+// manual browser refresh was enough. It is not. Astro's content layer caches
+// rendered html in `.astro/data-store.json` keyed on each note's content DIGEST.
+// Wikilinks are resolved during render against the whole notes directory, so if
+// page A is rendered while note B is missing from the mirror, A's cached html
+// keeps its `wikilink-missing` anchor forever: A's body never changes, so the
+// digest still matches and A is never re-rendered, no matter how current the
+// resolver's index is. Refreshing the browser re-serves the SAME cached html.
+//
+// Editing a note is fine (its digest changes, so it re-renders). The broken case
+// is a note ADDED or REMOVED while the mirror is being rewritten, which is what
+// `syncContent` does on every sync. `scripts/dev.mjs` is what makes this safe:
+// it completes the initial sync BEFORE starting the server and clears the store
+// once per session, so a poisoned render cannot outlive a restart.
 const wikilinkResolver = createWikilinkResolver();
 
 // https://astro.build/config
@@ -69,12 +75,9 @@ export default defineConfig({
   // custom domain.
   site: 'https://cortex-5om.pages.dev',
 
-  // The site root resolves to the notes Section landing (Req 11.3, 11.7). A
-  // static redirect keeps a single canonical location for the landing content
-  // rather than duplicating it at `/`.
-  redirects: {
-    '/': '/notes',
-  },
+  // The site root `/` is a dedicated landing page (src/pages/index.astro) that
+  // presents the learning roadmap and links into the notes. (Previously `/`
+  // redirected to `/notes`; the landing page now lives at the root instead.)
 
   // @astrojs/sitemap lists every generated page in `sitemap-index.xml` (Req
   // 10.2). Unpublished Notes are excluded upstream — the ingestion bridge
