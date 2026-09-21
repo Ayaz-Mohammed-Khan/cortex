@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "description": "Static, content-driven portfolio website with a Markdown notes section.",
   "scripts": {
     "dev": "node scripts/dev.mjs",
