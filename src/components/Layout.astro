@@ -37,12 +37,31 @@ interface Props {
   sectionSlug: string;
   /** Document language. */
   lang?: string;
+  /**
+   * Which chrome to render around the slot.
+   *
+   *   'docs'    the default: left navigation tree + reading column + TOC rail.
+   *   'landing' the home page. The roadmap IS that page's navigation, so the
+   *             note tree would duplicate it and crowd the graph. The tree,
+   *             its drawer, and the toggle are dropped, and the controls that
+   *             normally live in the sidebar (Search, theme, GitHub) move into
+   *             the header so nothing becomes unreachable.
+   */
+  chrome?: 'docs' | 'landing';
 }
 
-const { tree, siteModel, currentRoute, sectionSlug, lang = 'en' } = Astro.props;
+const {
+  tree,
+  siteModel,
+  currentRoute,
+  sectionSlug,
+  lang = 'en',
+  chrome = 'docs',
+} = Astro.props;
 
 const navState = computeNavState(tree, currentRoute);
 const notesLanding = '/' + tree.slug;
+const isLanding = chrome === 'landing';
 ---
 
 <!doctype html>
@@ -125,22 +144,32 @@ const notesLanding = '/' + tree.slug;
       class="sticky top-0 z-30 border-b border-gray-200/80 bg-white/85 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/85"
     >
       <div class="mx-auto flex h-14 w-full max-w-[1400px] items-center gap-3 px-4 sm:px-6 lg:pl-6 lg:pr-8">
-        <button
-          type="button"
-          data-nav-drawer-toggle
-          aria-expanded="false"
-          aria-controls="nav-drawer"
-          aria-label="Toggle navigation"
-          class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
-        >
-          <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-            <path fill-rule="evenodd" d="M3 5h14a1 1 0 1 1 0 2H3a1 1 0 0 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2z" clip-rule="evenodd"></path>
-          </svg>
-        </button>
+        {
+          !isLanding && (
+            <button
+              type="button"
+              data-nav-drawer-toggle
+              aria-expanded="false"
+              aria-controls="nav-drawer"
+              aria-label="Toggle navigation"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M3 5h14a1 1 0 1 1 0 2H3a1 1 0 0 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          )
+        }
 
+        {/*
+          The wordmark goes HOME. It used to point at the notes index because
+          there was no home page; now there is one, and the roadmap is the
+          natural root of the site.
+        */}
         <a
-          href={notesLanding}
-          class="flex min-w-0 items-center gap-2 rounded-md py-1 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-50"
+          href="/"
+          aria-current={currentRoute === '/' ? 'page' : undefined}
+          class="mr-auto flex shrink-0 items-center gap-2 rounded-md py-1 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-50"
         >
           {/*
             Cortex neural-node badge: a rounded-square violet mark whose white
@@ -169,7 +198,7 @@ const notesLanding = '/' + tree.slug;
               <circle cx="13" cy="22" r="3.2" />
             </g>
           </svg>
-          <span class="truncate text-base font-bold tracking-tight">Cortex</span>
+          <span class="text-base font-bold tracking-tight">Cortex</span>
         </a>
 
         {/*
@@ -178,23 +207,104 @@ const notesLanding = '/' + tree.slug;
           copies take over and these are hidden, so there is never a duplicate
           on screen at the same breakpoint.
         */}
-        <div class="ml-auto flex items-center gap-2 lg:hidden">
-          <button
-            type="button"
-            data-search-open
-            aria-label="Search notes"
-            aria-keyshortcuts="Control+K"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
-          >
-            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path
-                fill-rule="evenodd"
-                d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
-                clip-rule="evenodd"></path>
-            </svg>
-          </button>
-          <ThemeToggle />
-        </div>
+        {
+          isLanding ? (
+            /*
+              Landing chrome. With no sidebar there is nowhere else for these to
+              live, so the header carries the ONE <Search /> instance (field +
+              dialog), the notes entry point, GitHub, and the theme toggle.
+            */
+            <div class="flex shrink-0 items-center gap-2 pl-2">
+              {/*
+                The full Search FIELD needs room for its "Search notes… ⌘K"
+                label; forcing it to ~160px on a phone squashed it against the
+                two icons beside it. So on small screens we show a compact search
+                ICON (the same `[data-search-open]` trigger the docs header uses,
+                driving the one shared dialog), the "Notes" text link collapses
+                to nothing, and GitHub is dropped from the bar entirely — it
+                still lives in the page footer. The full field + text link +
+                GitHub icon return at `sm+` where the width exists.
+              */}
+              <a
+                href={notesLanding}
+                class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:inline-flex dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
+              >
+                Notes
+              </a>
+
+              {/*
+                The single <Search /> (field button + its <dialog>). Rendered
+                FIRST so, on `sm+`, the reading order is field -> GitHub -> theme.
+                CRITICAL: the dialog must NOT sit inside a `display:none`
+                ancestor or `showModal()` silently no-ops. So below `sm` the
+                wrapper collapses to `w-0` (its field button hidden by the scoped
+                rule) rather than being removed — zero visible width, dialog
+                still live for the compact icon to open. `md:w-64` widens it on
+                roomy screens.
+              */}
+              <div class="rm-search-field contents sm:block sm:w-52 md:w-64">
+                <Search />
+              </div>
+
+              <a
+                href="https://github.com/Ayaz-Mohammed-Khan/cortex"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View this site's source on GitHub"
+                class="hidden h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:inline-flex dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </a>
+
+              {/*
+                Compact search icon: phones only. Placed right before the theme
+                toggle so the two icons sit together on the right, matching the
+                notes page. The `sm+` field above replaces it at wider widths.
+              */}
+              <button
+                type="button"
+                data-search-open
+                aria-label="Search notes"
+                aria-keyshortcuts="Control+K"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:hidden dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <ThemeToggle />
+            </div>
+          ) : (
+            <div class="flex shrink-0 items-center gap-2 pl-2 lg:hidden">
+              <button
+                type="button"
+                data-search-open
+                aria-label="Search notes"
+                aria-keyshortcuts="Control+K"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M9 3.5a5.5 5.5 0 1 0 3.4 9.82l3.14 3.14a1 1 0 0 0 1.42-1.42l-3.14-3.14A5.5 5.5 0 0 0 9 3.5zM5.5 9a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </button>
+              <ThemeToggle />
+            </div>
+          )
+        }
       </div>
     </header>
 
@@ -209,6 +319,8 @@ const notesLanding = '/' + tree.slug;
       internally instead of forcing horizontal page scroll.
     */}
     <div class="mx-auto flex w-full max-w-[1400px]">
+      {!isLanding && (
+      <Fragment>
       {/*
         Sidebar: a persistent, sticky panel at >=1024px, collapsing to an
         off-canvas drawer below. Its tinted background + right hairline reach the
@@ -237,8 +349,27 @@ const notesLanding = '/' + tree.slug;
         aria-label="Notes navigation"
         class="nav-surface fixed inset-y-0 left-0 z-40 flex w-72 -translate-x-full flex-col overflow-hidden border-r border-gray-200 transition-transform duration-200 lg:sticky lg:top-14 lg:z-auto lg:h-[calc(100vh-3.5rem)] lg:w-64 lg:shrink-0 lg:translate-x-0 dark:border-white/10"
       >
-        {/* Header block: full-width Search field + Section switcher. */}
+        {/*
+          Header block: a way back to the roadmap, then the Search field and the
+          Section switcher. The home link is first because the roadmap is the
+          site's root: without it, a reader who lands on a note deep-linked from
+          elsewhere has no route to the overview except the wordmark.
+        */}
         <div class="flex flex-col gap-2 px-4 pb-3 pt-4 lg:px-5">
+          <a
+            href="/"
+            class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
+          >
+            <svg
+              class="h-4 w-4 shrink-0 opacity-70"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path d="M10.7 2.3a1 1 0 0 0-1.4 0l-7 7A1 1 0 0 0 3 11h1v6a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4h2v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-6h1a1 1 0 0 0 .7-1.7l-7-7z" />
+            </svg>
+            Roadmap
+          </a>
           <Search />
           <SectionNav siteModel={siteModel} currentSectionSlug={sectionSlug} />
         </div>
@@ -285,6 +416,8 @@ const notesLanding = '/' + tree.slug;
         class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden"
       >
       </div>
+      </Fragment>
+      )}
 
       {/*
         Center: the reading column, centered and capped, with its own padding.
@@ -302,7 +435,12 @@ const notesLanding = '/' + tree.slug;
           `.note-body` keep their own horizontal overflow scrolling, so they
           still use the full column width.
         */}
-        <div class="mx-auto w-full max-w-3xl xl:max-w-4xl">
+        {/*
+          Prose wants a narrow measure; the roadmap graph wants room. The landing
+          page gets the full shell width, since it has neither a sidebar nor a
+          TOC rail competing for it.
+        */}
+        <div class={isLanding ? 'w-full' : 'mx-auto w-full max-w-3xl xl:max-w-4xl'}>
           <slot />
         </div>
 
@@ -323,8 +461,36 @@ const notesLanding = '/' + tree.slug;
           data-pagefind-ignore
           class="mt-auto border-t border-gray-200 dark:border-white/10"
         >
-          <div class="mx-auto flex h-[3.75rem] w-full max-w-3xl items-center text-sm text-gray-500 xl:max-w-4xl dark:text-gray-400">
+          <div
+            class:list={[
+              'flex h-[3.75rem] items-center text-sm text-gray-500 dark:text-gray-400',
+              isLanding ? 'w-full justify-between' : 'mx-auto w-full max-w-3xl xl:max-w-4xl',
+            ]}
+          >
             <p>&copy; {new Date().getFullYear()} Cortex. A personal notes project.</p>
+            {/*
+              GitHub lives in the SIDEBAR footer on docs pages, but the landing
+              page has no sidebar, so its footer carries the link instead. This
+              is the one place it is reachable on a phone (the landing header
+              drops the GitHub icon below `sm` for space).
+            */}
+            {isLanding && (
+              <a
+                href="https://github.com/Ayaz-Mohammed-Khan/cortex"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="View this site's source on GitHub"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.09.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.55-1.14-4.55-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.36 9.36 0 0 1 2.5-.34c.85 0 1.71.12 2.5.34 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.34 4.79-4.57 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.59.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </a>
+            )}
           </div>
         </footer>
       </main>
@@ -335,14 +501,18 @@ const notesLanding = '/' + tree.slug;
         comfortable gutter between the panel edge and its content, and the inner
         scroll container adds `pr-3` so the custom scrollbar clears the text.
       */}
-      <aside
-        data-pagefind-ignore
-        class="hidden w-64 shrink-0 border-l border-gray-200 py-8 pl-6 pr-6 xl:block dark:border-white/10"
-      >
-        <div class="app-scroll sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-3">
-          <slot name="toc" />
-        </div>
-      </aside>
+      {
+        !isLanding && (
+          <aside
+            data-pagefind-ignore
+            class="hidden w-64 shrink-0 border-l border-gray-200 py-8 pl-6 pr-6 xl:block dark:border-white/10"
+          >
+            <div class="app-scroll sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-3">
+              <slot name="toc" />
+            </div>
+          </aside>
+        )
+      }
     </div>
 
     <script>

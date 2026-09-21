@@ -127,9 +127,13 @@ const IDLE =
                 >
                   <path d="M3.5 4A1.5 1.5 0 0 0 2 5.5v9A1.5 1.5 0 0 0 3.5 16h13a1.5 1.5 0 0 0 1.5-1.5v-7A1.5 1.5 0 0 0 16.5 6H10L8.6 4.4A1.5 1.5 0 0 0 7.46 4H3.5z" />
                 </svg>
-                <span class="truncate">
-                  {node.hasPrefix ? `${node.order}. ${node.displayName}` : node.displayName}
-                </span>
+                {/*
+                  Categories show their name only. The folder's `NN - ` prefix
+                  still drives sibling ORDER, but a number on a category reads
+                  as a chapter count and competes with the note numbers nested
+                  directly beneath it, which are the ones a reader follows.
+                */}
+                <span class="truncate">{node.displayName}</span>
               </a>
             </div>
             <div data-nav-children hidden={!open}>
