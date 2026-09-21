@@ -1,0 +1,1062 @@
+---
+/**
+ * Landing page (site root `/`): a visual, syllabus-grade learning ROADMAP.
+ *
+ * Inspired by roadmap.sh / neetcode topic graphs: a central "spine" of
+ * main-track topics (studied top-to-bottom) with sub-topics branching off. It
+ * is a single hand-authored, fully static inline SVG (same convention as the
+ * site logo) so there are no runtime deps and it themes + scales cleanly.
+ *
+ * Every node is CLICKABLE and opens a modal (native <dialog>, same pattern as
+ * the search dialog) listing the concrete concepts to learn for that topic,
+ * turning the map into an actual syllabus guide. When the topic already has
+ * notes, the modal also shows a "Read notes" link.
+ *
+ * SYLLABUS SOURCE: the track list and every concept list below are derived
+ * from the CampusX Data Science Mentorship Program (DSMP 2.0) curriculum.
+ * Main-track nodes mirror the program's subject areas (roughly two weeks of
+ * study each); branch nodes mirror its individual sessions; the modal concept
+ * list mirrors that session's topic bullets.
+ *
+ * Node positions and connector paths are COMPUTED in the frontmatter from the
+ * declared `spine` data, so the layout stays maintainable: edit the syllabus
+ * data, not pixel coordinates. Reuses the shared Layout; `prerender = true`.
+ */
+import { loadSite, renderNote } from '@/lib/content';
+import Layout from '@/components/Layout.astro';
+import SeoHead from '@/components/SeoHead.astro';
+import { MIN_HEADING_DEPTH } from '@/lib/toc';
+import { matchTopicPrepared, preparePool } from '@/lib/syllabus/match';
+import type { Candidate, PreparedPool } from '@/lib/syllabus/match';
+import { spine, phases, conceptLabel } from '@/data/roadmap';
+import type { Concept, Step, Tier, Topic } from '@/data/roadmap';
+import type { CategoryNode, TreeNode } from '@/lib/ingest/types';
+
+export const prerender = true;
+
+const site = await loadSite();
+const siteBase = Astro.site?.href;
+
+/**
+ * Two Display_Name (lowercased) -> route indexes built from the published
+ * content tree, at ANY depth:
+ *
+ *   - `noteRoutes`     a single note page, e.g. "ANOVA" -> /notes/.../anova
+ *   - `categoryRoutes` a folder listing page, e.g. "Statistics & Probability"
+ *
+ * Notes win over categories when resolving a roadmap node (see `routeFor`), so
+ * a leaf topic deep-links straight to its note rather than dumping the reader
+ * on the parent folder. Because lookup falls back to the node's own label, a
+ * roadmap node lights up automatically as soon as a note with a matching
+ * Display_Name is added: no edit to this file required.
+ */
+const categoryRoutes = new Map<string, string>();
+const noteRoutes = new Map<string, string>();
+/** Reverse lookup, for naming a note when all we hold is its route. */
+const noteNameByRoute = new Map<string, string>();
+
+function indexTree(nodes: readonly TreeNode[]): void {
+  for (const node of nodes) {
+    const key = node.displayName.trim().toLowerCase();
+    if (node.kind === 'category') {
+      if (!categoryRoutes.has(key)) categoryRoutes.set(key, node.route);
+      indexTree(node.children);
+    } else {
+      if (!noteRoutes.has(key)) noteRoutes.set(key, node.route);
+      noteNameByRoute.set(node.route, node.displayName);
+    }
+  }
+}
+indexTree(site.tree.children);
+
+/** One linkable section inside a note: its heading text and `route#anchor`. */
+interface SectionLink {
+  text: string;
+  href: string;
+  /** Heading depth, so the modal can visually subordinate nested sections. */
+  depth: number;
+}
+
+/**
+ * Per-note section indexes, built by RENDERING each note so the anchors are the
+ * real `rehype-slug` ids the note page emits. Deriving them by hand here would
+ * risk drifting out of sync with what the note page actually publishes.
+ *
+ * Only notes are rendered (a dozen files today). If the note count grows into
+ * the hundreds this loop becomes the homepage's build cost, at which point the
+ * heading data is better threaded through `loadSite()` once.
+ */
+const sectionsByRoute = new Map<string, SectionLink[]>();
+
+for (const data of site.byRoute.values()) {
+  if (data.kind !== 'note') continue;
+  const rendered = await renderNote(data.entry);
+  const sections: SectionLink[] = [];
+  for (const heading of rendered.headings) {
+    // Skip the note title (depth 1); it is the page itself, not a section.
+    if (heading.depth < MIN_HEADING_DEPTH) continue;
+    sections.push({
+      text: heading.text,
+      href: `${data.route}#${heading.slug}`,
+      depth: heading.depth,
+    });
+  }
+  sectionsByRoute.set(data.route, sections);
+}
+
+/**
+ * Match pools, normalized once each rather than once per bullet.
+ *
+ *   - by note route     the note's own headings.
+ *   - by category route every heading of every note beneath it, merged. This is
+ *     what lets a main-track node (which links to the folder, not to one note)
+ *     still deep-link its bullets into whichever note covers them.
+ */
+/** Headings of one note as matcher candidates, tagged with the note they are in. */
+function candidatesFor(route: string, title: string): Candidate<string>[] {
+  return (sectionsByRoute.get(route) ?? []).map((s) => ({
+    text: s.text,
+    ref: s.href,
+    group: route,
+    groupTitle: title,
+    depth: s.depth,
+  }));
+}
+
+const poolByRoute = new Map<string, PreparedPool<string>>();
+const poolByCategory = new Map<string, PreparedPool<string>>();
+
+function collectCategoryCandidates(node: CategoryNode): Candidate<string>[] {
+  const acc: Candidate<string>[] = [];
+  for (const child of node.children) {
+    if (child.kind === 'category') {
+      acc.push(...collectCategoryCandidates(child));
+      continue;
+    }
+    const own = candidatesFor(child.route, child.displayName);
+    poolByRoute.set(child.route, preparePool(own));
+    acc.push(...own);
+  }
+  poolByCategory.set(node.route, preparePool(acc));
+  return acc;
+}
+collectCategoryCandidates(site.tree);
+
+
+// The syllabus itself lives in `src/data/roadmap.ts` so the audit script can
+// read the same declaration this page renders. See that file for provenance.
+
+/** What a resolved roadmap link points at, so the modal can label its CTA. */
+type LinkKind = 'note' | 'category';
+interface Target {
+  href: string | null;
+  linkKind: LinkKind | null;
+}
+
+/** Roadmap labels whose `match` could not be resolved, reported during build. */
+const unresolved: string[] = [];
+
+/**
+ * Resolve a topic to the page it should open. `match` overrides the label when
+ * the roadmap wording differs from the content's Display_Name (e.g. "Chi-square
+ * Test" -> the "Chi-Square Tests" note).
+ *
+ * `preferCategory` is set for MAIN TRACKS, and exists because the content folders
+ * are deliberately named after the tracks: a folder and a note can share a name
+ * ("Descriptive Statistics" is both). A track represents the whole area, so it
+ * must open the folder; a branch represents one note, so it must open the note.
+ * Without this the track would silently link to the first of its own notes.
+ */
+function targetFor(t: { label: string; match?: string }, preferCategory = false): Target {
+  const key = (t.match ?? t.label).trim().toLowerCase();
+  const note = noteRoutes.get(key);
+  const category = categoryRoutes.get(key);
+
+  const first = preferCategory ? category : note;
+  const second = preferCategory ? note : category;
+  const firstKind: LinkKind = preferCategory ? 'category' : 'note';
+  const secondKind: LinkKind = preferCategory ? 'note' : 'category';
+
+  if (first) return { href: first, linkKind: firstKind };
+  if (second) return { href: second, linkKind: secondKind };
+  // An explicit `match` that resolves to nothing is a typo or a renamed note,
+  // not an intentional "no notes yet" node, so surface it.
+  if (t.match) unresolved.push(`${t.label} -> ${t.match}`);
+  return { href: null, linkKind: null };
+}
+
+// ---- Layout geometry (SVG user units; viewBox scales it responsively) ------
+const W = 1000;
+const SPINE_X = W / 2;
+const TOP = 40;
+const BOTTOM_PAD = 40;
+const SPINE_W = 250;
+const SPINE_H = 50;
+const SUB_W = 250;
+const SUB_H = 36;
+const SUB_GAP_Y = 46;
+const SIDE_OFFSET = 285;
+// Clear vertical space left between one step's branch block and the next one's.
+const MIN_STEP_GAP = 52;
+
+/**
+ * Vertical half-height a step occupies: its own box, or its tallest branch
+ * column, whichever is larger. Steps are then spaced by these half-heights so
+ * branch lists never collide however long the syllabus grows.
+ */
+function halfHeightOf(step: Step): number {
+  const branches = Math.max(step.left?.length ?? 0, step.right?.length ?? 0);
+  const branchHalf = branches > 0 ? ((branches - 1) * SUB_GAP_Y) / 2 + SUB_H / 2 : 0;
+  return Math.max(SPINE_H / 2, branchHalf);
+}
+
+/** Each step paired with the spine y-coordinate it was assigned. */
+interface StepLayout {
+  step: Step;
+  y: number;
+}
+
+const stepLayouts: StepLayout[] = [];
+let cursor = TOP;
+for (const step of spine) {
+  const half = halfHeightOf(step);
+  cursor += half;
+  stepLayouts.push({ step, y: cursor });
+  cursor += half + MIN_STEP_GAP;
+}
+const H = cursor - MIN_STEP_GAP + BOTTOM_PAD;
+
+interface PlacedNode {
+  id: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  label: string;
+  href: string | null;
+  linkKind: LinkKind | null;
+  main: boolean;
+  /** 'core' (default) or 'advanced'; drives the deferrable-topic marker. */
+  tier: Tier;
+  concepts: Concept[];
+}
+interface Connector {
+  d: string;
+  dashed: boolean;
+}
+
+const nodes: PlacedNode[] = [];
+const connectors: Connector[] = [];
+/** Main-track node id -> the notes that track covers, for its jump list. */
+const notesByTrack = new Map<string, SectionLink[]>();
+/** Main-track node id -> `{ advanced, total }` over its sub-topics. */
+const advancedRatioByTrack = new Map<string, { advanced: number; total: number }>();
+let idc = 0;
+
+stepLayouts.forEach(({ step, y }, i) => {
+  const stepNode: PlacedNode = {
+    id: `n${idc++}`,
+    x: SPINE_X,
+    y,
+    w: SPINE_W,
+    h: SPINE_H,
+    label: step.label,
+    ...targetFor(step, true),
+    main: true,
+    tier: step.tier ?? 'core',
+    concepts: step.concepts,
+  };
+  nodes.push(stepNode);
+
+  const nextY = stepLayouts[i + 1]?.y;
+  if (nextY !== undefined) {
+    connectors.push({
+      d: `M ${SPINE_X} ${y + SPINE_H / 2} L ${SPINE_X} ${nextY - SPINE_H / 2}`,
+      dashed: false,
+    });
+  }
+
+  const place = (topics: Topic[], side: -1 | 1) => {
+    const colX = SPINE_X + side * SIDE_OFFSET;
+    const totalH = (topics.length - 1) * SUB_GAP_Y;
+    const startY = y - totalH / 2;
+    topics.forEach((t, j) => {
+      const ty = startY + j * SUB_GAP_Y;
+      nodes.push({
+        id: `n${idc++}`,
+        x: colX,
+        y: ty,
+        w: SUB_W,
+        h: SUB_H,
+        label: t.label,
+        ...targetFor(t),
+        main: false,
+        tier: t.tier ?? 'core',
+        concepts: t.concepts,
+      });
+      const spineEdge = SPINE_X + side * (SPINE_W / 2);
+      const subEdge = colX - side * (SUB_W / 2);
+      const midX = (spineEdge + subEdge) / 2;
+      connectors.push({
+        d: `M ${spineEdge} ${y} C ${midX} ${y}, ${midX} ${ty}, ${subEdge} ${ty}`,
+        dashed: true,
+      });
+    });
+  };
+  if (step.left) place(step.left, -1);
+  if (step.right) place(step.right, 1);
+
+  /**
+   * The track's own notes, taken from the notes its SUB-TOPICS resolve to.
+   *
+   * The category cannot supply this: three of these tracks share one folder, so
+   * listing the folder's contents would show each track the other two's notes.
+   * The sub-topics are the accurate statement of what this track covers.
+   */
+  const trackNotes: SectionLink[] = [];
+  const seenNote = new Set<string>();
+  for (const topic of [...(step.left ?? []), ...(step.right ?? [])]) {
+    const { href, linkKind } = targetFor(topic);
+    if (linkKind !== 'note' || href === null || seenNote.has(href)) continue;
+    seenNote.add(href);
+    trackNotes.push({ text: noteNameByRoute.get(href) ?? topic.label, href, depth: 2 });
+  }
+  notesByTrack.set(stepNode.id, trackNotes);
+
+  const branches = [...(step.left ?? []), ...(step.right ?? [])];
+  advancedRatioByTrack.set(stepNode.id, {
+    advanced: branches.filter((t) => t.tier === 'advanced').length,
+    total: branches.length,
+  });
+});
+
+// ---- Simple view (phase bands) --------------------------------------------
+/**
+ * The same tracks as the detailed view, grouped into the journey's phases and
+ * rendered as PLAIN HTML rather than SVG. HTML is what makes this view actually
+ * responsive: track chips reflow with `flex-wrap`, phase bands stack, and text
+ * never clips because the browser measures it. The detailed view stays SVG
+ * (its spine geometry needs absolute positioning); this one does not.
+ *
+ * Chips REUSE the detailed view's node ids, so a click opens the same modal
+ * from the same payload with nothing extra to maintain.
+ */
+const mainNodes = nodes.filter((n) => n.main);
+const nodeByLabel = new Map(mainNodes.map((n) => [n.label, n]));
+
+interface PhaseBand {
+  name: string;
+  hue: string;
+  tracks: PlacedNode[];
+}
+
+// Resolve each phase's track labels to their placed nodes, and prove the
+// grouping matches the spine: every track in exactly one phase, no unknowns,
+// none left over. A drift here would silently drop a track from the overview.
+const seenInPhase = new Set<string>();
+const phaseBands: PhaseBand[] = phases.map((p) => ({
+  name: p.name,
+  hue: p.hue,
+  tracks: p.tracks.map((label) => {
+    const node = nodeByLabel.get(label);
+    if (!node) throw new Error(`[roadmap] phase "${p.name}" names unknown track "${label}"`);
+    if (seenInPhase.has(label)) throw new Error(`[roadmap] track "${label}" is in two phases`);
+    seenInPhase.add(label);
+    return node;
+  }),
+}));
+const ungrouped = mainNodes.filter((n) => !seenInPhase.has(n.label));
+if (ungrouped.length > 0) {
+  throw new Error(`[roadmap] ${ungrouped.length} track(s) missing from phases: ` +
+    ungrouped.map((n) => n.label).join(', '));
+}
+
+// Fail loudly-but-safely: a stale `match` yields a dead node, which is easy to
+// miss in a graph this size, so name the offenders in the build log.
+if (unresolved.length > 0) {
+  console.warn(
+    `[roadmap] ${unresolved.length} topic(s) have a "match" that resolves to no note or category:\n  ` +
+      [...new Set(unresolved)].join('\n  '),
+  );
+}
+
+/**
+ * How many roadmap nodes point at each note. This is what distinguishes the two
+ * kinds of branch node without needing a hand-maintained flag:
+ *
+ *   - SOLE OWNER (count 1): the node covers the whole note, so its outline is
+ *     useful context. "ANOVA" is the ANOVA note.
+ *   - SLICE (count > 1): several nodes carve up one note, so that note's outline
+ *     describes its siblings as much as itself and would mislead. "Central
+ *     Tendency & Spread" and "Bivariate Analysis" are both parts of one note.
+ */
+const nodesPerNote = new Map<string, number>();
+for (const n of nodes) {
+  if (n.linkKind !== 'note' || n.href === null) continue;
+  nodesPerNote.set(n.href, (nodesPerNote.get(n.href) ?? 0) + 1);
+}
+
+// Measured after the build so the reach of the matcher is reported, not assumed.
+let linkableBullets = 0;
+let deepLinked = 0;
+/** Declared `at` overrides that matched nothing: stale, so surfaced. */
+const deadAnchors: string[] = [];
+
+// Data the client island reads to populate the modal (keyed by node id). A
+// concept carries an `href` only when the matcher placed it in a real section.
+const nodeData = Object.fromEntries(
+  nodes.map((n) => {
+    // A note-linked node searches its own note; a category-linked node searches
+    // every note in that category, and must win unambiguously to avoid landing
+    // on the wrong document.
+    const pool =
+      n.linkKind === 'note'
+        ? poolByRoute.get(n.href!)
+        : n.linkKind === 'category'
+          ? poolByCategory.get(n.href!)
+          : undefined;
+    const requireUnique = n.linkKind === 'category';
+
+    const concepts = n.concepts.map((c) => {
+      const text = conceptLabel(c);
+      if (!pool) return { text };
+      linkableBullets++;
+
+      // An explicit `at` is an author override for the rare case the matcher
+      // gets wrong; otherwise the bullet's own wording is matched.
+      const query = typeof c === 'string' ? text : c.at;
+      const hit = matchTopicPrepared(query, pool, { requireUnique });
+
+      if (!hit) {
+        if (typeof c !== 'string') deadAnchors.push(`${n.label}: "${c.label}" -> at "${c.at}"`);
+        return { text };
+      }
+      deepLinked++;
+      return { text, href: hit.ref };
+    });
+
+    return [
+      n.id,
+      {
+        label: n.label,
+        href: n.href,
+        linkKind: n.linkKind,
+        tier: n.tier,
+        /**
+         * For a main track: how many of its sub-topics are deferrable, out of how
+         * many. A track is never itself "advanced", so this is the useful signal
+         * at track level: "12 sub-topics, 5 of which can wait".
+         */
+        advanced: n.main ? advancedRatioByTrack.get(n.id) : undefined,
+        concepts,
+        /**
+         * The overview list, by node tier:
+         *
+         *   TRACK       the notes this track covers.
+         *   NOTE-LEVEL  that note's section outline (sole owner of the note).
+         *   SLICE       nothing. Its bullets already deep-link into the parts of
+         *               the note it covers, and the full outline would advertise
+         *               its sibling slices' content as if it were its own.
+         */
+        sections: n.main
+          ? n.linkKind === 'note'
+            ? (sectionsByRoute.get(n.href!) ?? [])
+            : (notesByTrack.get(n.id) ?? [])
+          : n.linkKind === 'note' && nodesPerNote.get(n.href!) === 1
+            ? (sectionsByRoute.get(n.href!) ?? [])
+            : [],
+      },
+    ];
+  }),
+);
+
+if (deadAnchors.length > 0) {
+  console.warn(
+    `[roadmap] ${deadAnchors.length} concept(s) declare an "at" override that matches nothing:\n  ` +
+      deadAnchors.join('\n  '),
+  );
+}
+
+const pct = linkableBullets > 0 ? Math.round((deepLinked / linkableBullets) * 100) : 0;
+console.log(
+  `[roadmap] ${nodes.length} nodes, ${nodes.filter((n) => n.href).length} linked ` +
+    `(${nodes.filter((n) => n.linkKind === 'note').length} to a note). ` +
+    `${deepLinked}/${linkableBullets} bullets auto-linked to a heading (${pct}%). ` +
+    `Run \`npm run audit:syllabus\` for the mapping report.`,
+);
+
+const availableSteps = nodes.filter((n) => n.main && n.href).length;
+const totalSteps = nodes.filter((n) => n.main).length;
+---
+
+<Layout
+  tree={site.tree}
+  siteModel={site.siteModel}
+  currentRoute="/"
+  sectionSlug={site.tree.slug}
+  chrome="landing"
+>
+  <SeoHead
+    slot="head"
+    displayName="Cortex: Learning Roadmap"
+    route="/"
+    site={siteBase}
+    description="A visual, syllabus-grade data-science learning roadmap. Click any topic to see the concepts to learn, and jump into the notes."
+  />
+
+  {/* ---- Hero ---- */}
+  <section class="px-4 pb-6 pt-2 sm:px-0 sm:pb-8">
+    <span class="inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+      Learning roadmap
+    </span>
+    <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-gray-50">
+      Cortex
+    </h1>
+    <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
+      A personal, structured data-science syllabus. Follow the map from Python
+      foundations to deployment. Start with the <strong class="font-semibold text-gray-900 dark:text-gray-100">simple view</strong> for
+      the shape of it, switch to detailed for every sub-topic, and <strong class="font-semibold text-gray-900 dark:text-gray-100">click any topic</strong> to
+      see exactly what to learn and jump straight into the notes.
+    </p>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <a
+        href="/notes"
+        class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+      >
+        Browse all notes
+        <span aria-hidden="true">→</span>
+      </a>
+      <span class="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
+        <strong class="font-semibold text-gray-700 dark:text-gray-200">{availableSteps}</strong> of {totalSteps} core topics have notes
+      </span>
+    </div>
+  </section>
+
+  {/* ---- Roadmap graph ---- */}
+  <section class="roadmap border-t border-gray-200 px-4 pb-10 pt-6 sm:px-0 sm:pt-8 dark:border-white/10">
+    {/*
+      Controls row: the view toggle sits FIRST, right under the topic count, so
+      the two most-used controls stay together. The hint follows it, wrapping to
+      its own line on a phone (where a toggle + a full sentence cannot share a
+      row) and sitting inline on wider screens.
+    */}
+    <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+      <div
+        class="inline-flex shrink-0 self-start rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-white/10 dark:bg-white/5"
+        role="group"
+        aria-label="Roadmap detail level"
+      >
+        <button
+          type="button"
+          data-rm-view="simple"
+          aria-pressed="true"
+          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+        >
+          Simple
+        </button>
+        <button
+          type="button"
+          data-rm-view="detailed"
+          aria-pressed="false"
+          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+        >
+          Detailed
+        </button>
+      </div>
+      <p class="text-sm text-gray-500 dark:text-gray-400" data-rm-view-hint>
+        {totalSteps} core topics at a glance. Switch to detailed for every sub-topic.
+      </p>
+    </div>
+
+    {/* Legend: below the toggle, wrapping freely. */}
+    <div class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
+      {/*
+        "Notes available" = a FILLED node. Its colour differs by view: each
+        phase's own hue in the simple view, dark violet in the detailed spine.
+        So the swatch matches the ACTIVE view — the island shows a swatch
+        carrying ALL SIX phase hues (in phase order) with the simple view, and
+        the violet one with the detailed view, via the data-rm-*-only tagging.
+        A wider pill makes every band of colour legible.
+      */}
+      <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
+        <span data-rm-simple-only class="h-2.5 w-6 rounded-full" style="background: linear-gradient(90deg, #8b5cf6 0 16.6%, #0ea5e9 16.6% 33.3%, #14b8a6 33.3% 50%, #c2842a 50% 66.6%, #c25585 66.6% 83.3%, #3f9e6a 83.3% 100%)" aria-hidden="true"></span>
+        <span data-rm-detailed-only hidden class="h-2.5 w-2.5 rounded-full bg-violet-600" aria-hidden="true"></span>
+        Notes available
+      </span>
+      <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
+        <span class="h-2.5 w-2.5 rounded-full border border-dashed border-gray-400 dark:border-gray-500" aria-hidden="true"></span>
+        Coming soon
+      </span>
+      {/*
+        Tier legend. The amber notch only appears in the DETAILED view (the
+        simple view lists whole tracks, so per-sub-topic tiering has nowhere to
+        show), so these two items are tagged `data-rm-detailed-only` and the
+        island hides them while the simple view is active.
+      */}
+      <span
+        data-rm-detailed-only
+        hidden
+        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
+      >
+        <span class="h-3.5 w-1 rounded-sm bg-amber-600 dark:bg-amber-400" aria-hidden="true"></span>
+        Advanced, safe to defer
+      </span>
+      <span
+        data-rm-detailed-only
+        hidden
+        class="w-full text-xs text-gray-500 sm:w-auto dark:text-gray-400"
+      >
+        Unmarked topics are core: later ones build on them.
+      </span>
+    </div>
+
+    {/*
+      Simple view: phase bands (plain HTML so it reflows). Each band is one
+      stage of the journey; its track chips wrap across as many rows as the
+      width allows, so this is one column on a phone and up to three across on a
+      wide screen with no clipping and no fixed geometry.
+    */}
+    <div
+      data-rm-pane="simple"
+      role="group"
+      aria-label={`Data-science learning roadmap, simple view: ${totalSteps} core topics in ${phaseBands.length} phases.`}
+    >
+      <ol class="flex flex-col gap-3">
+        {
+          phaseBands.map((band, bi) => (
+            <li
+              class="rm-band relative overflow-hidden rounded-xl px-3 py-3 sm:px-4"
+              style={`--phase-hue: ${band.hue}`}
+            >
+              <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+                <p class="rm-band-name flex shrink-0 items-baseline gap-2 sm:w-40 sm:flex-col sm:gap-0.5">
+                  <span class="text-[0.7rem] font-bold uppercase tracking-wider">{band.name}</span>
+                  <span class="text-[0.65rem] font-medium text-gray-400 dark:text-gray-500">
+                    {`Phase ${bi + 1}`}
+                  </span>
+                </p>
+                <ul class="flex flex-1 flex-wrap gap-2">
+                  {band.tracks.map((n) => (
+                    <li>
+                      <button
+                        type="button"
+                        class={`rm-chip ${n.href ? 'rm-avail' : 'rm-soon'}`}
+                        aria-label={`${n.label}: view concepts`}
+                        data-rm-node={n.id}
+                      >
+                        <span>{n.label}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+
+    {/*
+      Detailed view: the full spine. It is a wide fixed-ratio graph, so on a
+      phone we let it scroll HORIZONTALLY inside its own box (with a readable
+      min-width) rather than shrinking every label to an illegible size. The
+      simple view above is the phone-friendly default; this is the opt-in.
+    */}
+    <div data-rm-pane="detailed" hidden>
+    <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
+    <svg
+      viewBox={`0 0 ${W} ${H}`}
+      class="h-auto w-full min-w-[680px] sm:min-w-0"
+      role="group"
+      aria-label="Data-science learning roadmap. Select a topic to see its concepts."
+      font-family="var(--font-sans)"
+    >
+      {
+        connectors.map((c) => (
+          <path
+            d={c.d}
+            fill="none"
+            class={c.dashed ? 'rm-edge rm-edge-dashed' : 'rm-edge'}
+            stroke-width="2"
+            stroke-dasharray={c.dashed ? '5 5' : undefined}
+          />
+        ))
+      }
+      {
+        nodes.map((n) => {
+          const x = n.x - n.w / 2;
+          const y = n.y - n.h / 2;
+          const state = n.href ? 'rm-avail' : 'rm-soon';
+          const kind = n.main ? 'rm-node-main' : 'rm-node-sub';
+          const adv = n.tier === 'advanced';
+          return (
+            /*
+              The tier is spoken in `aria-label`, not just coloured. Colour alone
+              would make this indicator invisible to a screen reader and
+              unreliable for colour-blind readers.
+            */
+            <g
+              class={`rm-node ${kind} ${state} ${adv ? 'rm-adv' : ''}`}
+              role="button"
+              tabindex="0"
+              aria-label={`${n.label}${adv ? ', advanced (optional)' : ''}: view concepts`}
+              data-rm-node={n.id}
+            >
+              <rect x={x} y={y} width={n.w} height={n.h} rx={n.main ? 12 : 8} class="rm-rect" />
+              {/*
+                Deferrable-topic marker: a notch on the box's OUTER edge, drawn
+                outside the label's box so it can never collide with a long
+                label. Outer rather than "always left" so both branch columns
+                mark the edge facing away from the spine, which reads as one
+                consistent margin down each side instead of two conventions.
+                Position + colour + the accessible name give three cues.
+              */}
+              {adv && (
+                <rect
+                  x={n.x < SPINE_X ? x - 3 : x + n.w}
+                  y={y + n.h / 2 - 9}
+                  width="3"
+                  height="18"
+                  rx="1.5"
+                  class="rm-adv-mark"
+                />
+              )}
+              <text
+                x={n.x}
+                y={n.y}
+                class={n.main ? 'rm-label rm-label-main' : 'rm-label'}
+                text-anchor="middle"
+                dominant-baseline="central"
+              >
+                {n.label}
+              </text>
+            </g>
+          );
+        })
+      }
+    </svg>
+    </div>
+    </div>
+  </section>
+
+  {/* ---- Topic concept modal (populated by the island) ---- */}
+  <dialog
+    data-rm-dialog
+    aria-labelledby="rm-modal-title"
+    class="mx-auto mt-[6vh] w-[calc(100%-1.5rem)] max-w-[520px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 text-left shadow-2xl backdrop:bg-gray-900/50 backdrop:backdrop-blur-sm sm:mt-[10vh] sm:w-[calc(100%-2rem)] dark:border-white/10 dark:bg-gray-900"
+  >
+    <div class="flex items-start justify-between gap-4 border-b border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
+      <div class="min-w-0">
+        <p class="text-[0.7rem] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+          Topic syllabus
+        </p>
+        <h2 id="rm-modal-title" data-rm-title class="mt-0.5 break-words text-xl font-bold text-gray-900 dark:text-gray-100"></h2>
+        <p
+          data-rm-tier
+          hidden
+          class="mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
+        >
+        </p>
+      </div>
+      <button
+        type="button"
+        data-rm-close
+        aria-label="Close"
+        class="shrink-0 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
+      >
+        Esc
+      </button>
+    </div>
+
+    {/* Scrolls independently so a long syllabus never pushes the CTA off-screen. */}
+    <div class="max-h-[58vh] overflow-y-auto">
+      <div class="px-4 py-4 sm:px-5">
+        <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Concepts to learn:</p>
+        {/*
+          CSS multi-column, NOT a 2-column grid. A grid lays bullets out in ROWS,
+          so a bullet that wraps to two lines stretches its whole row and leaves
+          a gap opposite it. Columns flow independently: each one is packed on
+          its own, and a wrap on the left cannot move anything on the right.
+          Reading order stays sensible too, down the first column then the second.
+        */}
+        <ul data-rm-concepts class="sm:columns-2 sm:gap-x-8"></ul>
+      </div>
+
+      {/* Real headings of the linked note, so any section is one click away. */}
+      {/* Main-track overview: the notes in this area, or one note's outline. */}
+      <div data-rm-sections-wrap class="hidden border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
+        <p data-rm-sections-label class="mb-3 text-sm text-gray-500 dark:text-gray-400"></p>
+        <ul data-rm-sections class="flex flex-col gap-1"></ul>
+      </div>
+    </div>
+
+    <div data-rm-footer class="hidden border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
+      <a
+        data-rm-link
+        href="#"
+        class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+      >
+        <span data-rm-link-text>Read the notes</span>
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+  </dialog>
+
+  {/* Node syllabus data for the island. */}
+  <script type="application/json" data-rm-data set:html={JSON.stringify(nodeData)} />
+  <script>
+    import '@/components/roadmap';
+  </script>
+</Layout>
+
+<style>
+  .roadmap {
+    overflow-x: auto;
+  }
+
+  /* Connectors */
+  .rm-edge {
+    stroke: #7c3aed;
+  }
+  .rm-edge-dashed {
+    stroke: #c4b5fd;
+  }
+  :global([data-theme='dark']) .rm-edge {
+    stroke: #a78bfa;
+  }
+  :global([data-theme='dark']) .rm-edge-dashed {
+    stroke: #6d28d9;
+  }
+
+  /* Nodes */
+  .rm-node {
+    cursor: pointer;
+  }
+  .rm-node:focus {
+    outline: none;
+  }
+  .rm-node .rm-rect {
+    transition: filter 0.12s ease, stroke-width 0.12s ease;
+  }
+  .rm-label {
+    font-size: 14px;
+    fill: #1f2937;
+    pointer-events: none;
+  }
+  .rm-label-main {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  /* ---- Simple view: phase bands (HTML) ---- */
+  /* Each band tints itself with its phase hue via the --phase-hue custom prop,
+     set inline per band, so one rule styles all six. */
+  .rm-band {
+    background: color-mix(in srgb, var(--phase-hue) 7%, transparent);
+  }
+  /* A colour rail down the leading edge marks the phase without a heavy border. */
+  .rm-band::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    border-radius: 4px;
+    background: var(--phase-hue);
+  }
+  .rm-band-name span:first-child {
+    color: var(--phase-hue);
+  }
+
+  /* Track chip. A chip with notes fills with its PHASE hue (inherited via
+     --phase-hue from the band), so a completed track visibly belongs to its
+     stage — green under "Ship it", teal under "Statistics". A chip without
+     notes is a dashed outline, matching the detailed view's "coming soon". */
+  .rm-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border-radius: 8px;
+    padding: 7px 13px;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.2;
+    cursor: pointer;
+    transition: filter 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+  }
+  .rm-chip:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--phase-hue, #7c3aed);
+  }
+  .rm-chip.rm-avail {
+    /* Lightened one notch so the fill reads as a bright, distinct phase colour
+       on the dark canvas rather than a heavy block: mix ~15% white into the
+       hue, with the pure hue as the border so the edge stays crisp. White text
+       still clears WCAG AA on every phase at this lightness. */
+    background: color-mix(in srgb, var(--phase-hue, #7c3aed) 85%, white);
+    border: 1px solid var(--phase-hue, #7c3aed);
+    color: #ffffff;
+  }
+  .rm-chip.rm-avail:hover {
+    filter: brightness(1.06);
+  }
+  .rm-chip.rm-soon {
+    background: transparent;
+    /* slate-400, darker than the old slate-300 so the dashed outline is
+       actually visible on the white light-mode canvas. Dark mode overrides. */
+    border: 1.5px dashed #94a3b8;
+    color: #475569;
+  }
+  .rm-chip.rm-soon:hover {
+    border-color: var(--phase-hue, #a78bfa);
+  }
+  :global([data-theme='dark']) .rm-chip.rm-soon {
+    border-color: #475569;
+    color: #cbd5e1;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  /*
+   * Advanced (deferrable) topics in the DETAILED (SVG) view.
+   *
+   * Amber is a second axis over the has-notes/no-notes state: dimming already
+   * means "no notes yet". The simple view intentionally omits this marker (it
+   * only lists tracks, and per-sub-topic tiering belongs in the detail); only
+   * the edge notch is coloured here, never the label.
+   */
+  .rm-adv-mark {
+    fill: #d97706; /* amber-600 */
+  }
+  :global([data-theme='dark']) .rm-adv-mark {
+    fill: #fbbf24; /* amber-400 */
+  }
+
+  /* Modal tier pill. Added by the island, so these need :global. */
+  :global([data-rm-tier].rm-tier-adv) {
+    background: #fef3c7; /* amber-100 */
+    color: #92400e; /* amber-800 */
+  }
+  :global([data-theme='dark'] [data-rm-tier].rm-tier-adv) {
+    background: rgba(251, 191, 36, 0.14);
+    color: #fcd34d; /* amber-300 */
+  }
+  :global([data-rm-tier].rm-tier-core) {
+    background: #f3f4f6; /* gray-100 */
+    color: #4b5563; /* gray-600 */
+  }
+  :global([data-theme='dark'] [data-rm-tier].rm-tier-core) {
+    background: rgba(255, 255, 255, 0.06);
+    color: #9ca3af; /* gray-400 */
+  }
+
+  /* View switch */
+  .rm-view-btn {
+    color: #4b5563;
+  }
+  .rm-view-btn[aria-pressed='true'] {
+    background: #ffffff;
+    color: #6d28d9;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+  :global([data-theme='dark']) .rm-view-btn {
+    color: #9ca3af;
+  }
+  :global([data-theme='dark']) .rm-view-btn[aria-pressed='true'] {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ddd6fe;
+    box-shadow: none;
+  }
+
+  /* Available (has notes): filled violet. Light mode uses a LIGHTER violet
+     (violet-500) than dark mode's violet-600, because the saturated dark fill
+     read as heavy blocks against the white canvas. White label text still
+     clears contrast at this lightness. Dark mode is overridden below. */
+  .rm-avail .rm-rect {
+    fill: #8b5cf6;
+    stroke: #7c3aed;
+    stroke-width: 1;
+  }
+  .rm-avail .rm-label {
+    fill: #ffffff;
+  }
+  .rm-node.rm-avail:hover .rm-rect {
+    filter: brightness(1.1);
+  }
+
+  /* Soon (no notes yet): outlined and muted. slate-400 stroke (was slate-300),
+     dark enough to be visible on the white detailed-view canvas. Dark mode is
+     overridden below and stays as-is. */
+  .rm-soon .rm-rect {
+    fill: #ffffff;
+    stroke: #94a3b8;
+    stroke-width: 1.5;
+    stroke-dasharray: 5 4;
+  }
+  .rm-soon .rm-label {
+    fill: #475569;
+  }
+  .rm-node.rm-soon:hover .rm-rect {
+    stroke: #a78bfa;
+  }
+
+  /* Focus ring for keyboard users. */
+  .rm-node:focus-visible .rm-rect {
+    stroke: #4c1d95;
+    stroke-width: 3;
+  }
+
+  :global([data-theme='dark']) .rm-avail .rm-rect {
+    fill: #7c3aed;
+    stroke: #a78bfa;
+  }
+  :global([data-theme='dark']) .rm-soon .rm-rect {
+    fill: rgba(255, 255, 255, 0.03);
+    stroke: #475569;
+  }
+  :global([data-theme='dark']) .rm-soon .rm-label {
+    fill: #cbd5e1;
+  }
+  :global([data-theme='dark']) .rm-label {
+    fill: #e5e7eb;
+  }
+  :global([data-theme='dark']) .rm-node:focus-visible .rm-rect {
+    stroke: #ddd6fe;
+  }
+
+  /*
+   * Advanced (deferrable) node edge, DETAILED view. The whole box edge goes
+   * amber at full stroke so "optional" is legible instead of the faint tint it
+   * was before (the old muted `#8a6534` was easy to miss on a completed node).
+   * Placed AFTER the avail/soon rules so it wins the stroke on equal
+   * specificity; the FILL (violet when done, muted when not) is left untouched,
+   * so a node still reads its completion state and its tier at the same time.
+   * A keyboard focus ring still overrides this (it comes later + is thicker).
+   */
+  .rm-adv .rm-rect {
+    stroke: #d97706; /* amber-600 */
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  /* An INCOMPLETE advanced node (no notes yet) gets a dimmer amber than a
+     completed one, so the bright edge is reserved for tracks that have notes.
+     Scoped after the rule above so it wins on equal specificity. */
+  .rm-adv.rm-soon .rm-rect {
+    stroke: #d8ab63; /* muted amber (light mode) */
+  }
+  :global([data-theme='dark']) .rm-adv .rm-rect {
+    stroke: #fbbf24; /* amber-400 */
+    stroke-width: 2;
+    stroke-dasharray: 5 4;
+  }
+  /* An INCOMPLETE advanced node (no notes yet) gets a dimmer amber than a
+     completed one, so the bright edge is reserved for tracks that actually have
+     notes. Dark mode only; scoped after the rule above so it wins. */
+  :global([data-theme='dark']) .rm-adv.rm-soon .rm-rect {
+    stroke: #b98a2e; /* muted amber */
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rm-node .rm-rect {
+      transition: none;
+    }
+  }
+</style>
