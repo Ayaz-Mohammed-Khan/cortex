@@ -525,6 +525,7 @@ article[data-pagefind-body] > h1 {
  */
 .note-body a.wikilink:not(.wikilink-missing) {
   color: #6d28d9; /* violet-700 */
+  font-weight: 500;
   text-decoration: underline;
   text-decoration-style: solid;
   text-decoration-color: #6d28d9;
@@ -535,12 +536,37 @@ article[data-pagefind-body] > h1 {
   text-decoration-color: #5b21b6;
 }
 [data-theme="dark"] .note-body a.wikilink:not(.wikilink-missing) {
-  color: #a78bfa; /* violet-400 */
-  text-decoration-color: #a78bfa;
-}
-[data-theme="dark"] .note-body a.wikilink:not(.wikilink-missing):hover {
   color: #c4b5fd; /* violet-300 */
   text-decoration-color: #c4b5fd;
+}
+[data-theme="dark"] .note-body a.wikilink:not(.wikilink-missing):hover {
+  color: #ddd6fe; /* violet-200 */
+  text-decoration-color: #ddd6fe;
+}
+
+/*
+ * A callout's body text is deliberately MUTED, so a link inside one needs to be
+ * SATURATED to stand out, not merely light. An earlier attempt reached for
+ * violet-200, which is lighter but so desaturated it read as off-white and
+ * looked duller than the surrounding text. These match the Linked Mentions
+ * accent instead (violet-700 / violet-300), which is the same "this is a link"
+ * colour used elsewhere on a note, so the whole page speaks one language.
+ */
+.note-body blockquote.callout a.wikilink:not(.wikilink-missing) {
+  color: #6d28d9; /* violet-700 */
+  text-decoration-color: #a78bfa; /* violet-400: present, not shouting */
+}
+[data-theme="dark"] .note-body blockquote.callout a.wikilink:not(.wikilink-missing) {
+  color: #c4b5fd; /* violet-300 */
+  text-decoration-color: #8b5cf6; /* violet-500 */
+}
+.note-body blockquote.callout a.wikilink:not(.wikilink-missing):hover {
+  color: #5b21b6; /* violet-800 */
+  text-decoration-color: #6d28d9;
+}
+[data-theme="dark"] .note-body blockquote.callout a.wikilink:not(.wikilink-missing):hover {
+  color: #ddd6fe; /* violet-200 */
+  text-decoration-color: #a78bfa;
 }
 .note-body a.wikilink-missing {
   color: #9ca3af; /* gray-400 */
@@ -1010,4 +1036,24 @@ mark.pagefind-highlight.pagefind-highlight-active {
 [data-theme="dark"] mark.pagefind-highlight.pagefind-highlight-active {
   background: #7c3aed; /* violet-600 */
   outline-color: #c4b5fd; /* violet-300 */
+}
+
+/*
+ * Landing header search field (see Layout.astro `.rm-search-field`).
+ *
+ * The <Search> component bundles a trigger BUTTON and the <dialog> together.
+ * On the landing header we want a compact search ICON on phones and the full
+ * FIELD from `sm` up — but the dialog must stay in a rendered (not display:none)
+ * container at every width, otherwise `showModal()` no-ops and the modal only
+ * appears after a resize. So instead of hiding the whole wrapper below `sm`, we
+ * hide only the field button; the dialog (the wrapper's other child) stays live
+ * for the compact icon to open. 640px is Tailwind's `sm` breakpoint.
+ */
+.rm-search-field > button {
+  display: none;
+}
+@media (min-width: 640px) {
+  .rm-search-field > button {
+    display: inline-flex;
+  }
 }
