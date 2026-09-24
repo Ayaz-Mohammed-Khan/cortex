@@ -102,7 +102,13 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
                 {p.label}
               </a>
             ) : (
-              <span>{p.label}</span>
+              <span
+                title={`${p.label} - coming soon`}
+                class="text-gray-400 underline decoration-dashed decoration-gray-300 underline-offset-2 dark:text-gray-500 dark:decoration-gray-600"
+              >
+                {p.label}
+                <span class="text-xs text-gray-400 dark:text-gray-500"> (soon)</span>
+              </span>
             )}
           </>
         ))}

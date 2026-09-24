@@ -78,23 +78,24 @@ function openModal(id: string): void {
   if (title) title.textContent = info.label;
 
   /*
-   * Tier line. A sub-topic states its own tier; a main track states how much of
-   * it is deferrable, because a track is never wholly optional. Both say it in
-   * words, so the graph's amber notch has a text counterpart here.
+   * Tier line. A sub-topic states its own tier; a main track states how many of
+   * its sub-topics are optional, because a track is never wholly optional. Both
+   * say it in words, so the graph's optional (dashed) cue has a text counterpart
+   * here. The data value is 'advanced' but readers see "Optional".
    */
   const tierEl = dlg.querySelector<HTMLElement>('[data-rm-tier]');
   if (tierEl) {
     let text = '';
     let advanced = false;
     if (info.tier === 'advanced') {
-      text = 'Advanced, safe to defer';
+      text = 'Optional, safe to skip';
       advanced = true;
     } else if (info.advanced && info.advanced.total > 0) {
       const { advanced: n, total } = info.advanced;
       text =
         n === 0
           ? `Core track, all ${total} sub-topics essential`
-          : `Core track, ${n} of ${total} sub-topics can wait`;
+          : `Core track, ${n} of ${total} sub-topics optional`;
     } else if (info.tier === 'core') {
       text = 'Core, later topics build on this';
     }
@@ -127,6 +128,7 @@ function openModal(id: string): void {
     prereqs.forEach((p, i) => {
       if (i > 0) prereqEl.append(', ');
       if (p.href) {
+        // Resolved to real content: a live link, styled like every other.
         const a = document.createElement('a');
         a.href = p.href;
         a.textContent = p.label;
@@ -134,7 +136,19 @@ function openModal(id: string): void {
           'font-medium text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-500 dark:hover:text-violet-200';
         prereqEl.append(a);
       } else {
-        prereqEl.append(p.label);
+        // No note or category yet: a dull "coming soon" link, matching the
+        // roadmap's own rm-soon nodes (dashed, muted, not navigable). It lights
+        // up automatically once a matching note/folder is published.
+        const span = document.createElement('span');
+        span.textContent = p.label;
+        span.title = `${p.label} - coming soon`;
+        span.className =
+          'font-medium text-gray-400 underline decoration-dashed decoration-gray-300 underline-offset-2 dark:text-gray-500 dark:decoration-gray-600';
+        const soon = document.createElement('span');
+        soon.textContent = ' (soon)';
+        soon.className = 'text-xs text-gray-400 dark:text-gray-500';
+        span.append(soon);
+        prereqEl.append(span);
       }
     });
   }
