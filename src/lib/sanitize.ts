@@ -104,7 +104,20 @@ export const sanitizeSchema: Schema = {
     // (rehype-autolink-headings) so they announce as "Permalink to this
     // section" without injecting visible/extractable heading text.
     // Note: `on*` handlers are NOT listed here, so they are always stripped.
-    '*': [...baseGlobalAttributes, 'className', 'style', 'ariaHidden', 'ariaDisabled', 'ariaLabel'],
+    // `data-pagefind-ignore` lets the build's search crawl (Pagefind) skip an
+    // element's text. We add it to KaTeX's hidden MathML subtree so the raw
+    // LaTeX source never pollutes search excerpts; it is inert markup, never a
+    // script vector. Kept global so any future "index the reader's view, not
+    // the source/UI" tagging survives sanitize too.
+    '*': [
+      ...baseGlobalAttributes,
+      'className',
+      'style',
+      'ariaHidden',
+      'ariaDisabled',
+      'ariaLabel',
+      'dataPagefindIgnore',
+    ],
 
     // Anchors: `defaultSchema` restricts `<a>` `className` to a single GitHub
     // value via the tuple `['className', 'data-footnote-backref']`, which would

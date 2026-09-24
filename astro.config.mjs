@@ -14,6 +14,7 @@ import remarkCallouts from './src/lib/markdown/remark-callouts.ts';
 import remarkWikilinks from './src/lib/markdown/remark-wikilinks.ts';
 import remarkStripBlockrefs from './src/lib/markdown/remark-strip-blockrefs.ts';
 import { createWikilinkResolver } from './src/lib/markdown/wikilink-index.ts';
+import rehypeKatexSearch from './src/lib/markdown/rehype-katex-search.ts';
 
 // LIVE `[[wikilink]]` resolution. Instead of freezing a single index snapshot
 // at config load, we use a resolver that lazily builds + caches the
@@ -152,6 +153,11 @@ export default defineConfig({
       // last when added.
       rehypePlugins: [
         [rehypeKatex, { throwOnError: false }],
+        // Immediately after KaTeX: flag its hidden MathML/LaTeX-source subtree
+        // `data-pagefind-ignore` so the search index sees only the visible math,
+        // not the raw `\text{…}` source. Search crawl only; the live MathML (and
+        // its screen-reader access) is untouched.
+        rehypeKatexSearch,
         rehypeSlug,
         [
           rehypeAutolinkHeadings,
