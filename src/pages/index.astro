@@ -226,6 +226,40 @@ for (const step of spine) {
 }
 const H = cursor - MIN_STEP_GAP + BOTTOM_PAD;
 
+// The axon trunk runs between the CENTERS of the first and last track cells, so
+// it never pokes out past the top of the first cell or the bottom of the last
+// (those stubs looked like loose ends). The cells are opaque and drawn on top,
+// so the trunk simply disappears under them at each end.
+const trunkTop = stepLayouts[0]?.y ?? TOP;
+const trunkBottom = stepLayouts[stepLayouts.length - 1]?.y ?? TOP;
+
+// A gently CURVY trunk: it passes through SPINE_X at every track (so each cell
+// still sits on the fibre) but bows a little to alternating sides in the gaps
+// between tracks, so the axon meanders like a real nerve instead of a ruler.
+// Signal train timing. TRUNK_DUR is how long ONE spark takes to travel the
+// whole trunk (slow = calm). TRUNK_INTERVAL is how often a new spark is
+// released, so DUR/INTERVAL sparks ride the fibre at once (a periodic stream).
+const TRUNK_DUR = 16; // seconds, one spark top -> bottom (slower)
+const TRUNK_INTERVAL = 2; // seconds between spark releases
+const TRUNK_SPARKS = Math.round(TRUNK_DUR / TRUNK_INTERVAL); // sparks visible at once
+const TRUNK_BOW = 26; // px of horizontal sway at each mid-gap
+const trunkPath = (() => {
+  const ys = stepLayouts.map((s) => s.y);
+  if (ys.length === 0) return `M ${SPINE_X} ${trunkTop} L ${SPINE_X} ${trunkBottom}`;
+  let d = `M ${SPINE_X} ${trunkTop} L ${SPINE_X} ${ys[0]}`;
+  for (let i = 0; i < ys.length - 1; i++) {
+    const y0 = ys[i]!;
+    const y1 = ys[i + 1]!;
+    const midY = (y0 + y1) / 2;
+    const bowX = SPINE_X + (i % 2 === 0 ? TRUNK_BOW : -TRUNK_BOW);
+    // Cubic that leaves cell i vertically, bows out at the mid-gap, and re-enters
+    // cell i+1 vertically, keeping both endpoints exactly on SPINE_X.
+    d += ` C ${bowX} ${y0 + (midY - y0) * 0.5}, ${bowX} ${y1 - (y1 - midY) * 0.5}, ${SPINE_X} ${y1}`;
+  }
+  d += ` L ${SPINE_X} ${trunkBottom}`;
+  return d;
+})();
+
 interface PlacedNode {
   id: string;
   x: number;
@@ -245,8 +279,16 @@ interface PlacedNode {
   concepts: Concept[];
 }
 interface Connector {
+  /** Stable id so a signal spark can follow this dendrite via <mpath>. */
+  id?: string;
   d: string;
   dashed: boolean;
+  /** Branch (dendrite) connectors carry their terminal point, where a synaptic
+   *  bouton is drawn; `live` says the target topic has a note (bright bouton). */
+  bouton?: { x: number; y: number; live: boolean };
+  /** Seconds into the trunk's loop when the trunk signal reaches this branch's
+   *  track, so the branch spark fires as the trunk pulse passes (a cascade). */
+  beginAt?: number;
 }
 
 const nodes: PlacedNode[] = [];
@@ -257,7 +299,7 @@ const notesByTrack = new Map<string, SectionLink[]>();
 const advancedRatioByTrack = new Map<string, { advanced: number; total: number }>();
 let idc = 0;
 
-stepLayouts.forEach(({ step, y }, i) => {
+stepLayouts.forEach(({ step, y }) => {
   const stepNode: PlacedNode = {
     id: `n${idc++}`,
     x: SPINE_X,
@@ -274,13 +316,9 @@ stepLayouts.forEach(({ step, y }, i) => {
   };
   nodes.push(stepNode);
 
-  const nextY = stepLayouts[i + 1]?.y;
-  if (nextY !== undefined) {
-    connectors.push({
-      d: `M ${SPINE_X} ${y + SPINE_H / 2} L ${SPINE_X} ${nextY - SPINE_H / 2}`,
-      dashed: false,
-    });
-  }
+  // No per-step spine segment here: the continuous axon trunk (drawn once in
+  // the SVG, behind the cells) is the spine now, so the old segments would just
+  // double the line and show through the gaps between cells.
 
   const place = (topics: Topic[], side: -1 | 1) => {
     const colX = SPINE_X + side * SIDE_OFFSET;
@@ -305,9 +343,20 @@ stepLayouts.forEach(({ step, y }, i) => {
       const spineEdge = SPINE_X + side * (SPINE_W / 2);
       const subEdge = colX - side * (SUB_W / 2);
       const midX = (spineEdge + subEdge) / 2;
+      // A trunk spark reaches this track at time f*TRUNK_DUR after its release.
+      // Sparks release every TRUNK_INTERVAL, so the branch fires on that same
+      // interval, phase-offset to the moment a spark actually arrives.
+      const span = trunkBottom - trunkTop || 1;
+      const arrival = TRUNK_DUR * ((y - trunkTop) / span);
+      const beginAt = ((arrival % TRUNK_INTERVAL) + TRUNK_INTERVAL) % TRUNK_INTERVAL;
       connectors.push({
+        id: `e${idc}`,
         d: `M ${spineEdge} ${y} C ${midX} ${y}, ${midX} ${ty}, ${subEdge} ${ty}`,
-        dashed: true,
+        dashed: false,
+        // The dendrite terminates in a synaptic bouton at the topic's edge; it
+        // glows when the topic has a note (resolved href), else it stays dim.
+        bouton: { x: subEdge, y: ty, live: targetFor(t).href !== null },
+        beginAt,
       });
     });
   };
@@ -614,8 +663,8 @@ const totalSteps = nodes.filter((n) => n.main).length;
         hidden
         class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
       >
-        <span class="h-3.5 w-1 rounded-sm bg-amber-600 dark:bg-amber-400" aria-hidden="true"></span>
-        Advanced, safe to defer
+        <span class="h-3.5 w-5 rounded-sm border border-dashed border-amber-600 dark:border-amber-400" aria-hidden="true"></span>
+        Optional (safe to skip)
       </span>
       <span
         data-rm-detailed-only
@@ -687,15 +736,80 @@ const totalSteps = nodes.filter((n) => n.main).length;
       aria-label="Data-science learning roadmap. Select a topic to see its concepts."
       font-family="var(--font-sans)"
     >
+      {/*
+        Axon trunk: one continuous fibre down the spine (a myelinated sheath +
+        bright inner core), drawn UNDER the cells so opaque cell bodies paint
+        over it. It is the ONLY spine line (the old per-step segments were
+        removed) and carries the firing signal + nodes of Ranvier so the whole
+        path reads as one nerve.
+      */}
+      <path id="rm-axon" class="rm-trunk" d={trunkPath} />
+      <path class="rm-trunk-core" d={trunkPath} />
+      {/* Nodes of Ranvier: myelin gaps banding the trunk between tracks. */}
+      {
+        stepLayouts.slice(0, -1).map((s, i) => {
+          const nextY = stepLayouts[i + 1]!.y;
+          const midY = (s.y + SPINE_H / 2 + (nextY - SPINE_H / 2)) / 2;
+          return <line class="rm-ranvier" x1={SPINE_X - 6} y1={midY} x2={SPINE_X + 6} y2={midY} />;
+        })
+      }
+      {/* Action potentials: a periodic TRAIN. A new spark is released every
+          TRUNK_INTERVAL seconds and takes TRUNK_DUR to reach the bottom, so a
+          steady stream of sparks rides the fibre one after another. */}
+      {
+        Array.from({ length: TRUNK_SPARKS }).map((_, k) => (
+          <circle class={k % 2 === 0 ? 'rm-signal' : 'rm-signal rm-signal-trail'} r={k % 2 === 0 ? 3 : 2.4}>
+            <animateMotion
+              dur={`${TRUNK_DUR}s`}
+              begin={`${k * TRUNK_INTERVAL}s`}
+              repeatCount="indefinite"
+            >
+              <mpath href="#rm-axon" />
+            </animateMotion>
+          </circle>
+        ))
+      }
+
       {
         connectors.map((c) => (
-          <path
-            d={c.d}
-            fill="none"
-            class={c.dashed ? 'rm-edge rm-edge-dashed' : 'rm-edge'}
-            stroke-width="2"
-            stroke-dasharray={c.dashed ? '5 5' : undefined}
-          />
+          <>
+            <path
+              id={c.id}
+              d={c.d}
+              fill="none"
+              class={c.dashed ? 'rm-edge rm-edge-dashed' : 'rm-edge'}
+              stroke-width="2"
+              stroke-dasharray={c.dashed ? '5 5' : undefined}
+            />
+            {/* Synaptic bouton at the dendrite terminal (branch connectors only). */}
+            {c.bouton && (
+              <circle
+                cx={c.bouton.x}
+                cy={c.bouton.y}
+                r="3"
+                class={c.bouton.live ? 'rm-bouton rm-bouton-live' : 'rm-bouton'}
+              />
+            )}
+            {/* A synaptic spark fires down each LIVE dendrite the moment the
+                trunk pulse reaches its track (begin = beginAt), then travels the
+                branch quickly and rests at the bouton until the next pass. Same
+                6s cycle as the trunk, so it reads as the trunk triggering it.
+                Coming-soon branches (no note yet) carry no signal. */}
+            {c.id && c.bouton?.live && (
+              <circle class="rm-signal rm-signal-branch" r="2">
+                <animateMotion
+                  dur={`${TRUNK_INTERVAL}s`}
+                  begin={`${c.beginAt ?? 0}s`}
+                  repeatCount="indefinite"
+                  keyPoints="0;1;1"
+                  keyTimes="0;0.5;1"
+                  calcMode="linear"
+                >
+                  <mpath href={`#${c.id}`} />
+                </animateMotion>
+              </circle>
+            )}
+          </>
         ))
       }
       {
@@ -715,46 +829,32 @@ const totalSteps = nodes.filter((n) => n.main).length;
               class={`rm-node ${kind} ${state} ${adv ? 'rm-adv' : ''}`}
               role="button"
               tabindex="0"
-              aria-label={`${n.label}${adv ? ', advanced (optional)' : ''}: view concepts`}
+              aria-label={`${n.label}${adv ? ', optional' : ''}: view concepts`}
               data-rm-node={n.id}
             >
-              <rect x={x} y={y} width={n.w} height={n.h} rx={n.main ? 12 : 8} class="rm-rect" />
+              {/* Cell body (soma). Fully rounded so it reads as a neuron, not a
+                  box. Optional cells get the dashed amber membrane via `.rm-adv`. */}
+              <rect x={x} y={y} width={n.w} height={n.h} rx={n.h / 2} class="rm-rect" />
               {/*
-                Difficulty stripe (option 2A): a short colour bar on the box's
-                INNER edge (the side facing the spine), so it never collides with
-                the amber tier notch on the OUTER edge. Green/blue/pink scale,
-                a separate axis from tier. Purely visual; the modal speaks it.
+                Difficulty nucleus: a coloured dot (green/blue/pink) with a soft
+                halo, set just inside the cell's INNER edge (the side facing the
+                spine). It is the difficulty axis, separate from the optional
+                membrane. Purely visual; the modal speaks the level in words.
               */}
               {n.difficulty && (
-                <rect
-                  x={n.x < SPINE_X ? x + n.w - 4 : x + 1}
-                  y={y + 8}
-                  width="3"
-                  height={n.h - 16}
-                  rx="1.5"
-                  class={`rm-diff rm-diff-${n.difficulty}`}
-                />
+                <g class={`rm-nucleus rm-nucleus-${n.difficulty}`}>
+                  <circle cx={n.x < SPINE_X ? x + n.w - 15 : x + 15} cy={n.y} r="8" class="rm-nucleus-halo" />
+                  <circle cx={n.x < SPINE_X ? x + n.w - 15 : x + 15} cy={n.y} r="4" class="rm-nucleus-dot" />
+                </g>
               )}
               {/*
-                Deferrable-topic marker: a notch on the box's OUTER edge, drawn
-                outside the label's box so it can never collide with a long
-                label. Outer rather than "always left" so both branch columns
-                mark the edge facing away from the spine, which reads as one
-                consistent margin down each side instead of two conventions.
-                Position + colour + the accessible name give three cues.
+                Optional (safe to skip) is shown by the DASHED AMBER MEMBRANE on
+                the cell outline (see `.rm-adv .rm-rect`), a single cue reading
+                "not fully wired in". The accessible name also says "optional",
+                so it is never colour-only.
               */}
-              {adv && (
-                <rect
-                  x={n.x < SPINE_X ? x - 3 : x + n.w}
-                  y={y + n.h / 2 - 9}
-                  width="3"
-                  height="18"
-                  rx="1.5"
-                  class="rm-adv-mark"
-                />
-              )}
               <text
-                x={n.x}
+                x={n.difficulty ? (n.x < SPINE_X ? n.x - 8 : n.x + 8) : n.x}
                 y={n.y}
                 class={n.main ? 'rm-label rm-label-main' : 'rm-label'}
                 text-anchor="middle"
@@ -875,7 +975,62 @@ const totalSteps = nodes.filter((n) => n.main).length;
     overflow-x: auto;
   }
 
-  /* Connectors */
+  /* ============================================================
+     DETAILED VIEW - "Neural Pathway"
+     The spine is a myelinated axon carrying a firing signal; branch
+     connectors are dendrites ending in synaptic boutons; each track/topic
+     is a neuron cell body with a difficulty nucleus. Optional cells wear a
+     dashed amber membrane. Palettes are hand-tuned for light and dark.
+     ============================================================ */
+
+  /* --- Axon trunk (the spine) --- */
+  .rm-trunk {
+    fill: none;
+    stroke: #c9bdf5; /* soft myelin sheath, light mode */
+    stroke-width: 6;
+    stroke-linecap: round;
+  }
+  .rm-trunk-core {
+    fill: none;
+    stroke: #a78bfa; /* lighter core (light mode) so the violet-600 spark reads on it */
+    stroke-width: 2;
+    stroke-linecap: round;
+    opacity: 0.95;
+  }
+  .rm-ranvier {
+    /* myelin gap banding the trunk between tracks: a short break in the sheath */
+    stroke: #f6f5fb;
+    stroke-width: 7;
+    stroke-linecap: butt;
+  }
+  :global([data-theme='dark']) .rm-trunk {
+    stroke: #4a3aa0;
+  }
+  :global([data-theme='dark']) .rm-trunk-core {
+    stroke: #a78bfa;
+  }
+  :global([data-theme='dark']) .rm-ranvier {
+    stroke: #0b0d17;
+  }
+
+  /* --- Action potential travelling the trunk --- */
+  /* Light mode: a bright near-white violet spark so it stands out AGAINST the
+     violet core as it moves (using the core colour made it invisible). A subtle
+     ring makes the pulse legible on the pale sheath. */
+  /* Light theme: a solid violet-600 spark, bright against the pale trunk. */
+  .rm-signal {
+    fill: #7c3aed;
+    stroke: none;
+  }
+  .rm-signal-trail {
+    opacity: 0.5;
+  }
+  :global([data-theme='dark']) .rm-signal {
+    fill: #ffffff;
+    stroke: none;
+  }
+
+  /* --- Dendrite connectors --- */
   .rm-edge {
     stroke: #7c3aed;
   }
@@ -889,7 +1044,21 @@ const totalSteps = nodes.filter((n) => n.main).length;
     stroke: #6d28d9;
   }
 
-  /* Nodes */
+  /* --- Synaptic boutons at dendrite terminals --- */
+  .rm-bouton {
+    fill: #cbc4e6; /* dormant terminal, faint violet (topic has no note yet) */
+  }
+  .rm-bouton-live {
+    fill: #7c3aed; /* active synapse (topic has a note) */
+  }
+  :global([data-theme='dark']) .rm-bouton {
+    fill: #3b4160;
+  }
+  :global([data-theme='dark']) .rm-bouton-live {
+    fill: #8172d6;
+  }
+
+  /* --- Cell body (node) base --- */
   .rm-node {
     cursor: pointer;
   }
@@ -897,7 +1066,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
     outline: none;
   }
   .rm-node .rm-rect {
-    transition: filter 0.12s ease, stroke-width 0.12s ease;
+    transition: filter 0.15s ease, stroke 0.15s ease, stroke-width 0.12s ease;
   }
   .rm-label {
     font-size: 14px;
@@ -907,6 +1076,27 @@ const totalSteps = nodes.filter((n) => n.main).length;
   .rm-label-main {
     font-size: 15px;
     font-weight: 600;
+  }
+
+  /* --- Difficulty nucleus (green/blue/pink dot + halo) --- */
+  .rm-nucleus {
+    pointer-events: none;
+  }
+  .rm-nucleus-halo {
+    fill: currentColor;
+    opacity: 0.22;
+  }
+  .rm-nucleus-dot {
+    fill: currentColor;
+  }
+  .rm-nucleus-beginner {
+    color: #10b981; /* emerald */
+  }
+  .rm-nucleus-intermediate {
+    color: #3b82f6; /* blue */
+  }
+  .rm-nucleus-advanced {
+    color: #ec4899; /* pink */
   }
   /* ---- Simple view: phase bands (HTML) ---- */
   /* Each band tints itself with its phase hue via the --phase-hue custom prop,
@@ -976,31 +1166,12 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
 
   /*
-   * Advanced (deferrable) topics in the DETAILED (SVG) view.
-   *
-   * Amber is a second axis over the has-notes/no-notes state: dimming already
-   * means "no notes yet". The simple view intentionally omits this marker (it
-   * only lists tracks, and per-sub-topic tiering belongs in the detail); only
-   * the edge notch is coloured here, never the label.
+   * Optional (safe-to-skip) topics in the DETAILED (SVG) view are shown by the
+   * dashed amber MEMBRANE on the node outline (`.rm-adv .rm-rect` below), a
+   * single cue meaning "not fully wired in". The old separate amber notch was
+   * removed so nothing competes with the difficulty stripe. The simple view
+   * omits this (it only lists tracks; per-sub-topic tiering belongs in detail).
    */
-  .rm-adv-mark {
-    fill: #d97706; /* amber-600 */
-  }
-  :global([data-theme='dark']) .rm-adv-mark {
-    fill: #fbbf24; /* amber-400 */
-  }
-
-  /* Difficulty stripe: its own green -> blue -> pink axis, distinct from the
-     amber tier marker. Same hues as the note-page badge and the modal. */
-  .rm-diff-beginner {
-    fill: #10b981; /* emerald-500 */
-  }
-  .rm-diff-intermediate {
-    fill: #3b82f6; /* blue-500 */
-  }
-  .rm-diff-advanced {
-    fill: #ec4899; /* pink-500 */
-  }
 
   /* Modal difficulty badge (island-added, so :global). Own green/blue/pink
      axis, matching the note-page badge and the node stripe. */
@@ -1065,36 +1236,47 @@ const totalSteps = nodes.filter((n) => n.main).length;
     box-shadow: none;
   }
 
-  /* Available (has notes): filled violet. Light mode uses a LIGHTER violet
-     (violet-500) than dark mode's violet-600, because the saturated dark fill
-     read as heavy blocks against the white canvas. White label text still
-     clears contrast at this lightness. Dark mode is overridden below. */
+  /* Available cell (has notes): a living soma. Solid violet membrane, deep
+     violet body. White label clears AA on this fill. */
+  /* Available cell, LIGHT theme: a soft violet tint with a crisp violet border
+     and dark violet text - clean on a white canvas (the old heavy fill read as
+     near-black). Dark theme keeps its filled body via the override below. */
   .rm-avail .rm-rect {
-    fill: #8b5cf6;
-    stroke: #7c3aed;
-    stroke-width: 1;
+    fill: #c3b2f7; /* clearly darker violet so completed stands apart from the near-white "soon" cells */
+    stroke: #6d28d9; /* violet-700 */
+    stroke-width: 1.5;
   }
   .rm-avail .rm-label {
-    fill: #ffffff;
+    fill: #3b0f7a; /* deep violet, high contrast on the darker fill */
   }
+  /* Hover: obvious lift. A violet glow + brighter, thicker membrane so the cell
+     clearly reacts. Filter-based (no transform) so the node never shifts. */
   .rm-node.rm-avail:hover .rm-rect {
-    filter: brightness(1.1);
+    fill: #ab93f2; /* deepens a clear step past the resting fill on hover */
+    stroke: #5b21b6;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 7px rgba(124, 58, 237, 0.5));
   }
 
-  /* Soon (no notes yet): outlined and muted. slate-400 stroke (was slate-300),
-     dark enough to be visible on the white detailed-view canvas. Dark mode is
-     overridden below and stays as-is. */
+  /* Dormant cell (no notes yet): OPAQUE body so the trunk/edges never show
+     through it, with a VIOLET-TINTED dashed membrane so it still belongs to the
+     theme instead of reading as a dull grey box. */
   .rm-soon .rm-rect {
-    fill: #ffffff;
-    stroke: #94a3b8;
+    fill: #f4f1fd;
+    stroke: #a78bfa;
     stroke-width: 1.5;
-    stroke-dasharray: 5 4;
+    stroke-dasharray: 4 4;
   }
   .rm-soon .rm-label {
-    fill: #475569;
+    fill: #5b5470;
   }
+  /* Hover on a dormant cell: it lights up toward violet with a soft glow so it
+     still feels clickable even without notes yet. */
   .rm-node.rm-soon:hover .rm-rect {
-    stroke: #a78bfa;
+    fill: #ece6fb;
+    stroke: #7c3aed;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.45));
   }
 
   /* Focus ring for keyboard users. */
@@ -1104,15 +1286,21 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
 
   :global([data-theme='dark']) .rm-avail .rm-rect {
-    fill: #7c3aed;
+    fill: #5b34c4; /* richer, brighter violet body so completed cells pop */
     stroke: #a78bfa;
   }
+  :global([data-theme='dark']) .rm-avail .rm-label {
+    fill: #ffffff; /* crisp white label on the filled violet body */
+  }
   :global([data-theme='dark']) .rm-soon .rm-rect {
-    fill: rgba(255, 255, 255, 0.03);
-    stroke: #475569;
+    /* Opaque (a touch above the canvas) so the trunk and dendrites never bleed
+       through, with a brighter violet dashed membrane so a dormant cell still
+       reads as part of the theme rather than a dull grey outline. */
+    fill: #17162b;
+    stroke: #7c6bd0;
   }
   :global([data-theme='dark']) .rm-soon .rm-label {
-    fill: #cbd5e1;
+    fill: #b9b4d6;
   }
   :global([data-theme='dark']) .rm-label {
     fill: #e5e7eb;
@@ -1120,42 +1308,55 @@ const totalSteps = nodes.filter((n) => n.main).length;
   :global([data-theme='dark']) .rm-node:focus-visible .rm-rect {
     stroke: #ddd6fe;
   }
+  /* Dark-mode hover glows: brighter membrane + violet halo so the reaction is
+     unmistakable against the dark canvas. */
+  :global([data-theme='dark']) .rm-node.rm-avail:hover .rm-rect {
+    /* Lighten by a CONTROLLED step to a richer violet (not the runaway
+       brightness filter, which washed the cell out to near-white). Keep the
+       glow for the lift; the white label stays legible on this fill. */
+    fill: #7048d8;
+    stroke: #c4b5fd;
+    stroke-width: 2.5;
+    filter: drop-shadow(0 0 9px rgba(167, 139, 250, 0.7));
+  }
+  :global([data-theme='dark']) .rm-node.rm-soon:hover .rm-rect {
+    fill: #221f3d;
+    stroke: #a78bfa;
+    stroke-width: 2;
+    filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.5));
+  }
 
   /*
-   * Advanced (deferrable) node edge, DETAILED view. The whole box edge goes
-   * amber at full stroke so "optional" is legible instead of the faint tint it
-   * was before (the old muted `#8a6534` was easy to miss on a completed node).
-   * Placed AFTER the avail/soon rules so it wins the stroke on equal
-   * specificity; the FILL (violet when done, muted when not) is left untouched,
-   * so a node still reads its completion state and its tier at the same time.
-   * A keyboard focus ring still overrides this (it comes later + is thicker).
+   * Optional (safe-to-skip) cell: DASHED AMBER MEMBRANE. Placed AFTER the
+   * avail/soon rules so it wins the stroke on equal specificity; the FILL
+   * (violet when done, pale when not) is untouched, so a cell shows its
+   * completion state and its optional status at once. The focus ring (later +
+   * thicker) still overrides. Reads as "not fully wired in".
    */
   .rm-adv .rm-rect {
     stroke: #d97706; /* amber-600 */
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
-  /* An INCOMPLETE advanced node (no notes yet) gets a dimmer amber than a
-     completed one, so the bright edge is reserved for tracks that have notes.
-     Scoped after the rule above so it wins on equal specificity. */
   .rm-adv.rm-soon .rm-rect {
-    stroke: #d8ab63; /* muted amber (light mode) */
+    stroke: #d8ab63; /* dimmer amber for a not-yet-written optional topic */
   }
   :global([data-theme='dark']) .rm-adv .rm-rect {
     stroke: #fbbf24; /* amber-400 */
     stroke-width: 2;
     stroke-dasharray: 5 4;
   }
-  /* An INCOMPLETE advanced node (no notes yet) gets a dimmer amber than a
-     completed one, so the bright edge is reserved for tracks that actually have
-     notes. Dark mode only; scoped after the rule above so it wins. */
   :global([data-theme='dark']) .rm-adv.rm-soon .rm-rect {
-    stroke: #b98a2e; /* muted amber */
+    stroke: #b98a2e;
   }
 
   @media (prefers-reduced-motion: reduce) {
     .rm-node .rm-rect {
       transition: none;
+    }
+    /* Freeze the action potential for readers who opt out of motion. */
+    .rm-signal {
+      display: none;
     }
   }
 </style>
