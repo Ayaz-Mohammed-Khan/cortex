@@ -97,7 +97,7 @@ function openModal(id: string): void {
           ? `Core track, all ${total} sub-topics essential`
           : `Core track, ${n} of ${total} sub-topics optional`;
     } else if (info.tier === 'core') {
-      text = 'Core, later topics build on this';
+      text = 'Core, a fundamental you should know';
     }
     tierEl.textContent = text;
     tierEl.hidden = text === '';
