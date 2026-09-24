@@ -9,6 +9,10 @@ aliases:
   - ANOVA
   - Analysis of Variance
   - One-Way ANOVA
+difficulty: advanced
+prerequisites:
+  - Hypothesis Testing
+  - P-values and T-tests
 created: 2026-07-09
 ---
 

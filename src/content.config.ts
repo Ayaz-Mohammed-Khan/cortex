@@ -34,6 +34,12 @@ const notes = defineCollection({
     published: z.boolean().optional().default(true),
     // Optional date; coerced so string frontmatter (e.g. "2025-01-01") parses.
     date: z.coerce.date().optional(),
+    // Optional difficulty of the material (a separate axis from the roadmap's
+    // core/advanced "tier", which is about employability). Shown as a badge.
+    difficulty: z.enum(['beginner', 'intermediate', 'advanced']).optional(),
+    // Optional prerequisites: display names of notes/topics to learn first.
+    // Rendered as links under the title (resolved by display name downstream).
+    prerequisites: z.array(z.string()).optional(),
   }),
 });
 

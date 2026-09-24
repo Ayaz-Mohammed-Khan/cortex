@@ -60,6 +60,8 @@ let categoryPath = '';
 let breadcrumbs: CategoryRef[] = [];
 let body: string | null = null;
 let description: string | null = null;
+let difficulty: 'beginner' | 'intermediate' | 'advanced' | undefined;
+let prerequisites: { label: string; href: string | null }[] = [];
 
 // Prev/next published-Note neighbours (Tier 3). `site.entries` is already in
 // display order, so the neighbours are simply the adjacent entries.
@@ -88,6 +90,19 @@ if (data.kind === 'note') {
     .join(' / ');
   body = data.content.body;
   description = data.content.description ?? null;
+  difficulty = data.entry.data.difficulty;
+  // Resolve prerequisite display names to note routes (case-insensitive) so
+  // each becomes a link when it names a real note; unresolved names stay text.
+  const prereqNames = data.entry.data.prerequisites ?? [];
+  if (prereqNames.length > 0) {
+    const routeByName = new Map(
+      site.entries.map((e) => [e.displayName.trim().toLowerCase(), e.route]),
+    );
+    prerequisites = prereqNames.map((name) => ({
+      label: name,
+      href: routeByName.get(name.trim().toLowerCase()) ?? null,
+    }));
+  }
 
   const currentIndex = site.entries.findIndex((entry) => entry.route === route);
   if (currentIndex !== -1) {
@@ -131,6 +146,8 @@ if (data.kind === 'note') {
         displayName={displayName}
         categoryPath={categoryPath}
         Content={Content}
+        difficulty={difficulty}
+        prerequisites={prerequisites}
       />
     ) : (
       data.kind === 'category' && <CategoryListing node={data.node} />
