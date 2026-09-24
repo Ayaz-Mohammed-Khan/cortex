@@ -1,6 +1,6 @@
 ---
 /**
- * Backlinks / "Linked mentions" (Tier 3).
+ * Backlinks / "Referenced by" (Tier 3).
  *
  * Rendered at the bottom of a Note page, ABOVE `PrevNext`, listing the OTHER
  * published notes that link TO the current note via `[[wikilinks]]`. The refs
@@ -8,7 +8,7 @@
  * `loadSite().backlinks`) and arrive already de-duplicated and sorted by display
  * name, so this component is pure rendering.
  *
- * The whole nav is omitted when there are no linked mentions (the page template
+ * The whole nav is omitted when there are no references (the page template
  * only renders it for a non-empty `refs`). It is `data-pagefind-ignore` so these
  * link labels don't pollute the search index, and each link carries a hover
  * state + visible focus ring for keyboard operability, matching `PrevNext` and
@@ -26,16 +26,16 @@ const { refs } = Astro.props;
 {
   refs.length > 0 && (
     <nav
-      aria-label="Linked mentions"
+      aria-label="Referenced by"
       data-pagefind-ignore
       class="mt-12 border-t border-gray-200 pt-8 dark:border-white/10"
     >
       <p class="mb-3 flex items-center gap-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500">
-        {/* Small link icon leading the "Linked mentions" label. */}
+        {/* Small link icon leading the "Referenced by" label. */}
         <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
           <path d="M8.5 5.5a3 3 0 0 1 0 4.24l-1.06 1.06a3 3 0 0 1-4.24-4.24l1.5-1.5a1 1 0 1 1 1.42 1.42l-1.5 1.5a1 1 0 1 0 1.4 1.4l1.07-1.05a1 1 0 0 0 0-1.42 1 1 0 0 1 1.41-1.41zm3-1a3 3 0 0 1 4.24 4.24l-1.5 1.5a1 1 0 1 1-1.42-1.42l1.5-1.5a1 1 0 1 0-1.4-1.4l-1.07 1.05a1 1 0 0 0 0 1.42 1 1 0 0 1-1.41 1.41 3 3 0 0 1 0-4.24z" />
         </svg>
-        Linked mentions
+        Referenced by
       </p>
       <ul class="flex flex-col gap-1.5">
         {refs.map((ref) => (

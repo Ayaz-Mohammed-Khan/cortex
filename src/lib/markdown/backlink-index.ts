@@ -1,5 +1,5 @@
 /**
- * Build-time BACKLINK ("Linked mentions") index (Tier 3).
+ * Build-time BACKLINK ("Referenced by") index (Tier 3).
  *
  * Produces a reverse index of the site's `[[wikilinks]]`: for each TARGET note
  * route, the OTHER published notes that link TO it. Rendered at the bottom of

@@ -548,7 +548,7 @@ article[data-pagefind-body] > h1 {
  * A callout's body text is deliberately MUTED, so a link inside one needs to be
  * SATURATED to stand out, not merely light. An earlier attempt reached for
  * violet-200, which is lighter but so desaturated it read as off-white and
- * looked duller than the surrounding text. These match the Linked Mentions
+ * looked duller than the surrounding text. These match the Referenced by
  * accent instead (violet-700 / violet-300), which is the same "this is a link"
  * colour used elsewhere on a note, so the whole page speaks one language.
  */

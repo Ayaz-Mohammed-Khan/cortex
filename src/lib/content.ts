@@ -135,7 +135,7 @@ export interface LoadedSite {
   /** Routes of published Notes (for reference / sitemap parity). */
   publishedNoteRoutes: string[];
   /**
-   * Backlink ("Linked mentions") index: TARGET note route -> the published
+   * Backlink ("Referenced by") index: TARGET note route -> the published
    * notes that link to it via `[[wikilinks]]`. Computed once per build. See
    * `buildBacklinkIndex`.
    */
@@ -287,7 +287,7 @@ async function buildSite(): Promise<LoadedSite> {
     route,
   }));
 
-  // Backlink ("Linked mentions") index, computed once here and shared by every
+  // Backlink ("Referenced by") index, computed once here and shared by every
   // note page render via the memoized `loadSite()`.
   const backlinks = buildBacklinkIndex();
 

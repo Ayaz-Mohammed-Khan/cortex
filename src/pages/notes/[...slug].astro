@@ -69,7 +69,7 @@ type NoteLink = { route: string; displayName: string };
 let prev: NoteLink | undefined;
 let next: NoteLink | undefined;
 
-// Backlinks ("Linked mentions"): other published notes that link TO this one.
+// Backlinks ("Referenced by"): other published notes that link TO this one.
 // Precomputed once per build by `loadSite()`; empty array when none resolve.
 const backlinks = data.kind === 'note' ? (site.backlinks.get(route) ?? []) : [];
 
