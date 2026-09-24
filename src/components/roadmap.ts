@@ -41,6 +41,10 @@ interface NodeInfo {
   tier: 'core' | 'advanced';
   /** Main tracks only: how many of their sub-topics are advanced. */
   advanced?: { advanced: number; total: number };
+  /** Optional material difficulty; shown as a badge beside the tier pill. */
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  /** Prerequisite labels resolved to routes (href null when unresolved). */
+  prerequisites?: { label: string; href: string | null }[];
   concepts: Concept[];
   sections: Section[];
 }
@@ -98,6 +102,41 @@ function openModal(id: string): void {
     tierEl.hidden = text === '';
     tierEl.classList.toggle('rm-tier-adv', advanced);
     tierEl.classList.toggle('rm-tier-core', !advanced);
+  }
+
+  // Difficulty badge (own axis from tier): green/blue/pink dot + label.
+  const diffEl = dlg.querySelector<HTMLElement>('[data-rm-difficulty]');
+  if (diffEl) {
+    const d = info.difficulty;
+    diffEl.hidden = !d;
+    diffEl.className = 'inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold';
+    if (d) {
+      const label = d.charAt(0).toUpperCase() + d.slice(1);
+      diffEl.textContent = label;
+      diffEl.classList.add(`rm-diff-badge`, `rm-diff-${d}`);
+    }
+  }
+
+  // Prerequisites callout: "Learn first: <linked labels>".
+  const prereqWrap = dlg.querySelector<HTMLElement>('[data-rm-prereq-wrap]');
+  const prereqEl = dlg.querySelector<HTMLElement>('[data-rm-prereq]');
+  const prereqs = info.prerequisites ?? [];
+  if (prereqWrap && prereqEl) {
+    prereqWrap.hidden = prereqs.length === 0;
+    prereqEl.innerHTML = '';
+    prereqs.forEach((p, i) => {
+      if (i > 0) prereqEl.append(', ');
+      if (p.href) {
+        const a = document.createElement('a');
+        a.href = p.href;
+        a.textContent = p.label;
+        a.className =
+          'font-medium text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-500 dark:hover:text-violet-200';
+        prereqEl.append(a);
+      } else {
+        prereqEl.append(p.label);
+      }
+    });
   }
 
   const list = dlg.querySelector<HTMLElement>('[data-rm-concepts]');

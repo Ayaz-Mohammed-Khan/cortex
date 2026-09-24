@@ -29,7 +29,7 @@ import { MIN_HEADING_DEPTH } from '@/lib/toc';
 import { matchTopicPrepared, preparePool } from '@/lib/syllabus/match';
 import type { Candidate, PreparedPool } from '@/lib/syllabus/match';
 import { spine, phases, conceptLabel } from '@/data/roadmap';
-import type { Concept, Step, Tier, Topic } from '@/data/roadmap';
+import type { Concept, Difficulty, Step, Tier, Topic } from '@/data/roadmap';
 import type { CategoryNode, TreeNode } from '@/lib/ingest/types';
 
 export const prerender = true;
@@ -238,6 +238,10 @@ interface PlacedNode {
   main: boolean;
   /** 'core' (default) or 'advanced'; drives the deferrable-topic marker. */
   tier: Tier;
+  /** Optional material difficulty; drives the colour stripe + modal badge. */
+  difficulty?: Difficulty;
+  /** Optional prerequisite labels (linked in the modal where resolvable). */
+  prerequisites?: string[];
   concepts: Concept[];
 }
 interface Connector {
@@ -264,6 +268,8 @@ stepLayouts.forEach(({ step, y }, i) => {
     ...targetFor(step, true),
     main: true,
     tier: step.tier ?? 'core',
+    difficulty: step.difficulty,
+    prerequisites: step.prerequisites,
     concepts: step.concepts,
   };
   nodes.push(stepNode);
@@ -292,6 +298,8 @@ stepLayouts.forEach(({ step, y }, i) => {
         ...targetFor(t),
         main: false,
         tier: t.tier ?? 'core',
+        difficulty: t.difficulty,
+        prerequisites: t.prerequisites,
         concepts: t.concepts,
       });
       const spineEdge = SPINE_X + side * (SPINE_W / 2);
@@ -442,6 +450,13 @@ const nodeData = Object.fromEntries(
         href: n.href,
         linkKind: n.linkKind,
         tier: n.tier,
+        /** Material difficulty (beginner/intermediate/advanced), if set. */
+        difficulty: n.difficulty,
+        /** Prerequisite labels resolved to routes where a note/category matches. */
+        prerequisites: (n.prerequisites ?? []).map((label) => {
+          const key = label.trim().toLowerCase();
+          return { label, href: noteRoutes.get(key) ?? categoryRoutes.get(key) ?? null };
+        }),
         /**
          * For a main track: how many of its sub-topics are deferrable, out of how
          * many. A track is never itself "advanced", so this is the useful signal
@@ -705,6 +720,22 @@ const totalSteps = nodes.filter((n) => n.main).length;
             >
               <rect x={x} y={y} width={n.w} height={n.h} rx={n.main ? 12 : 8} class="rm-rect" />
               {/*
+                Difficulty stripe (option 2A): a short colour bar on the box's
+                INNER edge (the side facing the spine), so it never collides with
+                the amber tier notch on the OUTER edge. Green/blue/pink scale,
+                a separate axis from tier. Purely visual; the modal speaks it.
+              */}
+              {n.difficulty && (
+                <rect
+                  x={n.x < SPINE_X ? x + n.w - 4 : x + 1}
+                  y={y + 8}
+                  width="3"
+                  height={n.h - 16}
+                  rx="1.5"
+                  class={`rm-diff rm-diff-${n.difficulty}`}
+                />
+              )}
+              {/*
                 Deferrable-topic marker: a notch on the box's OUTER edge, drawn
                 outside the label's box so it can never collide with a long
                 label. Outer rather than "always left" so both branch columns
@@ -752,12 +783,20 @@ const totalSteps = nodes.filter((n) => n.main).length;
           Topic syllabus
         </p>
         <h2 id="rm-modal-title" data-rm-title class="mt-0.5 break-words text-xl font-bold text-gray-900 dark:text-gray-100"></h2>
-        <p
-          data-rm-tier
-          hidden
-          class="mt-1.5 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
-        >
-        </p>
+        <div class="mt-1.5 flex flex-wrap items-center gap-2">
+          <span
+            data-rm-difficulty
+            hidden
+            class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
+          >
+          </span>
+          <span
+            data-rm-tier
+            hidden
+            class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
+          >
+          </span>
+        </div>
       </div>
       <button
         type="button"
@@ -776,6 +815,22 @@ const totalSteps = nodes.filter((n) => n.main).length;
 
     {/* Scrolls independently so a long syllabus never pushes the CTA off-screen. */}
     <div class="max-h-[58vh] overflow-y-auto">
+      {/* Prerequisites callout (option 3A): populated by the island. */}
+      <div
+        data-rm-prereq-wrap
+        hidden
+        class="mx-4 mt-4 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 sm:mx-5 dark:border-blue-500/25 dark:bg-blue-500/10"
+      >
+        <svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2v6M8 6l4-4 4 4" />
+          <rect x="4" y="10" width="16" height="10" rx="2" />
+        </svg>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+          <span class="font-semibold text-gray-700 dark:text-gray-200">Learn first:</span>{' '}
+          <span data-rm-prereq></span>
+        </p>
+      </div>
+
       <div class="px-4 py-4 sm:px-5">
         <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Concepts to learn:</p>
         {/*
@@ -933,6 +988,45 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
   :global([data-theme='dark']) .rm-adv-mark {
     fill: #fbbf24; /* amber-400 */
+  }
+
+  /* Difficulty stripe: its own green -> blue -> pink axis, distinct from the
+     amber tier marker. Same hues as the note-page badge and the modal. */
+  .rm-diff-beginner {
+    fill: #10b981; /* emerald-500 */
+  }
+  .rm-diff-intermediate {
+    fill: #3b82f6; /* blue-500 */
+  }
+  .rm-diff-advanced {
+    fill: #ec4899; /* pink-500 */
+  }
+
+  /* Modal difficulty badge (island-added, so :global). Own green/blue/pink
+     axis, matching the note-page badge and the node stripe. */
+  :global(.rm-diff-badge.rm-diff-beginner) {
+    background: #d1fae5;
+    color: #047857;
+  }
+  :global([data-theme='dark'] .rm-diff-badge.rm-diff-beginner) {
+    background: rgba(16, 185, 129, 0.15);
+    color: #6ee7b7;
+  }
+  :global(.rm-diff-badge.rm-diff-intermediate) {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+  :global([data-theme='dark'] .rm-diff-badge.rm-diff-intermediate) {
+    background: rgba(59, 130, 246, 0.15);
+    color: #93c5fd;
+  }
+  :global(.rm-diff-badge.rm-diff-advanced) {
+    background: #fce7f3;
+    color: #be185d;
+  }
+  :global([data-theme='dark'] .rm-diff-badge.rm-diff-advanced) {
+    background: rgba(236, 72, 153, 0.15);
+    color: #f9a8d4;
   }
 
   /* Modal tier pill. Added by the island, so these need :global. */

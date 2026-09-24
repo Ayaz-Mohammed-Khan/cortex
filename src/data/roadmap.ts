@@ -50,6 +50,13 @@ export const conceptLabel = (c: Concept): string => (typeof c === 'string' ? c :
  */
 export type Tier = 'core' | 'advanced';
 
+/**
+ * How hard the MATERIAL is, a separate axis from `Tier` (which is about
+ * employability). A topic can be `core` and `advanced` difficulty at once, so
+ * this has its own scale and marker (never reuses the amber tier marker).
+ */
+export type Difficulty = 'beginner' | 'intermediate' | 'advanced';
+
 /** A branch sub-topic with its own concept syllabus. */
 export interface Topic {
   label: string;
@@ -61,6 +68,10 @@ export interface Topic {
   match?: string;
   /** Defaults to 'core'; only `'advanced'` is ever written out. */
   tier?: Tier;
+  /** Optional material difficulty; shown as a colour stripe + modal badge. */
+  difficulty?: Difficulty;
+  /** Optional prerequisites: labels of topics to learn first (linked if known). */
+  prerequisites?: string[];
   concepts: Concept[];
 }
 /** A main-track step: spine node + its concept syllabus + branch sub-topics. */
@@ -69,6 +80,10 @@ export interface Step {
   match?: string;
   /** Defaults to 'core'. A track is advanced only if all of it can be deferred. */
   tier?: Tier;
+  /** Optional material difficulty; shown as a colour stripe + modal badge. */
+  difficulty?: Difficulty;
+  /** Optional prerequisites: labels of topics to learn first (linked if known). */
+  prerequisites?: string[];
   concepts: Concept[];
   left?: Topic[];
   right?: Topic[];
@@ -156,6 +171,7 @@ export const phases: Phase[] = [
 export const spine: Step[] = [
   {
     label: 'Python Foundations',
+    difficulty: 'beginner',
     concepts: [
       'Python output / print function',
       'Data types & variables',
@@ -1077,6 +1093,8 @@ export const spine: Step[] = [
   },
   {
     label: 'Inferential Statistics',
+    difficulty: 'advanced',
+    prerequisites: ['Descriptive Statistics', 'Probability Distributions'],
     concepts: [
       'Sampling distribution',
       'Central Limit Theorem',
@@ -1860,6 +1878,7 @@ export const spine: Step[] = [
   },
   {
     label: 'Dimensionality Reduction',
+    difficulty: 'intermediate',
     concepts: [
       'Curse of dimensionality',
       'Geometric intuition of PCA',
