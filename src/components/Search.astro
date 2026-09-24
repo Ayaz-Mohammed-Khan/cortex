@@ -75,9 +75,15 @@
       type="button"
       data-search-close
       aria-label="Close search"
-      class="shrink-0 rounded-md border border-gray-200 bg-gray-50 px-1.5 py-1 text-[0.7rem] font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+      class="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-[0.7rem] font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
     >
-      Esc
+      {/* X icon is the obvious click target for a mouse or touch; the "Esc"
+          text stays alongside it as the keyboard hint. Matches the roadmap
+          modal's close control. */}
+      <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
+        <path d="M5 5l10 10M15 5L5 15" />
+      </svg>
+      <span>Esc</span>
     </button>
   </div>
 
