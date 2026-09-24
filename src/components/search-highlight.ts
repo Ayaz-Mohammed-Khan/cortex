@@ -43,8 +43,9 @@ let activeIndex = -1;
 /** Remove the `?highlight=` query param from the address bar without a reload. */
 function stripHighlightParam(): void {
   const url = new URL(window.location.href);
-  if (!url.searchParams.has(HIGHLIGHT_PARAM)) return;
+  if (!url.searchParams.has(HIGHLIGHT_PARAM) && !url.searchParams.has(PHRASE_PARAM)) return;
   url.searchParams.delete(HIGHLIGHT_PARAM);
+  url.searchParams.delete(PHRASE_PARAM);
   history.replaceState(history.state, '', url.pathname + url.search + url.hash);
 }
 
@@ -158,9 +159,86 @@ function onKeydown(event: KeyboardEvent): void {
   }
 }
 
+/** Query param set by the search island for exact-phrase results, telling this
+ *  page to mark the whole contiguous phrase instead of each word. */
+const PHRASE_PARAM = 'phrase';
+
+/**
+ * Highlight the whole contiguous PHRASE (e.g. "normal distribution") inside the
+ * note body, rather than each word separately. Pagefind's own highlighter is
+ * word-by-word only, so for an exact-phrase search result we do it ourselves.
+ *
+ * Walks the text nodes of `[data-pagefind-body]` and wraps each case-insensitive
+ * occurrence of `phrase` in a `<mark class="pagefind-highlight">`, matching the
+ * markup Pagefind would emit so the toolbar/navigation logic is unchanged. Only
+ * matches WITHIN a single text node (phrases rarely straddle inline element
+ * boundaries in prose, and this keeps the DOM edit safe and simple).
+ */
+function highlightPhrase(phrase: string): number {
+  const body = document.querySelector<HTMLElement>('[data-pagefind-body]');
+  if (!body) return 0;
+  const needle = phrase.toLowerCase();
+  if (!needle) return 0;
+
+  // Collect candidate text nodes first (mutating during walk invalidates it).
+  const walker = document.createTreeWalker(body, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const p = node.parentElement;
+      // Skip already-highlighted marks, scripts/styles, and empty text.
+      if (!p || p.closest(`mark.${MARK_CLASS}, script, style`)) return NodeFilter.FILTER_REJECT;
+      return node.nodeValue && node.nodeValue.toLowerCase().includes(needle)
+        ? NodeFilter.FILTER_ACCEPT
+        : NodeFilter.FILTER_REJECT;
+    },
+  });
+  const targets: Text[] = [];
+  for (let n = walker.nextNode(); n; n = walker.nextNode()) targets.push(n as Text);
+
+  let count = 0;
+  for (const textNode of targets) {
+    const text = textNode.nodeValue ?? '';
+    const lower = text.toLowerCase();
+    const frag = document.createDocumentFragment();
+    let pos = 0;
+    let idx = lower.indexOf(needle, pos);
+    while (idx !== -1) {
+      if (idx > pos) frag.appendChild(document.createTextNode(text.slice(pos, idx)));
+      const mark = document.createElement('mark');
+      mark.className = MARK_CLASS;
+      mark.textContent = text.slice(idx, idx + needle.length);
+      frag.appendChild(mark);
+      count += 1;
+      pos = idx + needle.length;
+      idx = lower.indexOf(needle, pos);
+    }
+    if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+    textNode.parentNode?.replaceChild(frag, textNode);
+  }
+  return count;
+}
+
 async function applyHighlight(): Promise<void> {
+  const params = new URLSearchParams(window.location.search);
   // Nothing to do if the page wasn't opened from a search result.
-  if (!new URLSearchParams(window.location.search).has(HIGHLIGHT_PARAM)) return;
+  const query = params.get(HIGHLIGHT_PARAM);
+  if (query === null) return;
+
+  // Exact-phrase result: the search island passes the full phrase in `?phrase=`
+  // (Pagefind splits `?highlight=` into one param PER WORD, so we cannot rebuild
+  // the phrase from it). Mark the whole contiguous phrase ourselves.
+  const phrase = (params.get(PHRASE_PARAM) ?? '').trim();
+  if (phrase.includes(' ')) {
+    const n = highlightPhrase(phrase);
+    requestAnimationFrame(() => {
+      marks = Array.from(document.querySelectorAll<HTMLElement>(`mark.${MARK_CLASS}`));
+      if (marks.length === 0) return;
+      showToolbar();
+      goToMatch(0);
+    });
+    if (n > 0) return; // phrase found & marked; done
+    // No in-node phrase occurrence found (rare): fall through to word highlighting.
+  }
+
   try {
     const dynamicImport = new Function('u', 'return import(u)') as (
       u: string,
