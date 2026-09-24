@@ -8,6 +8,9 @@ tags:
   - data-science
 aliases:
   - P-values and T-tests
+difficulty: advanced
+prerequisites:
+  - Hypothesis Testing
 created: 2026-07-09
 ---
 

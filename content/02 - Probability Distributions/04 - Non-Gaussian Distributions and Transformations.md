@@ -9,6 +9,9 @@ aliases:
   - Non-Gaussian Distributions and Transformations
   - Non-Gaussian Distributions
   - Mathematical Transformations
+difficulty: intermediate
+prerequisites:
+  - Skewness, Kurtosis and Normality Checks
 created: 2026-07-09
 ---
 

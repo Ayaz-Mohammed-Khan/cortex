@@ -8,6 +8,7 @@ tags:
 aliases:
   - Foundations and Central Tendency
   - Central Tendency and Spread
+difficulty: beginner
 created: 2026-06-30
 ---
 

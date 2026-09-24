@@ -6,6 +6,9 @@ tags:
   - data-science
 aliases:
   - Confidence Intervals
+difficulty: intermediate
+prerequisites:
+  - Central Limit Theorem
 created: 2026-07-09
 ---
 

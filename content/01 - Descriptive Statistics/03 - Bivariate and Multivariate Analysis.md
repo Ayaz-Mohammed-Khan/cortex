@@ -10,6 +10,9 @@ aliases:
   - Bivariate and Multivariate Analysis
   - Bivariate Analysis
   - Covariance and Correlation
+difficulty: intermediate
+prerequisites:
+  - Foundations and Central Tendency
 created: 2026-06-30
 ---
 

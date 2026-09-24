@@ -11,6 +11,9 @@ aliases:
   - Quantiles and Box Plots
   - Percentiles and Box Plots
   - Univariate Analysis
+difficulty: beginner
+prerequisites:
+  - Foundations and Central Tendency
 created: 2026-06-30
 ---
 

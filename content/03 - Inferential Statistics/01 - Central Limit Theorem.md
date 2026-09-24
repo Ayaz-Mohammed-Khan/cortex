@@ -9,6 +9,9 @@ aliases:
   - Central Limit Theorem
   - CLT
   - Sampling Distribution
+difficulty: intermediate
+prerequisites:
+  - Bernoulli and Binomial Distributions
 created: 2026-07-09
 ---
 

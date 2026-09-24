@@ -7,6 +7,9 @@ tags:
 aliases:
   - Probability Distributions Notes
   - Probability Distributions
+difficulty: intermediate
+prerequisites:
+  - Bivariate and Multivariate Analysis
 created: 2026-07-08
 ---
 

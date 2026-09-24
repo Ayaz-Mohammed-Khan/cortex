@@ -7,6 +7,9 @@ tags:
   - data-science
 aliases:
   - Bernoulli and Binomial Distributions
+difficulty: beginner
+prerequisites:
+  - Probability Distributions
 created: 2026-07-09
 ---
 

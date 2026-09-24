@@ -6,6 +6,9 @@ tags:
   - data-science
 aliases:
   - Hypothesis Testing
+difficulty: advanced
+prerequisites:
+  - Confidence Intervals
 created: 2026-07-09
 ---
 

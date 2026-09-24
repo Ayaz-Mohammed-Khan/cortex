@@ -9,6 +9,9 @@ aliases:
   - The Normal Distribution
   - Normal Distribution
   - Gaussian Distribution
+difficulty: beginner
+prerequisites:
+  - Probability Distributions
 created: 2026-07-09
 ---
 

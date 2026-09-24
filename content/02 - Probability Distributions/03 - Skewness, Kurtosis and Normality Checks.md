@@ -11,6 +11,9 @@ aliases:
   - Skewness and Kurtosis
   - Normality Checks
   - QQ Plot
+difficulty: intermediate
+prerequisites:
+  - The Normal Distribution
 created: 2026-07-09
 ---
 
