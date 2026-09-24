@@ -653,6 +653,36 @@ const totalSteps = nodes.filter((n) => n.main).length;
         Coming soon
       </span>
       {/*
+        Difficulty legend: the coloured nucleus dot inside each cell. It only
+        exists in the DETAILED view (the simple view has no per-node nucleus),
+        so these three are `data-rm-detailed-only` and the island hides them in
+        the simple view. Hues match the nucleus + note-page badge + modal.
+      */}
+      <span
+        data-rm-detailed-only
+        hidden
+        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
+      >
+        <span class="h-2.5 w-2.5 rounded-full" style="background:#10b981" aria-hidden="true"></span>
+        Beginner
+      </span>
+      <span
+        data-rm-detailed-only
+        hidden
+        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
+      >
+        <span class="h-2.5 w-2.5 rounded-full" style="background:#3b82f6" aria-hidden="true"></span>
+        Intermediate
+      </span>
+      <span
+        data-rm-detailed-only
+        hidden
+        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
+      >
+        <span class="h-2.5 w-2.5 rounded-full" style="background:#ec4899" aria-hidden="true"></span>
+        Advanced
+      </span>
+      {/*
         Tier legend. The amber notch only appears in the DETAILED view (the
         simple view lists whole tracks, so per-sub-topic tiering has nowhere to
         show), so these two items are tagged `data-rm-detailed-only` and the
