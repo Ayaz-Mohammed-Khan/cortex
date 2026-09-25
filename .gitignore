@@ -20,6 +20,10 @@ pnpm-debug.log*
 # macOS-specific files
 .DS_Store
 
+# Python bytecode cache (diagram generator in ASSETS/)
+__pycache__/
+*.pyc
+
 # IDEs setting folder
 .idea/
 .kiro/
