@@ -808,6 +808,12 @@ const totalSteps = nodes.filter((n) => n.main).length;
         Array.from({ length: TRUNK_SPARKS }).map((_, k) => (
           <circle
             class={`rm-signal rm-signal-gated${k % 2 === 0 ? '' : ' rm-signal-trail'}`}
+            // Rest ON the spine origin, not the SVG's (0,0) corner. animateMotion
+            // overrides this while a spark is mid-flight, but before its `begin`
+            // delay (and any resting frame) the circle paints at its own cx/cy;
+            // defaulting to (0,0) left a white speck in the top-left corner.
+            cx={SPINE_X}
+            cy={trunkTop}
             r={k % 2 === 0 ? 3 : 2.4}
             data-rm-track="0"
           >
@@ -854,6 +860,10 @@ const totalSteps = nodes.filter((n) => n.main).length;
             {c.id && c.bouton?.live && (
               <circle
                 class="rm-signal rm-signal-branch rm-signal-gated"
+                // Rest on the bouton (where the spark ends anyway), never the
+                // SVG's (0,0) corner — see the trunk spark note above.
+                cx={c.bouton.x}
+                cy={c.bouton.y}
                 r="2"
                 data-rm-track={c.track}
               >
