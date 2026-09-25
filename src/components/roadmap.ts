@@ -279,6 +279,12 @@ function setView(view: View, persist = true): void {
     if (initialHint === null) initialHint = hint.textContent;
     hint.textContent = view === 'simple' && initialHint ? initialHint : HINTS[view];
   }
+  // Switching to the detailed view (re)arms the scroll reveal so on-screen
+  // tracks animate in. `persist` is only false during initial restore, where
+  // `bind()` arms right after, so skip the double-arm then.
+  if (persist && view === 'detailed') {
+    requestAnimationFrame(() => armReveal());
+  }
   if (!persist) return;
   try {
     localStorage.setItem(VIEW_KEY, view);
@@ -348,11 +354,130 @@ function onDialogClick(event: MouseEvent): void {
   if (dlg && event.target === dlg) dlg.close();
 }
 
+/* ---------------------------------------------------------------------------
+ * Scroll reveal for the detailed graph.
+ *
+ * As each track scrolls into view its nodes/edges (class `.rm-reveal`) get
+ * `.rm-shown`, which the CSS fades + rises in - main cell first, sub-topics
+ * cascading by their `--ri` index, so it reads as the axon signal branching
+ * into the dendrites. Arming adds `.rm-anim-ready` to the SVG, which is what
+ * flips the elements to their hidden start state; without it (JS off, or before
+ * the detailed view is shown) everything stays visible, so the graph is never
+ * stuck blank. Idempotent and re-armed on view switch + page-load.
+ * --------------------------------------------------------------------------- */
+let revealCleanup: (() => void) | null = null;
+
+function prefersReducedMotion(): boolean {
+  return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+}
+
+function armReveal(): void {
+  // Tear down any previous wiring first (view switches re-arm).
+  revealCleanup?.();
+  revealCleanup = null;
+
+  const pane = document.querySelector<HTMLElement>('[data-rm-pane="detailed"]');
+  const svg = pane?.querySelector<SVGSVGElement>('svg');
+  if (!pane || !svg) return;
+
+  // Reveal targets: the fade+rise cells/edges/boutons AND the gated signal
+  // sparks (which fade in with their track so they never fire before it shows).
+  const revealEls = Array.from(svg.querySelectorAll<SVGElement>('.rm-reveal, .rm-signal-gated'));
+  if (revealEls.length === 0) return;
+
+  // Reduced motion (or a hidden pane): show everything, do not animate.
+  if (prefersReducedMotion()) {
+    for (const el of revealEls) el.classList.add('rm-shown');
+    return;
+  }
+
+  // Group reveal elements by their track index.
+  const byTrack = new Map<string, SVGElement[]>();
+  for (const el of revealEls) {
+    const t = el.getAttribute('data-rm-track') ?? '0';
+    (byTrack.get(t) ?? byTrack.set(t, []).get(t)!).push(el);
+  }
+
+  // Arm: switch the SVG into its hidden start state.
+  svg.classList.add('rm-anim-ready');
+
+  const REVEAL_MS = 500; // matches the CSS fade+rise duration
+  const STAGGER_MS = 90; // matches transition-delay per --ri step
+  const signalTimers: number[] = [];
+
+  const shownTracks = new Set<string>();
+  const showTrack = (t: string): void => {
+    if (shownTracks.has(t)) return;
+    shownTracks.add(t);
+    const els = byTrack.get(t) ?? [];
+    // Reveal the STRUCTURE now: cells, dendrites, boutons (fade + rise).
+    const signals: SVGElement[] = [];
+    let maxRi = 0;
+    for (const el of els) {
+      if (el.classList.contains('rm-signal-gated')) {
+        signals.push(el);
+        continue;
+      }
+      el.classList.add('rm-shown');
+      const ri = Number(el.style.getPropertyValue('--ri')) || 0;
+      if (ri > maxRi) maxRi = ri;
+    }
+    // Reveal this track's SIGNALS only AFTER its structure has fully arrived
+    // (base fade + the last sub-topic's stagger + a small buffer), so a spark
+    // never appears before the trunk and cells it rides on.
+    const delay = REVEAL_MS + maxRi * STAGGER_MS + 250;
+    const timer = window.setTimeout(() => {
+      for (const s of signals) s.classList.add('rm-shown');
+    }, delay);
+    signalTimers.push(timer);
+  };
+
+  // A track reveals when its MAIN cell crosses ~82% of the viewport height, so
+  // the reveal lands just as the reader (and the travelling signal) arrive.
+  const check = (): void => {
+    if (pane.hidden) return;
+    const vh = window.innerHeight;
+    for (const [t, els] of byTrack) {
+      if (shownTracks.has(t)) continue;
+      const main = els.find((e) => e.classList.contains('rm-node-main')) ?? els[0];
+      if (!main) continue;
+      const r = main.getBoundingClientRect();
+      if (r.top < vh * 0.82 && r.bottom > 0) showTrack(t);
+    }
+    if (shownTracks.size === byTrack.size) stopListening();
+  };
+
+  const onScroll = (): void => check();
+  // Remove scroll listeners once every track is revealed (the pending signal
+  // timers keep running and clear themselves after firing).
+  function stopListening(): void {
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+  }
+  // Full teardown (used when re-arming): stop listening AND cancel any pending
+  // signal timers so a stale one can't fire on the rebuilt graph.
+  function teardown(): void {
+    stopListening();
+    for (const timer of signalTimers) clearTimeout(timer);
+    revealCleanup = null;
+  }
+  revealCleanup = teardown;
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  // Reveal whatever is already on screen (next frame so the transition runs).
+  requestAnimationFrame(() => requestAnimationFrame(check));
+}
+
 function bind(): void {
   loadData();
   restoreView();
   const dlg = dialog();
   dlg?.addEventListener('click', onDialogClick);
+  // Arm the scroll reveal once the pane state is settled. If the detailed pane
+  // is hidden now, arming still tags it; when the user switches to detailed the
+  // elements are in their start state and the first `check()` reveals what fits.
+  armReveal();
 }
 
 document.addEventListener('click', onClick);
