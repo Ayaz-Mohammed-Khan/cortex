@@ -808,22 +808,19 @@ const totalSteps = nodes.filter((n) => n.main).length;
         Array.from({ length: TRUNK_SPARKS }).map((_, k) => (
           <circle
             class={`rm-signal rm-signal-gated${k % 2 === 0 ? '' : ' rm-signal-trail'}`}
-            // Rest ON the spine origin, not the SVG's (0,0) corner. animateMotion
-            // overrides this while a spark is mid-flight, but before its `begin`
-            // delay (and any resting frame) the circle paints at its own cx/cy;
-            // defaulting to (0,0) left a white speck in the top-left corner.
-            cx={SPINE_X}
-            cy={trunkTop}
+            // NO cx/cy: animateMotion supplies ABSOLUTE coordinates from the
+            // trunk path. Adding a cx/cy here would OFFSET the path (the browser
+            // adds them), which is what pushed the spark far to the right. The
+            // resting-frame speck is hidden by the gating opacity instead.
             r={k % 2 === 0 ? 3 : 2.4}
             data-rm-track="0"
           >
             <animateMotion
               dur={`${TRUNK_DUR}s`}
-              begin={`${k * TRUNK_INTERVAL}s`}
+              begin={`-${k * TRUNK_INTERVAL}s`}
               repeatCount="indefinite"
-            >
-              <mpath href="#rm-axon" />
-            </animateMotion>
+              path={trunkPath}
+            />
           </circle>
         ))
       }
@@ -860,23 +857,27 @@ const totalSteps = nodes.filter((n) => n.main).length;
             {c.id && c.bouton?.live && (
               <circle
                 class="rm-signal rm-signal-branch rm-signal-gated"
-                // Rest on the bouton (where the spark ends anyway), never the
-                // SVG's (0,0) corner — see the trunk spark note above.
-                cx={c.bouton.x}
-                cy={c.bouton.y}
+                // NO cx/cy: the inline `path` gives ABSOLUTE coordinates, so a
+                // cx/cy would offset the whole path (pushing the spark off the
+                // dendrite). The resting-frame speck is hidden by the gating.
                 r="2"
                 data-rm-track={c.track}
               >
+                {/*
+                  Path `d` DIRECTLY on animateMotion (not <mpath>): keyPoints are
+                  unreliable via <mpath>. The spark travels the branch
+                  (trunk -> bouton) in the first half, then rests at the bouton,
+                  exactly along the visible dendrite line.
+                */}
                 <animateMotion
                   dur={`${TRUNK_INTERVAL}s`}
                   begin={`${c.beginAt ?? 0}s`}
                   repeatCount="indefinite"
+                  path={c.d}
                   keyPoints="0;1;1"
                   keyTimes="0;0.5;1"
                   calcMode="linear"
-                >
-                  <mpath href={`#${c.id}`} />
-                </animateMotion>
+                />
               </circle>
             )}
           </>
