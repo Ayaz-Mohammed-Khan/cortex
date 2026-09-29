@@ -17,7 +17,7 @@ import os
 import re
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.patches import Patch, FancyBboxPatch, Circle, Ellipse
+from matplotlib.patches import Patch, FancyBboxPatch, Circle, Ellipse, Polygon
 from scipy import stats
 
 # ----------------------------------------------------------------------------- setup
@@ -61,6 +61,7 @@ _PROBABILITY = _track("Probability Distributions", "07")
 _INFERENTIAL = _track("Inferential Statistics", "08")
 _MATHS_ML = _track("Maths & ML Foundations", "09")
 _PYTHON = _track("Python Foundations", "01")
+_OOP = _track("OOP & Advanced Python", "02")
 
 # Which track ASSETS/ folder each image belongs in. The statistics images are
 # split across the three Cortex statistics tracks to match where each note lives.
@@ -118,6 +119,13 @@ IMAGE_FOLDERS = {
     "function_anatomy.png": _PYTHON,
     "function_scope.png": _PYTHON,
     "map_filter_reduce.png": _PYTHON,
+    # OOP & Advanced Python
+    "class_diagram.png": _OOP,
+    "class_blueprint_objects.png": _OOP,
+    "self_current_object.png": _OOP,
+    "reference_variables.png": _OOP,
+    "encapsulation_capsule.png": _OOP,
+    "inheritance_types.png": _OOP,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -1965,6 +1973,371 @@ def map_filter_reduce():
     save(fig, "map_filter_reduce.png")
 
 
+# ============================================================ OOP: class diagram
+def _uml_class(ax, cx, top, w, name, attributes, methods, header=BLUE):
+    """Draw a UML-style class box: name band, attributes, methods.
+
+    Returns (bottom_y, top_y) so relationship connectors can attach.
+    """
+    line_h = 0.62
+    pad = 0.28
+    n_attr, n_meth = len(attributes), len(methods)
+    name_h = 0.85
+    attr_h = pad + n_attr * line_h
+    meth_h = pad + n_meth * line_h
+    total_h = name_h + attr_h + meth_h
+    left = cx - w / 2
+    bottom = top - total_h
+
+    # section rectangles (plain squares, UML style)
+    ax.add_patch(FancyBboxPatch((left, top - name_h), w, name_h,
+                                boxstyle="square,pad=0", facecolor=header,
+                                edgecolor="black", lw=1.4))
+    ax.add_patch(FancyBboxPatch((left, top - name_h - attr_h), w, attr_h,
+                                boxstyle="square,pad=0", facecolor="white",
+                                edgecolor="black", lw=1.4))
+    ax.add_patch(FancyBboxPatch((left, bottom), w, meth_h,
+                                boxstyle="square,pad=0", facecolor="white",
+                                edgecolor="black", lw=1.4))
+
+    ax.text(cx, top - name_h / 2, name, ha="center", va="center",
+            fontsize=12, fontweight="bold", color="white")
+    for i, a in enumerate(attributes):
+        y = top - name_h - pad / 2 - (i + 0.5) * line_h + pad / 2
+        ax.text(left + 0.25, y, a, ha="left", va="center", fontsize=10.5,
+                family="monospace")
+    for i, m in enumerate(methods):
+        y = bottom + meth_h - pad / 2 - (i + 0.5) * line_h + pad / 2
+        ax.text(left + 0.25, y, m, ha="left", va="center", fontsize=10.5,
+                family="monospace")
+    return bottom, top
+
+
+def class_diagram():
+    """A UML class box (name / attributes / methods, with - private and + public),
+    plus the two relationship markers: a diamond for aggregation (has-a) and a
+    hollow triangle for inheritance (is-a, arrowhead pointing to the parent)."""
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5.6),
+                             gridspec_kw={"width_ratios": [1, 1.15]})
+
+    # ---- left: anatomy of a single class box
+    ax = axes[0]
+    ax.set_xlim(0, 10); ax.set_ylim(0, 10); ax.axis("off")
+    ax.set_title("Anatomy of a class box", fontsize=12, fontweight="bold")
+    _uml_class(ax, 5.0, 8.6, 4.6, "Atm",
+               ["- pin", "- balance"],
+               ["+ menu()", "+ withdraw()"])
+    # side labels
+    ax.annotate("class name", xy=(7.3, 8.15), xytext=(8.4, 8.9), fontsize=9,
+                color=GREY, ha="center",
+                arrowprops=dict(arrowstyle="->", color=GREY))
+    ax.annotate("attributes\n(data)", xy=(7.3, 6.7), xytext=(8.7, 6.6), fontsize=9,
+                color=GREY, ha="center",
+                arrowprops=dict(arrowstyle="->", color=GREY))
+    ax.annotate("methods\n(behavior)", xy=(7.3, 4.6), xytext=(8.7, 4.3), fontsize=9,
+                color=GREY, ha="center",
+                arrowprops=dict(arrowstyle="->", color=GREY))
+    ax.text(5.0, 1.6, "-  private (hidden outside)\n+  public (usable outside)",
+            ha="center", va="center", fontsize=10, family="monospace",
+            bbox=dict(boxstyle="round,pad=0.4", facecolor="#f2f2f2",
+                      edgecolor=GREY))
+
+    # ---- right: the two relationships
+    ax = axes[1]
+    ax.set_xlim(0, 12); ax.set_ylim(0, 10); ax.axis("off")
+    ax.set_title("Relationships between classes", fontsize=12, fontweight="bold")
+
+    def small_box(cx, cy, label, color):
+        w, h = 2.5, 0.95
+        ax.add_patch(FancyBboxPatch((cx - w / 2, cy - h / 2), w, h,
+                                    boxstyle="square,pad=0", facecolor=color,
+                                    edgecolor="black", lw=1.3))
+        ax.text(cx, cy, label, ha="center", va="center", fontsize=11,
+                fontweight="bold", color="white")
+
+    # aggregation (left column): Customer <>--- Address
+    small_box(2.6, 8.4, "Customer", PURPLE)
+    small_box(2.6, 4.2, "Address", BLUE)
+    ax.plot([2.6, 2.6], [5.0, 7.35], color="black", lw=1.5, zorder=1)
+    diamond = Polygon([(2.6, 7.9), (2.2, 7.5), (2.6, 7.1), (3.0, 7.5)],
+                      closed=True, facecolor="white", edgecolor="black", lw=1.5,
+                      zorder=2)
+    ax.add_patch(diamond)
+    ax.text(2.6, 9.4, "Aggregation", ha="center", fontsize=10.5, fontweight="bold")
+    ax.text(4.35, 6.2, "has-a\n(diamond on\nthe owner)", ha="left", fontsize=8.5,
+            color=GREY)
+
+    # inheritance (right column): SmartPhone --|> Phone
+    small_box(8.0, 8.4, "Phone", GREEN)
+    small_box(8.0, 4.2, "SmartPhone", ORANGE)
+    ax.plot([8.0, 8.0], [4.7, 7.5], color="black", lw=1.5, zorder=1)
+    triangle = Polygon([(8.0, 7.9), (7.62, 7.5), (8.38, 7.5)],
+                       closed=True, facecolor="white", edgecolor="black", lw=1.5,
+                       zorder=2)
+    ax.add_patch(triangle)
+    ax.text(8.0, 9.4, "Inheritance", ha="center", fontsize=10.5, fontweight="bold")
+    ax.text(9.05, 6.2, "is-a\n(arrowhead\npoints to\nthe parent)", ha="left",
+            fontsize=8.5, color=GREY)
+
+    fig.suptitle("Class diagram: the box notation and its relationship markers",
+                 y=1.0, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "class_diagram.png")
+
+
+def class_blueprint_objects():
+    """One class (blueprint) stamps out many objects, each with its OWN instance
+    data but the SAME methods. Shows why a class produces many distinct objects."""
+    fig, ax = plt.subplots(figsize=(11, 5.2))
+    ax.set_xlim(0, 13); ax.set_ylim(0, 9); ax.axis("off")
+
+    # blueprint on the left
+    ax.add_patch(FancyBboxPatch((0.5, 2.6), 3.4, 3.8,
+                                boxstyle="round,pad=0.05,rounding_size=0.12",
+                                facecolor="#ede9fe", edgecolor=PURPLE, lw=2))
+    ax.text(2.2, 5.85, "Person", ha="center", fontsize=13, fontweight="bold",
+            color=PURPLE)
+    ax.text(2.2, 5.35, "class (blueprint)", ha="center", fontsize=8.5, color=GREY,
+            style="italic")
+    ax.text(2.2, 4.5, "attributes:\nname, country", ha="center", fontsize=9.5,
+            family="monospace")
+    ax.text(2.2, 3.25, "method:\ngreet()", ha="center", fontsize=9.5,
+            family="monospace")
+
+    # three objects on the right
+    specs = [
+        (7.2, "p1", "Nitish", "India", BLUE),
+        (4.6, "p2", "Steve", "Australia", GREEN),
+        (2.0, "p3", "Ankita", "Nepal", ORANGE),
+    ]
+    for cy, name, person, country, color in specs:
+        ax.add_patch(FancyBboxPatch((8.6, cy - 0.95), 3.9, 1.9,
+                                    boxstyle="round,pad=0.04,rounding_size=0.10",
+                                    facecolor="white", edgecolor=color, lw=1.8))
+        ax.text(8.85, cy + 0.55, name, ha="left", fontsize=11, fontweight="bold",
+                color=color)
+        ax.text(8.85, cy + 0.05, f"name = '{person}'", ha="left", fontsize=9.5,
+                family="monospace")
+        ax.text(8.85, cy - 0.45, f"country = '{country}'", ha="left", fontsize=9.5,
+                family="monospace")
+        _pyarrow(ax, 4.0, 4.5, 8.5, cy, color=color, lw=1.8, rad=0.0)
+    ax.text(6.2, 6.7, "each call to Person(...)\nstamps out a new object",
+            ha="center", fontsize=9, color=GREY, style="italic")
+    ax.text(10.55, 8.4, "objects (instances)", ha="center", fontsize=8.5,
+            color=GREY, style="italic")
+
+    fig.suptitle("One class, many objects: same methods, each its own instance data",
+                 y=0.99, fontsize=13, fontweight="bold")
+    save(fig, "class_blueprint_objects.png")
+
+
+def self_current_object():
+    """`self` is not a separate thing: it is the SAME object you created, seen
+    from inside a method. Two names, one address in memory."""
+    fig, ax = plt.subplots(figsize=(10, 4.6))
+    ax.set_xlim(0, 12); ax.set_ylim(0, 8); ax.axis("off")
+
+    # the object in memory (center)
+    ax.add_patch(FancyBboxPatch((4.6, 2.3), 3.0, 3.3,
+                                boxstyle="round,pad=0.05,rounding_size=0.12",
+                                facecolor="white", edgecolor=BLUE, lw=2))
+    ax.text(6.1, 5.05, "Atm object", ha="center", fontsize=11, fontweight="bold",
+            color=BLUE)
+    ax.text(6.1, 4.4, "pin", ha="center", fontsize=10, family="monospace")
+    ax.text(6.1, 3.8, "balance", ha="center", fontsize=10, family="monospace")
+    ax.text(6.1, 3.05, "id: 0x7f3a...", ha="center", fontsize=8.5, color=GREY)
+    ax.text(6.1, 1.9, "one object in memory", ha="center", fontsize=8.5,
+            color=GREY, style="italic")
+
+    # obj name (outside)
+    _pybox(ax, 1.7, 4.2, 2.0, 0.9, "obj", PURPLE, fs=12)
+    ax.text(1.7, 3.35, "name outside the class", ha="center", fontsize=8.5,
+            color=GREY)
+    _pyarrow(ax, 2.75, 4.2, 4.5, 4.0, color=PURPLE, lw=2.2)
+
+    # self name (inside a method)
+    _pybox(ax, 10.3, 4.2, 2.0, 0.9, "self", GREEN, fs=12)
+    ax.text(10.3, 3.35, "name inside a method", ha="center", fontsize=8.5,
+            color=GREY)
+    _pyarrow(ax, 9.25, 4.2, 7.7, 4.0, color=GREEN, lw=2.2)
+
+    ax.text(6.1, 6.6, "id(obj) == id(self)", ha="center", fontsize=11,
+            family="monospace", fontweight="bold",
+            bbox=dict(boxstyle="round,pad=0.35", facecolor="#f2f2f2",
+                      edgecolor=GREY))
+
+    fig.suptitle("self is the current object: two names for the same thing in memory",
+                 y=1.0, fontsize=12.5, fontweight="bold")
+    save(fig, "self_current_object.png")
+
+
+def reference_variables():
+    """A reference variable holds the object's ADDRESS, not the object. `q = p`
+    copies the address, so both names point at one object; editing via one is
+    seen via the other."""
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.4))
+
+    for ax in axes:
+        ax.set_xlim(0, 10); ax.set_ylim(0, 8); ax.axis("off")
+
+    # left: q = p makes two names for one object
+    ax = axes[0]
+    ax.set_title("q = p  →  two names, one object", fontsize=11, fontweight="bold")
+    ax.add_patch(FancyBboxPatch((5.2, 2.6), 4.0, 2.8,
+                                boxstyle="round,pad=0.05,rounding_size=0.12",
+                                facecolor="white", edgecolor=BLUE, lw=2))
+    ax.text(7.2, 4.8, "Person object", ha="center", fontsize=10.5,
+            fontweight="bold", color=BLUE)
+    ax.text(7.2, 4.15, "name = 'Nitish'", ha="center", fontsize=9.5,
+            family="monospace")
+    ax.text(7.2, 3.2, "id: 0x91b2...", ha="center", fontsize=8.5, color=GREY)
+    _pybox(ax, 1.6, 5.4, 1.7, 0.9, "p", PURPLE, fs=12)
+    _pybox(ax, 1.6, 2.6, 1.7, 0.9, "q", ORANGE, fs=12)
+    _pyarrow(ax, 2.5, 5.4, 5.1, 4.4, color=PURPLE, lw=2)
+    _pyarrow(ax, 2.5, 2.6, 5.1, 3.6, color=ORANGE, lw=2)
+
+    # right: editing via q is seen via p
+    ax = axes[1]
+    ax.set_title("q.name = 'Ankit'  →  p sees it too", fontsize=11,
+                 fontweight="bold")
+    ax.add_patch(FancyBboxPatch((5.2, 2.6), 4.0, 2.8,
+                                boxstyle="round,pad=0.05,rounding_size=0.12",
+                                facecolor="white", edgecolor=BLUE, lw=2))
+    ax.text(7.2, 4.8, "Person object", ha="center", fontsize=10.5,
+            fontweight="bold", color=BLUE)
+    ax.text(7.2, 4.15, "name = 'Ankit'", ha="center", fontsize=9.5,
+            family="monospace", color=RED)
+    ax.text(7.2, 3.2, "id: 0x91b2...", ha="center", fontsize=8.5, color=GREY)
+    _pybox(ax, 1.6, 5.4, 1.7, 0.9, "p", PURPLE, fs=12)
+    _pybox(ax, 1.6, 2.6, 1.7, 0.9, "q", ORANGE, fs=12)
+    _pyarrow(ax, 2.5, 5.4, 5.1, 4.4, color=PURPLE, lw=2)
+    _pyarrow(ax, 2.5, 2.6, 5.1, 3.6, color=ORANGE, lw=2)
+    ax.annotate("edit through q", xy=(6.4, 4.15), xytext=(3.0, 6.9),
+                fontsize=8.5, color=RED,
+                arrowprops=dict(arrowstyle="->", color=RED))
+
+    fig.suptitle("A reference variable holds the object's address, not a copy",
+                 y=1.0, fontsize=12.5, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "reference_variables.png")
+
+
+def encapsulation_capsule():
+    """Private data sealed in a capsule; the outside world can only reach it
+    through the getter and setter, and the setter validates before letting a
+    value in. A bad write from outside bounces off."""
+    fig, ax = plt.subplots(figsize=(11, 5.4))
+    ax.set_xlim(0, 13); ax.set_ylim(0, 9); ax.axis("off")
+
+    # the capsule (the class)
+    ax.add_patch(FancyBboxPatch((3.3, 1.2), 5.4, 6.4,
+                                boxstyle="round,pad=0.1,rounding_size=0.3",
+                                facecolor="#eef2ff", edgecolor=PURPLE, lw=2.2))
+    ax.text(6.0, 7.0, "Atm class", ha="center", fontsize=12, fontweight="bold",
+            color=PURPLE)
+
+    # private core
+    ax.add_patch(FancyBboxPatch((4.3, 3.9), 3.4, 1.9,
+                                boxstyle="round,pad=0.05,rounding_size=0.12",
+                                facecolor=RED, edgecolor="black", lw=1.5,
+                                alpha=0.85))
+    ax.text(6.0, 5.3, "private data", ha="center", fontsize=10, color="white",
+            fontweight="bold")
+    ax.text(6.0, 4.75, "__pin", ha="center", fontsize=9.5, color="white",
+            family="monospace")
+    ax.text(6.0, 4.25, "__balance", ha="center", fontsize=9.5, color="white",
+            family="monospace")
+
+    # getter and setter gates
+    ax.add_patch(FancyBboxPatch((3.9, 2.0), 3.5, 0.85,
+                                boxstyle="round,pad=0.03,rounding_size=0.08",
+                                facecolor=GREEN, edgecolor="black", lw=1.3))
+    ax.text(5.65, 2.42, "get_balance()  /  set_balance()", ha="center",
+            fontsize=9, color="white", family="monospace")
+
+    # allowed path: through getter/setter
+    _pyarrow(ax, 0.9, 2.42, 3.85, 2.42, color=GREEN, lw=2.4)
+    ax.text(0.9, 3.0, "allowed:\nvia getter/\nsetter", ha="center", fontsize=8.5,
+            color=GREEN)
+    _pyarrow(ax, 5.65, 2.85, 5.9, 3.85, color=GREEN, lw=2, style="-|>")
+
+    # blocked path: direct write bounces off the capsule wall
+    _pyarrow(ax, 12.2, 5.4, 9.35, 5.4, color=RED, lw=2.4)
+    ax.text(10.75, 6.35, "blocked:", ha="center", fontsize=9, color=RED,
+            fontweight="bold")
+    ax.text(10.75, 5.95, "obj.__balance = 'x'", ha="center", fontsize=8.5,
+            color=RED, family="monospace")
+    # a drawn "no entry" mark (circle + slash), avoids a missing-glyph tofu box
+    ax.add_patch(Circle((8.95, 5.4), 0.32, facecolor="white", edgecolor=RED,
+                        lw=2.6, zorder=5))
+    ax.plot([8.72, 9.18], [5.63, 5.17], color=RED, lw=2.6, zorder=6,
+            solid_capstyle="round")
+
+    ax.text(6.0, 0.55, "outside code reaches private data only through the gates",
+            ha="center", fontsize=9, color=GREY, style="italic")
+
+    fig.suptitle("Encapsulation: private data guarded by a getter and setter",
+                 y=1.0, fontsize=12.5, fontweight="bold")
+    save(fig, "encapsulation_capsule.png")
+
+
+def inheritance_types():
+    """The five shapes of inheritance, drawn as class trees so the structure of
+    each is obvious at a glance."""
+    fig, axes = plt.subplots(1, 5, figsize=(14, 3.6))
+    titles = ["Single", "Multilevel", "Hierarchical", "Multiple", "Hybrid"]
+
+    def node(ax, x, y, label, color=BLUE):
+        w, h = 1.5, 0.72
+        ax.add_patch(FancyBboxPatch((x - w / 2, y - h / 2), w, h,
+                                    boxstyle="round,pad=0.03,rounding_size=0.08",
+                                    facecolor=color, edgecolor="black", lw=1.2))
+        ax.text(x, y, label, ha="center", va="center", fontsize=9,
+                color="white", fontweight="bold")
+
+    def link(ax, x1, y1, x2, y2):
+        # arrowhead points to the PARENT (child -> parent), UML style
+        _pyarrow(ax, x1, y1, x2, y2, color="black", lw=1.4, style="-|>")
+
+    for ax, title in zip(axes, titles):
+        ax.set_xlim(0, 6); ax.set_ylim(0, 10); ax.axis("off")
+        ax.set_title(title, fontsize=11, fontweight="bold")
+
+    # Single: A -> B
+    ax = axes[0]
+    node(ax, 3, 8.2, "A", PURPLE); node(ax, 3, 3.0, "B")
+    link(ax, 3, 3.55, 3, 7.65)
+
+    # Multilevel: A -> B -> C
+    ax = axes[1]
+    node(ax, 3, 8.6, "A", PURPLE); node(ax, 3, 5.0, "B", GREEN)
+    node(ax, 3, 1.4, "C")
+    link(ax, 3, 5.55, 3, 8.05); link(ax, 3, 1.95, 3, 4.45)
+
+    # Hierarchical: A -> B, A -> C
+    ax = axes[2]
+    node(ax, 3, 8.2, "A", PURPLE); node(ax, 1.6, 3.0, "B"); node(ax, 4.4, 3.0, "C")
+    link(ax, 1.6, 3.55, 2.7, 7.65); link(ax, 4.4, 3.55, 3.3, 7.65)
+
+    # Multiple: A -> C, B -> C
+    ax = axes[3]
+    node(ax, 1.6, 8.2, "A", PURPLE); node(ax, 4.4, 8.2, "B", PURPLE)
+    node(ax, 3, 3.0, "C")
+    link(ax, 2.7, 3.55, 1.6, 7.65); link(ax, 3.3, 3.55, 4.4, 7.65)
+
+    # Hybrid: A -> B, A -> C, (B, C) -> D
+    ax = axes[4]
+    node(ax, 3, 8.8, "A", PURPLE); node(ax, 1.5, 5.2, "B", GREEN)
+    node(ax, 4.5, 5.2, "C", GREEN); node(ax, 3, 1.4, "D")
+    link(ax, 1.5, 5.75, 2.7, 8.25); link(ax, 4.5, 5.75, 3.3, 8.25)
+    link(ax, 2.7, 1.95, 1.5, 4.65); link(ax, 3.3, 1.95, 4.5, 4.65)
+
+    fig.suptitle("The five forms of inheritance (arrowhead points to the parent)",
+                 y=1.03, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "inheritance_types.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2041,4 +2414,11 @@ if __name__ == "__main__":
     function_anatomy()
     function_scope()
     map_filter_reduce()
+    # OOP & advanced python
+    class_diagram()
+    class_blueprint_objects()
+    self_current_object()
+    reference_variables()
+    encapsulation_capsule()
+    inheritance_types()
     print("\nAll diagrams generated.")

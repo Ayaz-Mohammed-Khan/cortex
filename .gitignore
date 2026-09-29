@@ -27,6 +27,7 @@ __pycache__/
 # IDEs setting folder
 .idea/
 .kiro/
+.obsidian/
 
 # generated content mirror (synced from CONTENT_ROOT by scripts/sync-content.ts)
 src/content/notes/

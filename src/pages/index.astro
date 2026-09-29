@@ -455,22 +455,6 @@ if (unresolved.length > 0) {
   );
 }
 
-/**
- * How many roadmap nodes point at each note. This is what distinguishes the two
- * kinds of branch node without needing a hand-maintained flag:
- *
- *   - SOLE OWNER (count 1): the node covers the whole note, so its outline is
- *     useful context. "ANOVA" is the ANOVA note.
- *   - SLICE (count > 1): several nodes carve up one note, so that note's outline
- *     describes its siblings as much as itself and would mislead. "Central
- *     Tendency & Spread" and "Bivariate Analysis" are both parts of one note.
- */
-const nodesPerNote = new Map<string, number>();
-for (const n of nodes) {
-  if (n.linkKind !== 'note' || n.href === null) continue;
-  nodesPerNote.set(n.href, (nodesPerNote.get(n.href) ?? 0) + 1);
-}
-
 // Measured after the build so the reach of the matcher is reported, not assumed.
 let linkableBullets = 0;
 let deepLinked = 0;
@@ -532,21 +516,13 @@ const nodeData = Object.fromEntries(
         advanced: n.main ? advancedRatioByTrack.get(n.id) : undefined,
         concepts,
         /**
-         * The overview list, by node tier:
-         *
-         *   TRACK       the notes this track covers.
-         *   NOTE-LEVEL  that note's section outline (sole owner of the note).
-         *   SLICE       nothing. Its bullets already deep-link into the parts of
-         *               the note it covers, and the full outline would advertise
-         *               its sibling slices' content as if it were its own.
+         * The overview list is only the notes a TRACK covers. A note-level node
+         * carries nothing here: its concept bullets already deep-link into the
+         * note's sections, so a separate "jump to a section" outline is
+         * redundant. Only a main track (a category listing) shows its notes.
          */
-        sections: n.main
-          ? n.linkKind === 'note'
-            ? (sectionsByRoute.get(n.href!) ?? [])
-            : (notesByTrack.get(n.id) ?? [])
-          : n.linkKind === 'note' && nodesPerNote.get(n.href!) === 1
-            ? (sectionsByRoute.get(n.href!) ?? [])
-            : [],
+        sections:
+          n.main && n.linkKind === 'category' ? (notesByTrack.get(n.id) ?? []) : [],
       },
     ];
   }),

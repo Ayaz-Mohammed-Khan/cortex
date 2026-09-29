@@ -186,11 +186,11 @@ function openModal(id: string): void {
   const sections = dlg.querySelector<HTMLElement>('[data-rm-sections]');
   const sectionsLabel = dlg.querySelector<HTMLElement>('[data-rm-sections-label]');
   if (sectionsWrap && sections) {
-    // Only main tracks carry this list, and its contents differ by link kind:
-    // a whole area lists its notes, a single note lists its own sections.
+    // Only a main track carries this list now: it names the notes the track
+    // covers. Note-level nodes leave `sections` empty, since their concept
+    // bullets already deep-link into the note's own sections.
     if (sectionsLabel) {
-      sectionsLabel.textContent =
-        info.linkKind === 'category' ? 'Notes in this track:' : 'Jump to a section:';
+      sectionsLabel.textContent = 'Notes in this track:';
     }
     sections.innerHTML = '';
     for (const section of info.sections) {
