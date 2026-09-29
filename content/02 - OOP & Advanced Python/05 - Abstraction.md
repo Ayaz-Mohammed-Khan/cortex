@@ -6,7 +6,7 @@ tags:
   - abstract-class
 difficulty: intermediate
 prerequisites:
-  - Polymorphism
+  - Inheritance
 created: 2026-09-29
 ---
 

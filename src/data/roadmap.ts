@@ -339,6 +339,7 @@ export const spine: Step[] = [
       {
         label: 'Classes & Objects',
         difficulty: 'beginner',
+        prerequisites: ['Functions'],
         concepts: [
           'What is OOP?',
           'Classes and objects',
@@ -354,6 +355,7 @@ export const spine: Step[] = [
       {
         label: 'Encapsulation',
         difficulty: 'intermediate',
+        prerequisites: ['Classes & Objects'],
         concepts: [
           'How objects access attributes',
           { label: 'Attribute creation from outside the class', at: 'How objects access attributes' },
@@ -367,6 +369,7 @@ export const spine: Step[] = [
       {
         label: 'Inheritance',
         difficulty: 'intermediate',
+        prerequisites: ['Encapsulation'],
         concepts: [
           { label: 'Class relationships', at: 'Aggregation' },
           { label: 'Aggregation & class diagram', at: 'Aggregation' },
@@ -382,6 +385,7 @@ export const spine: Step[] = [
       {
         label: 'Polymorphism',
         difficulty: 'intermediate',
+        prerequisites: ['Inheritance'],
         concepts: [
           'Method overriding',
           'Method overloading',
@@ -391,6 +395,7 @@ export const spine: Step[] = [
       {
         label: 'Abstraction',
         difficulty: 'intermediate',
+        prerequisites: ['Inheritance'],
         concepts: [
           'What is abstraction?',
           'Bank example hierarchy',
