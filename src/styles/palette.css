@@ -1,0 +1,125 @@
+/*
+ * Palette configuration
+ * ---------------------------------------------------------------------------
+ * The site ships a single theme (violet) today, but the theming system is
+ * fully token-driven so more palettes can be added later with no component
+ * changes.
+ *
+ * HOW THEMING WORKS
+ *   - `SITE_PALETTE` in `src/lib/config.ts` picks the active theme; its value is
+ *     applied as `data-palette="…"` on <html> (see `Layout.astro`).
+ *   - Each theme is a `[data-palette="…"]` block below that sets the token
+ *     scales. `:root` also carries the default theme so the site is themed even
+ *     with no attribute.
+ *   - `global.css` maps these tokens onto Tailwind utilities via `@theme`
+ *     (`accent-*`, `secondary-*`, and the neutral `gray-*`), so every component
+ *     that uses those utility classes re-themes automatically.
+ *
+ * TOKEN LAYERS
+ *   --accent-*     primary hue (links, focus, nodes, primary chrome)
+ *   --secondary-*  secondary hue (roadmap strands: trunk, edges, boutons).
+ *                  Defaults to the accent, so a theme that omits it is a pure
+ *                  single-accent look. Violet overrides it with teal.
+ *   --gray-*       neutral scale (text, surfaces, borders). A theme may retint
+ *                  these for a tinted-surface look; violet keeps standard grey.
+ *   --slate-*      code/chrome neutrals                       [shared]
+ *   --success/warning/error/info  semantic status colours     [shared]
+ *
+ * TO ADD A PALETTE
+ *   1. Add its name to `PALETTES` in `src/lib/config.ts`.
+ *   2. Add a `[data-palette="name"]` block below with at least an `--accent-*`
+ *      scale (optionally `--secondary-*` and a tinted `--gray-*`).
+ *   3. Set `SITE_PALETTE` to it.
+ * ---------------------------------------------------------------------------
+ */
+
+/* =============================================================================
+ * Shared defaults (a theme overrides only what it needs)
+ * ============================================================================= */
+:root {
+  /* Neutral greys (for text, borders, surfaces) — a theme may retint these. */
+  --gray-50: #f9fafb;
+  --gray-100: #f3f4f6;
+  --gray-200: #e5e7eb;
+  --gray-300: #d1d5db;
+  --gray-400: #9ca3af;
+  --gray-500: #6b7280;
+  --gray-600: #4b5563;
+  --gray-700: #374151;
+  --gray-800: #1f2937;
+  --gray-900: #111827;
+  --gray-950: #0b1120;
+
+  /* Slate (for code blocks, UI chrome) — shared across all themes. */
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Semantic status colors — shared, so difficulty/callout meaning is stable. */
+  --success-light: #16a34a;
+  --success-dark: #4ade80;
+  --warning-light: #d97706;
+  --warning-dark: #fbbf24;
+  --error-light: #dc2626;
+  --error-dark: #ef4444;
+  --info-light: #2563eb;
+  --info-dark: #60a5fa;
+}
+
+/* Secondary defaults to the primary accent (single-accent behaviour). A theme
+   overrides `--secondary-*` to give the roadmap strands a distinct hue. This
+   rule is separate so it can read the `--accent-*` set on :root above. */
+:root {
+  --secondary-50: var(--accent-50);
+  --secondary-100: var(--accent-100);
+  --secondary-200: var(--accent-200);
+  --secondary-300: var(--accent-300);
+  --secondary-400: var(--accent-400);
+  --secondary-500: var(--accent-500);
+  --secondary-600: var(--accent-600);
+  --secondary-700: var(--accent-700);
+  --secondary-800: var(--accent-800);
+  --secondary-900: var(--accent-900);
+  --secondary-950: var(--accent-950);
+}
+
+/* =============================================================================
+ * Themes
+ * ============================================================================= */
+
+/* Violet (default) — a refined violet accent, with teal roadmap strands.
+   `:root` carries it too, so the site is themed even without a data-palette. */
+:root,
+[data-palette="violet"] {
+  --accent-50: #f5f3ff;
+  --accent-100: #ede9fe;
+  --accent-200: #ddd6fe;
+  --accent-300: #c4b5fd;
+  --accent-400: #a78bfa;
+  --accent-500: #8b5cf6;
+  --accent-600: #7c3aed;
+  --accent-700: #6d28d9;
+  --accent-800: #5b21b6;
+  --accent-900: #4c1d95;
+  --accent-950: #2e1065;
+
+  /* secondary: teal — colours the roadmap strands (trunk, edges, boutons) only,
+     so the violet primary keeps every other role (links, focus, nodes, spark). */
+  --secondary-50: #f0fdfa;
+  --secondary-100: #ccfbf1;
+  --secondary-200: #99f6e4;
+  --secondary-300: #5eead4;
+  --secondary-400: #2dd4bf;
+  --secondary-500: #14b8a6;
+  --secondary-600: #0d9488;
+  --secondary-700: #0f766e;
+  --secondary-800: #115e59;
+  --secondary-900: #134e4a;
+  --secondary-950: #042f2e;
+}
