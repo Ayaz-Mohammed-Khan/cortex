@@ -1043,23 +1043,29 @@ const totalSteps = nodes.filter((n) => n.main).length;
      the sides give the trunk depth and volume. */
   .rm-trunk {
     fill: none;
-    /* darker outer wall */
-    stroke: var(--secondary-800);
-    stroke-width: 7;
+    /* Light theme: a saturated mid-teal wall. The old secondary-800 read as a
+       near-black cord against the pale violet canvas; secondary-600 keeps the
+       vessel depth without the heaviness. */
+    stroke: var(--secondary-600);
+    stroke-width: 6.5;
     stroke-linecap: round;
   }
   .rm-trunk-core {
     fill: none;
-    /* inner core: same strand colour as the side trunks */
-    stroke: var(--secondary-600);
+    /* inner core: a bright highlight so the vessel still reads as rounded, now
+       with real contrast against the softer wall above. */
+    stroke: var(--secondary-200);
     stroke-width: 2.5;
     stroke-linecap: round;
-    opacity: 0.95;
+    opacity: 0.9;
   }
   .rm-ranvier {
-    /* myelin gap banding the trunk between tracks: a short break in the sheath */
-    stroke: color-mix(in srgb, var(--secondary-100) 55%, white);
-    stroke-width: 8;
+    /* Myelin-gap band between tracks. In light mode it is hidden: the trunk
+       bows sideways in the gaps, so a band drawn at the spine centre floats off
+       the fibre and reads as a stray box against the pale canvas. Dark mode
+       keeps it (its near-black band blends into the canvas as a clean break). */
+    stroke: transparent;
+    stroke-width: 7.5;
     stroke-linecap: butt;
   }
   :global([data-theme='dark']) .rm-trunk {
@@ -1080,8 +1086,12 @@ const totalSteps = nodes.filter((n) => n.main).length;
      the pulse legible on the pale sheath. */
   /* Light theme: a solid accent spark, bright against the pale trunk. */
   .rm-signal {
-    fill: var(--accent-600);
-    stroke: none;
+    /* Light theme: a bright violet pulse with a soft accent glow, so it reads
+       as a travelling spark against the teal trunk instead of a flat speck. */
+    fill: var(--accent-500);
+    stroke: #ffffff;
+    stroke-width: 0.75;
+    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent-500) 70%, transparent));
   }
   .rm-signal-trail {
     opacity: 0.5;
@@ -1089,6 +1099,8 @@ const totalSteps = nodes.filter((n) => n.main).length;
   :global([data-theme='dark']) .rm-signal {
     fill: #ffffff;
     stroke: none;
+    stroke-width: 0;
+    filter: none;
   }
 
   /* --- Dendrite connectors ---
@@ -1096,7 +1108,9 @@ const totalSteps = nodes.filter((n) => n.main).length;
      tissue reads as a second voice against the primary nodes/spark; in a
      single-accent palette secondary mirrors the accent, so it looks unchanged. */
   .rm-edge {
-    stroke: var(--secondary-600);
+    /* Light theme: a mid-teal tendril, a touch lighter than the trunk wall so
+       the branches read as finer connective tissue, not competing cords. */
+    stroke: var(--secondary-500);
   }
   .rm-edge-dashed {
     stroke: var(--secondary-300);
