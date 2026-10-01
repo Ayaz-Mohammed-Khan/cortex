@@ -19,6 +19,7 @@
  * pre-rendered at build time (Req 9.1).
  */
 import { loadSite, renderNote } from '@/lib/content';
+import { prerequisitesFor } from '@/data/prerequisites';
 import { buildToc, type TocEntry } from '@/lib/toc';
 import type { CategoryRef } from '@/lib/ingest/types';
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
@@ -91,9 +92,13 @@ if (data.kind === 'note') {
   body = data.content.body;
   description = data.content.description ?? null;
   difficulty = data.entry.data.difficulty;
-  // Resolve prerequisite display names to note routes (case-insensitive) so
-  // each becomes a link when it names a real note; unresolved names stay text.
-  const prereqNames = data.entry.data.prerequisites ?? [];
+  // Prerequisites come from the single source of truth (`src/data/
+  // prerequisites.ts`), keyed by this note's Display_Name, NOT from the note's
+  // frontmatter. This is what keeps the "Prerequisites" line here identical to
+  // the roadmap modal's "Learn first" row — both read the same map. Resolve the
+  // names to note routes (case-insensitive) so each becomes a link when it
+  // names a real note; unresolved names stay as plain text.
+  const prereqNames = prerequisitesFor(displayName);
   if (prereqNames.length > 0) {
     const routeByName = new Map(
       site.entries.map((e) => [e.displayName.trim().toLowerCase(), e.route]),

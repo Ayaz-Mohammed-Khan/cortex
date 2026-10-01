@@ -30,6 +30,7 @@ import { matchTopicPrepared, preparePool } from '@/lib/syllabus/match';
 import type { Candidate, PreparedPool } from '@/lib/syllabus/match';
 import { spine, phases, conceptLabel } from '@/data/roadmap';
 import type { Concept, Difficulty, Step, Tier, Topic } from '@/data/roadmap';
+import { prerequisitesFor } from '@/data/prerequisites';
 import type { CategoryNode, TreeNode } from '@/lib/ingest/types';
 
 export const prerender = true;
@@ -319,7 +320,9 @@ stepLayouts.forEach(({ step, y }, trackIndex) => {
     main: true,
     tier: step.tier ?? 'core',
     difficulty: step.difficulty,
-    prerequisites: step.prerequisites,
+    // Prerequisites come from the single source of truth, resolved by the
+    // track name (preferTrack: a track and a note can share a Display_Name).
+    prerequisites: prerequisitesFor(step.label, true),
     track: trackIndex,
     revealIndex: 0, // main cell reveals first in its track
     concepts: step.concepts,
@@ -351,7 +354,9 @@ stepLayouts.forEach(({ step, y }, trackIndex) => {
         main: false,
         tier: t.tier ?? 'core',
         difficulty: t.difficulty,
-        prerequisites: t.prerequisites,
+        // Prerequisites come from the single source of truth, keyed by the
+        // topic's link target (its note Display_Name) just like targetFor.
+        prerequisites: prerequisitesFor(t.match ?? t.label),
         track: trackIndex,
         revealIndex: subReveal++,
         concepts: t.concepts,

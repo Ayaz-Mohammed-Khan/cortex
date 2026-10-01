@@ -73,8 +73,10 @@ export interface Topic {
   tier?: Tier;
   /** Optional material difficulty; shown as a colour stripe + modal badge. */
   difficulty?: Difficulty;
-  /** Optional prerequisites: labels of topics to learn first (linked if known). */
-  prerequisites?: string[];
+  // NOTE: prerequisites are NOT declared here. They live in the single source
+  // of truth `src/data/prerequisites.ts` and are resolved by Display_Name when
+  // the roadmap is rendered, so the roadmap modal and the note page can never
+  // disagree. See TOPIC_PREREQUISITES / TRACK_PREREQUISITES there.
   concepts: Concept[];
 }
 /** A main-track step: spine node + its concept syllabus + branch sub-topics. */
@@ -85,8 +87,7 @@ export interface Step {
   tier?: Tier;
   /** Optional material difficulty; shown as a colour stripe + modal badge. */
   difficulty?: Difficulty;
-  /** Optional prerequisites: labels of topics to learn first (linked if known). */
-  prerequisites?: string[];
+  // Prerequisites live in `src/data/prerequisites.ts` (see Topic above).
   concepts: Concept[];
   left?: Topic[];
   right?: Topic[];
@@ -311,7 +312,6 @@ export const spine: Step[] = [
   {
     label: 'OOP & Advanced Python',
     difficulty: 'intermediate',
-    prerequisites: ['Python Foundations'],
     concepts: [
       'Classes & objects',
       'Methods vs functions',
@@ -339,7 +339,6 @@ export const spine: Step[] = [
       {
         label: 'Classes & Objects',
         difficulty: 'beginner',
-        prerequisites: ['Functions'],
         concepts: [
           'What is OOP?',
           'Classes and objects',
@@ -355,7 +354,6 @@ export const spine: Step[] = [
       {
         label: 'Encapsulation',
         difficulty: 'intermediate',
-        prerequisites: ['Classes & Objects'],
         concepts: [
           'How objects access attributes',
           { label: 'Attribute creation from outside the class', at: 'How objects access attributes' },
@@ -369,7 +367,6 @@ export const spine: Step[] = [
       {
         label: 'Inheritance',
         difficulty: 'intermediate',
-        prerequisites: ['Encapsulation'],
         concepts: [
           { label: 'Class relationships', at: 'Aggregation' },
           { label: 'Aggregation & class diagram', at: 'Aggregation' },
@@ -385,7 +382,6 @@ export const spine: Step[] = [
       {
         label: 'Polymorphism',
         difficulty: 'intermediate',
-        prerequisites: ['Inheritance'],
         concepts: [
           'Method overriding',
           'Method overloading',
@@ -395,7 +391,6 @@ export const spine: Step[] = [
       {
         label: 'Abstraction',
         difficulty: 'intermediate',
-        prerequisites: ['Inheritance'],
         concepts: [
           'What is abstraction?',
           'Bank example hierarchy',
@@ -409,16 +404,16 @@ export const spine: Step[] = [
         label: 'File Handling',
         difficulty: 'beginner',
         concepts: [
-          'How file I/O is done',
-          'open() and append()',
-          'Writing many lines & saving a file',
-          'read() and readline()',
+          { label: 'How file I/O is done', at: 'Text files versus binary files, and the I/O flow' },
+          { label: 'open() and append()', at: 'Writing to a text file' },
+          { label: 'Writing many lines & saving a file', at: 'Writing to a text file' },
+          { label: 'read() and readline()', at: 'Reading a text file' },
           'Context manager with()',
           'Reading big files in chunks',
           'seek and tell',
           'Working with binary files',
           'Serialization & deserialization',
-          'JSON module: dump() and load()',
+          { label: 'JSON module: dump() and load()', at: 'Serialization and deserialization' },
           'Pickling',
           'Pickle vs JSON',
         ],
@@ -427,11 +422,11 @@ export const spine: Step[] = [
         label: 'Exception Handling',
         difficulty: 'intermediate',
         concepts: [
-          'Syntax errors with examples',
-          'Exceptions with examples',
+          { label: 'Syntax errors with examples', at: 'Syntax errors versus exceptions' },
+          { label: 'Exceptions with examples', at: 'Common error types' },
           'Why we need to handle exceptions',
           'try-except-else-finally',
-          'Handling specific errors',
+          { label: 'Handling specific errors', at: 'Catching specific exceptions' },
           'Raising exceptions',
           'Creating custom exceptions',
         ],
@@ -443,7 +438,7 @@ export const spine: Step[] = [
         concepts: [
           'Namespaces',
           'Scope and the LEGB rule',
-          'Local, enclosing, global, built-in scope',
+          { label: 'Local, enclosing, global, built-in scope', at: 'Namespaces and scope' },
           'Decorators with examples',
         ],
       },
@@ -454,8 +449,8 @@ export const spine: Step[] = [
           'What are iterators',
           'What are iterables',
           'How for loops work in Python',
-          'Building your own for loop',
-          'Creating your own range function',
+          { label: 'Building your own for loop', at: 'How a for loop really works' },
+          { label: 'Creating your own range function', at: 'Building a custom iterator' },
           'What is a generator?',
           'yield vs return',
           'Generator expressions',
@@ -467,7 +462,6 @@ export const spine: Step[] = [
   {
     label: 'NumPy & Pandas',
     difficulty: 'beginner',
-    prerequisites: ['Python Foundations'],
     concepts: [
       'NumPy arrays & matrices',
       'Array attributes & operations',
@@ -646,7 +640,6 @@ export const spine: Step[] = [
   {
     label: 'EDA & Visualization',
     difficulty: 'beginner',
-    prerequisites: ['NumPy & Pandas'],
     concepts: [
       'Simple plots, labels, legends',
       'Scatter plots & bar charts',
@@ -966,7 +959,6 @@ export const spine: Step[] = [
   {
     label: 'Descriptive Statistics',
     difficulty: 'beginner',
-    prerequisites: ['NumPy & Pandas'],
     concepts: [
       'What is statistics?',
       'Population vs sample',
@@ -1004,7 +996,6 @@ export const spine: Step[] = [
         label: 'Quantiles & Box Plots',
         match: N_QUANT,
         difficulty: 'beginner',
-        prerequisites: ['Foundations and Central Tendency'],
         concepts: [
           'Quantiles, quartiles & percentiles',
           'What a percentile means',
@@ -1020,7 +1011,6 @@ export const spine: Step[] = [
         label: 'Bivariate Analysis',
         match: N_BIVAR,
         difficulty: 'intermediate',
-        prerequisites: ['Foundations and Central Tendency'],
         concepts: [
           'Graphs for bivariate analysis',
           // The note numbers these as "Case 1/2/3", which shares no distinctive
@@ -1041,7 +1031,6 @@ export const spine: Step[] = [
   {
     label: 'Probability Distributions',
     difficulty: 'intermediate',
-    prerequisites: ['Descriptive Statistics'],
     concepts: [
       'Random variables',
       'Probability distribution functions',
@@ -1069,7 +1058,6 @@ export const spine: Step[] = [
         label: 'PDF, CDF & PMF',
         match: N_PROB,
         difficulty: 'intermediate',
-        prerequisites: ['Bivariate and Multivariate Analysis'],
         concepts: [
           'Random variables',
           'Two types of random variables',
@@ -1089,7 +1077,6 @@ export const spine: Step[] = [
         label: 'Normal Distribution',
         match: N_NORMAL,
         difficulty: 'beginner',
-        prerequisites: ['Probability Distributions'],
         concepts: [
           'Normal (Gaussian) distribution',
           'The shape and its parts',
@@ -1111,7 +1098,6 @@ export const spine: Step[] = [
         label: 'Skewness & Kurtosis',
         match: N_SKEW,
         difficulty: 'intermediate',
-        prerequisites: ['The Normal Distribution'],
         concepts: [
           'Skewness',
           'Formula (statistical moments)',
@@ -1130,7 +1116,6 @@ export const spine: Step[] = [
         tier: 'advanced',
         match: N_NONGAUSS,
         difficulty: 'intermediate',
-        prerequisites: ['Skewness, Kurtosis and Normality Checks'],
         concepts: [
           'Non-Gaussian continuous distributions',
           'Uniform distribution',
@@ -1142,7 +1127,6 @@ export const spine: Step[] = [
         label: 'Transformations',
         match: N_NONGAUSS,
         difficulty: 'intermediate',
-        prerequisites: ['Skewness, Kurtosis and Normality Checks'],
         concepts: [
           'Mathematical transformations',
           'Function transformer',
@@ -1160,7 +1144,6 @@ export const spine: Step[] = [
         label: 'Bernoulli & Binomial',
         match: N_BERNOULLI,
         difficulty: 'beginner',
-        prerequisites: ['Probability Distributions'],
         concepts: [
           'Bernoulli distribution',
           'PMF of the Bernoulli distribution',
@@ -1180,7 +1163,6 @@ export const spine: Step[] = [
   {
     label: 'Inferential Statistics',
     difficulty: 'advanced',
-    prerequisites: ['Probability Distributions'],
     concepts: [
       'Sampling distribution',
       'Central Limit Theorem',
@@ -1202,7 +1184,6 @@ export const spine: Step[] = [
         label: 'Central Limit Theorem',
         match: N_CLT,
         difficulty: 'intermediate',
-        prerequisites: ['Bernoulli and Binomial Distributions'],
         concepts: [
           'Sampling distribution',
           'Sampling distribution of the sample mean',
@@ -1218,7 +1199,6 @@ export const spine: Step[] = [
         label: 'Confidence Intervals',
         match: N_CI,
         difficulty: 'intermediate',
-        prerequisites: ['Central Limit Theorem'],
         concepts: [
           { label: 'Parameter vs estimate', at: 'Revision: the vocabulary we need' },
           'Point estimate',
@@ -1239,7 +1219,6 @@ export const spine: Step[] = [
         label: 'Hypothesis Testing',
         match: N_HYP,
         difficulty: 'advanced',
-        prerequisites: ['Confidence Intervals'],
         concepts: [
           'Why hypothesis testing exists',
           { label: 'Null and alternate hypothesis', at: 'The two hypotheses' },
@@ -1260,7 +1239,6 @@ export const spine: Step[] = [
         label: 'p-values & t-tests',
         match: N_PVAL,
         difficulty: 'advanced',
-        prerequisites: ['Hypothesis Testing'],
         concepts: [
           'What is a p-value?',
           'Building intuition with a coin',
@@ -1278,7 +1256,6 @@ export const spine: Step[] = [
         label: 'Chi-square Test',
         match: N_CHI,
         difficulty: 'advanced',
-        prerequisites: ['Hypothesis Testing'],
         concepts: [
           'The chi-square distribution',
           'The two chi-square tests',
@@ -1293,7 +1270,6 @@ export const spine: Step[] = [
         label: 'ANOVA',
         match: N_ANOVA,
         difficulty: 'advanced',
-        prerequisites: ['Hypothesis Testing', 'P-values and T-tests'],
         concepts: [
           'The F-distribution',
           'Why not many t-tests?',
@@ -1314,7 +1290,6 @@ export const spine: Step[] = [
   {
     label: 'Maths & ML Foundations',
     difficulty: 'intermediate',
-    prerequisites: ['NumPy & Pandas'],
     concepts: [
       'Tensors: 0D, 1D, 2D, ND',
       'Rank, axes and shape',
@@ -1353,7 +1328,6 @@ export const spine: Step[] = [
       {
         label: 'Vectors',
         difficulty: 'intermediate',
-        prerequisites: ['Tensors'],
         concepts: [
           'What is linear algebra?',
           'What are vectors?',
@@ -1373,7 +1347,6 @@ export const spine: Step[] = [
         label: 'Matrices: Computation',
         tier: 'advanced',
         difficulty: 'intermediate',
-        prerequisites: ['Vectors'],
         concepts: [
           'What are matrices?',
           'Types of matrices',
@@ -1391,7 +1364,6 @@ export const spine: Step[] = [
       {
         label: 'Matrices: Intuition',
         difficulty: 'advanced',
-        prerequisites: ['Matrices: Computation'],
         concepts: [
           'Basis vectors',
           'Linear transformations',
@@ -1452,7 +1424,6 @@ export const spine: Step[] = [
   {
     label: 'Regression & Regularization',
     difficulty: 'intermediate',
-    prerequisites: ['Maths & ML Foundations', 'Inferential Statistics'],
     concepts: [
       'Simple & multiple linear regression',
       'Finding m and b',
@@ -1495,7 +1466,6 @@ export const spine: Step[] = [
         label: 'Optimization',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['Linear Regression'],
         concepts: [
           'Mathematical & multivariable functions',
           'Parameters in a function',
@@ -1512,7 +1482,6 @@ export const spine: Step[] = [
       {
         label: 'Gradient Descent',
         difficulty: 'advanced',
-        prerequisites: ['Optimization'],
         concepts: [
           'What is gradient descent?',
           'Intuition & mathematical formulation',
@@ -1530,7 +1499,6 @@ export const spine: Step[] = [
       {
         label: 'Regression Analysis',
         difficulty: 'advanced',
-        prerequisites: ['Linear Regression', 'Inferential Statistics'],
         concepts: [
           'What is regression analysis?',
           'Inference vs prediction',
@@ -1564,7 +1532,6 @@ export const spine: Step[] = [
       {
         label: 'Multicollinearity',
         difficulty: 'intermediate',
-        prerequisites: ['Regression Analysis'],
         concepts: [
           'What is multicollinearity?',
           'When is multicollinearity bad?',
@@ -1594,7 +1561,6 @@ export const spine: Step[] = [
       {
         label: 'Ridge Regression',
         difficulty: 'advanced',
-        prerequisites: ['Bias-Variance Tradeoff', 'Gradient Descent'],
         concepts: [
           'What is regularization?',
           'When to use regularization',
@@ -1613,7 +1579,6 @@ export const spine: Step[] = [
       {
         label: 'Lasso & ElasticNet',
         difficulty: 'advanced',
-        prerequisites: ['Ridge Regression'],
         concepts: [
           'Lasso intuition',
           'Lasso code example',
@@ -1628,7 +1593,6 @@ export const spine: Step[] = [
   {
     label: 'Feature Engineering & Selection',
     difficulty: 'intermediate',
-    prerequisites: ['Regression & Regularization'],
     concepts: [
       'Feature engineering roadmap',
       'Ordinal, label & one-hot encoding',
@@ -1777,7 +1741,6 @@ export const spine: Step[] = [
       {
         label: 'Filter Methods',
         difficulty: 'intermediate',
-        prerequisites: ['Inferential Statistics'],
         concepts: [
           'What is feature selection?',
           'Why to do feature selection?',
@@ -1820,7 +1783,6 @@ export const spine: Step[] = [
   {
     label: 'Classification',
     difficulty: 'intermediate',
-    prerequisites: ['Regression & Regularization'],
     concepts: [
       'KNN intuition & choosing K',
       'Decision surface & decision boundary',
@@ -1856,7 +1818,6 @@ export const spine: Step[] = [
       {
         label: 'Naive Bayes',
         difficulty: 'intermediate',
-        prerequisites: ['Probability Distributions'],
         concepts: [
           'Random experiment, trials, outcomes',
           'Sample space & events',
@@ -1875,7 +1836,6 @@ export const spine: Step[] = [
       {
         label: 'Logistic Regression',
         difficulty: 'intermediate',
-        prerequisites: ['Linear Regression', 'Gradient Descent'],
         concepts: [
           'Introduction & basic geometry',
           'The classification problem',
@@ -1895,7 +1855,6 @@ export const spine: Step[] = [
         label: 'Support Vector Machines',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['Logistic Regression'],
         concepts: [
           'Maximum margin classifier',
           'Support vectors',
@@ -1916,7 +1875,6 @@ export const spine: Step[] = [
   {
     label: 'Trees & Ensembles',
     difficulty: 'intermediate',
-    prerequisites: ['Classification'],
     concepts: [
       'CART algorithm for classification',
       'Splitting categorical & numerical features',
@@ -1952,7 +1910,6 @@ export const spine: Step[] = [
       {
         label: 'Bagging',
         difficulty: 'intermediate',
-        prerequisites: ['Decision Trees'],
         concepts: [
           'Introduction to ensemble learning',
           'Types of ensemble learning',
@@ -1968,7 +1925,6 @@ export const spine: Step[] = [
       {
         label: 'Random Forest',
         difficulty: 'intermediate',
-        prerequisites: ['Bagging'],
         concepts: [
           'Introduction to random forest',
           'Random forest intuition',
@@ -1984,7 +1940,6 @@ export const spine: Step[] = [
       {
         label: 'Gradient Boosting',
         difficulty: 'advanced',
-        prerequisites: ['Decision Trees', 'Gradient Descent'],
         concepts: [
           'Boosting',
           'What is gradient boosting',
@@ -2003,7 +1958,6 @@ export const spine: Step[] = [
       {
         label: 'XGBoost',
         difficulty: 'advanced',
-        prerequisites: ['Gradient Boosting'],
         concepts: [
           'Introduction & features',
           'Performance, speed, flexibility',
@@ -2023,7 +1977,6 @@ export const spine: Step[] = [
         label: 'Other Boosters',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['Gradient Boosting'],
         concepts: [
           'AdaBoost: weak learners & weights',
           'AdaBoost hyperparameters',
@@ -2041,7 +1994,6 @@ export const spine: Step[] = [
   {
     label: 'Dimensionality Reduction',
     difficulty: 'advanced',
-    prerequisites: ['Maths & ML Foundations'],
     concepts: [
       'Curse of dimensionality',
       'Geometric intuition of PCA',
@@ -2059,7 +2011,6 @@ export const spine: Step[] = [
       {
         label: 'PCA',
         difficulty: 'advanced',
-        prerequisites: ['Eigen Decomposition'],
         concepts: [
           'Curse of dimensionality',
           'Geometric intuition of PCA',
@@ -2078,7 +2029,6 @@ export const spine: Step[] = [
       {
         label: 'Eigen Decomposition',
         difficulty: 'advanced',
-        prerequisites: ['Matrices: Intuition'],
         concepts: [
           'What are eigenvectors & eigenvalues?',
           'Intuition: axis of rotation',
@@ -2096,7 +2046,6 @@ export const spine: Step[] = [
         label: 'SVD',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['Eigen Decomposition'],
         concepts: [
           'Intuition of non-square matrices',
           'Rectangular diagonal matrix',
@@ -2113,7 +2062,6 @@ export const spine: Step[] = [
         label: 't-SNE',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['PCA'],
         concepts: [
           'What is t-SNE?',
           'Why learn t-SNE?',
@@ -2131,7 +2079,6 @@ export const spine: Step[] = [
         label: 'LDA',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['PCA'],
         concepts: [
           'Supervised dimensionality reduction',
           'Maximizing between-class variance',
@@ -2146,7 +2093,6 @@ export const spine: Step[] = [
   {
     label: 'Model Evaluation',
     difficulty: 'intermediate',
-    prerequisites: ['Classification'],
     concepts: [
       'Accuracy & its problems',
       'Confusion matrix',
@@ -2252,7 +2198,6 @@ export const spine: Step[] = [
   {
     label: 'Unsupervised Learning',
     difficulty: 'advanced',
-    prerequisites: ['Dimensionality Reduction'],
     concepts: [
       'Applications of clustering',
       'Geometric intuition of K-Means',
@@ -2289,7 +2234,6 @@ export const spine: Step[] = [
         label: 'DBSCAN',
         tier: 'advanced',
         difficulty: 'intermediate',
-        prerequisites: ['K-Means Clustering'],
         concepts: [
           'Why DBSCAN?',
           'What is density based clustering',
@@ -2305,7 +2249,6 @@ export const spine: Step[] = [
         label: 'Hierarchical Clustering',
         tier: 'advanced',
         difficulty: 'intermediate',
-        prerequisites: ['K-Means Clustering'],
         concepts: [
           'Need for other clustering methods',
           'Introduction & algorithm',
@@ -2323,7 +2266,6 @@ export const spine: Step[] = [
         label: 'Gaussian Mixture Models',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['K-Means Clustering', 'Probability Distributions'],
         concepts: [
           'The why and the what',
           'Geometric intuition',
@@ -2359,7 +2301,6 @@ export const spine: Step[] = [
   {
     label: 'MLOps & Deployment',
     difficulty: 'advanced',
-    prerequisites: ['Trees & Ensembles'],
     concepts: [
       'What is MLOps and why it matters',
       'Version control with Git & GitHub',
@@ -2394,7 +2335,6 @@ export const spine: Step[] = [
         label: 'Reproducibility & DVC',
         tier: 'advanced',
         difficulty: 'intermediate',
-        prerequisites: ['Version Control'],
         concepts: [
           'Industry tools',
           'Cookiecutter templates',
@@ -2412,7 +2352,6 @@ export const spine: Step[] = [
         label: 'MLflow',
         tier: 'advanced',
         difficulty: 'intermediate',
-        prerequisites: ['Reproducibility & DVC'],
         concepts: [
           'Limitations of DVC',
           'Introduction to MLflow',
@@ -2448,7 +2387,6 @@ export const spine: Step[] = [
         label: 'CI/CD',
         tier: 'advanced',
         difficulty: 'advanced',
-        prerequisites: ['Docker & Kubernetes'],
         concepts: [
           'Philosophy behind CI/CD',
           'Setting up GitHub Actions',
@@ -2496,7 +2434,6 @@ export const spine: Step[] = [
   {
     label: 'Capstone Project',
     difficulty: 'advanced',
-    prerequisites: ['Model Evaluation', 'Feature Engineering & Selection', 'MLOps & Deployment'],
     concepts: [
       'Project overview & data gathering',
       'Merging and cleaning the data',
