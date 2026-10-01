@@ -564,7 +564,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
 
   {/* ---- Hero ---- */}
   <section class="px-4 pb-6 pt-2 sm:px-0 sm:pb-8">
-    <span class="inline-flex items-center rounded-full bg-violet-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">
+    <span class="inline-flex items-center rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-700 dark:bg-accent-500/15 dark:text-accent-300">
       Learning roadmap
     </span>
     <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-gray-50">
@@ -580,7 +580,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
     <div class="mt-6 flex flex-wrap items-center gap-3">
       <a
         href="/notes"
-        class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+        class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
       >
         Browse all notes
         <span aria-hidden="true">→</span>
@@ -609,7 +609,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
           type="button"
           data-rm-view="simple"
           aria-pressed="true"
-          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600"
         >
           Simple
         </button>
@@ -617,7 +617,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
           type="button"
           data-rm-view="detailed"
           aria-pressed="false"
-          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600"
+          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600"
         >
           Detailed
         </button>
@@ -631,15 +631,15 @@ const totalSteps = nodes.filter((n) => n.main).length;
     <div class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
       {/*
         "Notes available" = a FILLED node. Its colour differs by view: each
-        phase's own hue in the simple view, dark violet in the detailed spine.
+        phase's own hue in the simple view, the site accent in the detailed spine.
         So the swatch matches the ACTIVE view — the island shows a swatch
         carrying ALL SIX phase hues (in phase order) with the simple view, and
-        the violet one with the detailed view, via the data-rm-*-only tagging.
+        the accent one with the detailed view, via the data-rm-*-only tagging.
         A wider pill makes every band of colour legible.
       */}
       <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
         <span data-rm-simple-only class="h-2.5 w-6 rounded-full" style="background: linear-gradient(90deg, #8b5cf6 0 16.6%, #0ea5e9 16.6% 33.3%, #14b8a6 33.3% 50%, #c2842a 50% 66.6%, #c25585 66.6% 83.3%, #3f9e6a 83.3% 100%)" aria-hidden="true"></span>
-        <span data-rm-detailed-only hidden class="h-2.5 w-2.5 rounded-full bg-violet-600" aria-hidden="true"></span>
+        <span data-rm-detailed-only hidden class="h-2.5 w-2.5 rounded-full bg-accent-600" aria-hidden="true"></span>
         Notes available
       </span>
       <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
@@ -928,7 +928,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
   >
     <div class="flex items-start justify-between gap-4 border-b border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
       <div class="min-w-0">
-        <p class="text-[0.7rem] font-semibold uppercase tracking-wider text-violet-700 dark:text-violet-300">
+        <p class="text-[0.7rem] font-semibold uppercase tracking-wider text-accent-700 dark:text-accent-300">
           Topic syllabus
         </p>
         <h2 id="rm-modal-title" data-rm-title class="mt-0.5 break-words text-xl font-bold text-gray-900 dark:text-gray-100"></h2>
@@ -951,7 +951,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
         type="button"
         data-rm-close
         aria-label="Close"
-        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
+        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
       >
         {/* X icon is the obvious click target for a mouse or touch at any size;
             the "Esc" text stays alongside it as the keyboard hint. */}
@@ -1004,7 +1004,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
       <a
         data-rm-link
         href="#"
-        class="inline-flex items-center gap-2 rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+        class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       >
         <span data-rm-link-text>Read the notes</span>
         <span aria-hidden="true">→</span>
@@ -1033,42 +1033,49 @@ const totalSteps = nodes.filter((n) => n.main).length;
      ============================================================ */
 
   /* --- Axon trunk (the spine) --- */
+  /* The main trunk reads like a VESSEL: the inner core keeps the strand colour
+     (same as the side trunks), and the outer wall (sheath) is a DARKER teal so
+     the sides give the trunk depth and volume. */
   .rm-trunk {
     fill: none;
-    stroke: #c9bdf5; /* soft myelin sheath, light mode */
-    stroke-width: 6;
+    /* darker outer wall */
+    stroke: var(--secondary-800);
+    stroke-width: 7;
     stroke-linecap: round;
   }
   .rm-trunk-core {
     fill: none;
-    stroke: #a78bfa; /* lighter core (light mode) so the violet-600 spark reads on it */
-    stroke-width: 2;
+    /* inner core: same strand colour as the side trunks */
+    stroke: var(--secondary-600);
+    stroke-width: 2.5;
     stroke-linecap: round;
     opacity: 0.95;
   }
   .rm-ranvier {
     /* myelin gap banding the trunk between tracks: a short break in the sheath */
-    stroke: #f6f5fb;
-    stroke-width: 7;
+    stroke: color-mix(in srgb, var(--secondary-100) 55%, white);
+    stroke-width: 8;
     stroke-linecap: butt;
   }
   :global([data-theme='dark']) .rm-trunk {
-    stroke: #4a3aa0;
+    /* darker teal wall, deep against the near-black canvas */
+    stroke: var(--secondary-700);
   }
   :global([data-theme='dark']) .rm-trunk-core {
-    stroke: #a78bfa;
+    /* inner core: same strand colour as the side trunks (dark theme) */
+    stroke: var(--secondary-400);
   }
   :global([data-theme='dark']) .rm-ranvier {
     stroke: #0b0d17;
   }
 
   /* --- Action potential travelling the trunk --- */
-  /* Light mode: a bright near-white violet spark so it stands out AGAINST the
-     violet core as it moves (using the core colour made it invisible). A subtle
-     ring makes the pulse legible on the pale sheath. */
-  /* Light theme: a solid violet-600 spark, bright against the pale trunk. */
+  /* Light mode: a bright accent spark so it stands out AGAINST the accent core
+     as it moves (using the core colour made it invisible). A subtle ring makes
+     the pulse legible on the pale sheath. */
+  /* Light theme: a solid accent spark, bright against the pale trunk. */
   .rm-signal {
-    fill: #7c3aed;
+    fill: var(--accent-600);
     stroke: none;
   }
   .rm-signal-trail {
@@ -1079,32 +1086,38 @@ const totalSteps = nodes.filter((n) => n.main).length;
     stroke: none;
   }
 
-  /* --- Dendrite connectors --- */
+  /* --- Dendrite connectors ---
+     Edges use the SECONDARY hue: in a rich theme (e.g. midnight) the connective
+     tissue reads as a second voice against the primary nodes/spark; in a
+     single-accent palette secondary mirrors the accent, so it looks unchanged. */
   .rm-edge {
-    stroke: #7c3aed;
+    stroke: var(--secondary-600);
   }
   .rm-edge-dashed {
-    stroke: #c4b5fd;
+    stroke: var(--secondary-300);
   }
   :global([data-theme='dark']) .rm-edge {
-    stroke: #a78bfa;
+    stroke: var(--secondary-400);
   }
   :global([data-theme='dark']) .rm-edge-dashed {
-    stroke: #6d28d9;
+    stroke: var(--secondary-700);
   }
 
-  /* --- Synaptic boutons at dendrite terminals --- */
+  /* --- Synaptic boutons at dendrite terminals ---
+     Boutons sit at the end of the edges, so they follow the SECONDARY hue too,
+     keeping the edge/terminal system one visual voice. */
   .rm-bouton {
-    fill: #cbc4e6; /* dormant terminal, faint violet (topic has no note yet) */
+    /* dormant terminal, faint secondary (topic has no note yet) */
+    fill: color-mix(in srgb, var(--secondary-300) 55%, white);
   }
   .rm-bouton-live {
-    fill: #7c3aed; /* active synapse (topic has a note) */
+    fill: var(--secondary-600); /* active synapse (topic has a note) */
   }
   :global([data-theme='dark']) .rm-bouton {
-    fill: #3b4160;
+    fill: color-mix(in srgb, var(--secondary-400) 30%, #1a1a2e);
   }
   :global([data-theme='dark']) .rm-bouton-live {
-    fill: #8172d6;
+    fill: var(--secondary-500);
   }
 
   /* --- Scroll reveal (fade + rise), triggered as the signal reaches a track ---
@@ -1223,15 +1236,15 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
   .rm-chip:focus-visible {
     outline: none;
-    box-shadow: 0 0 0 2px var(--phase-hue, #7c3aed);
+    box-shadow: 0 0 0 2px var(--phase-hue, var(--accent-600));
   }
   .rm-chip.rm-avail {
     /* Lightened one notch so the fill reads as a bright, distinct phase colour
        on the dark canvas rather than a heavy block: mix ~15% white into the
        hue, with the pure hue as the border so the edge stays crisp. White text
        still clears WCAG AA on every phase at this lightness. */
-    background: color-mix(in srgb, var(--phase-hue, #7c3aed) 85%, white);
-    border: 1px solid var(--phase-hue, #7c3aed);
+    background: color-mix(in srgb, var(--phase-hue, var(--accent-600)) 85%, white);
+    border: 1px solid var(--phase-hue, var(--accent-600));
     color: #ffffff;
   }
   .rm-chip.rm-avail:hover {
@@ -1245,7 +1258,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
     color: #475569;
   }
   .rm-chip.rm-soon:hover {
-    border-color: var(--phase-hue, #a78bfa);
+    border-color: var(--phase-hue, var(--accent-400));
   }
   :global([data-theme='dark']) .rm-chip.rm-soon {
     border-color: #475569;
@@ -1312,7 +1325,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
   .rm-view-btn[aria-pressed='true'] {
     background: #ffffff;
-    color: #6d28d9;
+    color: var(--accent-700);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
   }
   :global([data-theme='dark']) .rm-view-btn {
@@ -1320,104 +1333,107 @@ const totalSteps = nodes.filter((n) => n.main).length;
   }
   :global([data-theme='dark']) .rm-view-btn[aria-pressed='true'] {
     background: rgba(255, 255, 255, 0.1);
-    color: #ddd6fe;
+    color: var(--accent-200);
     box-shadow: none;
   }
 
-  /* Available cell (has notes): a living soma. Solid violet membrane, deep
-     violet body. White label clears AA on this fill. */
-  /* Available cell, LIGHT theme: a soft violet tint with a crisp violet border
-     and dark violet text - clean on a white canvas (the old heavy fill read as
+  /* Available cell (has notes): a living soma. Solid accent membrane, deep
+     accent body. White label clears AA on this fill. */
+  /* Available cell, LIGHT theme: a soft accent tint with a crisp accent border
+     and dark accent text - clean on a white canvas (the old heavy fill read as
      near-black). Dark theme keeps its filled body via the override below. */
   .rm-avail .rm-rect {
-    fill: #c3b2f7; /* clearly darker violet so completed stands apart from the near-white "soon" cells */
-    stroke: #6d28d9; /* violet-700 */
+    /* a clearly darker accent tint so completed stands apart from the near-white "soon" cells */
+    fill: color-mix(in srgb, var(--accent-300) 80%, white);
+    stroke: var(--accent-700);
     stroke-width: 1.5;
   }
   .rm-avail .rm-label {
-    fill: #3b0f7a; /* deep violet, high contrast on the darker fill */
+    /* deep accent, high contrast on the tinted fill */
+    fill: color-mix(in srgb, var(--accent-900) 88%, black);
   }
-  /* Hover: obvious lift. A violet glow + brighter, thicker membrane so the cell
+  /* Hover: obvious lift. An accent glow + brighter, thicker membrane so the cell
      clearly reacts. Filter-based (no transform) so the node never shifts. */
   .rm-node.rm-avail:hover .rm-rect {
-    fill: #ab93f2; /* deepens a clear step past the resting fill on hover */
-    stroke: #5b21b6;
+    fill: color-mix(in srgb, var(--accent-400) 75%, white); /* deepens a clear step past the resting fill on hover */
+    stroke: var(--accent-800);
     stroke-width: 2.5;
-    filter: drop-shadow(0 0 7px rgba(124, 58, 237, 0.5));
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--accent-600) 50%, transparent));
   }
 
   /* Dormant cell (no notes yet): OPAQUE body so the trunk/edges never show
-     through it, with a VIOLET-TINTED dashed membrane so it still belongs to the
+     through it, with an ACCENT-TINTED dashed membrane so it still belongs to the
      theme instead of reading as a dull grey box. */
   .rm-soon .rm-rect {
-    fill: #f4f1fd;
-    stroke: #a78bfa;
+    fill: color-mix(in srgb, var(--accent-100) 45%, white);
+    stroke: var(--accent-400);
     stroke-width: 1.5;
     stroke-dasharray: 4 4;
   }
   .rm-soon .rm-label {
-    fill: #5b5470;
+    fill: color-mix(in srgb, var(--accent-900) 55%, var(--gray-500));
   }
-  /* Hover on a dormant cell: it lights up toward violet with a soft glow so it
+  /* Hover on a dormant cell: it lights up toward the accent with a soft glow so it
      still feels clickable even without notes yet. */
   .rm-node.rm-soon:hover .rm-rect {
-    fill: #ece6fb;
-    stroke: #7c3aed;
+    fill: color-mix(in srgb, var(--accent-100) 70%, white);
+    stroke: var(--accent-600);
     stroke-width: 2;
-    filter: drop-shadow(0 0 6px rgba(124, 58, 237, 0.45));
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-600) 45%, transparent));
   }
 
   /* Focus ring for keyboard users. */
   .rm-node:focus-visible .rm-rect {
-    stroke: #4c1d95;
+    stroke: var(--accent-900);
     stroke-width: 3;
   }
 
   :global([data-theme='dark']) .rm-avail .rm-rect {
-    fill: #5b34c4; /* richer, brighter violet body so completed cells pop */
-    stroke: #a78bfa;
+    /* richer, brighter accent body so completed cells pop */
+    fill: color-mix(in srgb, var(--accent-600) 78%, black);
+    stroke: var(--accent-400);
   }
   :global([data-theme='dark']) .rm-avail .rm-label {
-    fill: #ffffff; /* crisp white label on the filled violet body */
+    fill: #ffffff; /* crisp white label on the filled accent body */
   }
   :global([data-theme='dark']) .rm-soon .rm-rect {
     /* Opaque (a touch above the canvas) so the trunk and dendrites never bleed
-       through, with a brighter violet dashed membrane so a dormant cell still
+       through, with a brighter accent dashed membrane so a dormant cell still
        reads as part of the theme rather than a dull grey outline. */
-    fill: #17162b;
-    stroke: #7c6bd0;
+    fill: color-mix(in srgb, var(--accent-900) 45%, #0b0d17);
+    stroke: color-mix(in srgb, var(--accent-400) 70%, var(--accent-700));
   }
   :global([data-theme='dark']) .rm-soon .rm-label {
-    fill: #b9b4d6;
+    fill: color-mix(in srgb, var(--accent-200) 70%, var(--gray-400));
   }
   :global([data-theme='dark']) .rm-label {
     fill: #e5e7eb;
   }
   :global([data-theme='dark']) .rm-node:focus-visible .rm-rect {
-    stroke: #ddd6fe;
+    stroke: var(--accent-200);
   }
-  /* Dark-mode hover glows: brighter membrane + violet halo so the reaction is
+  /* Dark-mode hover glows: brighter membrane + accent halo so the reaction is
      unmistakable against the dark canvas. */
   :global([data-theme='dark']) .rm-node.rm-avail:hover .rm-rect {
-    /* Lighten by a CONTROLLED step to a richer violet (not the runaway
+    /* Lighten by a CONTROLLED step to a richer accent (not the runaway
        brightness filter, which washed the cell out to near-white). Keep the
        glow for the lift; the white label stays legible on this fill. */
-    fill: #7048d8;
-    stroke: #c4b5fd;
+    fill: color-mix(in srgb, var(--accent-500) 85%, black);
+    stroke: var(--accent-300);
     stroke-width: 2.5;
-    filter: drop-shadow(0 0 9px rgba(167, 139, 250, 0.7));
+    filter: drop-shadow(0 0 9px color-mix(in srgb, var(--accent-400) 70%, transparent));
   }
   :global([data-theme='dark']) .rm-node.rm-soon:hover .rm-rect {
-    fill: #221f3d;
-    stroke: #a78bfa;
+    fill: color-mix(in srgb, var(--accent-900) 55%, #0b0d17);
+    stroke: var(--accent-400);
     stroke-width: 2;
-    filter: drop-shadow(0 0 8px rgba(167, 139, 250, 0.5));
+    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-400) 50%, transparent));
   }
 
   /*
    * Optional (safe-to-skip) cell: DASHED AMBER MEMBRANE. Placed AFTER the
    * avail/soon rules so it wins the stroke on equal specificity; the FILL
-   * (violet when done, pale when not) is untouched, so a cell shows its
+   * (accent when done, pale when not) is untouched, so a cell shows its
    * completion state and its optional status at once. The focus ring (later +
    * thicker) still overrides. Reads as "not fully wired in".
    */
