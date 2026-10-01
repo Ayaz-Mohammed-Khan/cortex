@@ -133,7 +133,7 @@ function openModal(id: string): void {
         a.href = p.href;
         a.textContent = p.label;
         a.className =
-          'font-medium text-violet-700 underline decoration-violet-300 underline-offset-2 hover:text-violet-800 dark:text-violet-300 dark:decoration-violet-500 dark:hover:text-violet-200';
+          'font-medium text-accent-700 underline decoration-accent-300 underline-offset-2 hover:text-accent-800 dark:text-accent-300 dark:decoration-accent-500 dark:hover:text-accent-200';
         prereqEl.append(a);
       } else {
         // No note or category yet: a dull "coming soon" link, matching the
@@ -165,7 +165,7 @@ function openModal(id: string): void {
         'mb-2 flex break-inside-avoid items-start gap-2 text-sm text-gray-700 dark:text-gray-200';
       const dot = document.createElement('span');
       dot.setAttribute('aria-hidden', 'true');
-      dot.className = 'mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500';
+      dot.className = 'mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent-500';
       // A concept that maps to a real heading becomes a link straight to it;
       // the rest stay plain text so nothing pretends to be navigable.
       const text = document.createElement(concept.href ? 'a' : 'span');
@@ -173,8 +173,8 @@ function openModal(id: string): void {
       if (concept.href && text instanceof HTMLAnchorElement) {
         text.href = concept.href;
         text.className +=
-          ' font-medium text-violet-700 underline decoration-violet-300 underline-offset-2' +
-          ' hover:decoration-violet-600 dark:text-violet-300 dark:decoration-violet-500';
+          ' font-medium text-accent-700 underline decoration-accent-300 underline-offset-2' +
+          ' hover:decoration-accent-600 dark:text-accent-300 dark:decoration-accent-500';
       }
       text.textContent = concept.text;
       li.append(dot, text);
@@ -200,9 +200,9 @@ function openModal(id: string): void {
       a.textContent = section.text;
       a.className =
         'block rounded-md px-2 py-1 text-sm text-gray-600 transition-colors' +
-        ' hover:bg-violet-50 hover:text-violet-700 focus-visible:outline-none' +
-        ' focus-visible:ring-2 focus-visible:ring-violet-600' +
-        ' dark:text-gray-300 dark:hover:bg-violet-500/10 dark:hover:text-violet-300';
+        ' hover:bg-accent-50 hover:text-accent-700 focus-visible:outline-none' +
+        ' focus-visible:ring-2 focus-visible:ring-accent-600' +
+        ' dark:text-gray-300 dark:hover:bg-accent-500/10 dark:hover:text-accent-300';
       // Indent nested headings so the note's structure is legible at a glance.
       if (section.depth > 2) a.style.paddingLeft = `${(section.depth - 2) * 0.75 + 0.5}rem`;
       li.appendChild(a);

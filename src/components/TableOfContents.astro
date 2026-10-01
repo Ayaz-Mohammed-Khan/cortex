@@ -47,7 +47,7 @@ const { entries } = Astro.props;
               data-toc-link
               data-target={entry.slug}
               style={{ paddingLeft: `${0.85 + entry.indent}rem` }}
-              class="-ml-px block border-l-2 border-transparent py-1 leading-snug text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-100"
+              class="-ml-px block border-l-2 border-transparent py-1 leading-snug text-gray-500 transition-colors hover:border-gray-300 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-400 dark:hover:border-gray-600 dark:hover:text-gray-100"
             >
               {entry.text}
             </a>
@@ -62,13 +62,13 @@ const { entries } = Astro.props;
   /* Active entry: an accent left bar sitting on the rail, accent text, medium
      weight — a clear docs-style marker, not just a color change. */
   .toc-active {
-    border-inline-start-color: #7c3aed; /* violet-600 */
-    color: #6d28d9; /* violet-700 */
+    border-inline-start-color: #7c3aed; /* accent-600 */
+    color: #6d28d9; /* accent-700 */
     font-weight: 600;
   }
   :global([data-theme='dark']) .toc-active {
-    border-inline-start-color: #a78bfa; /* violet-400 */
-    color: #c4b5fd; /* violet-300 */
+    border-inline-start-color: #a78bfa; /* accent-400 */
+    color: #c4b5fd; /* accent-300 */
   }
 </style>
 

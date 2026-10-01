@@ -37,9 +37,9 @@ const landingBySlug = new Map(siteModel.sections.map((s) => [s.slug, s.landingRo
             href={landingBySlug.get(item.slug) ?? `/${item.slug}`}
             aria-current={isActive ? 'page' : undefined}
             class:list={[
-              'inline-flex h-8 flex-1 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+              'inline-flex h-8 flex-1 items-center justify-center rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600',
               isActive
-                ? 'bg-violet-600 text-white dark:bg-violet-600 dark:text-white'
+                ? 'bg-accent-600 text-white dark:bg-accent-600 dark:text-white'
                 : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-white/5',
             ]}
           >

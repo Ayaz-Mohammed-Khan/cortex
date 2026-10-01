@@ -57,7 +57,7 @@ function isExpanded(route: string): boolean {
  * left accent bar (no layout shift), accent text, and heavier weight.
  */
 const ACTIVE =
-  'bg-violet-50 text-violet-700 font-medium shadow-[inset_2px_0_0_#7c3aed] dark:bg-violet-950/50 dark:text-violet-200 dark:shadow-[inset_2px_0_0_#a78bfa]';
+  'bg-accent-50 text-accent-700 font-medium shadow-[inset_2px_0_0_#7c3aed] dark:bg-accent-950/50 dark:text-accent-200 dark:shadow-[inset_2px_0_0_#a78bfa]';
 
 /** Idle (inactive) row chrome: muted text, calm hover background + text lift. */
 const IDLE =
@@ -93,7 +93,7 @@ const IDLE =
                 data-nav-toggle
                 aria-expanded={open}
                 aria-label={`Toggle ${node.displayName}`}
-                class="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-200/60 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-500 dark:hover:bg-gray-700/50 dark:hover:text-gray-300"
+                class="inline-flex h-8 w-6 shrink-0 items-center justify-center rounded text-gray-400 hover:bg-gray-200/60 hover:text-gray-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-500 dark:hover:bg-gray-700/50 dark:hover:text-gray-300"
               >
                 {/* Chevron: rotates smoothly from ▶ to ▼ when the branch opens. */}
                 <svg
@@ -114,7 +114,7 @@ const IDLE =
                 href={node.route}
                 aria-current={selected ? 'page' : undefined}
                 class:list={[
-                  'flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-sm font-medium leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+                  'flex min-h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-2 py-1 text-sm font-medium leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600',
                   selected ? `font-semibold ${ACTIVE}` : IDLE,
                 ]}
               >
@@ -153,7 +153,7 @@ const IDLE =
             href={node.route}
             aria-current={selected ? 'page' : undefined}
             class:list={[
-              'flex min-h-8 min-w-0 items-center gap-2 rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600',
+              'flex min-h-8 min-w-0 items-center gap-2 rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600',
               selected ? ACTIVE : IDLE,
             ]}
           >

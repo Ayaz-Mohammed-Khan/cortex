@@ -105,8 +105,8 @@ function makeButton(label: string, ariaLabel: string, onClick: () => void): HTML
   btn.setAttribute('aria-label', ariaLabel);
   btn.className =
     'inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-sm font-medium ' +
-    'text-violet-700 transition-colors hover:bg-violet-50 focus-visible:outline-none ' +
-    'focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-violet-200 dark:hover:bg-gray-800';
+    'text-accent-700 transition-colors hover:bg-accent-50 focus-visible:outline-none ' +
+    'focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-accent-200 dark:hover:bg-gray-800';
   btn.addEventListener('click', onClick);
   return btn;
 }
@@ -120,8 +120,8 @@ function showToolbar(): void {
   bar.setAttribute('aria-label', 'Search highlight navigation');
   bar.className =
     'fixed bottom-4 left-1/2 z-40 flex -translate-x-1/2 items-center gap-1 rounded-full ' +
-    'border border-violet-300 bg-white/95 px-2 py-1 shadow-lg backdrop-blur ' +
-    'dark:border-violet-500/50 dark:bg-gray-900/95';
+    'border border-accent-300 bg-white/95 px-2 py-1 shadow-lg backdrop-blur ' +
+    'dark:border-accent-500/50 dark:bg-gray-900/95';
 
   const prev = makeButton('‹', 'Previous match', prevMatch);
   const counter = document.createElement('span');

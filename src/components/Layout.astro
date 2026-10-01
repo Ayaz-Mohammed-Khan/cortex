@@ -18,6 +18,7 @@
  */
 import '@/styles/global.css';
 import { ClientRouter } from 'astro:transitions';
+import { SITE_PALETTE } from '@/lib/config';
 import type { CategoryNode } from '@/lib/ingest/types';
 import type { SiteModel } from '@/lib/section';
 import { computeNavState } from '@/lib/nav-state';
@@ -65,7 +66,7 @@ const isLanding = chrome === 'landing';
 ---
 
 <!doctype html>
-<html lang={lang}>
+<html lang={lang} data-palette={SITE_PALETTE}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -113,7 +114,7 @@ const isLanding = chrome === 'landing';
 
     <a
       href="#main-content"
-      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-violet-800 focus:ring-2 focus:ring-violet-600 dark:focus:bg-gray-900 dark:focus:text-violet-200"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:text-accent-800 focus:ring-2 focus:ring-accent-600 dark:focus:bg-gray-900 dark:focus:text-accent-200"
     >
       Skip to content
     </a>
@@ -152,7 +153,7 @@ const isLanding = chrome === 'landing';
               aria-expanded="false"
               aria-controls="nav-drawer"
               aria-label="Toggle navigation"
-              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+              class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 lg:hidden dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
             >
               <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M3 5h14a1 1 0 1 1 0 2H3a1 1 0 0 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2zm0 4h14a1 1 0 1 1 0 2H3a1 1 0 1 1 0-2z" clip-rule="evenodd" />
@@ -169,7 +170,7 @@ const isLanding = chrome === 'landing';
         <a
           href="/"
           aria-current={currentRoute === '/' ? 'page' : undefined}
-          class="mr-auto flex shrink-0 items-center gap-2 rounded-md py-1 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-50"
+          class="mr-auto flex shrink-0 items-center gap-2 rounded-md py-1 text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-50"
         >
           {/*
             Cortex neural-node badge: a rounded-square violet mark whose white
@@ -227,7 +228,7 @@ const isLanding = chrome === 'landing';
               */}
               <a
                 href={notesLanding}
-                class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:inline-flex dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
+                class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
               >
                 Notes
               </a>
@@ -251,7 +252,7 @@ const isLanding = chrome === 'landing';
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="View this site's source on GitHub"
-                class="hidden h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:inline-flex dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                class="hidden h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               >
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path
@@ -272,7 +273,7 @@ const isLanding = chrome === 'landing';
                 data-search-open
                 aria-label="Search notes"
                 aria-keyshortcuts="Control+K"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:hidden dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:hidden dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
               >
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
@@ -291,7 +292,7 @@ const isLanding = chrome === 'landing';
                 data-search-open
                 aria-label="Search notes"
                 aria-keyshortcuts="Control+K"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800"
               >
                 <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                   <path
@@ -358,7 +359,7 @@ const isLanding = chrome === 'landing';
         <div class="flex flex-col gap-2 px-4 pb-3 pt-4 lg:px-5">
           <a
             href="/"
-            class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
+            class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
           >
             <svg
               class="h-4 w-4 shrink-0 opacity-70"
@@ -396,7 +397,7 @@ const isLanding = chrome === 'landing';
             target="_blank"
             rel="noopener noreferrer"
             aria-label="View this site's source on GitHub"
-            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+            class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
           >
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path
@@ -480,7 +481,7 @@ const isLanding = chrome === 'landing';
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="View this site's source on GitHub"
-                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
+                class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-300 text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
               >
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path

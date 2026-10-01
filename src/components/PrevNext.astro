@@ -36,12 +36,12 @@ const { prev, next } = Astro.props;
       <a
         href={prev.route}
         rel="prev"
-        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-left transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-left transition-colors hover:border-accent-400 hover:bg-accent-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-accent-500/60 dark:hover:bg-accent-500/10"
       >
         <span class="flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
           <span aria-hidden="true">&larr;</span> Previous
         </span>
-        <span class="font-semibold text-gray-900 group-hover:text-violet-700 dark:text-gray-100 dark:group-hover:text-violet-300">
+        <span class="font-semibold text-gray-900 group-hover:text-accent-700 dark:text-gray-100 dark:group-hover:text-accent-300">
           {prev.displayName}
         </span>
       </a>
@@ -54,12 +54,12 @@ const { prev, next } = Astro.props;
       <a
         href={next.route}
         rel="next"
-        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-right transition-colors hover:border-violet-400 hover:bg-violet-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-violet-500/60 dark:hover:bg-violet-500/10"
+        class="group flex flex-1 flex-col gap-1 rounded-lg border border-gray-200 px-4 py-3 text-right transition-colors hover:border-accent-400 hover:bg-accent-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:max-w-[48%] dark:border-white/10 dark:hover:border-accent-500/60 dark:hover:bg-accent-500/10"
       >
         <span class="flex items-center justify-end gap-1 text-xs font-medium text-gray-500 dark:text-gray-400">
           Next <span aria-hidden="true">&rarr;</span>
         </span>
-        <span class="font-semibold text-gray-900 group-hover:text-violet-700 dark:text-gray-100 dark:group-hover:text-violet-300">
+        <span class="font-semibold text-gray-900 group-hover:text-accent-700 dark:text-gray-100 dark:group-hover:text-accent-300">
           {next.displayName}
         </span>
       </a>

@@ -289,8 +289,8 @@ function renderSection(sub: PagefindSubResult, isPhrase: boolean, phrase: string
   return `
     <li>
       <a href="${escapeHtml(withPhraseFlag(sub.url, isPhrase, phrase))}"
-         class="group/sec flex items-center gap-2 rounded-md py-1 pl-3 pr-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-violet-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-violet-300">
-        <svg class="h-3 w-3 shrink-0 text-gray-400 group-hover/sec:text-violet-500 dark:text-gray-500" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+         class="group/sec flex items-center gap-2 rounded-md py-1 pl-3 pr-2 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-accent-300">
+        <svg class="h-3 w-3 shrink-0 text-gray-400 group-hover/sec:text-accent-500 dark:text-gray-500" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M7 4l6 6-6 6" />
         </svg>
         <span class="min-w-0 flex-1 truncate">${escapeHtml(sectionLabel(sub))}</span>
@@ -337,9 +337,9 @@ function renderResults(notes: RankedNote[], query: string): void {
       return `
         <li class="rounded-lg px-1 py-1">
           <a href="${escapeHtml(noteHref)}"
-             class="flex items-baseline gap-2 rounded-md px-3 py-2 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-600 dark:hover:bg-gray-800">
+             class="flex items-baseline gap-2 rounded-md px-3 py-2 hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:hover:bg-gray-800">
             <span class="min-w-0 flex-1 font-medium text-gray-900 dark:text-gray-100">${escapeHtml(displayName)}</span>
-            <span class="shrink-0 rounded-full bg-violet-100 px-2 py-0.5 text-[0.7rem] font-semibold text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">${escapeHtml(matchCountLabel(note))}</span>
+            <span class="shrink-0 rounded-full bg-accent-100 px-2 py-0.5 text-[0.7rem] font-semibold text-accent-700 dark:bg-accent-500/15 dark:text-accent-300">${escapeHtml(matchCountLabel(note))}</span>
           </a>
           ${categoryPath ? `<p class="px-3 text-xs text-gray-500 dark:text-gray-400">${escapeHtml(categoryPath)}</p>` : ''}
           ${sectionsHtml ? `<ul class="mt-1 space-y-0.5 border-l border-gray-100 pl-3 dark:border-white/5">${sectionsHtml}${moreHtml}</ul>` : ''}
