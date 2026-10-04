@@ -10,10 +10,9 @@
  * A standalone script cannot reach into an Astro component's frontmatter, so
  * keeping the data here is what makes the roadmap auditable at all.
  *
- * SOURCE: every track and concept list is derived from the CampusX Data Science
- * Mentorship Program (DSMP 2.0) curriculum. Main-track entries mirror the
- * program's subject areas (roughly two weeks of study each); branch entries
- * mirror its individual sessions; concept lists mirror that session's bullets.
+ * The roadmap is organized as main tracks (each a subject area of roughly two
+ * weeks of study), branch sub-topics (individual lessons), and a granular
+ * concept list per node that acts as that lesson's syllabus.
  *
  * Concept bullets are matched to note headings AUTOMATICALLY by
  * `src/lib/syllabus/match.ts`, so adding a note requires no edit here. The
@@ -169,9 +168,8 @@ export const phases: Phase[] = [
   },
 ];
 
-// The roadmap graph, top -> bottom (study order), following the DSMP 2.0
-// curriculum. Each node carries a granular concept list (its "syllabus"),
-// surfaced in the click-through modal.
+// The roadmap graph, top -> bottom (study order). Each node carries a granular
+// concept list (its "syllabus"), surfaced in the click-through modal.
 export const spine: Step[] = [
   {
     label: 'Python Foundations',

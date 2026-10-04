@@ -5,9 +5,8 @@ keep doing so as notes are added.
 
 ## The problem
 
-The roadmap (`src/data/roadmap.ts`) is written from the CampusX DSMP curriculum.
-The notes (`content/**/*.md`) are written independently. The two describe the same
-subjects in different words:
+The roadmap (`src/data/roadmap.ts`) and the notes (`content/**/*.md`) are
+written independently. The two describe the same subjects in different words:
 
 | Roadmap bullet | Note heading |
 | --- | --- |

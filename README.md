@@ -135,9 +135,8 @@ or want to propose a topic, please open an issue or a pull request.
 
 ## License
 
-Released under the [MIT License](./LICENSE). The notes and content are shared
-freely for learning; please credit the source if you reuse them. Content is
-derived from the CampusX DSMP 2.0 curriculum.
+Released under the [MIT License](./LICENSE). The notes and content are original
+work written for Cortex.
 
 ---
 
