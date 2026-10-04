@@ -550,6 +550,14 @@ console.log(
 
 const availableSteps = nodes.filter((n) => n.main && n.href).length;
 const totalSteps = nodes.filter((n) => n.main).length;
+
+// Completable topics = DISTINCT note routes reachable from the graph's leaf
+// nodes (a few nodes share one note, so dedupe to match how progress is keyed).
+// This is the denominator of the progress meter.
+const completableRoutes = new Set(
+  nodes.filter((n) => n.linkKind === 'note' && n.href).map((n) => n.href as string),
+);
+const totalNotes = completableRoutes.size;
 ---
 
 <Layout
@@ -630,6 +638,51 @@ const totalSteps = nodes.filter((n) => n.main).length;
       <p class="text-sm text-gray-500 dark:text-gray-400" data-rm-view-hint>
         {totalSteps} core topics at a glance. Switch to detailed for every sub-topic.
       </p>
+    </div>
+
+    {/*
+      Progress meter. Fills to done/total, where total is the number of distinct
+      notes the graph links to. The island updates the fill width, the label,
+      and the reset affordance live from the shared progress store. Hidden until
+      the reader has completed at least one topic, so a brand-new visitor is not
+      shown an empty 0% bar; the island reveals it on the first completion.
+    */}
+    <div
+      data-rm-meter-wrap
+      data-total={totalNotes}
+      hidden
+      class="mb-5 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 dark:border-white/10 dark:bg-white/5"
+    >
+      <div class="shrink-0">
+        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+          <span data-rm-meter-count>0 of {totalNotes}</span> topics done
+        </div>
+        <div class="text-xs text-gray-500 dark:text-gray-400">
+          <span data-rm-meter-pct>0%</span> of the roadmap complete
+        </div>
+      </div>
+      <div
+        class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-accent-500/15"
+        role="progressbar"
+        aria-label="Roadmap completion"
+        aria-valuemin="0"
+        aria-valuemax={totalNotes}
+        aria-valuenow="0"
+        data-rm-meter-track
+      >
+        <div
+          data-rm-meter-fill
+          class="rm-meter-fill h-full w-0 rounded-full"
+          style="background: linear-gradient(90deg, var(--accent-600), #10b981)"
+        ></div>
+      </div>
+      <button
+        type="button"
+        data-rm-meter-reset
+        class="shrink-0 self-start text-xs font-semibold text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-gray-700 sm:self-auto dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-gray-200"
+      >
+        Reset
+      </button>
     </div>
 
     {/* Legend: below the toggle, wrapping freely. */}
@@ -890,6 +943,22 @@ const totalSteps = nodes.filter((n) => n.main).length;
                   box. Optional cells get the dashed amber membrane via `.rm-adv`. */}
               <rect x={x} y={y} width={n.w} height={n.h} rx={n.h / 2} class="rm-rect" />
               {/*
+                Completion badge (option A5): a green check overlapping the
+                top-right corner, shown only once the reader marks this topic's
+                note done. Rendered for every cell with a note but hidden until
+                the island flips `.rm-done` on the node (from the progress
+                store); keeps the cell colour otherwise untouched.
+              */}
+              {n.href && n.linkKind === 'note' && (
+                <g class="rm-done-badge" aria-hidden="true">
+                  <circle cx={x + n.w} cy={y} r="9" class="rm-done-badge-bg" />
+                  <path
+                    d={`M ${x + n.w - 4} ${y} l 2.6 2.6 L ${x + n.w + 4.5} ${y - 4}`}
+                    class="rm-done-badge-tick"
+                  />
+                </g>
+              )}
+              {/*
                 Difficulty nucleus: a coloured dot (green/blue/pink) with a soft
                 halo, set just inside the cell's INNER edge (the side facing the
                 spine). It is the difficulty axis, separate from the optional
@@ -1005,7 +1074,7 @@ const totalSteps = nodes.filter((n) => n.main).length;
       </div>
     </div>
 
-    <div data-rm-footer class="hidden border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
+    <div data-rm-footer class="hidden flex-wrap items-center gap-2.5 border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
       <a
         data-rm-link
         href="#"
@@ -1014,6 +1083,21 @@ const totalSteps = nodes.filter((n) => n.main).length;
         <span data-rm-link-text>Read the notes</span>
         <span aria-hidden="true">→</span>
       </a>
+      {/*
+        Progress toggle (option B1). Ghost outline by default; the island flips
+        it to a solid green "Completed" when this topic's route is done, reading
+        the same store as the note page and the graph badge. Hidden for topics
+        with no note (nothing to complete).
+      */}
+      <button
+        type="button"
+        data-rm-done
+        aria-pressed="false"
+        class="inline-flex items-center gap-2 rounded-lg border-[1.75px] border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-offset-gray-900"
+      >
+        <span data-rm-done-icon aria-hidden="true" class="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full border-2 border-current"></span>
+        <span data-rm-done-text>Mark done</span>
+      </button>
     </div>
   </dialog>
 
@@ -1196,6 +1280,93 @@ const totalSteps = nodes.filter((n) => n.main).length;
   .rm-label-main {
     font-size: 15px;
     font-weight: 600;
+  }
+
+  /* --- Completion badge (A5): green corner check on a done cell ---
+     Hidden by default; the island adds `.rm-done` to a node whose note the
+     reader has completed, which reveals the badge. Green reads as "done" across
+     both themes, distinct from the accent/difficulty hues. */
+  .rm-done-badge {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: scale(0.6);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+  .rm-node.rm-done .rm-done-badge {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .rm-done-badge-bg {
+    fill: #10b981;
+    stroke: #ffffff;
+    stroke-width: 2.5;
+  }
+  .rm-done-badge-tick {
+    fill: none;
+    stroke: #ffffff;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  :global([data-theme='dark']) .rm-done-badge-bg {
+    fill: #34d399;
+    stroke: #0b0d17;
+  }
+  :global([data-theme='dark']) .rm-done-badge-tick {
+    stroke: #042f1f;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rm-done-badge {
+      transition: none;
+      transform: scale(1);
+    }
+  }
+
+  /* Progress meter fill: a gradient bar that eases to its new width, with a
+     soft sheen sweeping across it. Reduced motion drops the sweep. */
+  .rm-meter-fill {
+    position: relative;
+    transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  }
+  .rm-meter-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: rm-meter-sweep 2.4s linear infinite;
+  }
+  @keyframes rm-meter-sweep {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(100%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rm-meter-fill {
+      transition: none;
+    }
+    .rm-meter-fill::after {
+      animation: none;
+    }
+  }
+
+  /* Modal "Mark done" button, done state (B1): the ghost outline flips to a
+     solid green fill with a tick. Base (not-done) styling is Tailwind on the
+     element; this only overrides the done modifier the island toggles. */
+  :global([data-rm-done].rm-done-on) {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: #042f1f;
+  }
+  :global([data-rm-done].rm-done-on:hover) {
+    background-color: #059669;
+    border-color: #059669;
+  }
+  :global([data-theme='dark'] [data-rm-done].rm-done-on) {
+    background-color: #34d399;
+    border-color: #34d399;
+    color: #042f1f;
   }
 
   /* --- Difficulty nucleus (green/blue/pink dot + halo) --- */

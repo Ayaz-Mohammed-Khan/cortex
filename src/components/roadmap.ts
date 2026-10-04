@@ -17,7 +17,12 @@
  * thin, dependency-free presentation layer. Delegated listeners are bound once
  * on `document` and survive Astro View Transitions; the graph is re-scanned on
  * `astro:page-load` so it works after client-side navigation too.
+ *
+ * Progress: the graph also reflects which topics the reader has completed,
+ * reading the shared `@/lib/progress` store so a done cell shows a corner check
+ * badge, the modal's "Mark done" toggle stays in sync, and the top meter fills.
  */
+import { isDone, toggleDone, resetProgress, onChange } from '@/lib/progress';
 
 /** A syllabus bullet; `href` is set when it names a real section of the note. */
 interface Concept {
@@ -66,6 +71,88 @@ function loadData(): void {
 
 function dialog(): HTMLDialogElement | null {
   return document.querySelector<HTMLDialogElement>('[data-rm-dialog]');
+}
+
+/**
+ * Reflect the progress store onto the modal's "Mark done" button for whatever
+ * route it currently targets. Ghost outline = not done; solid green with a tick
+ * = done. Called when the modal opens and whenever the store changes.
+ */
+function syncDoneButton(): void {
+  const btn = dialog()?.querySelector<HTMLButtonElement>('[data-rm-done]');
+  const route = btn?.dataset.route;
+  if (!btn || !route) return;
+  const done = isDone(route);
+  const icon = btn.querySelector<HTMLElement>('[data-rm-done-icon]');
+  const text = btn.querySelector<HTMLElement>('[data-rm-done-text]');
+  btn.setAttribute('aria-pressed', String(done));
+  // Swap the two visual states by toggling a `done` modifier class the CSS
+  // keys off (defined in index.astro), keeping colour logic out of the JS.
+  btn.classList.toggle('rm-done-on', done);
+  if (text) text.textContent = done ? 'Completed' : 'Mark done';
+  if (icon) {
+    icon.innerHTML = done
+      ? '<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6 l2.5 2.5 L10 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '';
+  }
+}
+
+/**
+ * Reflect the progress store onto the graph: a node whose note route is done
+ * gets `.rm-done` (which reveals its corner check badge via CSS). Runs over
+ * both panes so the simple and detailed graphs agree. Cheap enough to re-run
+ * wholesale on any change.
+ */
+function syncGraphBadges(): void {
+  const groups = document.querySelectorAll<SVGGElement>('[data-rm-node]');
+  for (const g of groups) {
+    const id = g.getAttribute('data-rm-node');
+    const route = id ? data[id]?.href : null;
+    const done = route != null && data[id!]?.linkKind === 'note' && isDone(route);
+    g.classList.toggle('rm-done', done);
+  }
+}
+
+/**
+ * Update the progress meter from the store. The denominator (total completable
+ * notes) is baked into the markup as `data-total`; the numerator is however
+ * many of this graph's note routes are done. The meter stays hidden until the
+ * first completion so a new visitor never sees an empty 0% bar.
+ */
+function syncMeter(): void {
+  const wrap = document.querySelector<HTMLElement>('[data-rm-meter-wrap]');
+  if (!wrap) return;
+  const total = Number(wrap.dataset.total) || 0;
+
+  // Count done among THIS graph's note routes only (ignore any stale routes in
+  // storage that no longer exist), so the numerator can never exceed the total.
+  const routes = new Set<string>();
+  for (const g of document.querySelectorAll<SVGGElement>('[data-rm-node]')) {
+    const id = g.getAttribute('data-rm-node');
+    const info = id ? data[id] : undefined;
+    if (info?.linkKind === 'note' && info.href) routes.add(info.href);
+  }
+  let done = 0;
+  for (const r of routes) if (isDone(r)) done++;
+
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  wrap.hidden = done === 0;
+
+  const count = wrap.querySelector<HTMLElement>('[data-rm-meter-count]');
+  if (count) count.textContent = `${done} of ${total}`;
+  const pctEl = wrap.querySelector<HTMLElement>('[data-rm-meter-pct]');
+  if (pctEl) pctEl.textContent = `${pct}%`;
+  const fill = wrap.querySelector<HTMLElement>('[data-rm-meter-fill]');
+  if (fill) fill.style.width = `${pct}%`;
+  const track = wrap.querySelector<HTMLElement>('[data-rm-meter-track]');
+  if (track) track.setAttribute('aria-valuenow', String(done));
+}
+
+/** Update every progress-aware surface on the roadmap page at once. */
+function syncProgress(): void {
+  syncGraphBadges();
+  syncDoneButton();
+  syncMeter();
 }
 
 /** Populate and open the modal for a given node id. */
@@ -224,10 +311,29 @@ function openModal(id: string): void {
         linkText.textContent =
           info.linkKind === 'category' ? 'Browse all notes' : 'Read the full note';
       }
+      // `hidden` wins over the footer's flex utilities, so swap the two.
       footer.classList.remove('hidden');
+      footer.classList.add('flex');
     } else {
       link.removeAttribute('href');
       footer.classList.add('hidden');
+      footer.classList.remove('flex');
+    }
+  }
+
+  // Progress toggle (B1): only a topic WITH a note can be completed. Point it at
+  // this node's route and reflect the stored state; the click handler and the
+  // store subscription keep it live.
+  const doneBtn = dlg.querySelector<HTMLButtonElement>('[data-rm-done]');
+  if (doneBtn) {
+    if (info.href && info.linkKind === 'note') {
+      doneBtn.hidden = false;
+      doneBtn.dataset.route = info.href;
+      syncDoneButton();
+    } else {
+      // A main-track category or a note-less topic: nothing to mark complete.
+      doneBtn.hidden = true;
+      delete doneBtn.dataset.route;
     }
   }
 
@@ -319,6 +425,22 @@ function onClick(event: MouseEvent): void {
   // Close button inside the dialog.
   if (target.closest('[data-rm-close]')) {
     dialog()?.close();
+    return;
+  }
+
+  // "Mark done" toggle in the modal footer: flip the store, keep the modal open.
+  const doneBtn = target.closest<HTMLButtonElement>('[data-rm-done]');
+  if (doneBtn) {
+    const route = doneBtn.dataset.route;
+    if (route) toggleDone(route); // store change -> onChange -> all surfaces sync
+    return;
+  }
+
+  // Reset progress (meter): clear all completion after a confirm.
+  if (target.closest('[data-rm-meter-reset]')) {
+    if (window.confirm('Reset your progress? This clears every topic you have marked done.')) {
+      resetProgress(); // -> onChange -> graph, meter, any open modal all clear
+    }
     return;
   }
 
@@ -469,6 +591,8 @@ function armReveal(): void {
   requestAnimationFrame(() => requestAnimationFrame(check));
 }
 
+let progressUnsub: (() => void) | null = null;
+
 function bind(): void {
   loadData();
   restoreView();
@@ -478,6 +602,11 @@ function bind(): void {
   // is hidden now, arming still tags it; when the user switches to detailed the
   // elements are in their start state and the first `check()` reveals what fits.
   armReveal();
+  // Progress: paint the stored completion onto the graph/meter, and keep them
+  // live. Resubscribe fresh each page-load so listeners never stack.
+  syncProgress();
+  progressUnsub?.();
+  progressUnsub = onChange(syncProgress);
 }
 
 document.addEventListener('click', onClick);

@@ -28,13 +28,16 @@ interface Props {
   categoryPath: string;
   /** The rendered Markdown component from `render(entry)`. */
   Content: AstroComponentFactory;
+  /** This note's route, e.g. `/notes/.../classes-objects`. Keys the progress
+   *  store so the "Mark as complete" control stays in sync with the roadmap. */
+  route: string;
   /** Optional material difficulty (frontmatter), shown as a badge. */
   difficulty?: Difficulty;
   /** Optional prerequisites (frontmatter), resolved to links where possible. */
   prerequisites?: PrereqLink[];
 }
 
-const { displayName, categoryPath, Content, difficulty, prerequisites = [] } = Astro.props;
+const { displayName, categoryPath, Content, route, difficulty, prerequisites = [] } = Astro.props;
 
 // Difficulty badge palette: a distinct axis from the roadmap's core/advanced
 // tier, so it uses its own green -> blue -> pink scale.
@@ -119,11 +122,61 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   <div class="note-body mt-6">
     <Content />
   </div>
+
+  {/*
+    Progress control (option B2), placed at the END of the reading flow — the
+    natural "you've finished, mark it done" moment, after the body and before
+    the backlinks / prev-next navigation. A quiet divider sets it apart from the
+    content. State lives in the shared progress store (keyed by this note's
+    route), so the roadmap graph, modal, and meter stay in sync. Enhanced by the
+    `./note-progress` island, which reflects any state saved on a previous visit.
+  */}
+  <div
+    class="mt-10 flex flex-col items-center gap-3 border-t border-gray-200 pt-6 text-center dark:border-white/10"
+    data-note-progress
+    data-route={route}
+  >
+    <p class="text-sm text-gray-500 dark:text-gray-400">Finished this note?</p>
+    <button
+      type="button"
+      data-note-progress-input
+      aria-pressed="false"
+      class="note-progress-btn inline-flex items-center gap-2.5 rounded-lg border-[1.75px] border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-offset-gray-900"
+    >
+      <span
+        data-note-progress-icon
+        aria-hidden="true"
+        class="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full border-2 border-current"
+      ></span>
+      <span data-note-progress-label>Mark as complete</span>
+    </button>
+  </div>
 </article>
+
+<style>
+  /* Done state for the "Mark as complete" control: the ghost outline flips to a
+     solid green fill with a tick, matching the roadmap modal's "Mark done"
+     button. The island adds `.is-done` when this note's route is complete. */
+  .note-progress-btn.is-done {
+    background-color: #10b981;
+    border-color: #10b981;
+    color: #042f1f;
+  }
+  .note-progress-btn.is-done:hover {
+    background-color: #059669;
+    border-color: #059669;
+  }
+  :global([data-theme='dark']) .note-progress-btn.is-done {
+    background-color: #34d399;
+    border-color: #34d399;
+    color: #042f1f;
+  }
+</style>
 
 <script>
   import './image-fallback';
   import './code-block';
   import './image-zoom';
   import './search-highlight';
+  import './note-progress';
 </script>
