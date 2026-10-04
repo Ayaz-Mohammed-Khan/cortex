@@ -1,0 +1,43 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "A distribution has a long tail stretching to the right (a few very large values). How is it described, and how do mean and median compare?",
+      "options": [
+        "Right (positively) skewed, with the mean greater than the median because the tail pulls the mean upward.",
+        "Symmetric, with mean equal to median.",
+        "Left skewed, with the mean below the median.",
+        "Right skewed, with the median above the mean."
+      ],
+      "answer": 0,
+      "explanation": "A right-skewed distribution has its long tail on the high side, so the extreme large values drag the mean above the median. Income is a classic example. For left skew the tail is on the low side and the mean sits below the median.",
+      "misconception": "The skew direction is named for the tail, not the bulk. A long right tail is positive (right) skew."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You fit a model that assumes normally distributed residuals and want to check that assumption visually before trusting the inference.",
+      "question": "Which plot is designed for this, and how do you read it?",
+      "options": [
+        "A quantile-quantile (QQ) plot: if the points fall close to the diagonal line, the data matches the reference distribution; systematic curves or S-shapes signal departures.",
+        "A single number, the mean of the residuals.",
+        "A pie chart of residual signs.",
+        "A bar chart of the residuals."
+      ],
+      "answer": 0,
+      "explanation": "A QQ plot compares the data's quantiles against a reference distribution's quantiles. Points on the straight diagonal mean a good match; curvature at the ends indicates heavy or light tails, and an S-shape indicates skew. It is the standard visual normality check.",
+      "misconception": "Normality is a shape question, so a single statistic is not enough. A QQ plot shows where and how the data departs."
+    },
+    {
+      "type": "mcq",
+      "question": "What does kurtosis describe about a distribution?",
+      "options": [
+        "The heaviness of its tails and the sharpness of its peak relative to a normal distribution.",
+        "Its total area, which kurtosis adjusts to 1.",
+        "Its mean.",
+        "Whether it is skewed left or right."
+      ],
+      "answer": 0,
+      "explanation": "Kurtosis measures tail weight and peakedness. High (leptokurtic) means heavy tails and more extreme outliers than a normal; low (platykurtic) means lighter tails. Excess kurtosis subtracts 3 so a normal distribution reads as 0. It is a separate axis from skewness, which measures asymmetry."
+    }
+  ]
+}

@@ -47,6 +47,7 @@ import {
 } from './section';
 import { publishedRoutes } from './sitemap-filter';
 import { buildBacklinkIndex, type BacklinkRef } from './markdown/backlink-index';
+import { readQuizForNote, type Quiz } from './quiz';
 
 /** The `notes` collection entry type. */
 export type NoteEntry = CollectionEntry<'notes'>;
@@ -140,6 +141,11 @@ export interface LoadedSite {
    * `buildBacklinkIndex`.
    */
   backlinks: Map<string, BacklinkRef[]>;
+  /**
+   * Per-note quizzes, keyed by note route. A note has an entry here only when a
+   * valid `NN - Name.quiz.json` sits beside its Markdown. Read once per build.
+   */
+  quizzes: Map<string, Quiz>;
 }
 
 /** Convert an absolute route to the `[...slug]` rest parameter value. */
@@ -231,6 +237,7 @@ async function buildSite(): Promise<LoadedSite> {
   const treeEntries = collectEntries(tree);
   const entries: ContentEntry[] = [];
   const byRoute = new Map<string, RouteData>();
+  const quizzes = new Map<string, Quiz>();
 
   for (const { note, ancestors } of treeEntries) {
     const entry = note.sourcePath ? entryByPath.get(note.sourcePath) : undefined;
@@ -256,6 +263,12 @@ async function buildSite(): Promise<LoadedSite> {
     };
     entries.push(content);
     byRoute.set(note.route, { kind: 'note', route: note.route, entry, content });
+
+    // Pair the note with its sibling quiz (NN - Name.quiz.json), when present.
+    if (entry.filePath) {
+      const quiz = readQuizForNote(entry.filePath);
+      if (quiz) quizzes.set(note.route, quiz);
+    }
   }
 
   // Category listing routes: the section root plus every Category node.
@@ -291,7 +304,7 @@ async function buildSite(): Promise<LoadedSite> {
   // note page render via the memoized `loadSite()`.
   const backlinks = buildBacklinkIndex();
 
-  return { tree, entries, siteModel, paths, byRoute, publishedNoteRoutes, backlinks };
+  return { tree, entries, siteModel, paths, byRoute, publishedNoteRoutes, backlinks, quizzes };
 }
 
 /** Render a Note entry's Markdown to its `Content` component and headings. */
@@ -301,3 +314,4 @@ export async function renderNote(entry: NoteEntry) {
 
 export type { CategoryNode, CategoryRef, ContentEntry, NoteNode, TreeNode };
 export type { BacklinkRef };
+export type { Quiz };

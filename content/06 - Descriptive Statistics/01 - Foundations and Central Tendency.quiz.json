@@ -1,0 +1,48 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A dataset of annual incomes includes a few billionaires. You report the mean as the typical income.",
+      "question": "What is the problem, and which measure is more representative here?",
+      "options": [
+        "The mean is pulled upward by the extreme high values. The median is more representative because it is resistant to outliers.",
+        "The mean is always best; the median hides information.",
+        "There is no problem; the mean ignores outliers.",
+        "The mode is the only valid choice for income."
+      ],
+      "answer": 0,
+      "explanation": "The mean sums every value, so a few extreme incomes drag it away from what most people earn. The median, the middle value, barely moves when outliers are added, so it better reflects the typical case for skewed data like income.",
+      "misconception": "The mean is not robust. On skewed data with outliers, the median is the more honest summary of center."
+    },
+    {
+      "type": "mcq",
+      "question": "Why is standard deviation often preferred over variance when reporting spread?",
+      "options": [
+        "They are interchangeable and identical.",
+        "Variance cannot handle negative numbers.",
+        "Standard deviation is in the same units as the data, since it is the square root of variance.",
+        "Standard deviation is always smaller, so it looks better."
+      ],
+      "answer": 2,
+      "explanation": "Variance is the average squared deviation, so its units are the data's units squared, which is hard to interpret. Taking the square root returns the standard deviation to the original units, so it reads as a spread in the same scale as the values."
+    },
+    {
+      "type": "mcq",
+      "question": "What does the coefficient of variation (CV) let you do that standard deviation alone does not?",
+      "options": [
+        "Compare the relative spread of two datasets with different units or very different means, since CV is the standard deviation divided by the mean.",
+        "Convert a sample into a population.",
+        "Measure the center rather than the spread.",
+        "Remove outliers automatically."
+      ],
+      "answer": 0,
+      "explanation": "Standard deviation is absolute, so comparing a spread of 5 kg to a spread of 5 cm is meaningless. The coefficient of variation normalizes spread by the mean, giving a unitless ratio you can compare across datasets with different scales or units."
+    },
+    {
+      "type": "card",
+      "question": "Explain the difference between a population and a sample, and why most statistics work with samples.",
+      "answer": "A population is the entire group you care about, for example every customer. A sample is a smaller, representative subset you actually measure. You usually work with a sample because measuring the whole population is too costly, slow, or impossible, so you estimate population parameters from sample statistics. The quality of that estimate depends on the sample being random and representative.",
+      "explanation": "This split is the root of inferential statistics: a sample mean estimates an unknown population mean, with uncertainty you quantify later."
+    }
+  ]
+}

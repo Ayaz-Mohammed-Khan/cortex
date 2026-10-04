@@ -1,0 +1,55 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What is the difference between a syntax error and an exception?",
+      "options": [
+        "A syntax error happens at run time; an exception happens at parse time.",
+        "They are two names for the same thing.",
+        "Exceptions cannot be caught, but syntax errors can.",
+        "A syntax error is caught before the code runs because it breaks Python's grammar; an exception occurs at run time in otherwise valid code."
+      ],
+      "answer": 3,
+      "explanation": "A syntax error means Python cannot parse the source, so nothing runs. An exception is a runtime event, like dividing by zero, in code that parsed fine. You can handle exceptions with try and except; you cannot handle a syntax error, you must fix it.",
+      "misconception": "A try and except block cannot rescue a syntax error. It only handles runtime exceptions."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A data loader wraps everything in `try: ... except: pass` so it never crashes. In production, bad records vanish silently and nobody notices for weeks.",
+      "question": "What is wrong with this pattern, and what is better?",
+      "options": [
+        "Nothing is wrong; silent failure is safest.",
+        "A bare `except: pass` hides every error, including bugs. Catch specific exceptions and log or handle them, so real problems surface.",
+        "The try block is too small; wrap more code.",
+        "You should catch exceptions with `if` statements instead."
+      ],
+      "answer": 1,
+      "explanation": "A bare except swallows all exceptions, including ones you never anticipated, so genuine bugs and data problems disappear without a trace. Catch the specific exception types you expect, handle them deliberately, and let the unexpected ones propagate or get logged.",
+      "misconception": "Silent catch-all is not robustness. It is how serious failures go unnoticed; specificity and logging are what make code resilient."
+    },
+    {
+      "type": "mcq",
+      "question": "In a `try / except / else / finally` block, when does the `finally` clause run?",
+      "options": [
+        "Always, whether the try succeeded, raised and was handled, or raised and propagated.",
+        "Only when the except block ran.",
+        "Only when no exception occurred.",
+        "Only when an exception was raised."
+      ],
+      "answer": 0,
+      "explanation": "`finally` always executes, which makes it the place for cleanup like closing a resource. `else` runs only when the try block raised nothing. `except` runs only on a matching exception. That split lets you separate the success path, the failure path, and guaranteed cleanup."
+    },
+    {
+      "type": "mcq",
+      "question": "Why would you create a custom exception class instead of raising a built-in like `ValueError`?",
+      "options": [
+        "Built-in exceptions cannot be raised by your code.",
+        "It gives callers a precise, meaningful type to catch, so they can handle your domain's failures specifically.",
+        "Custom exceptions run faster.",
+        "It is required whenever you use try and except."
+      ],
+      "answer": 1,
+      "explanation": "A custom exception (subclassing Exception) names a domain-specific failure, so callers can `except InsufficientFundsError` and handle exactly that case without catching unrelated ValueErrors. It makes error handling expressive and targeted."
+    }
+  ]
+}

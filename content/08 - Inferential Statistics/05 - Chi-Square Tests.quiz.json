@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What type of data is a chi-square test designed for?",
+      "options": [
+        "Categorical (count) data, comparing observed counts against expected counts.",
+        "A single sample mean.",
+        "Paired continuous before-and-after values.",
+        "Continuous measurements like height."
+      ],
+      "answer": 0,
+      "explanation": "Chi-square tests work on counts in categories. They compare the frequencies you observed with the frequencies you would expect under the null, summing the squared, scaled differences. They are not for continuous data or for means."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You want to know whether a customer's region and their preferred product category are related, using a contingency table of counts.",
+      "question": "Which chi-square test applies, and what is its null hypothesis?",
+      "options": [
+        "The goodness-of-fit test, with a null that the data is normal.",
+        "A paired t-test on the counts.",
+        "The test of independence, with a null that the variables are perfectly correlated.",
+        "The chi-square test of independence, with a null that the two categorical variables are independent (not associated)."
+      ],
+      "answer": 3,
+      "explanation": "Testing whether two categorical variables in a contingency table are related is the chi-square test of independence. Its null hypothesis is that the variables are independent, so the expected counts are computed from the row and column totals under that assumption.",
+      "misconception": "The null is independence (no association), not correlation. A small p-value is evidence the variables are associated."
+    },
+    {
+      "type": "mcq",
+      "question": "A chi-square test can become unreliable when which condition is violated?",
+      "options": [
+        "When the sample is larger than 1000.",
+        "When the data is perfectly balanced.",
+        "When expected counts in cells are very small (a common rule is each expected count should be at least 5).",
+        "When there are exactly two categories."
+      ],
+      "answer": 2,
+      "explanation": "The chi-square approximation degrades when expected cell counts are too small, with a common guideline of at least 5 per cell. With sparse cells you combine categories or use an exact test such as Fisher's exact test instead."
+    }
+  ]
+}

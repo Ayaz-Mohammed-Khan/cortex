@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "According to the empirical rule for a normal distribution, roughly what fraction of values lie within one standard deviation of the mean?",
+      "options": [
+        "About 68 percent.",
+        "About 95 percent.",
+        "About 50 percent.",
+        "About 99.7 percent."
+      ],
+      "answer": 0,
+      "explanation": "The empirical rule says about 68 percent of values fall within one standard deviation, about 95 percent within two, and about 99.7 percent within three. These thresholds are why two and three sigma are common flags for unusual values."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You must compare a student's score of 82 on a biology test (mean 70, standard deviation 6) with 78 on a chemistry test (mean 60, standard deviation 12).",
+      "question": "How do you compare them fairly, and which is relatively better?",
+      "options": [
+        "Average the two means and compare.",
+        "Compare raw scores; 82 beats 78, so biology wins by 4 points.",
+        "You cannot compare scores from different tests.",
+        "Convert to z-scores. Biology is (82 minus 70) over 6, which is 2.0; chemistry is (78 minus 60) over 12, which is 1.5. Biology is relatively better."
+      ],
+      "answer": 3,
+      "explanation": "Standardizing to a z-score, the number of standard deviations from the mean, puts both scores on one scale. Biology is 2.0 standard deviations above its mean, chemistry 1.5, so the biology performance is relatively stronger despite both being above average.",
+      "misconception": "Raw scores are not comparable across tests with different means and spreads. Standardize first."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the standard normal distribution?",
+      "options": [
+        "A normal distribution with mean 1 and standard deviation 0.",
+        "Any symmetric distribution.",
+        "A normal distribution with mean 0 and standard deviation 1, obtained by standardizing any normal variable with a z-score.",
+        "The distribution of z-scores for non-normal data."
+      ],
+      "answer": 2,
+      "explanation": "Standardizing a normal variable by subtracting the mean and dividing by the standard deviation yields the standard normal: mean 0, standard deviation 1. That single reference distribution is what z-tables and the empirical rule are built on."
+    }
+  ]
+}

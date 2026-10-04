@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A `SavingsAccount` subclass defines its own `__init__` to add an interest rate, but after construction the base `Account` attributes like `balance` are missing.",
+      "question": "What was forgotten?",
+      "options": [
+        "The base class attributes are inherited automatically with no call needed.",
+        "The subclass `__init__` must call `super().__init__(...)` so the base class sets up its own attributes.",
+        "Subclasses cannot define `__init__`.",
+        "`balance` must be a class variable."
+      ],
+      "answer": 1,
+      "explanation": "When a subclass defines its own constructor, it overrides the base one, so the base initialization no longer runs unless you call `super().__init__(...)`. That call lets the base class set up `balance` and the rest before the subclass adds its own.",
+      "misconception": "Defining a subclass `__init__` does not auto-run the parent's. You must call `super().__init__` explicitly."
+    },
+    {
+      "type": "mcq",
+      "question": "What does method overriding mean?",
+      "options": [
+        "A method accepts a different number of arguments depending on the call.",
+        "A method is marked abstract.",
+        "A subclass provides its own implementation of a method already defined in the base class.",
+        "Two methods in the same class share a name."
+      ],
+      "answer": 2,
+      "explanation": "Overriding is a subclass redefining an inherited method to change its behavior. Calls on a subclass instance then use the subclass version. Having two same-named methods differing by arguments would be overloading, which Python does not support in the classic sense."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A class inherits from two parents that both define a method with the same name.",
+      "question": "How does Python decide which one runs, and what is this called?",
+      "options": [
+        "The method resolution order (MRO) determines it, following C3 linearization left to right through the base classes.",
+        "It picks randomly at runtime.",
+        "The last-listed parent always wins unconditionally.",
+        "Python raises an error on any multiple inheritance."
+      ],
+      "answer": 0,
+      "explanation": "Python computes a method resolution order using C3 linearization, a deterministic ordering of the class and its ancestors. A lookup walks that order and uses the first match. This is also how the diamond problem is resolved cleanly.",
+      "misconception": "Multiple inheritance is not forbidden or random in Python. The MRO gives a well-defined lookup order."
+    }
+  ]
+}

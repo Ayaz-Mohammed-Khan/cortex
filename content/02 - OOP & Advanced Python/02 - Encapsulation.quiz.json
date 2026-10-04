@@ -1,0 +1,43 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "In Python, what does a single leading underscore (for example `_balance`) on an attribute mean?",
+      "options": [
+        "The attribute is read-only.",
+        "The attribute is a class variable.",
+        "The attribute is strictly private and cannot be accessed from outside.",
+        "A convention signalling the attribute is internal, with no access enforcement by the language."
+      ],
+      "answer": 3,
+      "explanation": "Python has no hard private keyword. A single underscore is a convention meaning do not touch this from outside. A double underscore triggers name mangling, which discourages access but still does not truly forbid it.",
+      "misconception": "Python encapsulation is by convention, not enforcement. The underscore signals intent; it does not lock the attribute."
+    },
+    {
+      "type": "scenario",
+      "scenario": "Two variables point at the same list: `b = a`. You append to `b`, and `a` changes too.",
+      "question": "Why does this happen?",
+      "options": [
+        "`a` and `b` are two references to the same list object, so mutating through one is visible through the other.",
+        "Python copies the list on assignment, so this should not happen.",
+        "`b = a` creates a deep copy.",
+        "Lists are immutable, so neither should change."
+      ],
+      "answer": 0,
+      "explanation": "Assignment binds a new name to the same object; it does not copy. Both names reference one list, so an in-place mutation shows through both. Use `a.copy()` or `list(a)` for an independent shallow copy.",
+      "misconception": "Assignment never copies the object. It copies the reference, so mutations are shared."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the difference between an instance variable and a static (class) variable?",
+      "options": [
+        "A class variable is unique per object; an instance variable is shared.",
+        "Class variables cannot be read by instances.",
+        "They are the same thing.",
+        "An instance variable is unique per object; a class variable is shared by every instance of the class."
+      ],
+      "answer": 3,
+      "explanation": "An instance variable, set on `self`, holds per-object state. A class variable, defined in the class body, is one value shared across all instances, which suits a shared counter or a constant. Instances can read a class variable through `self` unless they shadow it."
+    }
+  ]
+}

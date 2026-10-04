@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "In hypothesis testing, what does the null hypothesis typically represent?",
+      "options": [
+        "The default position of no effect or no difference, which the test tries to find evidence against.",
+        "The result the researcher hopes to prove true.",
+        "The probability that the data is correct.",
+        "The alternative we accept by default."
+      ],
+      "answer": 0,
+      "explanation": "The null hypothesis states no effect or no difference and is assumed true until the data gives strong evidence against it. The alternative is what you suspect instead. A test never proves the null; it either rejects it or fails to reject it."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A medical screening test's null hypothesis is that a patient is healthy. The test flags a healthy patient as diseased.",
+      "question": "Which error is this, and what is the other type?",
+      "options": [
+        "A Type 1 error (false positive): rejecting a true null. A Type 2 error is a false negative: failing to reject a false null.",
+        "No error; the test did its job.",
+        "A sampling error; the other is a rounding error.",
+        "A Type 2 error (false negative); the other is a false positive."
+      ],
+      "answer": 0,
+      "explanation": "Flagging a healthy patient wrongly rejects a true null, which is a Type 1 error, a false positive. Missing a truly diseased patient would fail to reject a false null, a Type 2 error, a false negative. The significance level controls the Type 1 rate.",
+      "misconception": "Type 1 is the false positive (reject a true null); Type 2 is the false negative. Keep the direction straight."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A team runs an A/B test, sees nothing at the planned stop, keeps collecting data, and stops the moment the result crosses significance.",
+      "question": "Why does this inflate the false-positive rate?",
+      "options": [
+        "It does not; stopping early is always valid.",
+        "Repeatedly testing and stopping on significance (peeking) gives the statistic many chances to cross the threshold by chance, so the true Type 1 rate exceeds the stated level.",
+        "Collecting more data always reduces false positives, so this is fine.",
+        "The problem is only that the sample is too large."
+      ],
+      "answer": 1,
+      "explanation": "A fixed significance level assumes one test at a predetermined sample size. Peeking and stopping when it crosses the line means many implicit tests, each a fresh chance to cross by random noise, so the real false-positive rate climbs well above the nominal level. Fixed-horizon designs or sequential-testing corrections avoid this.",
+      "misconception": "More data is not a free pass. Optional stopping on significance breaks the Type 1 guarantee."
+    }
+  ]
+}

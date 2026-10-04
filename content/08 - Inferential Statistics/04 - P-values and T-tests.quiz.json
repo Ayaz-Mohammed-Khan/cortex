@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A test returns p equals 0.03. A colleague says this means there is a 3 percent chance the null hypothesis is true.",
+      "question": "What does the p-value actually mean?",
+      "options": [
+        "It is the chance the experiment was run correctly.",
+        "It is the probability the null is true, so the colleague is right.",
+        "It is the probability the alternative is true.",
+        "It is the probability of observing data at least as extreme as this, assuming the null is true. It is not the probability that the null is true."
+      ],
+      "answer": 3,
+      "explanation": "A p-value is computed under the assumption that the null holds, measuring how surprising the data would be in that world. It says nothing directly about the probability of either hypothesis. Treating it as P(null is true) is the most common and consequential misreading.",
+      "misconception": "A p-value is not the probability the null is true. It is the probability of the data (or more extreme) given the null."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You compare the mean conversion of the same users before and after a UI change, with each user measured twice.",
+      "question": "Which t-test fits, and why?",
+      "options": [
+        "An independent two-sample t-test, because there are two groups.",
+        "A one-sample t-test against zero on the raw after-values.",
+        "A paired (dependent) t-test, because the two measurements come from the same units, so you analyze the within-user differences.",
+        "A chi-square test, because the data is numerical."
+      ],
+      "answer": 2,
+      "explanation": "The same users measured twice are paired, so the observations are dependent. A paired t-test works on each user's before-minus-after difference, which removes between-user variation and gives more power than treating the groups as independent.",
+      "misconception": "Repeated measurements on the same subjects are not independent groups. Pairing them is both correct and more powerful."
+    },
+    {
+      "type": "mcq",
+      "question": "Why are p-values often preferred over a simple reject-or-not rejection-region decision?",
+      "options": [
+        "A rejection region is more informative than a p-value.",
+        "A p-value reports how strong the evidence is on a continuous scale, not just a binary verdict at one threshold.",
+        "P-values prove the alternative hypothesis.",
+        "P-values remove the need to choose any significance level ever."
+      ],
+      "answer": 1,
+      "explanation": "The rejection-region approach gives only a yes or no at a fixed cutoff. A p-value quantifies the strength of evidence against the null continuously, so a reader can judge a result near the boundary and apply their own threshold. It conveys more information than a bare decision."
+    }
+  ]
+}

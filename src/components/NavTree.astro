@@ -151,9 +151,10 @@ const IDLE =
         <li role="treeitem">
           <a
             href={node.route}
+            data-nav-route={node.route}
             aria-current={selected ? 'page' : undefined}
             class:list={[
-              'flex min-h-8 min-w-0 items-center gap-2 rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600',
+              'group flex min-h-8 min-w-0 items-center gap-2 rounded-md py-1 pl-2 pr-2 text-sm leading-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600',
               selected ? ACTIVE : IDLE,
             ]}
           >
@@ -173,6 +174,25 @@ const IDLE =
             <span class="truncate">
               {node.hasPrefix ? `${node.order}. ${node.displayName}` : node.displayName}
             </span>
+            {/*
+              Completion tick, revealed by the `nav-progress` island when this
+              note's route is in the progress store. Starts with `nav-done-hidden`
+              (display:none) so a fresh visit shows no ticks and the markup is
+              static-safe; the island removes that class to reveal the tick.
+            */}
+            <svg
+              data-nav-done
+              class="nav-done-hidden ml-auto h-4 w-4 shrink-0 text-emerald-500 dark:text-emerald-400"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16zm3.7-9.3a1 1 0 0 0-1.4-1.4L9 10.6 7.7 9.3a1 1 0 0 0-1.4 1.4l2 2a1 1 0 0 0 1.4 0l4-4z"
+                clip-rule="evenodd"
+              />
+            </svg>
           </a>
         </li>
       );
@@ -182,4 +202,5 @@ const IDLE =
 
 <script>
   import './nav-drawer';
+  import './nav-progress';
 </script>

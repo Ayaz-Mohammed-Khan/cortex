@@ -1,0 +1,37 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What happens if a class inherits from an abstract base class but does not implement all its abstract methods?",
+      "options": [
+        "The code fails only if you call the missing method.",
+        "The subclass works, and calling the missing method returns None.",
+        "The abstract methods are inherited as empty functions.",
+        "Python refuses to instantiate the subclass, raising a TypeError at construction."
+      ],
+      "answer": 3,
+      "explanation": "An abstract base class with unimplemented abstract methods cannot be instantiated, and neither can a subclass that leaves any of them unimplemented. The TypeError fires at construction time, which forces subclasses to honor the contract before use.",
+      "misconception": "The error is at instantiation, not when the method is first called. The abstract contract is checked up front."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A payments module defines a base type requiring every provider to implement `charge()` and `refund()`, so no provider can ship half-finished.",
+      "question": "Which tool enforces this, and how?",
+      "options": [
+        "A regular base class with empty methods, which fully enforces the contract.",
+        "An abstract base class with `@abstractmethod` on `charge` and `refund`, so any provider missing one cannot be instantiated.",
+        "A set of module-level functions.",
+        "Encapsulation with underscores."
+      ],
+      "answer": 1,
+      "explanation": "Marking `charge` and `refund` with `@abstractmethod` in an abstract base class (from the `abc` module) makes them mandatory: a subclass must implement both to be instantiable. Empty methods on a plain base class document intent but enforce nothing.",
+      "misconception": "Empty methods on a normal base class do not enforce anything. Abstraction needs the abc machinery to make the contract binding."
+    },
+    {
+      "type": "card",
+      "question": "In your own words, what is abstraction in object-oriented design, and how does it differ from encapsulation?",
+      "answer": "Abstraction is exposing a simple, essential interface while hiding the complex implementation behind it, so callers work with what an object does, not how it does it. Encapsulation is bundling data with the methods that operate on it and controlling access to that data. Abstraction is about the interface and the contract; encapsulation is about protecting and grouping the internal state. They are complementary: an abstract base class defines the contract, and each implementation encapsulates its own state behind it.",
+      "explanation": "A quick way to keep them apart: abstraction hides complexity (what), encapsulation hides data (how it is stored and accessed)."
+    }
+  ]
+}

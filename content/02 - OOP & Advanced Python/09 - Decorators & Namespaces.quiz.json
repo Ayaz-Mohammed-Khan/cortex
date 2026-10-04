@@ -1,0 +1,51 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "At the module level you write `max = 5`, then later call `max([1, 2, 3])` and get `TypeError: 'int' object is not callable`.",
+      "question": "Why, in terms of the LEGB rule?",
+      "options": [
+        "Built-ins always win over globals, so this should work.",
+        "The list is malformed.",
+        "Name lookup checks Local, then Enclosing, then Global, then Built-in. Your global `max = 5` is found before the built-in `max`, so the name now refers to the integer.",
+        "`max` cannot be reassigned."
+      ],
+      "answer": 2,
+      "explanation": "Python resolves a name by searching Local, Enclosing, Global, then Built-in, and stops at the first match. The global `max = 5` shadows the built-in function, so calling `max(...)` tries to call the integer 5. Avoid naming variables after built-ins.",
+      "misconception": "Built-ins do not take priority. They are last in LEGB, so a global of the same name shadows them."
+    },
+    {
+      "type": "mcq",
+      "question": "A decorator's inner wrapper is defined as `def wrapper():` with no parameters. You apply it to a function that takes arguments, and calls fail.",
+      "options": [
+        "Decorators cannot be applied to functions with arguments.",
+        "The decorated function must be made global.",
+        "The wrapper must accept `*args, **kwargs` and forward them, so it works for functions of any signature.",
+        "You must write one decorator per argument count."
+      ],
+      "answer": 2,
+      "explanation": "The wrapper stands in for the decorated function, so it must accept whatever that function accepts. Writing `def wrapper(*args, **kwargs):` and calling `func(*args, **kwargs)` makes the decorator generic across signatures. A zero-parameter wrapper only works for zero-argument functions.",
+      "misconception": "A hard-coded wrapper signature breaks most functions. Variadic arguments keep a decorator reusable."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A decorator returns an inner `wrapper` that still uses the decorated `func` after the decorator function has already returned.",
+      "question": "What language feature makes this work?",
+      "options": [
+        "Static variables on the module.",
+        "Global variables, which all functions share.",
+        "The `nonlocal` keyword, which copies the variable.",
+        "A closure: the inner function retains access to variables from the enclosing scope even after that outer function has finished."
+      ],
+      "answer": 3,
+      "explanation": "When an inner function references a name from its enclosing function and is returned, Python keeps that enclosing variable alive in a closure. That is why the returned wrapper can still call `func` after the decorator has returned. Closures are the mechanism every decorator relies on.",
+      "misconception": "It is not globals keeping `func` alive. The closure captures the specific enclosing variable."
+    },
+    {
+      "type": "card",
+      "question": "Describe how the `@my_decorator` syntax relates to plain function calls, using `hello` as the decorated function.",
+      "answer": "Writing `@my_decorator` above `def hello(): ...` is shorthand for `hello = my_decorator(hello)`. The decorator receives the original `hello`, builds and returns a wrapper, and that wrapper is bound back to the name `hello`. So every later call to `hello()` runs the wrapper, which adds behavior around the original and calls it. The at-sign is pure convenience for that reassignment.",
+      "explanation": "The tell: anything you can do with `@decorator` you can do by hand with `name = decorator(name)`; the syntax just reads better."
+    }
+  ]
+}

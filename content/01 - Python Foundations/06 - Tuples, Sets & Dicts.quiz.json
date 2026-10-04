@@ -1,0 +1,55 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "You try `d = {[1, 2]: \"a\"}` and Python raises `TypeError: unhashable type: 'list'`.",
+      "question": "Why can a tuple be a dict key but a list cannot?",
+      "options": [
+        "Only strings and numbers can be dict keys.",
+        "Dict keys must be hashable, which requires a fixed value. A tuple is immutable and hashable; a list is mutable and therefore unhashable.",
+        "Lists are too large to be keys.",
+        "Lists can be keys if you call `hash()` on them first."
+      ],
+      "answer": 1,
+      "explanation": "A dict places a key by its hash, so the hash must never change while the key is stored. Immutable objects like tuples, strings, and numbers are hashable. A list can change in place, so its hash would be unstable, and Python forbids it as a key.",
+      "misconception": "Hashability, not type, is the rule. Any immutable, hashable object (including a tuple of immutables) can be a key."
+    },
+    {
+      "type": "mcq",
+      "question": "What does `{1, 2, 2, 3, 3, 3}` evaluate to?",
+      "options": [
+        "{1, 2, 2, 3, 3, 3}",
+        "A dict with counts",
+        "[1, 2, 3]",
+        "{1, 2, 3}"
+      ],
+      "answer": 3,
+      "explanation": "A set holds only distinct elements, so duplicates collapse to {1, 2, 3}. If you wanted counts, you would use `collections.Counter` instead."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the key difference between `d[key]` and `d.get(key)` for a missing key?",
+      "options": [
+        "`d.get(key)` raises KeyError; `d[key]` returns None.",
+        "`d.get(key)` creates the key with value None.",
+        "They behave identically.",
+        "`d[key]` raises KeyError; `d.get(key)` returns None (or a supplied default)."
+      ],
+      "answer": 3,
+      "explanation": "Indexing a missing key raises KeyError. `get` returns None by default, or a value you pass as a second argument, which is useful when a missing key is expected. `get` does not create the key.",
+      "misconception": "`get` does not insert anything. Use `setdefault` or a `defaultdict` when you want a missing key created."
+    },
+    {
+      "type": "mcq",
+      "question": "Why can you not index a set with `s[0]`?",
+      "options": [
+        "Sets start indexing at 1.",
+        "Indexing a set is allowed but slow.",
+        "Only frozensets can be indexed.",
+        "A set is unordered, so it has no positional index to retrieve."
+      ],
+      "answer": 3,
+      "explanation": "A set stores elements by hash with no defined position, so there is no first or nth element to index. You iterate a set or test membership, but you cannot subscript it. Lists and tuples are the ordered, indexable structures."
+    }
+  ]
+}

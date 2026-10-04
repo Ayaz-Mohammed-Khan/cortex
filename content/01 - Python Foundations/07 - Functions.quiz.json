@@ -1,0 +1,50 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A function `def add(x, items=[]):` appends x to items and returns it. Called repeatedly, it keeps accumulating values from earlier calls.",
+      "question": "What causes this, and what is the fix?",
+      "options": [
+        "Python caches return values by default. Disable the cache.",
+        "Lists cannot be function arguments. Pass a tuple.",
+        "The function needs the `global` keyword.",
+        "The default list is created once at definition and shared across calls. Use `items=None` and create a new list inside the function."
+      ],
+      "answer": 3,
+      "explanation": "A default argument value is evaluated once, when the function is defined, not on each call. A mutable default like a list is then shared by every call. The fix is to default to None and build a fresh list in the body.",
+      "misconception": "This is the classic mutable-default-argument trap. Defaults are created at definition time, not per call."
+    },
+    {
+      "type": "mcq",
+      "question": "In `def f(*args, **kwargs):`, what do `args` and `kwargs` capture?",
+      "options": [
+        "Both are tuples.",
+        "`args` captures keywords; `kwargs` captures positionals.",
+        "`args` is a tuple of extra positional arguments; `kwargs` is a dict of extra keyword arguments.",
+        "`args` is a dict; `kwargs` is a list."
+      ],
+      "answer": 2,
+      "explanation": "`*args` gathers any extra positional arguments into a tuple. `**kwargs` gathers any extra keyword arguments into a dict. This is how a function accepts a variable number of inputs, which is exactly what a generic decorator wrapper needs."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A reviewer asks you to pass a transformation to `map` so it applies to every row, instead of writing an explicit loop.",
+      "question": "Which statement about `map`, `filter`, and `lambda` is correct?",
+      "options": [
+        "A `lambda` can contain many statements and a return.",
+        "`map` keeps only matching items; `filter` transforms every item.",
+        "`map(f, xs)` applies f to each item lazily; `filter(f, xs)` keeps items where f is truthy; a `lambda` is a small anonymous function to pass to them.",
+        "`map` returns a list immediately in Python 3."
+      ],
+      "answer": 2,
+      "explanation": "`map` transforms each element, `filter` selects elements by a predicate, and a `lambda` is a one-expression anonymous function convenient to pass inline. In Python 3 both `map` and `filter` return lazy iterators, so wrap in `list()` to materialize.",
+      "misconception": "A lambda holds a single expression, not a block of statements. For anything larger, use a named function."
+    },
+    {
+      "type": "card",
+      "question": "What does it mean that functions in Python are first-class citizens, and name two things that enables.",
+      "answer": "A first-class function is an ordinary object: you can store it in a variable, put it in a list or dict, pass it as an argument, and return it from another function. This enables higher-order functions like map and filter, and it is the foundation decorators are built on, since a decorator takes a function and returns a wrapped function.",
+      "explanation": "The practical tell: `f = len` then `f([1, 2])` works, because the name just points at the function object."
+    }
+  ]
+}

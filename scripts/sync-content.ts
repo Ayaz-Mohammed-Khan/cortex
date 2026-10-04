@@ -60,6 +60,16 @@ function isMarkdown(fileName: string): boolean {
 }
 
 /**
+ * Case-insensitive `.quiz.json` check. A note's companion quiz lives beside it
+ * as `NN - Name.quiz.json`; the file is staged next to the note so the build
+ * can read a note's quiz from its own directory. Only the `.quiz.json` suffix
+ * is mirrored, so stray `.json` files in the vault are never copied.
+ */
+function isQuizFile(fileName: string): boolean {
+  return fileName.toLowerCase().endsWith('.quiz.json');
+}
+
+/**
  * Image/asset extensions that are staged alongside notes so relative image
  * references in Markdown resolve at build time. These files are NOT treated as
  * content; they exist only to satisfy Astro's image import resolution.
@@ -93,6 +103,8 @@ export interface SyncStats {
    * image references resolve during the build; they are not Notes.
    */
   assetsCopied: number;
+  /** Number of `.quiz.json` companion files copied (one per note at most). */
+  quizzesCopied: number;
   /** Number of target folders created while mirroring. */
   dirsCreated: number;
 }
@@ -148,9 +160,10 @@ function mirrorDirectory(
     }
 
     const isNote = isMarkdown(dirent.name);
-    const isAsset = !isNote && isImageAsset(dirent.name);
-    if (!isNote && !isAsset) {
-      // Not a note and not an image asset → never copied.
+    const isQuiz = !isNote && isQuizFile(dirent.name);
+    const isAsset = !isNote && !isQuiz && isImageAsset(dirent.name);
+    if (!isNote && !isQuiz && !isAsset) {
+      // Not a note, a quiz, or an image asset → never copied.
       continue;
     }
 
@@ -164,6 +177,8 @@ function mirrorDirectory(
     copyFileSync(sourcePath, join(targetDir, dirent.name));
     if (isNote) {
       stats.filesCopied += 1;
+    } else if (isQuiz) {
+      stats.quizzesCopied += 1;
     } else {
       stats.assetsCopied += 1;
     }
@@ -209,7 +224,7 @@ export function syncContent(options: SyncOptions = {}): SyncResult {
     mkdirSync(targetDir, { recursive: true });
   }
 
-  const stats: SyncStats = { filesCopied: 0, assetsCopied: 0, dirsCreated: 0 };
+  const stats: SyncStats = { filesCopied: 0, assetsCopied: 0, quizzesCopied: 0, dirsCreated: 0 };
 
   if (!existsSync(sourceDir)) {
     // True mirror of "nothing" ⇒ an empty target (no stale content retained).
@@ -246,7 +261,8 @@ export function syncContent(options: SyncOptions = {}): SyncResult {
   mirrorDirectory(sourceDir, targetDir, stats);
 
   log(
-    `[sync-content] Mirrored ${stats.filesCopied} Markdown file(s) and ${stats.assetsCopied} image asset(s) ` +
+    `[sync-content] Mirrored ${stats.filesCopied} Markdown file(s), ${stats.quizzesCopied} quiz file(s), ` +
+      `and ${stats.assetsCopied} image asset(s) ` +
       `from ${sourceDir} into ${relative(cwd, targetDir) || '.'} (${stats.dirsCreated} folder(s) created).`,
   );
 

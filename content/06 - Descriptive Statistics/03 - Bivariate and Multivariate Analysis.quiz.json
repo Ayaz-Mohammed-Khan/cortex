@@ -1,0 +1,43 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "An analyst finds ice-cream sales and drowning deaths rise together, correlation 0.9, and proposes banning ice cream to save lives.",
+      "question": "What is the flaw?",
+      "options": [
+        "A correlation of 0.9 is too low to matter.",
+        "Correlation does not imply causation. A third variable, hot weather, drives both, so this is a confounded relationship.",
+        "Correlation always implies causation when it is above 0.8.",
+        "The two variables must be measured in the same units."
+      ],
+      "answer": 1,
+      "explanation": "A strong correlation only says the two move together, not that one causes the other. Here a confounder, temperature, raises both ice-cream sales and swimming (and thus drownings). Establishing causation needs an experiment or careful causal reasoning, not a correlation coefficient.",
+      "misconception": "A high correlation is not evidence of causation. Always ask whether a confounder could drive both variables."
+    },
+    {
+      "type": "mcq",
+      "question": "Why is the Pearson correlation coefficient often preferred over raw covariance for describing the strength of a linear relationship?",
+      "options": [
+        "Covariance only works for categorical data.",
+        "It is standardized to the range minus 1 to 1, so its magnitude is comparable across datasets, unlike covariance whose scale depends on the units.",
+        "Pearson correlation detects any relationship, including non-linear ones.",
+        "Covariance cannot be negative."
+      ],
+      "answer": 1,
+      "explanation": "Covariance captures the direction of a linear relationship but its size depends on the variables' units, so you cannot compare it across datasets. Pearson correlation divides covariance by the product of the standard deviations, giving a unitless value in minus 1 to 1 that is directly comparable.",
+      "misconception": "Pearson correlation measures LINEAR association only. A strong non-linear relationship can show a near-zero coefficient."
+    },
+    {
+      "type": "mcq",
+      "question": "You want to see how a numerical variable differs across the categories of a categorical variable (for example, fare by passenger class).",
+      "options": [
+        "Use a single histogram of the numerical variable only.",
+        "Use a grouped box plot or violin plot, comparing the numerical distribution within each category.",
+        "Correlation is the only valid tool.",
+        "Use a scatter plot of the category against itself."
+      ],
+      "answer": 1,
+      "explanation": "Comparing a numerical distribution across categories is the categorical-numerical case. A grouped box plot or violin plot shows center, spread, and outliers per category side by side, which a single pooled histogram would hide."
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "You must compare the mean conversion rate across four landing-page designs. A teammate suggests running a t-test on every pair.",
+      "question": "Why is one-way ANOVA the better first step?",
+      "options": [
+        "ANOVA compares variances, so it cannot say anything about means.",
+        "Pairwise t-tests are invalid for more than two groups and will not run.",
+        "Running many pairwise t-tests inflates the overall Type 1 error from multiple comparisons. ANOVA tests all group means at once with a single controlled test.",
+        "ANOVA is just a faster t-test with identical assumptions and no benefit."
+      ],
+      "answer": 2,
+      "explanation": "Each pairwise t-test carries its own false-positive risk, and six comparisons across four groups compound that risk well above the nominal level. One-way ANOVA asks a single question, are any group means different, with one test that controls the error, after which a post-hoc test identifies which pairs differ.",
+      "misconception": "The problem with many t-tests is multiple comparisons inflating Type 1 error, which ANOVA sidesteps with one omnibus test."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the core idea behind how ANOVA detects a difference in means?",
+      "options": [
+        "It compares each group's median to the grand median.",
+        "It compares the variance between group means to the variance within groups; a large ratio (the F-statistic) signals real differences.",
+        "It measures the correlation between group labels.",
+        "It counts how many groups are above average."
+      ],
+      "answer": 1,
+      "explanation": "ANOVA partitions total variation into between-group and within-group parts. The F-statistic is the between-group variance over the within-group variance. If groups truly differ, between-group variation dominates and F is large relative to its distribution under the null.",
+      "misconception": "Despite the name analysis of variance, ANOVA tests whether MEANS differ, using variance as the lens."
+    },
+    {
+      "type": "mcq",
+      "question": "A one-way ANOVA returns a significant result. What can you conclude, and what is the necessary next step?",
+      "options": [
+        "No further analysis is needed; ANOVA names the different group.",
+        "Every group mean differs from every other group mean.",
+        "At least one group mean differs from another, but not which ones; a post-hoc test (for example Tukey's HSD) is needed to locate the differences.",
+        "The group with the highest mean is significantly best."
+      ],
+      "answer": 2,
+      "explanation": "A significant ANOVA is an omnibus result: it says the group means are not all equal, without identifying which pairs differ. A post-hoc test with correction for multiple comparisons, such as Tukey's HSD, pinpoints the specific differences.",
+      "misconception": "A significant ANOVA does not tell you which groups differ. You need a post-hoc test for that."
+    }
+  ]
+}

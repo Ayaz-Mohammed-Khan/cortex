@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "The interquartile range (IQR) is defined as which of the following?",
+      "options": [
+        "The mean plus or minus one standard deviation.",
+        "The maximum minus the minimum.",
+        "Q3 minus Q1, the spread of the middle 50 percent of the data.",
+        "The median minus the mode."
+      ],
+      "answer": 2,
+      "explanation": "The IQR is the third quartile minus the first quartile, so it captures the range covering the central half of the data. Because it ignores the tails, it is a robust measure of spread, much like the median is a robust measure of center."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A box plot of request latency shows a box from 80 to 140 milliseconds, a median line at 95, and several points plotted far above the upper whisker.",
+      "question": "How do you read the points above the whisker?",
+      "options": [
+        "They are the mode of the distribution.",
+        "They are the mean of the data.",
+        "They are plotting errors that should be removed.",
+        "They are outliers, values beyond 1.5 times the IQR above Q3, flagged by the box-plot rule."
+      ],
+      "answer": 3,
+      "explanation": "A standard box plot draws whiskers to the furthest points within 1.5 times the IQR of the quartiles, and marks anything past that as individual outlier points. Those high-latency points are statistical outliers worth investigating, not errors to delete blindly.",
+      "misconception": "Outlier points are not errors by default. The 1.5 times IQR rule flags them for inspection, not automatic removal."
+    },
+    {
+      "type": "mcq",
+      "question": "The 90th percentile of a response-time dataset is 300 milliseconds. What does that mean?",
+      "options": [
+        "90 percent of responses were at or below 300 milliseconds, and 10 percent were slower.",
+        "The response time is 90 percent accurate.",
+        "The average response time is 300 milliseconds.",
+        "90 percent of responses were slower than 300 milliseconds."
+      ],
+      "answer": 0,
+      "explanation": "A percentile is the value below which that share of the data falls. The 90th percentile at 300 ms means nine in ten responses were no slower than 300 ms. Tail percentiles like p90 and p99 are standard for latency because the mean hides the slow tail."
+    }
+  ]
+}

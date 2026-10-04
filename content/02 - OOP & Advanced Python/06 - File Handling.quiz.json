@@ -1,0 +1,58 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A script opens a file with `f = open(path, \"w\")`, writes rows in a loop, and sometimes raises partway through. Later reads find the file empty or truncated.",
+      "question": "What is the robust fix?",
+      "options": [
+        "Use `with open(path, \"w\") as f:`, so the file is flushed and closed even if an exception is raised.",
+        "Write to the file in binary mode.",
+        "Add `f.flush()` and nothing else.",
+        "Call `open` twice to be safe."
+      ],
+      "answer": 0,
+      "explanation": "A `with` block is a context manager that closes the file automatically when the block exits, including on an exception. Closing flushes buffered writes to disk. A forgotten `close` after an error leaves buffered data unwritten, which is what truncates the file.",
+      "misconception": "Relying on manual `close` is fragile. The context manager guarantees cleanup on both success and failure."
+    },
+    {
+      "type": "mcq",
+      "question": "You must process a file far larger than available memory. What is the right reading strategy?",
+      "options": [
+        "Convert it to a list with `list(f)` first.",
+        "Increase the Python recursion limit.",
+        "Call `f.read()` to load it all, then slice it.",
+        "Read it in chunks (or line by line), processing and discarding each piece, so only a small part is in memory at once."
+      ],
+      "answer": 3,
+      "explanation": "Reading a fixed-size chunk or iterating line by line keeps memory flat regardless of file size, because you hold only the current piece. `f.read()` and `list(f)` both pull the whole file into memory, which fails on a file larger than RAM.",
+      "misconception": "`read()` is not safe for huge files. Stream the content so memory stays bounded."
+    },
+    {
+      "type": "mcq",
+      "question": "You dump a Python dict to a file with `json.dump` and read it back with `json.load`. A value that was a tuple comes back as a list. Why?",
+      "options": [
+        "Tuples are not serializable at all.",
+        "The dict was corrupted on write.",
+        "JSON has no tuple type, so tuples serialize as arrays and deserialize as lists.",
+        "`json.load` is buggy."
+      ],
+      "answer": 2,
+      "explanation": "JSON only has arrays, not a separate tuple type, so a tuple is written as an array and read back as a list. If you need a tuple again, convert it after loading. This is a known JSON round-trip detail, not a bug.",
+      "misconception": "JSON does not preserve Python-specific types. For exact Python object round-trips you would use pickle, with its own trade-offs."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A teammate pickles a trained model on their laptop and asks you to load the pickle, which came from an untrusted shared drive.",
+      "question": "What is the key safety point about pickle versus JSON here?",
+      "options": [
+        "Pickle is always safer than JSON.",
+        "JSON can run code on load, so prefer pickle.",
+        "Unpickling can execute arbitrary code, so never unpickle data you do not trust. JSON only carries data and is safe to parse.",
+        "Both are equally safe for untrusted input."
+      ],
+      "answer": 2,
+      "explanation": "Pickle can reconstruct arbitrary Python objects, which means a malicious pickle can run code during loading. Only unpickle data from a source you trust. JSON parses to plain data types and cannot execute code, so it is safe for untrusted input, at the cost of not preserving custom Python objects.",
+      "misconception": "Convenience is not the only axis. Pickle's power to rebuild objects is also a security risk with untrusted data."
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "Python is described as dynamically typed. What does that mean for a variable?",
+      "options": [
+        "Every variable must be declared with its type before use.",
+        "A variable can hold only one type for the life of the program.",
+        "Types are checked only when you run `mypy`.",
+        "A variable has no fixed type and can be rebound to a value of any type at runtime."
+      ],
+      "answer": 3,
+      "explanation": "Dynamic typing means the type travels with the value, not the variable name. The same name can point at an integer and later at a string. Static languages bind a type to the variable at declaration instead.",
+      "misconception": "Dynamic typing is not the same as untyped. Values still have types; the name just is not pinned to one."
+    },
+    {
+      "type": "mcq",
+      "question": "What does `print(1, 2, 3, sep=\"-\", end=\"!\")` output?",
+      "options": [
+        "1-2-3!",
+        "1 2 3!",
+        "123!",
+        "1-2-3 followed by a newline"
+      ],
+      "answer": 0,
+      "explanation": "`sep` sets the string placed between the arguments, so the values join as 1-2-3. `end` replaces the default trailing newline, so the line ends with ! and no newline."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A new learner writes `age = input(\"Age: \")` then checks `if age > 18:` and gets a TypeError.",
+      "question": "What is the cause and the fix?",
+      "options": [
+        "`input` cannot be assigned to a variable.",
+        "The comparison needs `==` instead of `>`.",
+        "`input` returns a string, so compare after converting with `int(age)`.",
+        "`input` returns a float, so round it first."
+      ],
+      "answer": 2,
+      "explanation": "`input` always returns a string, and Python will not order a string against an integer, so the comparison raises a TypeError. Convert the input with `int(age)` (or `float`) before comparing.",
+      "misconception": "`input` does not infer numbers. Treat its result as text until you convert it."
+    },
+    {
+      "type": "card",
+      "question": "Explain the difference between implicit and explicit type conversion in Python, with one example of each.",
+      "answer": "Implicit conversion is done by Python automatically when it is safe, for example `3 + 2.0` promotes the integer to a float and gives 5.0. Explicit conversion is done by you with a constructor, for example `int(\"42\")` turns a string into an integer. Python never implicitly converts a string to a number, which is why reading input needs an explicit cast.",
+      "explanation": "The rule of thumb: Python converts implicitly only when there is no risk of losing data or guessing intent, and asks you to be explicit otherwise."
+    }
+  ]
+}

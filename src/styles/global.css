@@ -1097,3 +1097,454 @@ mark.pagefind-highlight.pagefind-highlight-active {
     display: inline-flex;
   }
 }
+
+/*
+ * Quiz modal internals (`quiz.ts` island).
+ *
+ * The island builds the quiz markup inside the `.quiz-modal` shell (styled in
+ * NoteContent.astro's scoped block). These rules are GLOBAL because the markup
+ * is created at runtime by the island, so scoped component styles would not
+ * reach it. Colours route through the palette tokens so the quiz follows the
+ * active theme; a top-layer <dialog> is themed by the explicit colour set on
+ * `.quiz-modal`. Light and dark are both covered; motion is reduced on request.
+ */
+.quiz-head {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+[data-theme="dark"] .quiz-head {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+.quiz-head-ic {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 0.6rem;
+  background: var(--accent-100);
+  color: var(--accent-600);
+}
+[data-theme="dark"] .quiz-head-ic {
+  background: color-mix(in srgb, var(--accent-500) 22%, transparent);
+  color: var(--accent-300);
+}
+.quiz-head-ic svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+.quiz-head-text b {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-head-text b {
+  color: var(--gray-100);
+}
+.quiz-head-text span {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+[data-theme="dark"] .quiz-head-text span {
+  color: var(--gray-400);
+}
+.quiz-close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--gray-200);
+  background: #ffffff;
+  color: var(--gray-500);
+  border-radius: 0.55rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+.quiz-close:hover {
+  color: var(--gray-800);
+  border-color: var(--accent-400);
+}
+[data-theme="dark"] .quiz-close {
+  background: var(--gray-900);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: var(--gray-400);
+}
+[data-theme="dark"] .quiz-close:hover {
+  color: var(--gray-100);
+}
+
+.quiz-prog-wrap {
+  padding: 0.9rem 1.25rem 0;
+}
+.quiz-prog-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.quiz-prog {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--gray-200);
+  overflow: hidden;
+}
+[data-theme="dark"] .quiz-prog {
+  background: rgba(255, 255, 255, 0.1);
+}
+.quiz-prog > div {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent-600), var(--accent-400));
+  transition: width 0.35s ease;
+}
+.quiz-pills {
+  display: flex;
+  gap: 5px;
+}
+.quiz-pill {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gray-200);
+}
+[data-theme="dark"] .quiz-pill {
+  background: rgba(255, 255, 255, 0.12);
+}
+.quiz-pill.ok {
+  background: #10b981;
+}
+.quiz-pill.no {
+  background: #ef4444;
+}
+
+.quiz-body {
+  padding: 1.1rem 1.25rem;
+  overflow-y: auto;
+}
+.quiz-scenario {
+  color: var(--gray-600);
+  font-size: 0.9rem;
+  line-height: 1.55;
+  border-left: 3px solid var(--gray-200);
+  padding-left: 0.75rem;
+  margin: 0 0 0.75rem;
+}
+[data-theme="dark"] .quiz-scenario {
+  color: var(--gray-400);
+  border-left-color: rgba(255, 255, 255, 0.12);
+}
+.quiz-scenario b {
+  color: var(--gray-800);
+}
+[data-theme="dark"] .quiz-scenario b {
+  color: var(--gray-200);
+}
+.quiz-q {
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.45;
+  margin: 0 0 1rem;
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-q {
+  color: var(--gray-100);
+}
+.quiz-qnum {
+  color: var(--accent-600);
+  font-weight: 700;
+  margin-right: 0.45rem;
+}
+[data-theme="dark"] .quiz-qnum {
+  color: var(--accent-400);
+}
+.quiz-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.quiz-opt {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  width: 100%;
+  text-align: left;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 0.7rem;
+  padding: 0.8rem 0.85rem;
+  background: #ffffff;
+  color: var(--gray-800);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.14s, background-color 0.14s;
+}
+.quiz-opt:hover:not(:disabled) {
+  border-color: var(--accent-400);
+  background: var(--accent-50);
+}
+[data-theme="dark"] .quiz-opt {
+  background: rgba(255, 255, 255, 0.02);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--gray-200);
+}
+[data-theme="dark"] .quiz-opt:hover:not(:disabled) {
+  border-color: var(--accent-500);
+  background: color-mix(in srgb, var(--accent-500) 14%, transparent);
+}
+.quiz-opt:disabled {
+  cursor: default;
+}
+.quiz-mk {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  border: 2px solid var(--gray-400);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--gray-500);
+}
+.quiz-mk svg {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+.quiz-opt.is-correct {
+  border-color: #10b981;
+  background: #ecfdf5;
+}
+.quiz-opt.is-correct .quiz-mk {
+  background: #10b981;
+  border-color: #10b981;
+  color: #ffffff;
+}
+.quiz-opt.is-wrong {
+  border-color: #ef4444;
+  background: #fef2f2;
+}
+.quiz-opt.is-wrong .quiz-mk {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #ffffff;
+}
+[data-theme="dark"] .quiz-opt.is-correct {
+  background: rgba(16, 185, 129, 0.14);
+}
+[data-theme="dark"] .quiz-opt.is-wrong {
+  background: rgba(239, 68, 68, 0.12);
+}
+.quiz-explain {
+  display: none;
+  margin-top: 0.9rem;
+  border-left: 3px solid var(--accent-500);
+  background: var(--gray-50);
+  padding: 0.75rem 0.95rem;
+  border-radius: 0 0.7rem 0.7rem 0;
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--gray-600);
+}
+.quiz-explain.show {
+  display: block;
+}
+[data-theme="dark"] .quiz-explain {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--gray-400);
+}
+.quiz-explain b {
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-explain b {
+  color: var(--gray-100);
+}
+.quiz-mis {
+  display: block;
+  margin-top: 0.5rem;
+  color: #b45309;
+}
+[data-theme="dark"] .quiz-mis {
+  color: #fbbf24;
+}
+.quiz-card-answer {
+  margin-top: 0.9rem;
+  border: 1px dashed var(--gray-300);
+  background: var(--gray-50);
+  border-radius: 0.7rem;
+  padding: 0.8rem 0.95rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--gray-700);
+}
+[data-theme="dark"] .quiz-card-answer {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--gray-300);
+}
+.quiz-card-answer b {
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-card-answer b {
+  color: var(--gray-100);
+}
+.quiz-card-note {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: 0.84rem;
+}
+
+.quiz-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.9rem 1.25rem;
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+[data-theme="dark"] .quiz-foot {
+  border-top-color: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+.quiz-count {
+  margin-right: auto;
+  font-size: 0.78rem;
+  color: var(--gray-500);
+}
+.quiz-grade {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+.quiz-btn {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  border-radius: 0.6rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  font-family: inherit;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.quiz-btn-primary {
+  background: var(--accent-600);
+  color: #ffffff;
+}
+.quiz-btn-primary:hover:not(:disabled) {
+  background: var(--accent-700);
+}
+.quiz-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.quiz-btn-ghost {
+  background: transparent;
+  border: 1.5px solid var(--gray-200);
+  color: var(--gray-600);
+}
+.quiz-btn-ghost:hover {
+  border-color: var(--accent-400);
+  color: var(--accent-600);
+}
+[data-theme="dark"] .quiz-btn-ghost {
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--gray-300);
+}
+[data-theme="dark"] .quiz-btn-ghost:hover {
+  border-color: var(--accent-500);
+  color: var(--accent-300);
+}
+.quiz-btn:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+
+.quiz-score {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+}
+.quiz-ring {
+  --p: 0;
+  width: 104px;
+  height: 104px;
+  border-radius: 50%;
+  margin: 0 auto 0.75rem;
+  background: conic-gradient(var(--accent-500) calc(var(--p) * 1%), var(--gray-200) 0);
+  display: grid;
+  place-items: center;
+}
+[data-theme="dark"] .quiz-ring {
+  background: conic-gradient(var(--accent-500) calc(var(--p) * 1%), rgba(255, 255, 255, 0.1) 0);
+}
+.quiz-ring > span {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 1.25rem;
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-ring > span {
+  background: var(--gray-900);
+  color: var(--gray-100);
+}
+.quiz-score-pct {
+  font-size: 2.4rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--gray-900);
+}
+[data-theme="dark"] .quiz-score-pct {
+  color: var(--gray-100);
+}
+.quiz-score-msg {
+  color: var(--gray-500);
+  margin-top: 0.25rem;
+  font-size: 0.92rem;
+}
+
+.quiz-body code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  border-radius: 0.35rem;
+  background: var(--slate-100);
+  border: 1px solid var(--slate-200);
+  padding: 0.06rem 0.35rem;
+  color: var(--slate-700);
+}
+[data-theme="dark"] .quiz-body code {
+  background: var(--slate-800);
+  border-color: var(--slate-700);
+  color: var(--slate-200);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-prog > div,
+  .quiz-btn,
+  .quiz-opt,
+  .quiz-close {
+    transition: none;
+  }
+}
+
+/*
+ * Sidebar completion tick (`nav-progress.ts` island).
+ *
+ * The tick is rendered with `nav-done-hidden` so it is invisible until the
+ * island confirms the note's route is complete in the progress store, then
+ * removes the class to reveal it. Using a class (not the `hidden` attribute)
+ * keeps the toggle reliable on inline SVG across browsers.
+ */
+.nav-done-hidden {
+  display: none;
+}

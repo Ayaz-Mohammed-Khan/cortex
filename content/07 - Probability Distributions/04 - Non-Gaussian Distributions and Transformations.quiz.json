@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A right-skewed feature (for example, income) violates a model's normality assumption and hurts a linear model's fit.",
+      "question": "Which transformation is a common first choice, and why?",
+      "options": [
+        "Squaring the values, which makes the right skew worse.",
+        "Adding a constant to every value.",
+        "A log transform, because it compresses large values more than small ones, pulling in the right tail toward symmetry.",
+        "Multiplying by a constant to rescale."
+      ],
+      "answer": 2,
+      "explanation": "A log transform shrinks large values far more than small ones, so a long right tail is pulled inward and the distribution becomes more symmetric. Squaring would stretch the tail further. Adding or multiplying by a constant shifts or rescales but does not change the shape.",
+      "misconception": "Rescaling by addition or multiplication does not fix skew. Only a non-linear transform like log changes the distribution's shape."
+    },
+    {
+      "type": "mcq",
+      "question": "What advantage does the Yeo-Johnson transform have over the Box-Cox transform?",
+      "options": [
+        "Yeo-Johnson handles zero and negative values, while Box-Cox requires strictly positive inputs.",
+        "Yeo-Johnson only works on integers.",
+        "They are identical in every case.",
+        "Box-Cox is non-parametric and Yeo-Johnson is not."
+      ],
+      "answer": 0,
+      "explanation": "Box-Cox is defined only for positive data, so it fails on zeros or negatives without shifting. Yeo-Johnson extends the same power-transform idea to the whole real line, including zero and negative values, which makes it the more general default."
+    },
+    {
+      "type": "mcq",
+      "question": "A quantity where a small fraction of items accounts for most of the total (for example, wealth or web traffic) is often modeled by which distribution?",
+      "options": [
+        "The Pareto distribution, which captures heavy-tailed, power-law behavior.",
+        "The standard normal distribution.",
+        "The uniform distribution.",
+        "The Bernoulli distribution."
+      ],
+      "answer": 0,
+      "explanation": "The Pareto distribution models power-law, heavy-tailed phenomena, the familiar pattern where a small share of causes drives most of the effect. A uniform distribution spreads mass evenly, and a normal distribution has light tails, so neither fits this shape."
+    }
+  ]
+}

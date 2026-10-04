@@ -1,0 +1,45 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A report states: the 95 percent confidence interval for mean session time is 24 to 32 minutes. A stakeholder concludes there is a 95 percent chance the true mean is between 24 and 32.",
+      "question": "Is that interpretation correct?",
+      "options": [
+        "No, it should say a 95 percent chance the sample mean is in the range.",
+        "No. The true mean is a fixed unknown; 95 percent refers to the procedure, meaning 95 percent of intervals built this way across repeated samples would contain it.",
+        "Yes, that is exactly what a 95 percent confidence interval means.",
+        "Yes, but only if the data is normal."
+      ],
+      "answer": 1,
+      "explanation": "In the frequentist view the parameter is fixed, so this specific interval either contains it or does not. The 95 percent describes the long-run success rate of the method, not the probability for one interval. The probability-about-this-interval reading is the Bayesian credible interval, a different object.",
+      "misconception": "A confidence level is a property of the procedure, not a probability about one computed interval. This is the classic interview trap."
+    },
+    {
+      "type": "mcq",
+      "question": "Holding the sample fixed, what happens to the width of a confidence interval as you raise the confidence level from 90 percent to 99 percent?",
+      "options": [
+        "The interval gets narrower.",
+        "The interval gets wider, because higher confidence requires covering more possibilities.",
+        "The width does not change.",
+        "The interval becomes a single point."
+      ],
+      "answer": 1,
+      "explanation": "More confidence means you must cast a wider net to be more sure of capturing the parameter, so the interval widens. There is a trade-off: higher confidence costs precision. You buy a narrower interval at the same confidence by increasing the sample size.",
+      "misconception": "You cannot increase confidence and precision at once for free. Higher confidence widens the interval unless n grows."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You are estimating a mean from a small sample (n equals 12) and the population standard deviation is unknown.",
+      "question": "Which procedure is appropriate, and why?",
+      "options": [
+        "The z-procedure, because it always applies.",
+        "The t-procedure, because with unknown population standard deviation and a small sample the t-distribution accounts for the extra uncertainty from estimating the standard deviation.",
+        "No interval can be computed with n below 30.",
+        "The t-procedure, but only when the data is uniform."
+      ],
+      "answer": 1,
+      "explanation": "When the population standard deviation is unknown and estimated from a small sample, using the normal (z) understates uncertainty. The t-distribution has heavier tails that widen the interval to reflect the estimated standard deviation, converging to the normal as the sample grows.",
+      "misconception": "Unknown population standard deviation with a small sample calls for the t-distribution, not the z."
+    }
+  ]
+}

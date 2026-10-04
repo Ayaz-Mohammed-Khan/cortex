@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "You build a result with `out = out + [x]` inside a loop over n items. Why is this O(n squared), and what is the fix?",
+      "options": [
+        "List indexing is O(n), so switch to a tuple.",
+        "It is actually O(n). The concern is a myth.",
+        "Python lists are linked lists, so use a NumPy array instead.",
+        "Each concatenation copies the whole list so far, so the total work is quadratic. Use `out.append(x)`, which is amortized O(1)."
+      ],
+      "answer": 3,
+      "explanation": "`list + [x]` allocates a new list and copies every current element on each iteration, so the work is 1 plus 2 plus ... plus n, which is O(n squared). `append` mutates in place and is amortized O(1), giving O(n) overall.",
+      "misconception": "Concatenation and append are not the same. One copies, the other mutates in place."
+    },
+    {
+      "type": "mcq",
+      "question": "What does `\"data science\"[::2]` return?",
+      "options": [
+        "\"ecneics atad\"",
+        "\"aasine\"",
+        "\"dt cec\"",
+        "\"data\""
+      ],
+      "answer": 2,
+      "explanation": "A step of 2 takes every other character starting at index 0: d, t, space, c, e, c, which gives \"dt cec\". A step of -1 would reverse the string instead."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A teammate joins thousands of tokens into one string with `s = s + token` inside a loop and the function is slow on large inputs.",
+      "question": "What is the idiomatic, fast fix in Python?",
+      "options": [
+        "Use `s += token`, which Python optimizes to O(1).",
+        "Preallocate the string with `s = \" \" * n`.",
+        "Collect the tokens in a list and call `\"\".join(tokens)` once.",
+        "Convert each token to bytes first."
+      ],
+      "answer": 2,
+      "explanation": "Strings are immutable, so repeated concatenation rebuilds the whole string each time, giving O(n squared) behavior. Building a list and calling `join` once is linear and is the standard Python idiom.",
+      "misconception": "`+=` on a string does not avoid the copies in general. The occasional CPython in-place optimization is not guaranteed and should not be relied on."
+    },
+    {
+      "type": "card",
+      "question": "Explain why strings being immutable is a feature, not just a restriction. Give one concrete benefit it enables.",
+      "answer": "Immutability means a string's value never changes after creation, so it is safe to share and hash. That lets strings be dictionary keys and set members, enables interning and caching, and makes them thread safe to pass around without defensive copies.",
+      "explanation": "The practical tell: you can use a string as a dict key but not a list, because a key must be hashable, and hashability relies on the value being fixed."
+    }
+  ]
+}

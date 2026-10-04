@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What is the role of `self` in an instance method?",
+      "options": [
+        "It is the current object, passed automatically, through which the method reads and writes that instance's attributes.",
+        "It must be passed explicitly every time you call the method.",
+        "It is a keyword that makes a method static.",
+        "It is a copy of the class, shared by all instances."
+      ],
+      "answer": 0,
+      "explanation": "When you call `obj.method()`, Python passes `obj` as the first parameter, which convention names `self`. The method uses it to access that specific instance's state. You do not pass it yourself at the call site.",
+      "misconception": "`self` is not shared across instances. It is whichever object the method was called on."
+    },
+    {
+      "type": "mcq",
+      "question": "What problem does a constructor (`__init__`) solve?",
+      "options": [
+        "It guarantees every object starts in a valid, fully initialized state at creation.",
+        "It makes the class immutable.",
+        "It destroys the object when it goes out of scope.",
+        "It is required for a class to have methods."
+      ],
+      "answer": 0,
+      "explanation": "`__init__` runs right after an object is created, so you set up its attributes there. That means no object can exist in a half-built state, which is the true benefit: callers always get a usable, consistent instance."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You want `print(fraction)` to show `3/4` instead of something like `<Fraction object at 0x...>`.",
+      "question": "Which magic method do you implement, and what should it return?",
+      "options": [
+        "`__print__`, returning the string.",
+        "`__repr__` only, which print never uses.",
+        "`__init__`, returning the string.",
+        "`__str__`, returning a readable string like \"3/4\"."
+      ],
+      "answer": 3,
+      "explanation": "`print` and `str()` call `__str__`, which should return a human-readable string. There is no `__print__`. `__repr__` is the unambiguous developer representation and is a sensible fallback, but `__str__` is what print prefers.",
+      "misconception": "Magic (dunder) methods hook into built-in operations. You implement `__str__`; you do not invent a `__print__`."
+    },
+    {
+      "type": "card",
+      "question": "Explain the difference between a class and an object, using a concrete analogy.",
+      "answer": "A class is a blueprint that defines what attributes and behaviors a kind of thing has. An object is a concrete instance built from that blueprint, with its own values. For example, a Car class defines that every car has a color and a speed and can accelerate; a specific red car doing 60 is one object. Many independent objects can be created from one class, each with its own state.",
+      "explanation": "The tell: the class is written once; objects are made many times with `ClassName(...)`, each holding its own instance attributes."
+    }
+  ]
+}

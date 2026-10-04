@@ -1,0 +1,49 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "Why do we measure algorithm cost with Big O rather than timing the code with a clock?",
+      "options": [
+        "Big O describes how work grows with input size, independent of the machine, language, or load, which wall-clock time cannot.",
+        "Big O gives the exact number of seconds a function takes.",
+        "Big O only applies to sorting algorithms.",
+        "Clock timing is always wrong."
+      ],
+      "answer": 0,
+      "explanation": "Wall-clock time depends on the hardware, the language, and the current load, so it is not portable or stable. Big O captures the growth rate of the operation count as input size grows, which is a property of the algorithm itself.",
+      "misconception": "Big O is not a running time in seconds. It is a growth rate that ignores constants and hardware."
+    },
+    {
+      "type": "mcq",
+      "question": "A function has one loop over n items and, inside it, another loop over the same n items. What is its time complexity?",
+      "options": [
+        "O(2n)",
+        "O(log n)",
+        "O(n squared)",
+        "O(n)"
+      ],
+      "answer": 2,
+      "explanation": "Nested loops multiply: for each of n outer steps you do n inner steps, so the total is n times n, which is O(n squared). Big O drops constant factors, so O(2n) would simplify to O(n) and is not how nesting works."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You must check membership (is x present?) millions of times against a large collection that does not change.",
+      "question": "Which structure gives the best average lookup, and why?",
+      "options": [
+        "A list, because lists are faster for everything.",
+        "A set or dict, because hash lookup is average O(1), versus O(n) for scanning a list.",
+        "A tuple, because tuples are immutable and therefore faster to search.",
+        "It does not matter, since all lookups are O(1)."
+      ],
+      "answer": 1,
+      "explanation": "A set or dict uses hashing, so an average membership test is O(1) regardless of size. Scanning a list or tuple is O(n) because it checks elements one by one. For heavy repeated membership tests, the set wins decisively at scale.",
+      "misconception": "Immutability (tuple) does not make membership faster. The data structure's lookup mechanism (hashing versus linear scan) is what matters."
+    },
+    {
+      "type": "card",
+      "question": "Explain the difference between best, average, and worst case complexity, and say which one Big O usually reports and why.",
+      "answer": "Best case is the fewest operations for a lucky input, worst case is the most for the hardest input, and average case is the expected cost over typical inputs. Big O usually reports the worst case, because it gives a guarantee that the algorithm never does more than that, which is what you need to reason about reliability at scale.",
+      "explanation": "Average case matters in practice too (for example, hash lookups are average O(1) but worst-case O(n) under collisions), so state which case you mean when it differs."
+    }
+  ]
+}

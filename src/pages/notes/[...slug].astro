@@ -154,6 +154,7 @@ if (data.kind === 'note') {
         route={route}
         difficulty={difficulty}
         prerequisites={prerequisites}
+        quiz={site.quizzes.get(route) ?? null}
       />
     ) : (
       data.kind === 'category' && <CategoryListing node={data.node} />

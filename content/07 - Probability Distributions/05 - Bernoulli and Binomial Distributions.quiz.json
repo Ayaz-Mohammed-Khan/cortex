@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What does a Bernoulli distribution model?",
+      "options": [
+        "A continuous measurement like height.",
+        "The number of successes in many trials.",
+        "A single trial with two outcomes, success with probability p and failure with probability 1 minus p.",
+        "The time between events."
+      ],
+      "answer": 2,
+      "explanation": "A Bernoulli variable is one yes-or-no trial: 1 with probability p, 0 with probability 1 minus p. Counting the successes across n independent Bernoulli trials gives the binomial distribution, which builds directly on it."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A model classifies 20 emails independently, each spam with probability 0.1, and you want the probability that exactly 3 are spam.",
+      "question": "Which distribution applies, and what must hold for it to be valid?",
+      "options": [
+        "The uniform distribution, because each email is equally likely.",
+        "The binomial distribution, valid because there is a fixed number of independent trials, each with the same success probability and two outcomes.",
+        "The Pareto distribution, because spam is rare.",
+        "The normal distribution, because counts are always normal."
+      ],
+      "answer": 1,
+      "explanation": "Counting successes in a fixed number n of independent, identical two-outcome trials is exactly the binomial setting. Its criteria are: fixed n, independent trials, constant p, and binary outcomes. Here n is 20, p is 0.1, and you want the probability of 3 successes.",
+      "misconception": "A count of successes is binomial, not normal. The normal can approximate it only when n is large and p is not extreme."
+    },
+    {
+      "type": "mcq",
+      "question": "Why does the Bernoulli distribution matter in machine learning?",
+      "options": [
+        "It models continuous target variables in regression.",
+        "It is used only in physics, not machine learning.",
+        "It underlies binary classification: a model outputs p, the probability of the positive class, and log loss comes from the Bernoulli likelihood.",
+        "It is the distribution of model weights."
+      ],
+      "answer": 2,
+      "explanation": "Binary classification treats each label as a Bernoulli outcome with success probability p predicted by the model. Maximizing the Bernoulli likelihood over the data is equivalent to minimizing log loss (binary cross-entropy), which is the standard objective for logistic regression and many classifiers."
+    }
+  ]
+}

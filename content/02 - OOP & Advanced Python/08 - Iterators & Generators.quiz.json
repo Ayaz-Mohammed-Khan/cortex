@@ -1,0 +1,57 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What distinguishes an iterator from an iterable?",
+      "options": [
+        "An iterable can produce an iterator (it has `__iter__`); an iterator produces values one at a time and has both `__iter__` and `__next__`.",
+        "An iterator holds all values in memory; an iterable does not.",
+        "They are the same thing.",
+        "An iterable can only be looped once."
+      ],
+      "answer": 0,
+      "explanation": "An iterable, like a list, can hand out an iterator via `iter()`. The iterator carries the position and yields the next value on each `next()` call, raising StopIteration when done. Every iterator is iterable, but not every iterable is an iterator.",
+      "misconception": "A list is iterable but is not itself an iterator. You get its iterator from `iter(list)`."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A training loop must stream millions of images, each converted to an array, but they do not all fit in memory.",
+      "question": "Why is a generator the right tool here?",
+      "options": [
+        "A generator loads everything first, then yields quickly.",
+        "A generator caches all produced values for reuse.",
+        "A generator yields one item at a time and keeps only the current value in memory, so it handles arbitrarily large or infinite streams in constant memory.",
+        "A generator is just a faster list."
+      ],
+      "answer": 2,
+      "explanation": "A generator produces values lazily, computing each on demand and discarding it after use, so memory stays flat no matter how many items flow through. That is exactly how data pipelines feed models larger-than-memory datasets, one batch at a time.",
+      "misconception": "A generator does not materialize the whole sequence. It is the lazy, constant-memory alternative to a list."
+    },
+    {
+      "type": "mcq",
+      "question": "How does `yield` differ from `return` in a function?",
+      "options": [
+        "`yield` pauses the function and remembers its state, resuming after the yield on the next call; `return` ends the function and discards its state.",
+        "`yield` and `return` behave identically.",
+        "`return` produces a generator; `yield` produces a value.",
+        "`yield` can appear only once per function."
+      ],
+      "answer": 0,
+      "explanation": "A function with `yield` is a generator: calling it returns a generator object, and each `next()` runs to the next `yield`, pausing with all local state intact. `return` runs the body once and throws the frame away. That pause-and-resume is what makes lazy iteration possible.",
+      "misconception": "`yield` does not end the function. It suspends it, to be resumed where it left off."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the practical difference between `[x * x for x in range(10**8)]` and `(x * x for x in range(10**8))`?",
+      "options": [
+        "The first is lazy; the second is eager.",
+        "They are identical; parentheses are cosmetic.",
+        "The second is a tuple.",
+        "The first builds a huge list in memory and may exhaust it; the second is a generator expression that computes values lazily."
+      ],
+      "answer": 3,
+      "explanation": "Square brackets build a list comprehension, materializing all 100 million squares at once, which can run out of memory. Round brackets create a generator expression that yields one square at a time. For large or streamed data, the generator expression is the safe choice.",
+      "misconception": "Round brackets here do not make a tuple. They make a lazy generator expression."
+    }
+  ]
+}

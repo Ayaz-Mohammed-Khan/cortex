@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What does `__add__` let you do, and what expression triggers it?",
+      "options": [
+        "It makes the class iterable.",
+        "It defines what `a + b` means for your objects; `a + b` calls `a.__add__(b)`.",
+        "It is called by `a.add(b)` only.",
+        "It adds a method to the class at runtime."
+      ],
+      "answer": 1,
+      "explanation": "`__add__` is operator overloading for `+`. Writing `a + b` invokes `a.__add__(b)`, so you can define addition for a Fraction or Vector naturally. Each operator has its own dunder, for example `__sub__` for `-` and `__mul__` for `*`."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You write a function `def total_area(shapes):` that loops and calls `shape.area()` on each item, where shapes may be circles, squares, or triangles.",
+      "question": "Which idea makes this one function work for every shape type?",
+      "options": [
+        "Inheritance of the `total_area` function.",
+        "Polymorphism: each class implements `area()` its own way, and the caller uses the shared interface without knowing the concrete type.",
+        "Encapsulation of the loop variable.",
+        "Operator overloading of the plus sign."
+      ],
+      "answer": 1,
+      "explanation": "Polymorphism lets objects of different types respond to the same method call in their own way. The function depends only on the shared `area()` interface, so adding a new shape needs no change to `total_area`. This is the open-closed benefit of polymorphism.",
+      "misconception": "The function does not branch on type. It relies on each type honoring a common interface, which is the point of polymorphism."
+    },
+    {
+      "type": "mcq",
+      "question": "Python does not support classic method overloading (same name, different signatures). What is the common Pythonic substitute?",
+      "options": [
+        "Overloading is fully supported with type annotations.",
+        "Using a different class per signature.",
+        "Defining the method twice; the second wins.",
+        "Default arguments or `*args` and `**kwargs` so one method handles varied inputs."
+      ],
+      "answer": 3,
+      "explanation": "Defining a method twice just replaces the first with the second in Python. Instead, you write one method that adapts using default parameters or variadic arguments. True compile-time overloading does not exist in Python."
+    }
+  ]
+}

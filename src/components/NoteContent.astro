@@ -13,6 +13,7 @@
  * click-to-zoom lightbox) as progressive, client-side enhancements.
  */
 import type { AstroComponentFactory } from 'astro/runtime/server/index.js';
+import type { Quiz } from '@/lib/quiz';
 
 /** One resolved prerequisite: its label and (if it maps to a note) its route. */
 export interface PrereqLink {
@@ -35,9 +36,28 @@ interface Props {
   difficulty?: Difficulty;
   /** Optional prerequisites (frontmatter), resolved to links where possible. */
   prerequisites?: PrereqLink[];
+  /** This note's quiz, when one exists; drives the "Test yourself" banner. */
+  quiz?: Quiz | null;
 }
 
-const { displayName, categoryPath, Content, route, difficulty, prerequisites = [] } = Astro.props;
+const {
+  displayName,
+  categoryPath,
+  Content,
+  route,
+  difficulty,
+  prerequisites = [],
+  quiz = null,
+} = Astro.props;
+
+// Count of questions, used in the banner copy. Zero means no banner is shown.
+const quizCount = quiz?.questions.length ?? 0;
+// A rough reading time: about 40 seconds per question, rounded to a minute.
+const quizMinutes = quizCount > 0 ? Math.max(1, Math.round((quizCount * 40) / 60)) : 0;
+// Pass threshold: the quiz counts as passed at two thirds correct, so this is
+// the number of questions a reader must get right. Kept in sync with
+// PASS_RATIO in `src/components/quiz.ts`.
+const quizPassMark = quizCount > 0 ? Math.ceil((quizCount * 2) / 3) : 0;
 
 // Difficulty badge palette: a distinct axis from the roadmap's core/advanced
 // tier, so it uses its own green -> blue -> pink scale.
@@ -124,6 +144,44 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   </div>
 
   {/*
+    Quiz entry banner. Shown only when this note has a companion quiz. It is a
+    quiet call-to-action (a container with an explicit Start button, not a
+    whole-card click target), sitting after the body and before "Mark as
+    complete" so the flow reads: read the note, test yourself, mark it done. The
+    `./quiz` island reads the serialized quiz below and opens the modal.
+  */}
+  {quizCount > 0 && (
+    <div
+      class="mt-10 flex items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50/60 px-5 py-4 dark:border-accent-500/25 dark:bg-accent-500/10"
+      data-quiz-banner
+    >
+      <span
+        aria-hidden="true"
+        class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent-100 text-accent-600 dark:bg-accent-500/20 dark:text-accent-300"
+      >
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 11l3 3L22 4" />
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+        </svg>
+      </span>
+      <div class="min-w-0 flex-1">
+        <p class="font-semibold text-gray-900 dark:text-gray-100">Test yourself</p>
+        <p class="text-sm text-gray-600 dark:text-gray-400">
+          {quizCount} {quizCount === 1 ? 'question' : 'questions'}, about {quizMinutes} {quizMinutes === 1 ? 'minute' : 'minutes'}. Score {quizPassMark} or more to complete this note.
+        </p>
+      </div>
+      <button
+        type="button"
+        data-quiz-start
+        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+      >
+        Start
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
+  )}
+
+  {/*
     Progress control (option B2), placed at the END of the reading flow — the
     natural "you've finished, mark it done" moment, after the body and before
     the backlinks / prev-next navigation. A quiet divider sets it apart from the
@@ -135,13 +193,19 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     class="mt-10 flex flex-col items-center gap-3 border-t border-gray-200 pt-6 text-center dark:border-white/10"
     data-note-progress
     data-route={route}
+    data-requires-quiz={quizCount > 0 ? 'true' : undefined}
   >
-    <p class="text-sm text-gray-500 dark:text-gray-400">Finished this note?</p>
+    <p
+      data-note-progress-heading
+      class="text-sm text-gray-500 dark:text-gray-400"
+    >
+      {quizCount > 0 ? 'Completion' : 'Finished this note?'}
+    </p>
     <button
       type="button"
       data-note-progress-input
       aria-pressed="false"
-      class="note-progress-btn inline-flex items-center gap-2.5 rounded-lg border-[1.75px] border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-offset-gray-900"
+      class="note-progress-btn inline-flex items-center gap-2.5 rounded-lg border-[1.75px] border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:border-gray-300 disabled:text-gray-400 disabled:hover:bg-transparent dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-offset-gray-900 dark:disabled:border-white/15 dark:disabled:text-gray-500"
     >
       <span
         data-note-progress-icon
@@ -150,10 +214,98 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
       ></span>
       <span data-note-progress-label>Mark as complete</span>
     </button>
+    {/* Shown by the island only when a quiz gates completion and it is not yet
+        passed. Explains why the button is disabled and points at the quiz. */}
+    {quizCount > 0 && (
+      <p data-note-progress-hint class="text-xs text-gray-400 dark:text-gray-500" hidden>
+        Score at least {quizPassMark} of {quizCount} on the quiz above to complete this note.
+      </p>
+    )}
   </div>
 </article>
 
+{
+  quizCount > 0 && (
+    <>
+      {/*
+        Quiz data for the island, serialized as JSON (the same pattern the
+        roadmap uses). The island reads this, builds the stepper, and drives the
+        dialog below. Kept out of the dialog markup so the dialog stays a thin,
+        island-populated shell.
+      */}
+      <script type="application/json" data-quiz set:html={JSON.stringify(quiz)} />
+      <script type="application/json" data-quiz-route set:html={JSON.stringify(route)} />
+
+      {/*
+        Quiz modal. A native <dialog> (same accessible pattern as the roadmap
+        modal: Esc closes, backdrop click closes, focus is trapped). The island
+        fills `[data-quiz-modal]` per step. `data-quiz-dialog` carries an
+        explicit themed text colour because a top-layer <dialog> does not inherit
+        the page's text colour.
+      */}
+      <dialog data-quiz-dialog class="quiz-dialog">
+        <div class="quiz-shell">
+          <div data-quiz-modal class="quiz-modal" />
+        </div>
+      </dialog>
+    </>
+  )
+}
+
 <style>
+  /* ============================================================
+     Quiz modal (guided stepper in a native <dialog>).
+     A top-layer dialog does NOT inherit the page's themed text colour, so
+     colour is set explicitly on the dialog and modal. Light + dark both styled.
+     ============================================================ */
+  .quiz-dialog {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    max-width: none;
+    max-height: none;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    color: var(--gray-900);
+  }
+  :global([data-theme='dark']) .quiz-dialog {
+    color: var(--gray-100);
+  }
+  .quiz-dialog::backdrop {
+    background: rgba(30, 27, 46, 0.45);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+  }
+  :global([data-theme='dark']) .quiz-dialog::backdrop {
+    background: rgba(4, 5, 12, 0.72);
+  }
+  .quiz-shell {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(10px, 3vw, 40px);
+  }
+  .quiz-modal {
+    width: min(760px, 100%);
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    color: var(--gray-900);
+    border: 1px solid var(--gray-200);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+  }
+  :global([data-theme='dark']) .quiz-modal {
+    background: var(--gray-900);
+    color: var(--gray-100);
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+
   /* Done state for the "Mark as complete" control: the ghost outline flips to a
      solid green fill with a tick, matching the roadmap modal's "Mark done"
      button. The island adds `.is-done` when this note's route is complete. */
@@ -179,4 +331,5 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   import './image-zoom';
   import './search-highlight';
   import './note-progress';
+  import './quiz';
 </script>

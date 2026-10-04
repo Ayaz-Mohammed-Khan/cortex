@@ -1,0 +1,48 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "question": "What is the key difference between a probability mass function (PMF) and a probability density function (PDF)?",
+      "options": [
+        "A PMF is for continuous variables and a PDF is for discrete ones.",
+        "They are the same function with different names.",
+        "A PMF gives the probability of each value for a discrete variable; a PDF gives density for a continuous variable, where probability is an area under the curve.",
+        "A PDF gives the probability of each exact value directly."
+      ],
+      "answer": 2,
+      "explanation": "For a discrete variable, the PMF assigns a real probability to each possible value, and those probabilities sum to 1. For a continuous variable, the PDF gives density, not probability, and you get a probability by integrating over an interval. The total area under a PDF is 1."
+    },
+    {
+      "type": "scenario",
+      "scenario": "A student asks for the probability that a continuous variable equals exactly 2.0, reading it off the PDF height at 2.0.",
+      "question": "What is the correct statement?",
+      "options": [
+        "The probability is 1 divided by the number of values.",
+        "The probability of any single exact value is zero for a continuous variable; probability comes from the area over an interval, not the PDF height.",
+        "The PDF height at 2.0 is that probability.",
+        "Continuous variables cannot have probabilities."
+      ],
+      "answer": 1,
+      "explanation": "For a continuous distribution, probability is area under the PDF between two points, so a single point spans zero width and has probability zero. The PDF value at a point is a density, which can even exceed 1, not a probability.",
+      "misconception": "PDF height is not probability. Only the area under the curve over a range is a probability."
+    },
+    {
+      "type": "mcq",
+      "question": "What does the cumulative distribution function (CDF) at a value x represent?",
+      "options": [
+        "The density at x.",
+        "The probability that the variable is less than or equal to x.",
+        "The derivative of the PMF at x.",
+        "The probability that the variable equals x exactly."
+      ],
+      "answer": 1,
+      "explanation": "The CDF accumulates probability up to x, so CDF(x) is P(X is at most x). It rises from 0 to 1 as x increases. For a continuous variable, the PDF is the derivative of the CDF, and the CDF is the integral of the PDF."
+    },
+    {
+      "type": "card",
+      "question": "Why do data scientists care about estimating a distribution from data, for example with a kernel density estimate, rather than only looking at a histogram?",
+      "answer": "A histogram depends heavily on bin width and bin edges, so the same data can look very different, and it is a jagged, discontinuous view. A kernel density estimate produces a smooth, continuous estimate of the underlying PDF that does not jump with arbitrary bin choices. Knowing the distribution lets you reason about probabilities, detect skew and multimodality, choose appropriate models, and check assumptions like normality.",
+      "explanation": "The deeper point: many methods assume a distributional shape, so estimating the actual shape of your data tells you whether those assumptions hold."
+    }
+  ]
+}

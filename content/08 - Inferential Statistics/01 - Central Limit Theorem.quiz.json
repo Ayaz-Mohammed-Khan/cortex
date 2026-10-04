@@ -1,0 +1,42 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A population of transaction amounts is heavily right-skewed. A colleague says you cannot use normal-based confidence intervals because the data is not normal.",
+      "question": "How does the central limit theorem address this?",
+      "options": [
+        "The CLT says the sampling distribution of the sample mean is approximately normal for a large enough sample, regardless of the population shape, so normal-based intervals apply to the mean.",
+        "The colleague is right; nothing can be done.",
+        "The CLT only applies when the population is already normal.",
+        "The CLT makes the raw data normal if you collect enough of it."
+      ],
+      "answer": 0,
+      "explanation": "The CLT is about the distribution of the sample MEAN, not the raw data. Even from a skewed population, the means of many samples cluster into an approximately normal sampling distribution as sample size grows, which is what justifies the usual interval for the mean.",
+      "misconception": "The CLT does not normalize the raw data. It makes the distribution of the sample mean approximately normal."
+    },
+    {
+      "type": "mcq",
+      "question": "The CLT says the sampling distribution of the mean has standard deviation (the standard error) equal to what?",
+      "options": [
+        "The population standard deviation divided by the square root of n.",
+        "The population standard deviation times n.",
+        "The population variance divided by n.",
+        "The population standard deviation unchanged."
+      ],
+      "answer": 0,
+      "explanation": "The standard error of the mean is the population standard deviation divided by the square root of the sample size. The square-root relationship is why halving the standard error requires quadrupling the sample size, a key cost consideration in experiment design."
+    },
+    {
+      "type": "mcq",
+      "question": "A common rule of thumb is that the CLT approximation is reasonable once the sample size reaches about what, with more needed for very skewed populations?",
+      "options": [
+        "About 1000 always.",
+        "About 5.",
+        "Exactly 100 regardless of the population.",
+        "About 30."
+      ],
+      "answer": 3,
+      "explanation": "A sample size of roughly 30 is the usual rule of thumb for the sampling distribution of the mean to look approximately normal. Heavier skew or extreme outliers push that requirement higher, so treat 30 as a guideline, not a guarantee."
+    }
+  ]
+}

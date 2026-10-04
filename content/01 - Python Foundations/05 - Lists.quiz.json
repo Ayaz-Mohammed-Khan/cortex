@@ -1,0 +1,56 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "scenario": "A colleague says a Python list is just like a C array, so appending is cheap and indexing is slow.",
+      "question": "What is the accurate picture of how a Python list is stored and performs?",
+      "options": [
+        "A list is a dynamic array of references, so indexing is O(1) and append is amortized O(1), while insert or delete at the front is O(n).",
+        "A list is a hash table, so lookups by position are O(1) but order is lost.",
+        "A list stores values inline like a C array, so it cannot grow.",
+        "A list is a linked list, so append is O(1) but indexing is O(n)."
+      ],
+      "answer": 0,
+      "explanation": "A Python list is a dynamic array holding references to objects. Index access is O(1). Append is amortized O(1) because the array occasionally reallocates with extra room. Inserting or deleting at the front shifts every element, which is O(n).",
+      "misconception": "A Python list is not a linked list. Indexing is fast; it is front insertion and deletion that are expensive."
+    },
+    {
+      "type": "mcq",
+      "question": "What is the result of `[1, 2, 3] * 2`?",
+      "options": [
+        "[2, 4, 6]",
+        "A TypeError",
+        "[1, 2, 3, 2]",
+        "[1, 2, 3, 1, 2, 3]"
+      ],
+      "answer": 3,
+      "explanation": "The `*` operator repeats a list, so the three elements appear twice in order. Elementwise multiplication of values is a NumPy operation, not a Python list operation."
+    },
+    {
+      "type": "scenario",
+      "scenario": "You write `grid = [[0] * 3] * 3` to make a 3 by 3 grid, then set `grid[0][0] = 1` and find that `grid[1][0]` and `grid[2][0]` also became 1.",
+      "question": "Why, and what is the correct construction?",
+      "options": [
+        "`grid[0][0]` writes to every row by design. Use a NumPy array.",
+        "The grid is fine; the read is wrong.",
+        "Integers are mutable, so changing one changes all. Use tuples instead.",
+        "The outer `* 3` copied the same inner-list reference three times. Build independent rows with `[[0] * 3 for _ in range(3)]`."
+      ],
+      "answer": 3,
+      "explanation": "`[[0] * 3] * 3` repeats the SAME inner list object three times, so all rows are one shared list. Mutating one row mutates all. A list comprehension builds a fresh inner list per row, which is what you want.",
+      "misconception": "List repetition copies references, not deep structure. Repeating a list of mutable objects shares those objects."
+    },
+    {
+      "type": "mcq",
+      "question": "Which is the idiomatic way to build a list of squares for 0 to 9?",
+      "options": [
+        "`[range(10) * 2]`",
+        "`[x * x for x in range(10)]`",
+        "A for loop is the only correct way.",
+        "`list(x * x in range(10))`"
+      ],
+      "answer": 1,
+      "explanation": "A list comprehension `[expr for x in iterable]` is the idiomatic, readable, and fast way to build a derived list. The other options are not valid Python for this task."
+    }
+  ]
+}
