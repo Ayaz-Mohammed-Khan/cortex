@@ -11,7 +11,7 @@ created: 2026-09-29
 ---
 
 > [!info] Where this fits
-> This is the last of the four core pillars of object-oriented programming, following [[Classes & Objects]], [[Encapsulation]], [[Inheritance]], and [[Polymorphism]]. It builds on inheritance: a parent class uses abstraction to hide how something is done while forcing its child classes to provide certain methods. The focus is on what abstraction is and, just as importantly, when you would actually use it.
+> This is the last of the four pillars of object-oriented programming, following [[Classes & Objects]], [[Encapsulation]], [[Inheritance]], and [[Polymorphism]]. It builds on inheritance: a parent class uses abstraction to hide how something is done while forcing its child classes to provide certain methods. The focus is on what abstraction is and, just as importantly, when you would actually use it.
 
 **Abstraction** hides implementation detail while exposing only what a user needs. A laptop is abstracted: it hides its circuits and lets you work through a keyboard and screen. This note covers abstract classes and abstract methods, and abstraction's most practical use: forcing every class that builds on yours to implement required methods.
 
@@ -128,4 +128,4 @@ Abstraction is one of the less frequently used pillars; it earns its place where
 ---
 
 > [!info] Continues to
-> This completes the four core pillars of object-oriented programming: classes and objects, encapsulation, inheritance, polymorphism, and abstraction. The next stages of the roadmap move into the data science libraries [[NumPy & Pandas]], which are themselves built entirely from the OOP ideas covered here.
+> This completes object-oriented programming: classes and objects, plus the four pillars of encapsulation, inheritance, polymorphism, and abstraction. The next stages of the roadmap move into the data science libraries [[NumPy & Pandas]], which are themselves built entirely from the OOP ideas covered here.

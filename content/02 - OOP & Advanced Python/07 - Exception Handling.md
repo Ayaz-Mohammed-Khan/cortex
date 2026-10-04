@@ -12,7 +12,7 @@ created: 2026-09-29
 > [!info] Where this fits
 > This follows [[File Handling]], where real-world data (a missing file, a bad format, a dropped connection) is a common source of failures. Exception handling is how a program catches those failures and responds gracefully instead of crashing. It builds on classes from [[Classes & Objects]], since every error in Python is an object of a class.
 
-An **error** can appear in a program at two moments: when it is **compiled** (translated to machine code) and when it is **executed** (run). This note covers both, but focuses on the second: **exceptions**, the runtime failures you catch and handle so your program degrades gracefully. You will learn why handling matters, the `try`/`except`/`else`/`finally` blocks, catching specific errors, raising your own, and writing custom exception classes.
+An **error** can appear in a program at two moments: **before it runs**, when Python parses the code and compiles it to bytecode, and **while it runs**, during execution. This note covers both, but focuses on the second: **exceptions**, the runtime failures you catch and handle so your program degrades gracefully. You will learn why handling matters, the `try`/`except`/`else`/`finally` blocks, catching specific errors, raising your own, and writing custom exception classes.
 
 ---
 
@@ -22,18 +22,18 @@ The two moments an error can occur give the two families of error:
 
 | | Syntax error | Exception |
 | :--- | :--- | :--- |
-| When | at **compile** time | at **run** time (execution) |
+| When | **before the program runs** (at parse time) | **while the program runs** (execution) |
 | Caused by | code that breaks the language's grammar | a logical/runtime problem, even in correct code |
-| Raised by | the interpreter/compiler | the Python runtime |
+| Raised by | the parser, before any line executes | the Python runtime |
 | Fix | debug and rewrite the code | handle it on the fly |
 
-A **syntax error** means something is written against the language's rules, a missing bracket, a missing colon, a misspelled keyword, wrong indentation:
+A **syntax error** means something is written against the language's rules, a missing bracket, a missing colon, a misspelled keyword, wrong indentation. Python reports it before running any line, because it cannot parse the file:
 
 ```python
 print 'hello world'     # SyntaxError: missing parentheses
 ```
 
-The compiler cannot translate the code, so it refuses to run and points at the problem. (Bad indentation is reported as its own `IndentationError`, a special kind of syntax error.)
+Python cannot parse the code, so it refuses to run and points at the problem. (Bad indentation is reported as its own `IndentationError`, a special kind of syntax error.)
 
 An **exception** is different: the code is written correctly, but something goes wrong *while it runs*.
 

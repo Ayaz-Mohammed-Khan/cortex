@@ -135,12 +135,14 @@ A file can be larger than your RAM, a 10 GB file will not fit in 8 GB of memory.
 ```python
 with open('big.txt', 'r') as f:
     chunk_size = 100
-    while len(f.read(chunk_size)) > 0:
-        print(f.read(chunk_size), end='')
-        f.read(chunk_size)
+    while True:
+        chunk = f.read(chunk_size)
+        if chunk == '':            # empty string means end of file
+            break
+        print(chunk, end='')
 ```
 
-Each `f.read(chunk_size)` returns the next chunk; when the file is exhausted it returns an empty string (length `0`), ending the loop.
+Read each chunk into a variable **once**, process it, then read the next. When the file is exhausted `f.read(chunk_size)` returns an empty string, which ends the loop. Reading in the condition and again in the body would skip chunks, so always capture the chunk in a variable first.
 
 > [!tip]
 > Think of moving a pile of bricks one at a time instead of lifting the whole stack. You never hold more than one brick, so the pile can be any size. Libraries like pandas and Keras read huge files this way internally; you rarely write chunking by hand, but knowing it demystifies how they stay within memory.
@@ -209,7 +211,7 @@ Python's `json` module has two file functions:
 ```python
 import json
 
-d = {'name': 'Nitish', 'marks': [23, 14, 34, 45, 56]}
+d = {'name': 'Aarav', 'marks': [23, 14, 34, 45, 56]}
 
 # serialize: Python object -> JSON file
 with open('demo.json', 'w') as f:
@@ -246,7 +248,7 @@ def show_object(person):
             'gender': person.gender,
         }
 
-p = Person('Nitish', 'Singh', 33, 'male')
+p = Person('Aarav', 'Singh', 33, 'male')
 with open('demo.json', 'w') as f:
     json.dump(p, f, default=show_object, indent=4)
 ```
@@ -273,7 +275,7 @@ class Person:
     def display_info(self):
         print('Hi, my name is', self.name)
 
-p = Person('Nitish')
+p = Person('Aarav')
 
 # pickle: object -> binary file (note the 'wb' mode)
 with open('person.pkl', 'wb') as f:
@@ -283,7 +285,7 @@ with open('person.pkl', 'wb') as f:
 with open('person.pkl', 'rb') as f:
     loaded = pickle.load(f)
 
-loaded.display_info()    # Hi, my name is Nitish, the method still works
+loaded.display_info()    # Hi, my name is Aarav, the method still works
 ```
 
 The unpickled object is fully functional, it keeps access to its class's methods, which is why pickle is **transferable**: you can pickle an object on one machine and unpickle it on another.

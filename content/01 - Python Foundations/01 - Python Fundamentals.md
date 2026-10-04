@@ -222,23 +222,25 @@ Each type is introduced below.
 
 ### Numbers
 
-**Integers** (`int`) are whole numbers, positive or negative. Python handles extremely large integers without special effort, on the order of $10^{308}$. Beyond that it reports infinity.
+**Integers** (`int`) are whole numbers, positive or negative. Python integers have **arbitrary precision**: they grow as large as your memory allows, with no fixed maximum, so you never overflow an integer.
 
 ```python
 print(8)
-print(1e308)    # 1 multiplied by 10 to the power 308
+print(2 ** 1000)    # a 302-digit number, computed exactly
+```
+
+**Floats** (`float`) are decimals. Unlike integers, they have a finite range, holding values up to about $1.8 \times 10^{308}$. Beyond that a float reports `inf` (infinity).
+
+```python
+print(8.55)
+print(1e308)        # 1 multiplied by 10 to the power 308
+print(1e309)        # inf: past the float range
 ```
 
 In $1e308$, the `e` notation means $1 \times 10^{308}$.
 
-**Floats** (`float`) are decimals, with a similarly large range.
-
-```python
-print(8.55)
-```
-
 > [!note]
-> Other languages separate `long` and `double` from `int` and `float`. Python does not. Long values map into `int` automatically, which is why Python integers can be so large with no extra type.
+> Other languages separate `long` and `double` from `int` and `float`. Python does not. Long values map into `int` automatically, which is why Python integers need no separate type for large values.
 
 **Complex numbers** (`complex`) have a real part and an imaginary part, written with `j`.
 
@@ -279,15 +281,15 @@ These types hold several values together. Each is covered in depth on its own, s
 | `list` | Square brackets | `[1, 2, 3]` |
 | `tuple` | Round brackets | `(1, 2, 3)` |
 | `set` | Curly braces | `{1, 2, 3}` |
-| `dict` | Curly braces with key-value pairs | `{'name': 'Nitish'}` |
+| `dict` | Curly braces with key-value pairs | `{'name': 'Aarav'}` |
 
 A **list** plays the role that arrays play in C, though it is more capable. A **tuple** looks almost identical to a list but behaves differently in ways that matter later. A **set** is the mathematical set you met in school, holding unique items. A **dictionary** stores **key-value pairs**, where you look up a value by its key.
 
 ```python
-{'name': 'Nitish', 'gender': 'male', 'weight': 70}
+{'name': 'Aarav', 'gender': 'male', 'weight': 70}
 ```
 
-Here `name` is a key and `'Nitish'` is its value.
+Here `name` is a key and `'Aarav'` is its value.
 
 > [!note]
 > The choice between square, round, and curly brackets carries no deeper meaning. They are the notation Python uses to tell these types apart.
@@ -330,12 +332,12 @@ int name = 5;
 Python needs no type. Write the name, an equals sign, and the value.
 
 ```python
-name = 'Nitish'
+name = 'Aarav'
 print(name)
 ```
 
 ```text
-Nitish
+Aarav
 ```
 
 The `=` here is the assignment operator. It stores the value on the right into the name on the left.
@@ -357,7 +359,7 @@ print(a + b)
 
 **Dynamic typing** means you do not state a variable's data type; the interpreter works it out from the value you assign.
 
-Python sees `5` and concludes `int`. It sees `5.5` and concludes `float`. It sees `'Nitish'` and concludes `str`.
+Python sees `5` and concludes `int`. It sees `5.5` and concludes `float`. It sees `'Aarav'` and concludes `str`.
 
 **Static typing** is the opposite, used by C, C++, and Java, where you declare the type when creating the variable.
 
@@ -369,8 +371,8 @@ Python sees `5` and concludes `int`. It sees `5.5` and concludes `float`. It see
 a = 5
 print(a)        # 5
 
-a = 'Nitish'
-print(a)        # Nitish
+a = 'Aarav'
+print(a)        # Aarav
 ```
 
 No error occurs. The variable holds whatever you last put in it.
@@ -468,15 +470,15 @@ An **identifier** is any name you create in your program: a variable name, a fun
 **Rule one: do not start with a digit.**
 
 ```python
-1name = 'Nitish'    # error
-name1 = 'Nitish'    # works
+1name = 'Aarav'    # error
+name1 = 'Aarav'    # works
 ```
 
 **Rule two: use letters, digits, and underscores only.** Uppercase and lowercase are both fine. Among special characters, only the underscore is allowed.
 
 ```python
-first_name = 'Nitish'    # works
-first-name = 'Nitish'    # error
+first_name = 'Aarav'    # works
+first-name = 'Aarav'    # error
 ```
 
 A name can even be a single underscore, `_`, which is valid and has conventional uses you will meet later. Characters such as `-`, `@`, and `%` are not allowed.

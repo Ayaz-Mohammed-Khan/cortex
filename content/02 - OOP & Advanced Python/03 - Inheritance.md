@@ -47,7 +47,7 @@ To build a `Customer`, first build an `Address` and pass it in:
 
 ```python
 addr = Address('Gurgaon', 122011, 'Haryana')
-cust = Customer('Nitish', 'male', addr)
+cust = Customer('Aarav', 'male', addr)
 ```
 
 The technical heart of aggregation: **you create the main object with another class's object passed in as input.**
@@ -68,7 +68,7 @@ In code, inheritance creates a **parent class** and a **child class** so a child
 ```python
 class User:
     def __init__(self):
-        self.name = 'Nitish'
+        self.name = 'Aarav'
 
     def login(self):
         print('login')

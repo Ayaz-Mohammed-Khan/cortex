@@ -73,11 +73,11 @@ Same setup as the Z-test in [[Hypothesis Testing|Hypothesis Testing]], but now w
 
 > [!example] Training program (one-tailed)
 > $H_0: \mu = 50$, $H_1: \mu > 50$, $\bar{x} = 53$, $\sigma = 5$, $n = 30$.
-> $$Z = \frac{53 - 50}{5/\sqrt{30}} \approx 4.10$$
-> The p-value is the area to the **right** of 4.10 (because $H_1$ is $>$). Using a Z-table (or `1 - norm.cdf(4.10)`), this area ≈ **0.00004**. Since $0.00004 \le 0.05$, **reject $H_0$**.
+> $$Z = \frac{53 - 50}{5/\sqrt{30}} \approx 3.28$$
+> The p-value is the area to the **right** of 3.28 (because $H_1$ is $>$). Using a Z-table (or `1 - norm.cdf(3.28)`), this area ≈ **0.0005**. Since $0.0005 \le 0.05$, **reject $H_0$**.
 
 > [!example] Lays packet (two-tailed)
-> $H_0: \mu = 50$, $H_1: \mu \ne 50$. Compute $Z \approx -1.26$. For a two-tailed test, take the area to the left of $-1.26$ and **double** it: $2 \times 0.103 = 0.206$. Since $0.206 > 0.05$, **fail to reject $H_0$**.
+> $H_0: \mu = 50$, $H_1: \mu \ne 50$. Compute $Z \approx -1.58$. For a two-tailed test, take the area to the left of $-1.58$ and **double** it: $2 \times 0.057 = 0.114$. Since $0.114 > 0.05$, **fail to reject $H_0$**.
 
 > [!note] One-tailed vs two-tailed p-values
 > For a **two-tailed** test, double the one-sided tail area. For a **one-tailed** test, use the single tail area directly.

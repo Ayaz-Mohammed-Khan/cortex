@@ -237,7 +237,7 @@ def greet(name):
 
 square(2)          # 4
 square("hello")    # TypeError: Wrong data type
-greet("nitish")    # hello nitish
+greet("aarav")    # hello aarav
 ```
 
 `@sanity_check(int)` first calls `sanity_check(int)`, which returns `outer_wrapper`; that is then applied to `square` just like an ordinary decorator. The extra layer exists purely to capture the argument (`data_type`) in a closure so the wrapper can use it. You will rarely need to go this deep as a data scientist, but it shows how far first-class functions and closures reach.

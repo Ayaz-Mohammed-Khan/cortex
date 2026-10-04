@@ -166,7 +166,7 @@ Consider a login page. When a user submits an email and password, there are two 
 email = input('Enter email: ')
 password = input('Enter password: ')
 
-if email == 'nitish@gmail.com' and password == '1234':
+if email == 'aarav@gmail.com' and password == '1234':
     print('Welcome')
 else:
     print('Incorrect email or password')
@@ -195,9 +195,9 @@ Indentation is not optional styling in Python; it is the syntax. This is a delib
 `if` and `else` handle two possibilities. For three or more, add one or more `elif` (short for "else if") branches between them.
 
 ```python
-if email == 'nitish@gmail.com' and password == '1234':
+if email == 'aarav@gmail.com' and password == '1234':
     print('Welcome')
-elif email == 'nitish@gmail.com' and password != '1234':
+elif email == 'aarav@gmail.com' and password != '1234':
     print('Wrong password, try again')
 else:
     print('Incorrect email')

@@ -141,7 +141,7 @@ Given `s1 = {1, 2, 3, 4}` and `s2 = {3, 4, 5, 6}`:
 | Difference (in s1 only) | `s1 - s2` | `s1.difference(s2)` | `{1, 2}` |
 | Symmetric difference (not shared) | `s1 ^ s2` | `s1.symmetric_difference(s2)` | `{1, 2, 5, 6}` |
 
-Each method has an `_update` variant (`union_update`, and so on) that stores the result back into `s1` permanently instead of returning a new set.
+Most of these have an in-place variant that stores the result back into `s1` instead of returning a new set: `update` (for union), `intersection_update`, `difference_update`, and `symmetric_difference_update`.
 
 Three relationship tests return booleans:
 
@@ -169,10 +169,10 @@ Because it cannot change, the read operations (union, intersection, subset check
 A **dictionary** stores data as **key-value pairs**. Instead of looking items up by position, you look them up by a key, like a real dictionary where you find a definition by its word. Other languages call this a map or an associative array.
 
 ```python
-person = {'name': 'Nitish', 'age': 26, 'gender': 'male'}
+person = {'name': 'Aarav', 'age': 26, 'gender': 'male'}
 ```
 
-Here `name` is a key and `'Nitish'` is its value. Four properties to remember:
+Here `name` is a key and `'Aarav'` is its value. Four properties to remember:
 
 - **Mutable**: you can add, change, and delete pairs.
 - **No indexing**: you access values by key, not by position.
@@ -183,8 +183,8 @@ Here `name` is a key and `'Nitish'` is its value. Four properties to remember:
 
 ```python
 empty = {}
-one_d = {'name': 'Nitish', 'gender': 'male'}
-mixed_keys = {(1, 2): 3, 'name': 'Nitish'}   # tuple and string keys
+one_d = {'name': 'Aarav', 'gender': 'male'}
+mixed_keys = {(1, 2): 3, 'name': 'Aarav'}   # tuple and string keys
 from_pairs = dict([(1, 1), (2, 2)])          # {1: 1, 2: 2}
 ```
 
@@ -192,7 +192,7 @@ A **nested (2D) dictionary** holds a dictionary as a value, which models tree-li
 
 ```python
 student = {
-    'name': 'Nitish',
+    'name': 'Aarav',
     'college': 'BIT',
     'sem': 4,
     'subjects': {'DSA': 90, 'maths': 80, 'english': 95}
@@ -207,8 +207,8 @@ student = {
 Look up a value by its key, either with square brackets or the `get` method.
 
 ```python
-print(person['name'])       # Nitish
-print(person.get('name'))   # Nitish
+print(person['name'])       # Aarav
+print(person.get('name'))   # Aarav
 ```
 
 For a nested dictionary, chain the keys, one bracket per level.

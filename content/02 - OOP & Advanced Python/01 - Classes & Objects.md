@@ -203,13 +203,13 @@ class Person:
         self.name = name
         self.country = country
 
-p1 = Person('Nitish', 'India')
+p1 = Person('Aarav', 'India')
 p2 = Person('Steve', 'Australia')
-print(p1.name)   # Nitish
+print(p1.name)   # Aarav
 print(p2.name)   # Steve
 ```
 
-`name` is one variable name, yet it holds `Nitish` for `p1` and `Steve` for `p2`. That is the defining trait: **an instance variable's value depends on the object**, which is what lets one blueprint produce many distinct objects.
+`name` is one variable name, yet it holds `Aarav` for `p1` and `Steve` for `p2`. That is the defining trait: **an instance variable's value depends on the object**, which is what lets one blueprint produce many distinct objects.
 
 ![The Person class as a blueprint on the left, with arrows to three objects p1, p2, and p3, each carrying the same attributes and method but its own name and country values](./ASSETS/class_blueprint_objects.png)
 

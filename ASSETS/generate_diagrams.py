@@ -1251,9 +1251,9 @@ def variable_reference_model():
     panels = [
         ("a = 5", [("int  5", BLUE, 6.3)], None,
          "the label 'a' points at an int object"),
-        ("a = 'Nitish'", [("int  5", GREY, 6.3), ("str  'Nitish'", ORANGE, 3.4)], 1,
+        ("a = 'Aarav'", [("int  5", GREY, 6.3), ("str  'Aarav'", ORANGE, 3.4)], 1,
          "the label moves; the int is abandoned"),
-        ("a = [1, 2]", [("int  5", GREY, 7.2), ("str  'Nitish'", GREY, 5.0),
+        ("a = [1, 2]", [("int  5", GREY, 7.2), ("str  'Aarav'", GREY, 5.0),
                         ("list  [1, 2]", GREEN, 2.8)], 2,
          "any type is allowed, in the same program"),
     ]
@@ -2106,7 +2106,7 @@ def class_blueprint_objects():
 
     # three objects on the right
     specs = [
-        (7.2, "p1", "Nitish", "India", BLUE),
+        (7.2, "p1", "Aarav", "India", BLUE),
         (4.6, "p2", "Steve", "Australia", GREEN),
         (2.0, "p3", "Ankita", "Nepal", ORANGE),
     ]
@@ -2188,7 +2188,7 @@ def reference_variables():
                                 facecolor="white", edgecolor=BLUE, lw=2))
     ax.text(7.2, 4.8, "Person object", ha="center", fontsize=10.5,
             fontweight="bold", color=BLUE)
-    ax.text(7.2, 4.15, "name = 'Nitish'", ha="center", fontsize=9.5,
+    ax.text(7.2, 4.15, "name = 'Aarav'", ha="center", fontsize=9.5,
             family="monospace")
     ax.text(7.2, 3.2, "id: 0x91b2...", ha="center", fontsize=8.5, color=GREY)
     _pybox(ax, 1.6, 5.4, 1.7, 0.9, "p", PURPLE, fs=12)

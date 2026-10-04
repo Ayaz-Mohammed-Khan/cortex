@@ -27,8 +27,8 @@ class Person:
         self.name = name
         self.country = country
 
-p = Person('Nitish', 'India')
-print(p.name)      # Nitish
+p = Person('Aarav', 'India')
+print(p.name)      # Aarav
 print(p.gender)    # error: 'Person' object has no attribute 'gender'
 ```
 
@@ -56,7 +56,7 @@ Because `p` holds an address, `q = p` copies the address, not the object, so bot
 ![Two panels: on the left, names p and q both point to one Person object; on the right, editing name through q to Ankit changes the single shared object, so p sees it too](./ASSETS/reference_variables.png)
 
 ```python
-p = Person('Nitish', 'India')
+p = Person('Aarav', 'India')
 q = p                 # q holds the same address as p
 print(id(p) == id(q)) # True: one object, two names
 
@@ -82,7 +82,7 @@ def greet(person):
     p1 = Person('Ankit', 'India')
     return p1                       # returns an object
 
-p = Person('Nitish', 'India')
+p = Person('Aarav', 'India')
 x = greet(p)                        # takes an object
 print(x.name)                       # Ankit
 ```
@@ -96,7 +96,7 @@ The key point: passing an object sends its **reference** (address), not a copy. 
 def rename(person):
     person.name = 'Ankit'
 
-p = Person('Nitish', 'India')
+p = Person('Aarav', 'India')
 rename(p)
 print(p.name)     # Ankit: the function changed the original object
 ```
@@ -112,7 +112,7 @@ def rename(person):
     person.name = 'Ankit'
     return person
 
-p = Person('Nitish', 'India')
+p = Person('Aarav', 'India')
 print('before:', id(p))
 p1 = rename(p)
 print('after: ', id(p1))    # same address as before
@@ -193,7 +193,7 @@ The setter is where protection lives: it rejects anything that is not an integer
 Objects are ordinary values, so you can store them in a list (or tuple or dictionary) and work with them like any collection.
 
 ```python
-p1 = Person('Nitish', 'male')
+p1 = Person('Aarav', 'male')
 p2 = Person('Ankit', 'male')
 p3 = Person('Ankita', 'female')
 

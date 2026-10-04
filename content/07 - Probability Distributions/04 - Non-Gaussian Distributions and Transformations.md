@@ -85,7 +85,7 @@ Its graph drops steeply then flattens into a long tail.
 **The 80–20 rule (Pareto principle):** roughly 20% of causes account for 80% of effects.
 
 > [!example]
-> Wilfredo Pareto studied wealth and found that ~20% of people control ~80% of the wealth. This is the origin of the Pareto distribution.
+> Vilfredo Pareto studied wealth and found that about 20% of people control about 80% of the wealth. This is the origin of the Pareto distribution.
 
 - **Single parameter $\alpha$** (shape). A higher $\alpha$ gives a higher, sharper peak and thinner tail; a lower $\alpha$ gives a lower peak and fatter tail. As $\alpha \to \infty$, the curve becomes a vertical line.
 - **PDF:** $f(x) = \dfrac{\alpha \, x_m^{\alpha}}{x^{\alpha + 1}}$, where $x_m$ is the minimum value.

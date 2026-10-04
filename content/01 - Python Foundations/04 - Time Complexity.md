@@ -142,7 +142,7 @@ The point is not an exact formula but the **shape** of the growth. $O(n)$ means 
 
 ## The common complexity classes
 
-Almost every program you write falls into one of a handful of classes. Here they are from fastest-growing (worst) to slowest-growing (best), the way they are usually ranked.
+Almost every program you write falls into one of a handful of classes. Here they are from slowest-growing (best) to fastest-growing (worst), the way they are usually ranked.
 
 ![Common time complexity classes, from constant to exponential, growing at different rates](./ASSETS/complexity_classes.png)
 

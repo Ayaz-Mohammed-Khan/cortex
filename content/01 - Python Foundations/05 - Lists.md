@@ -45,7 +45,7 @@ Other languages (C, C++, Java) have a similar type called an **array**. Python's
 - An array is **homogeneous**: every item must be the same type. A list is **heterogeneous**: it can mix integers, strings, floats, even other lists.
 
 ```python
-mixed = [20, 'nitish', 35.75, [1, 2, 3]]   # all valid in one list
+mixed = [20, 'aarav', 35.75, [1, 2, 3]]   # all valid in one list
 ```
 
 These conveniences come at a cost, covered at the end: Python lists are slower and use more memory than arrays.

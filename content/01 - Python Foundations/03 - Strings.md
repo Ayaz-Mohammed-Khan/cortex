@@ -22,7 +22,7 @@ A **string** is text: a name, a sentence, a whole blog post. Text is everywhere 
 
 ## What is a string
 
-Logically, a string is a **collection of characters**. The word `Nitish` is the characters `N`, `i`, `t`, `i`, `s`, `h` in order.
+Logically, a string is a **collection of characters**. The word `Aarav` is the characters `A`, `a`, `r`, `a`, `v` in order.
 
 More precisely, a Python string is a **sequence of Unicode characters**. That last word matters.
 
@@ -218,10 +218,10 @@ These built-in functions work on strings, lists, and other collections alike.
 - `s.startswith(sub)` and `s.endswith(sub)` return `True` or `False`.
 
 ```python
-s = 'my name is Nitish'
-print(s.count('i'))        # 3
+s = 'my name is aarav'
+print(s.count('a'))        # 4
 print(s.find('is'))        # 8
-print(s.endswith('sh'))    # True
+print(s.endswith('av'))    # True
 ```
 
 ### Splitting and joining
@@ -229,9 +229,9 @@ print(s.endswith('sh'))    # True
 `split` breaks a string into a **list** of pieces, and `join` does the reverse. These are among the most used string methods in real work.
 
 ```python
-sentence = 'hi my name is nitish'
-words = sentence.split()          # ['hi', 'my', 'name', 'is', 'nitish']
-back = ' '.join(words)            # 'hi my name is nitish'
+sentence = 'hi my name is aarav'
+words = sentence.split()          # ['hi', 'my', 'name', 'is', 'aarav']
+back = ' '.join(words)            # 'hi my name is aarav'
 ```
 
 `split` breaks on spaces by default, but you can split on any character.
@@ -245,8 +245,8 @@ print('a-b-c'.split('-'))    # ['a', 'b', 'c']
 `replace` swaps every occurrence of one substring with another, returning a new string.
 
 ```python
-print('my name is nitish'.replace('nitish', 'campusx'))
-# my name is campusx
+print('data cleaning in progress'.replace('progress', 'done'))
+# data cleaning in done
 ```
 
 ### Checking content
@@ -270,10 +270,10 @@ These return `True` or `False`, useful for validating input.
 Often you need to insert a variable's value into a sentence. The modern, preferred way is an **f-string**: put an `f` before the opening quote and write the variable inside curly braces.
 
 ```python
-name = 'Nitish'
+name = 'Aarav'
 gender = 'male'
 print(f'Hi, my name is {name} and I am a {gender}.')
-# Hi, my name is Nitish and I am a male.
+# Hi, my name is Aarav and I am a male.
 ```
 
 An older method, `.format()`, does the same by filling numbered placeholders in order.
