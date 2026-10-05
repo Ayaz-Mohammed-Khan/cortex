@@ -1091,7 +1091,7 @@ const totalNotes = completableRoutes.size;
         type="button"
         data-rm-done
         aria-pressed="false"
-        class="inline-flex items-center gap-2 rounded-lg border-[1.75px] border-emerald-500 px-4 py-2 text-sm font-semibold text-emerald-600 transition-colors hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:text-emerald-400 dark:hover:bg-emerald-500/10 dark:focus-visible:ring-offset-gray-900"
+        class="rm-done-btn inline-flex items-center gap-2 rounded-lg border-[1.75px] px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       >
         <span data-rm-done-icon aria-hidden="true" class="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full border-2 border-current"></span>
         <span data-rm-done-text>Mark done</span>
@@ -1297,7 +1297,9 @@ const totalNotes = completableRoutes.size;
     transform: scale(1);
   }
   .rm-done-badge-bg {
-    fill: #10b981;
+    /* themed via --success-light (dark override below) so the badge matches
+       the "done" green used by the modal and note-page buttons. */
+    fill: var(--success-light);
     stroke: #ffffff;
     stroke-width: 2.5;
   }
@@ -1309,7 +1311,7 @@ const totalNotes = completableRoutes.size;
     stroke-linejoin: round;
   }
   :global([data-theme='dark']) .rm-done-badge-bg {
-    fill: #34d399;
+    fill: var(--success-dark);
     stroke: #0b0d17;
   }
   :global([data-theme='dark']) .rm-done-badge-tick {
@@ -1349,22 +1351,43 @@ const totalNotes = completableRoutes.size;
     }
   }
 
-  /* Modal "Mark done" button, done state (B1): the ghost outline flips to a
-     solid green fill with a tick. Base (not-done) styling is Tailwind on the
-     element; this only overrides the done modifier the island toggles. */
+  /* Modal "Mark done" button (B1). Colour comes from the shared `--success-*`
+     semantic tokens so the done green follows the active palette in both themes,
+     matching the note page's "Mark as complete" control. Base is a ghost
+     outline; the island adds `.rm-done-on` to flip it to a solid themed fill. */
+  .rm-done-btn {
+    border-color: var(--success-light);
+    color: var(--success-light);
+    --tw-ring-color: var(--success-light);
+  }
+  .rm-done-btn:not(.rm-done-on):hover {
+    background-color: color-mix(in srgb, var(--success-light) 10%, transparent);
+  }
   :global([data-rm-done].rm-done-on) {
-    background-color: #10b981;
-    border-color: #10b981;
-    color: #042f1f;
+    background-color: var(--success-light);
+    border-color: var(--success-light);
+    color: #ffffff;
   }
   :global([data-rm-done].rm-done-on:hover) {
-    background-color: #059669;
-    border-color: #059669;
+    background-color: color-mix(in srgb, var(--success-light) 85%, black);
+    border-color: color-mix(in srgb, var(--success-light) 85%, black);
+  }
+  :global([data-theme='dark']) .rm-done-btn {
+    border-color: var(--success-dark);
+    color: var(--success-dark);
+    --tw-ring-color: var(--success-dark);
+  }
+  :global([data-theme='dark']) .rm-done-btn:not(.rm-done-on):hover {
+    background-color: color-mix(in srgb, var(--success-dark) 15%, transparent);
   }
   :global([data-theme='dark'] [data-rm-done].rm-done-on) {
-    background-color: #34d399;
-    border-color: #34d399;
+    background-color: var(--success-dark);
+    border-color: var(--success-dark);
     color: #042f1f;
+  }
+  :global([data-theme='dark'] [data-rm-done].rm-done-on:hover) {
+    background-color: color-mix(in srgb, var(--success-dark) 85%, white);
+    border-color: color-mix(in srgb, var(--success-dark) 85%, white);
   }
 
   /* --- Difficulty nucleus (green/blue/pink dot + halo) --- */
