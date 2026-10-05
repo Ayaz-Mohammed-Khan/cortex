@@ -320,13 +320,14 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     background-color: color-mix(in srgb, var(--success-light) 10%, transparent);
   }
   .note-progress-btn.is-done {
-    background-color: var(--success-light);
-    border-color: var(--success-light);
+    /* Deepened a touch so WHITE text clears WCAG AA (~5:1) on the fill. */
+    background-color: color-mix(in srgb, var(--success-light) 78%, black);
+    border-color: color-mix(in srgb, var(--success-light) 78%, black);
     color: #ffffff;
   }
   .note-progress-btn.is-done:hover {
-    background-color: color-mix(in srgb, var(--success-light) 85%, black);
-    border-color: color-mix(in srgb, var(--success-light) 85%, black);
+    background-color: color-mix(in srgb, var(--success-light) 68%, black);
+    border-color: color-mix(in srgb, var(--success-light) 68%, black);
   }
   :global([data-theme='dark']) .note-progress-btn {
     border-color: var(--success-dark);
@@ -337,13 +338,15 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     background-color: color-mix(in srgb, var(--success-dark) 15%, transparent);
   }
   :global([data-theme='dark']) .note-progress-btn.is-done {
-    background-color: var(--success-dark);
-    border-color: var(--success-dark);
-    color: #042f1f;
+    /* Deeper green fill so WHITE label text reads legibly in dark mode (clears
+       WCAG AA), matching the roadmap modal's done button and other controls. */
+    background-color: color-mix(in srgb, var(--success-dark) 50%, black);
+    border-color: color-mix(in srgb, var(--success-dark) 50%, black);
+    color: #ffffff;
   }
   :global([data-theme='dark']) .note-progress-btn.is-done:hover {
-    background-color: color-mix(in srgb, var(--success-dark) 85%, white);
-    border-color: color-mix(in srgb, var(--success-dark) 85%, white);
+    background-color: color-mix(in srgb, var(--success-dark) 42%, black);
+    border-color: color-mix(in srgb, var(--success-dark) 42%, black);
   }
 </style>
 

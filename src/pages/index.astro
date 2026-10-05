@@ -649,18 +649,30 @@ const totalNotes = completableRoutes.size;
       data-rm-meter-wrap
       data-total={totalNotes}
       hidden
-      class="mb-5 flex flex-col gap-2 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 dark:border-white/10 dark:bg-white/5"
+      class="mb-5 flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 dark:border-white/10 dark:bg-white/5"
     >
-      <div class="shrink-0">
-        <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-          <span data-rm-meter-count>0 of {totalNotes}</span> topics done
+      {/* Top row on mobile: label on the left, Reset aligned right so it never
+          orphans below the bar. On desktop (sm+) this row's children sit inline
+          with the bar via the parent's sm:flex-row. */}
+      <div class="flex items-center justify-between gap-3 sm:contents">
+        <div class="min-w-0 shrink-0 sm:order-1">
+          <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+            <span data-rm-meter-count>0 of {totalNotes}</span> topics done
+          </div>
+          <div class="text-xs text-gray-500 dark:text-gray-400">
+            <span data-rm-meter-pct>0%</span> of the roadmap complete
+          </div>
         </div>
-        <div class="text-xs text-gray-500 dark:text-gray-400">
-          <span data-rm-meter-pct>0%</span> of the roadmap complete
-        </div>
+        <button
+          type="button"
+          data-rm-meter-reset
+          class="shrink-0 text-xs font-semibold text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-gray-700 sm:order-3 dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-gray-200"
+        >
+          Reset
+        </button>
       </div>
       <div
-        class="relative h-2.5 flex-1 overflow-hidden rounded-full bg-accent-500/15"
+        class="relative h-2.5 w-full shrink-0 overflow-hidden rounded-full bg-accent-500/15 sm:order-2 sm:h-2.5 sm:min-w-0 sm:flex-1"
         role="progressbar"
         aria-label="Roadmap completion"
         aria-valuemin="0"
@@ -671,16 +683,9 @@ const totalNotes = completableRoutes.size;
         <div
           data-rm-meter-fill
           class="rm-meter-fill h-full w-0 rounded-full"
-          style="background: linear-gradient(90deg, var(--accent-600), #10b981)"
+          style="background: linear-gradient(90deg, var(--accent-600), var(--success-light))"
         ></div>
       </div>
-      <button
-        type="button"
-        data-rm-meter-reset
-        class="shrink-0 self-start text-xs font-semibold text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-gray-700 sm:self-auto dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-gray-200"
-      >
-        Reset
-      </button>
     </div>
 
     {/* Legend: below the toggle, wrapping freely. */}
@@ -949,9 +954,9 @@ const totalNotes = completableRoutes.size;
               */}
               {n.href && n.linkKind === 'note' && (
                 <g class="rm-done-badge" aria-hidden="true">
-                  <circle cx={x + n.w} cy={y} r="9" class="rm-done-badge-bg" />
+                  <circle cx={x + n.w - 3} cy={y + 3} r="8.5" class="rm-done-badge-bg" />
                   <path
-                    d={`M ${x + n.w - 4} ${y} l 2.6 2.6 L ${x + n.w + 4.5} ${y - 4}`}
+                    d={`M ${x + n.w - 6.6} ${y + 3} l 2.4 2.4 L ${x + n.w + 1} ${y - 1}`}
                     class="rm-done-badge-tick"
                   />
                 </g>
@@ -1072,13 +1077,13 @@ const totalNotes = completableRoutes.size;
       </div>
     </div>
 
-    <div data-rm-footer class="hidden flex-wrap items-center gap-2.5 border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
+    <div data-rm-footer class="hidden items-center gap-2.5 border-t border-gray-100 px-4 py-4 sm:flex-wrap sm:px-5 dark:border-white/5">
       <a
         data-rm-link
         href="#"
-        class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+        class="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-accent-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:flex-none sm:px-4 dark:focus-visible:ring-offset-gray-900"
       >
-        <span data-rm-link-text>Read the notes</span>
+        <span data-rm-link-text class="truncate">Read the notes</span>
         <span aria-hidden="true">→</span>
       </a>
       {/*
@@ -1091,10 +1096,10 @@ const totalNotes = completableRoutes.size;
         type="button"
         data-rm-done
         aria-pressed="false"
-        class="rm-done-btn inline-flex items-center gap-2 rounded-lg border-[1.75px] px-4 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+        class="rm-done-btn inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border-[1.75px] px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:flex-none sm:px-4 dark:focus-visible:ring-offset-gray-900"
       >
-        <span data-rm-done-icon aria-hidden="true" class="inline-flex h-[17px] w-[17px] items-center justify-center rounded-full border-2 border-current"></span>
-        <span data-rm-done-text>Mark done</span>
+        <span data-rm-done-icon aria-hidden="true" class="inline-flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full border-2 border-current"></span>
+        <span data-rm-done-text class="truncate">Mark done</span>
       </button>
     </div>
   </dialog>
@@ -1298,15 +1303,16 @@ const totalNotes = completableRoutes.size;
   }
   .rm-done-badge-bg {
     /* themed via --success-light (dark override below) so the badge matches
-       the "done" green used by the modal and note-page buttons. */
+       the "done" green used by the modal and note-page buttons. A slim ring
+       keeps the badge crisp when the SVG is scaled down on narrow screens. */
     fill: var(--success-light);
     stroke: #ffffff;
-    stroke-width: 2.5;
+    stroke-width: 1.75;
   }
   .rm-done-badge-tick {
     fill: none;
     stroke: #ffffff;
-    stroke-width: 2;
+    stroke-width: 1.9;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
@@ -1364,13 +1370,14 @@ const totalNotes = completableRoutes.size;
     background-color: color-mix(in srgb, var(--success-light) 10%, transparent);
   }
   :global([data-rm-done].rm-done-on) {
-    background-color: var(--success-light);
-    border-color: var(--success-light);
+    /* Deepened a touch so WHITE text clears WCAG AA (~5:1) on the fill. */
+    background-color: color-mix(in srgb, var(--success-light) 78%, black);
+    border-color: color-mix(in srgb, var(--success-light) 78%, black);
     color: #ffffff;
   }
   :global([data-rm-done].rm-done-on:hover) {
-    background-color: color-mix(in srgb, var(--success-light) 85%, black);
-    border-color: color-mix(in srgb, var(--success-light) 85%, black);
+    background-color: color-mix(in srgb, var(--success-light) 68%, black);
+    border-color: color-mix(in srgb, var(--success-light) 68%, black);
   }
   :global([data-theme='dark']) .rm-done-btn {
     border-color: var(--success-dark);
@@ -1381,13 +1388,16 @@ const totalNotes = completableRoutes.size;
     background-color: color-mix(in srgb, var(--success-dark) 15%, transparent);
   }
   :global([data-theme='dark'] [data-rm-done].rm-done-on) {
-    background-color: var(--success-dark);
-    border-color: var(--success-dark);
-    color: #042f1f;
+    /* A deeper green fill so WHITE label text reads legibly (matching the
+       accent "Read notes" button); the bright --success-dark alone is too light
+       for white text. ~50% mix clears WCAG AA (6:1) and still reads green. */
+    background-color: color-mix(in srgb, var(--success-dark) 50%, black);
+    border-color: color-mix(in srgb, var(--success-dark) 50%, black);
+    color: #ffffff;
   }
   :global([data-theme='dark'] [data-rm-done].rm-done-on:hover) {
-    background-color: color-mix(in srgb, var(--success-dark) 85%, white);
-    border-color: color-mix(in srgb, var(--success-dark) 85%, white);
+    background-color: color-mix(in srgb, var(--success-dark) 42%, black);
+    border-color: color-mix(in srgb, var(--success-dark) 42%, black);
   }
 
   /* --- Difficulty nucleus (green/blue/pink dot + halo) --- */
