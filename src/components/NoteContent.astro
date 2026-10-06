@@ -222,6 +222,43 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
       </p>
     )}
   </div>
+
+  {/*
+    Scratchpad (Phase 1). A private per-note notepad for the reader's own
+    summary — writing a topic in your own words is a small act of recall. Text
+    is keyed by this note's route in the shared store and autosaves; the
+    `./scratchpad` island fills it on load and persists edits. Progressive
+    enhancement: with no JS it is simply an empty textarea.
+  */}
+  <section
+    class="scratchpad mt-10 border-t border-gray-200 pt-6 dark:border-white/10"
+    data-scratchpad
+    data-route={route}
+    aria-label="Your notes for this topic"
+  >
+    <div class="mb-2 flex items-center justify-between">
+      <label
+        for="scratchpad-input"
+        class="flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200"
+      >
+        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+        </svg>
+        Your notes
+      </label>
+      <span data-scratchpad-status class="scratchpad-status text-xs" aria-live="polite"></span>
+    </div>
+    <textarea
+      id="scratchpad-input"
+      data-scratchpad-input
+      rows="3"
+      placeholder="Jot your own summary, questions, or things to revisit… (saved automatically, only in this browser)"
+      class="scratchpad-input w-full resize-none rounded-lg border border-gray-200 bg-gray-50/60 px-3.5 py-3 text-sm leading-relaxed text-gray-800 placeholder:text-gray-400 focus-visible:border-accent-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500/40 dark:border-white/10 dark:bg-white/5 dark:text-gray-100 dark:placeholder:text-gray-500"
+    ></textarea>
+    <p class="mt-1.5 text-xs text-gray-400 dark:text-gray-500">
+      Private to you, stored in this browser, never uploaded.
+    </p>
+  </section>
 </article>
 
 {
@@ -348,6 +385,28 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     background-color: color-mix(in srgb, var(--success-dark) 42%, black);
     border-color: color-mix(in srgb, var(--success-dark) 42%, black);
   }
+
+  /* Scratchpad save-status label: subtle, and only the "Saved" tick carries the
+     success colour. Hidden visually when idle (no text), announced via aria. */
+  .scratchpad-status {
+    color: var(--success-light);
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .scratchpad-status[data-state='saving'] {
+    color: var(--gray-400, #9ca3af);
+    opacity: 1;
+  }
+  .scratchpad-status[data-state='saved'] {
+    opacity: 1;
+  }
+  :global([data-theme='dark']) .scratchpad-status {
+    color: var(--success-dark);
+  }
+  :global([data-theme='dark']) .scratchpad-status[data-state='saving'] {
+    color: var(--gray-500, #6b7280);
+  }
 </style>
 
 <script>
@@ -357,4 +416,5 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   import './search-highlight';
   import './note-progress';
   import './quiz';
+  import './scratchpad';
 </script>

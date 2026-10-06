@@ -516,8 +516,27 @@ const isLanding = chrome === 'landing';
       }
     </div>
 
+    {/*
+      Back-to-top button (Phase 1). Hidden until the reader scrolls past ~1.5
+      screens, then fades in bottom-right; the `./back-to-top` island toggles
+      `.is-visible` and owns the scroll logic. Rendered once per page, outside
+      the layout grid so it floats over everything.
+    */}
+    <button
+      type="button"
+      data-back-to-top
+      aria-label="Back to top"
+      class="back-to-top focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
+      hidden
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 19V5" /><path d="M5 12l7-7 7 7" />
+      </svg>
+    </button>
+
     <script>
       import './reading-progress';
+      import './back-to-top';
     </script>
   </body>
 </html>
