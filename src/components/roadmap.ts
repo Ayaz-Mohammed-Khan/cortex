@@ -23,6 +23,7 @@
  * badge, the modal's "Mark done" toggle stays in sync, and the top meter fills.
  */
 import { isDone, toggleDone, resetProgress, onChange } from '@/lib/progress';
+import { resetAllReviews } from '@/lib/review';
 
 /** A syllabus bullet; `href` is set when it names a real section of the note. */
 interface Concept {
@@ -438,8 +439,13 @@ function onClick(event: MouseEvent): void {
 
   // Reset progress (meter): clear all completion after a confirm.
   if (target.closest('[data-rm-meter-reset]')) {
-    if (window.confirm('Reset your progress? This clears every topic you have marked done.')) {
+    if (
+      window.confirm(
+        'Reset your progress? This clears every topic you have marked done and your review schedule.',
+      )
+    ) {
       resetProgress(); // -> onChange -> graph, meter, any open modal all clear
+      resetAllReviews(); // also drop the spaced-repetition schedule
     }
     return;
   }
