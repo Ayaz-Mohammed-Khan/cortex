@@ -1108,6 +1108,47 @@ kbd.kbd-hint {
 }
 
 /*
+ * Spaced-repetition "Review due" card chips (see `review-due.ts`).
+ * Each due topic is a small pill linking into its note's quiz (review mode).
+ */
+.rm-review-chip {
+  display: inline-block;
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.2;
+  padding: 0.3rem 0.65rem;
+  border-radius: 9999px;
+  color: var(--accent-700);
+  background: color-mix(in srgb, var(--accent-500) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-500) 25%, transparent);
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.rm-review-chip:hover {
+  background: color-mix(in srgb, var(--accent-500) 20%, transparent);
+  border-color: color-mix(in srgb, var(--accent-500) 45%, transparent);
+}
+.rm-review-chip:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+.rm-review-more {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.76rem;
+  color: var(--gray-500, #6b7280);
+  padding: 0.3rem 0.4rem;
+}
+[data-theme="dark"] .rm-review-chip {
+  color: var(--accent-200);
+  background: color-mix(in srgb, var(--accent-400) 14%, transparent);
+  border-color: color-mix(in srgb, var(--accent-400) 28%, transparent);
+}
+[data-theme="dark"] .rm-review-chip:hover {
+  background: color-mix(in srgb, var(--accent-400) 22%, transparent);
+}
+
+/*
  * Search-term highlight marks (see `search-highlight.ts`).
  *
  * Pagefind wraps each matched word in `<mark class="pagefind-highlight">`. We

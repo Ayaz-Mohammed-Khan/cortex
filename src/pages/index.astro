@@ -556,6 +556,14 @@ const completableRoutes = new Set(
   nodes.filter((n) => n.linkKind === 'note' && n.href).map((n) => n.href as string),
 );
 const totalNotes = completableRoutes.size;
+
+// Route -> display label for every note-linked node, so the spaced-repetition
+// "Review due" card (Phase 2) can show topic names and deep-link to each note's
+// quiz. Keyed by route to match the review slice in the store.
+const noteLabelByRoute: Record<string, string> = {};
+for (const n of nodes) {
+  if (n.linkKind === 'note' && n.href) noteLabelByRoute[n.href] = n.label;
+}
 ---
 
 <Layout
@@ -636,6 +644,45 @@ const totalNotes = completableRoutes.size;
       <p class="text-sm text-gray-500 dark:text-gray-400" data-rm-view-hint>
         {totalSteps} core topics at a glance. Switch to detailed for every sub-topic.
       </p>
+    </div>
+
+    {/*
+      Spaced-repetition "Review due" card (Phase 2). Hidden until the island
+      finds at least one review due now. It lists the due topics and starts a
+      review session — opening each note's quiz in turn via `?review=1`. The
+      route -> label map is emitted below for the island to render names.
+    */}
+    <div
+      data-rm-review
+      hidden
+      class="mb-5 overflow-hidden rounded-xl border border-accent-500/30 bg-accent-500/5 dark:border-accent-400/25 dark:bg-accent-400/5"
+    >
+      <div class="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <div class="flex items-start gap-3">
+          <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/15 text-accent-600 dark:text-accent-300" aria-hidden="true">
+            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 2v6h6" /><path d="M3 8a9 9 0 1 0 2.5-5.5L3 8" /><path d="M12 8v4l3 2" />
+            </svg>
+          </span>
+          <div>
+            <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              <span data-rm-review-count>0</span> <span data-rm-review-noun>topics</span> due for review
+            </p>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+              A quick recall pass keeps what you've learned from fading.
+            </p>
+          </div>
+        </div>
+        <a
+          data-rm-review-start
+          href="#"
+          class="shrink-0 self-start rounded-lg bg-accent-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:focus-visible:ring-offset-gray-900"
+        >
+          Start review →
+        </a>
+      </div>
+      {/* The island fills this with the due topic chips. */}
+      <ul data-rm-review-list class="flex flex-wrap gap-1.5 border-t border-accent-500/15 px-4 py-2.5 dark:border-accent-400/15"></ul>
     </div>
 
     {/*
@@ -1106,8 +1153,11 @@ const totalNotes = completableRoutes.size;
 
   {/* Node syllabus data for the island. */}
   <script type="application/json" data-rm-data set:html={JSON.stringify(nodeData)} />
+  {/* Route -> note label map for the spaced-repetition review card. */}
+  <script type="application/json" data-rm-review-labels set:html={JSON.stringify(noteLabelByRoute)} />
   <script>
     import '@/components/roadmap';
+    import '@/components/review-due';
   </script>
 </Layout>
 

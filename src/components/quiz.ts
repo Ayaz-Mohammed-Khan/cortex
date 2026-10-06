@@ -18,7 +18,18 @@
  * survives View Transitions. No dependencies beyond the progress store.
  */
 import { markDone } from '@/lib/progress';
+import { recordReview } from '@/lib/review';
+import { readQueue, writeQueue, reviewUrl } from '@/lib/review-session';
 import type { Quiz, QuizQuestion } from '@/lib/quiz';
+
+/** Is the current page open as part of a review session (`?review=1`)? */
+function inReviewMode(): boolean {
+  try {
+    return new URLSearchParams(window.location.search).get('review') === '1';
+  } catch {
+    return false;
+  }
+}
 
 /** Fraction correct (of auto-graded questions) needed to count as a pass. */
 const PASS_RATIO = 2 / 3;
@@ -68,6 +79,17 @@ function loadState(): QuizState | null {
   } catch {
     return null;
   }
+}
+
+/** Friendly relative phrasing for a due timestamp ("tomorrow", "in 6 days"). */
+function formatDue(due: number): string {
+  const days = Math.round((due - Date.now()) / (24 * 60 * 60 * 1000));
+  if (days <= 0) return 'today';
+  if (days === 1) return 'tomorrow';
+  if (days < 7) return `in ${days} days`;
+  if (days < 14) return 'in about a week';
+  if (days < 45) return `in about ${Math.round(days / 7)} weeks`;
+  return `in about ${Math.round(days / 30)} months`;
 }
 
 /** Escape a string for safe insertion as HTML text. */
@@ -187,21 +209,44 @@ function renderScore(m: HTMLElement): void {
   // A pass marks the note complete, feeding the shared progress store.
   if (passed) markDone(state.route);
 
+  // Record the session for spaced repetition and schedule the next review.
+  // Enrolls the note on its first completion; re-grades it on every revisit.
+  const nextItem = recordReview(state.route, correct, total, passed);
+  const dueDate = new Date(nextItem.due);
+  const nextMsg = passed
+    ? `Next review ${formatDue(nextItem.due)} (${dueDate.toLocaleDateString()}).`
+    : 'This topic will come back for review shortly.';
+
   const msg = passed
-    ? 'Strong recall. The note is marked complete.'
+    ? `Strong recall. The note is marked complete. ${nextMsg}`
     : `You need ${passMark} of ${total} to complete the note. Reread the misses and try again.`;
 
+  // In a review session, the primary action continues to the next due note
+  // (or finishes the session) rather than just closing the dialog.
+  const review = inReviewMode();
+  const remaining = review ? readQueue() : [];
+  const primary = review
+    ? remaining.length > 0
+      ? '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-review-next>Next review →</button>'
+      : '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-review-done>Finish review ✓</button>'
+    : '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-close>Done</button>';
+  const countLabel = review
+    ? remaining.length > 0
+      ? `${remaining.length} more to review`
+      : 'Last one — nice work'
+    : 'Quiz complete';
+
   m.innerHTML =
-    headHtml('Results') +
+    headHtml(review ? 'Review' : 'Results') +
     '<div class="quiz-body"><div class="quiz-score">' +
     `<div class="quiz-ring" style="--p:${pct}"><span>${correct}/${total}</span></div>` +
     `<div class="quiz-score-pct">${pct}%</div>` +
     `<div class="quiz-score-msg">${esc(msg)}</div>` +
     '</div></div>' +
     '<div class="quiz-foot">' +
-    '<span class="quiz-count">Quiz complete</span>' +
+    `<span class="quiz-count">${esc(countLabel)}</span>` +
     '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-retry>Try again</button>' +
-    '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-close>Done</button>' +
+    primary +
     '</div>';
 }
 
@@ -295,6 +340,29 @@ function onClick(event: MouseEvent): void {
     render();
     return;
   }
+  if (target.closest('[data-quiz-review-next]')) {
+    advanceReview();
+    return;
+  }
+  if (target.closest('[data-quiz-review-done]')) {
+    finishReview();
+    return;
+  }
+}
+
+/** Pop the next due route off the queue and navigate to its quiz. */
+function advanceReview(): void {
+  const queue = readQueue();
+  const next = queue.shift();
+  writeQueue(queue);
+  if (next) window.location.href = reviewUrl(next);
+  else finishReview();
+}
+
+/** End the review session: clear any queue and return to the roadmap. */
+function finishReview(): void {
+  writeQueue([]);
+  window.location.href = '/';
 }
 
 /** Close on a backdrop click (native dialog reports target === dialog). */
@@ -307,6 +375,12 @@ function bind(): void {
   state = loadState();
   const dlg = dialog();
   dlg?.addEventListener('click', onDialogClick);
+  // Review mode: when a note is opened via the "Review due today" flow it
+  // carries `?review=1`, so start its quiz immediately rather than making the
+  // reader hunt for the Start button.
+  if (state && new URLSearchParams(window.location.search).get('review') === '1') {
+    open();
+  }
 }
 
 document.addEventListener('click', onClick);

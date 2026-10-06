@@ -45,7 +45,28 @@ export const STORE_CHANGE_EVENT = 'cortex:store-change';
 const LEGACY_PROGRESS_KEY = 'cortex:progress';
 
 /** Current schema version. Bump when {@link StoreDoc}'s shape changes. */
-export const SCHEMA_VERSION = 1 as const;
+export const SCHEMA_VERSION = 2 as const;
+
+/**
+ * A spaced-repetition review item for one note (Phase 2). Scheduling fields
+ * follow an SM-2-lite model (see `@/lib/review`): the note resurfaces for
+ * review once `due` passes, and the next interval grows or resets based on how
+ * the reader did on that note's quiz. All times are epoch milliseconds.
+ */
+export interface ReviewItem {
+  /** Epoch ms when this note is next due for review. */
+  due: number;
+  /** Current inter-review interval, in days. */
+  intervalDays: number;
+  /** Easiness factor (SM-2); higher = intervals grow faster. Clamped ≥ 1.3. */
+  ease: number;
+  /** Successful reviews in a row (resets to 0 on a lapse). */
+  reps: number;
+  /** Times this item has lapsed (failed after being learned). */
+  lapses: number;
+  /** Epoch ms of the last review, or 0 if never reviewed. */
+  lastReviewed: number;
+}
 
 /**
  * The whole persisted document.
@@ -65,11 +86,17 @@ export interface StoreDoc {
    * declared here so the schema is stable. Empty strings are pruned on save.
    */
   scratchpad: Record<string, string>;
+  /**
+   * Spaced-repetition schedule, keyed by note route. Added by Phase 2. A note
+   * gains an entry the first time its quiz is completed; the scheduler in
+   * `@/lib/review` reads and updates these.
+   */
+  review: Record<string, ReviewItem>;
 }
 
 /** A fresh, empty document at the current version. */
 function emptyDoc(): StoreDoc {
-  return { version: SCHEMA_VERSION, progress: [], scratchpad: {} };
+  return { version: SCHEMA_VERSION, progress: [], scratchpad: {}, review: {} };
 }
 
 /** Guard: are we in a browser with a usable `localStorage`? */
@@ -98,6 +125,33 @@ function toStringRecord(v: unknown): Record<string, string> {
   const out: Record<string, string> = {};
   for (const [k, val] of Object.entries(v)) {
     if (typeof val === 'string') out[k] = val;
+  }
+  return out;
+}
+
+/** A finite number, or `fallback` when the value is missing/invalid. */
+function num(v: unknown, fallback: number): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+}
+
+/**
+ * Coerce an unknown value into the review map, salvaging only well-formed
+ * items. Each item's fields are read defensively with sane defaults, so a
+ * partial or hand-edited entry still loads rather than dropping the whole slice.
+ */
+function toReviewRecord(v: unknown): Record<string, ReviewItem> {
+  if (!isObject(v)) return {};
+  const out: Record<string, ReviewItem> = {};
+  for (const [k, raw] of Object.entries(v)) {
+    if (!isObject(raw)) continue;
+    out[k] = {
+      due: num(raw.due, 0),
+      intervalDays: num(raw.intervalDays, 0),
+      ease: num(raw.ease, 2.5),
+      reps: num(raw.reps, 0),
+      lapses: num(raw.lapses, 0),
+      lastReviewed: num(raw.lastReviewed, 0),
+    };
   }
   return out;
 }
@@ -134,6 +188,7 @@ export function migrate(raw: unknown): StoreDoc {
     version: SCHEMA_VERSION,
     progress: toStringArray(raw.progress),
     scratchpad: toStringRecord(raw.scratchpad),
+    review: toReviewRecord(raw.review),
   };
   return doc;
 }
@@ -182,6 +237,7 @@ export function save(doc: StoreDoc): void {
     scratchpad: Object.fromEntries(
       Object.entries(doc.scratchpad).filter(([, v]) => v.trim() !== ''),
     ),
+    review: doc.review,
   };
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
