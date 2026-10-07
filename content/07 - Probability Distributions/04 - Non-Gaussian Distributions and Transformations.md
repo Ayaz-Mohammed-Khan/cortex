@@ -82,7 +82,7 @@ Its graph drops steeply then flattens into a long tail.
 
 ![Pareto distribution shapes](ASSETS/pareto_distribution.png)
 
-**The 80–20 rule (Pareto principle):** roughly 20% of causes account for 80% of effects.
+**The 80-20 rule (Pareto principle):** roughly 20% of causes account for 80% of effects.
 
 > [!example]
 > Vilfredo Pareto studied wealth and found that about 20% of people control about 80% of the wealth. This is the origin of the Pareto distribution.
@@ -92,7 +92,7 @@ Its graph drops steeply then flattens into a long tail.
 - It is skewed (not symmetric).
 
 > [!note]
-> The exact 80–20 split is not universal; it depends on $\alpha$. It is a rough guide, not a fixed law.
+> The exact 80-20 split is not universal; it depends on $\alpha$. It is a rough guide, not a fixed law.
 
 **Where it appears:** wealth/income distributions, city population vs area, file-size distribution of internet traffic (a few large files make up most of the total gigabytes).
 
@@ -162,7 +162,7 @@ Apply any function you like via `FunctionTransformer(func=...)`.
 
 ## Summary
 
-1. Common **non-Gaussian** distributions: **uniform** (equal likelihood over a range, skew 0), **log-normal** (right-skewed, its log is normal), and **Pareto** (a power law, the 80–20 rule).
+1. Common **non-Gaussian** distributions: **uniform** (equal likelihood over a range, skew 0), **log-normal** (right-skewed, its log is normal), and **Pareto** (a power law, the 80-20 rule).
 2. Detect them by transforming and re-checking normality (log for log-normal) or with tailored plots (log-log plot / QQ plot for Pareto).
 3. **Transformations** reshape non-normal data toward normal to help distribution-sensitive algorithms (linear/logistic regression, KNN); tree models are unaffected.
 4. **FunctionTransformer** applies log (right-skew), square (left-skew), reciprocal, sqrt, or custom functions; log is the workhorse (use `np.log1p` for zeros).

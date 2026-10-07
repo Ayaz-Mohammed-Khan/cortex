@@ -100,7 +100,7 @@ The top row shows three very different population shapes; the bottom row shows t
 
 ## Preview: from CLT to a confidence interval
 
-Rather than reporting a single point estimate ("the mean is exactly 32.5"), we usually give a **range**. Because the sampling distribution is normal, the **empirical rule** (68–95–99.7) applies.
+Rather than reporting a single point estimate ("the mean is exactly 32.5"), we usually give a **range**. Because the sampling distribution is normal, the **empirical rule** (68, 95, 99.7) applies.
 
 > [!example] A quick 95% interval
 > The sampling distribution is normal with mean $\bar{x}$ and standard error $\sigma/\sqrt{n}$. By the empirical rule, ~95% of the area lies within **2 standard errors** of the center. So:

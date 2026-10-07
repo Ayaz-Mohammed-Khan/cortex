@@ -132,7 +132,7 @@ By symmetry, the range $\mu - \sigma$ to $\mu$ also holds 34.13%. Together, one 
 
 ---
 
-## The empirical rule (68–95–99.7 rule)
+## The empirical rule (the 68, 95, 99.7 rule)
 
 For any normal distribution:
 
@@ -152,7 +152,7 @@ This is extremely powerful. If you know only that a data set is normal, you can 
 
 1. **Symmetric** around the mean; the two halves are mirror images, so a probability on one side gives you the other side.
 2. **Mean = Median = Mode**, all three are exactly equal for a proper normal distribution.
-3. **Empirical rule** holds (68–95–99.7).
+3. **Empirical rule** holds (68, 95, 99.7).
 4. **Total area under the curve = 1** (true of every PDF, but worth remembering here).
 
 > [!example] Outliers and standard deviations
@@ -192,7 +192,7 @@ The integral just accumulates the area under the PDF up to that point.
 2. Its PDF is $f(x) = \frac{1}{\sigma\sqrt{2\pi}} e^{-(x-\mu)^2 / 2\sigma^2}$; changing $\mu$ shifts it, changing $\sigma$ widens or narrows it.
 3. The **standard normal variate** (Z, with $\mu=0$, $\sigma=1$) is obtained by standardizing ($Z = (x-\mu)/\sigma$); it enables comparison and **Z-table** lookups.
 4. A **Z-table** gives the area to the left of a z value ($P(Z \le z)$), which is the probability.
-5. The **empirical rule** (68–95–99.7) holds for any normal distribution and powers outlier detection.
+5. The **empirical rule** (68, 95, 99.7) holds for any normal distribution and powers outlier detection.
 6. The normal **CDF** is a smooth S-curve; the distribution underpins outlier detection, ML assumptions, hypothesis testing, and the CLT.
 
 ---

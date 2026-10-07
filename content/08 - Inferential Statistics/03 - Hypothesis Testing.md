@@ -102,7 +102,7 @@ This is the first, most basic technique. The general flow:
 
 **Step 3.** $n = 30 \ge 30$ (CLT → normality holds), and $\sigma$ is known → use a **Z-test**.
 
-**Step 5–6.** Compute the Z statistic:
+**Steps 5 and 6.** Compute the Z statistic:
 $$Z = \frac{\bar{x} - \mu}{\sigma/\sqrt{n}} = \frac{53 - 50}{5/\sqrt{30}} \approx 3.28$$
 
 Because $H_1$ is $\mu > 50$, this is a **one-tailed (right-tailed)** test. Put all of $\alpha = 0.05$ in the right tail. The critical value is $z = 1.645$.
