@@ -52,8 +52,12 @@ const {
 
 // Count of questions, used in the banner copy. Zero means no banner is shown.
 const quizCount = quiz?.questions.length ?? 0;
-// A rough reading time: about 40 seconds per question, rounded to a minute.
-const quizMinutes = quizCount > 0 ? Math.max(1, Math.round((quizCount * 40) / 60)) : 0;
+// Timed budget for the graded quiz: a per-type allowance summed over the quiz.
+// Kept in sync with SECONDS_PER_TYPE in `src/components/quiz.ts`.
+const QUIZ_SECONDS_PER_TYPE: Record<string, number> = { mcq: 45, scenario: 75, card: 60 };
+const quizSeconds =
+  quiz?.questions.reduce((s, q) => s + (QUIZ_SECONDS_PER_TYPE[q.type] ?? 60), 0) ?? 0;
+const quizMinutes = quizSeconds > 0 ? Math.max(1, Math.round(quizSeconds / 60)) : 0;
 // Pass threshold: the quiz counts as passed at two thirds correct, so this is
 // the number of questions a reader must get right. Kept in sync with
 // PASS_RATIO in `src/components/quiz.ts`.
@@ -152,7 +156,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   */}
   {quizCount > 0 && (
     <div
-      class="mt-10 flex items-center gap-4 rounded-2xl border border-accent-200 bg-accent-50/60 px-5 py-4 dark:border-accent-500/25 dark:bg-accent-500/10"
+      class="mt-10 flex flex-col gap-4 rounded-2xl border border-accent-200 bg-accent-50/60 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center dark:border-accent-500/25 dark:bg-accent-500/10"
       data-quiz-banner
     >
       <span
@@ -167,17 +171,35 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
       <div class="min-w-0 flex-1">
         <p class="font-semibold text-gray-900 dark:text-gray-100">Test yourself</p>
         <p class="text-sm text-gray-600 dark:text-gray-400">
-          {quizCount} {quizCount === 1 ? 'question' : 'questions'}, about {quizMinutes} {quizMinutes === 1 ? 'minute' : 'minutes'}. Score {quizPassMark} or more to complete this note.
+          {quizCount} {quizCount === 1 ? 'question' : 'questions'}. <strong class="font-semibold text-gray-700 dark:text-gray-300">Quiz me</strong> is a timed test (~{quizMinutes} {quizMinutes === 1 ? 'min' : 'mins'}, score {quizPassMark}+ to complete the note; miss it and it locks until review). <strong class="font-semibold text-gray-700 dark:text-gray-300">Flashcards</strong> is untimed recall practice.
         </p>
       </div>
-      <button
-        type="button"
-        data-quiz-start
-        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
-      >
-        Start
-        <span aria-hidden="true">→</span>
-      </button>
+      <div class="flex shrink-0 gap-2">
+        {/* Recall practice: same questions, options hidden, not graded. */}
+        <button
+          type="button"
+          data-quiz-start="flashcards"
+          class="inline-flex items-center gap-1.5 rounded-lg border-[1.75px] border-accent-500 px-3.5 py-2 text-sm font-semibold text-accent-700 transition-colors hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:border-accent-400 dark:text-accent-200 dark:focus-visible:ring-offset-gray-900"
+        >
+          <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <rect x="3" y="6" width="13" height="12" rx="2" /><path d="M20 9v9a2 2 0 0 1-2 2H8" opacity="0.5" />
+          </svg>
+          Flashcards
+        </button>
+        {/* Graded quiz: recognition, gates completion. The island disables and
+            relabels this when the quiz is locked after a recent fail. */}
+        <button
+          type="button"
+          data-quiz-start="quiz"
+          data-quiz-cta
+          class="inline-flex items-center gap-1.5 rounded-lg bg-accent-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500 disabled:hover:bg-gray-300 dark:focus-visible:ring-offset-gray-900 dark:disabled:bg-white/10 dark:disabled:text-gray-500"
+        >
+          <span data-quiz-cta-label>Quiz me</span>
+          <span data-quiz-cta-arrow aria-hidden="true">→</span>
+        </button>
+      </div>
+      {/* Lock notice, shown by the island when the quiz is cooling down. */}
+      <p data-quiz-lock-hint class="basis-full text-xs text-gray-500 dark:text-gray-400" hidden></p>
     </div>
   )}
 
@@ -406,6 +428,18 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
   }
   :global([data-theme='dark']) .scratchpad-status[data-state='saving'] {
     color: var(--gray-500, #6b7280);
+  }
+
+  /* Flashcards: the "try to recall first" hint shown before a card is flipped.
+     Reuses the quiz modal's body typography; just a muted, italic cue. */
+  .fc-hint {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: var(--gray-500, #6b7280);
+  }
+  :global([data-theme='dark']) .fc-hint {
+    color: var(--gray-400, #9ca3af);
   }
 </style>
 

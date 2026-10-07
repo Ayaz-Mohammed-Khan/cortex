@@ -1238,6 +1238,13 @@ mark.pagefind-highlight.pagefind-highlight-active {
   width: 1.1rem;
   height: 1.1rem;
 }
+/* The title block grows to fill the row so the timer and close button sit at
+   the trailing edge, spaced by the header's own `gap`. `min-width: 0` lets the
+   subtitle truncate instead of shoving the controls off-balance. */
+.quiz-head-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
 .quiz-head-text b {
   display: block;
   font-size: 0.95rem;
@@ -1247,14 +1254,47 @@ mark.pagefind-highlight.pagefind-highlight-active {
   color: var(--gray-100);
 }
 .quiz-head-text span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.78rem;
   color: var(--gray-500);
 }
 [data-theme="dark"] .quiz-head-text span {
   color: var(--gray-400);
 }
+/* Countdown pill in the quiz header (graded mode only). Turns urgent in the
+   final seconds via `.is-low`. It sits at the trailing edge of the header via
+   the title block's `flex: 1`, so no `margin-left` auto is needed. */
+.quiz-timer {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  color: var(--accent-700);
+  background: color-mix(in srgb, var(--accent-500) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-500) 28%, transparent);
+}
+[data-theme="dark"] .quiz-timer {
+  color: var(--accent-200);
+  background: color-mix(in srgb, var(--accent-400) 16%, transparent);
+  border-color: color-mix(in srgb, var(--accent-400) 30%, transparent);
+}
+.quiz-timer.is-low {
+  color: #ffffff;
+  background: var(--error-light, #dc2626);
+  border-color: var(--error-light, #dc2626);
+}
+[data-theme="dark"] .quiz-timer.is-low {
+  background: var(--error-dark, #ef4444);
+  border-color: var(--error-dark, #ef4444);
+  color: #1a0000;
+}
 .quiz-close {
-  margin-left: auto;
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
@@ -1442,6 +1482,21 @@ mark.pagefind-highlight.pagefind-highlight-active {
 }
 [data-theme="dark"] .quiz-opt.is-wrong {
   background: rgba(239, 68, 68, 0.12);
+}
+/* Graded quiz: the chosen option gets a brief NEUTRAL highlight (no reveal of
+   right/wrong) before the quiz advances — test conditions. */
+.quiz-opt.is-picked {
+  border-color: var(--accent-500);
+  background: var(--accent-50);
+}
+.quiz-opt.is-picked .quiz-mk {
+  background: var(--accent-600);
+  border-color: var(--accent-600);
+  color: #ffffff;
+}
+[data-theme="dark"] .quiz-opt.is-picked {
+  border-color: var(--accent-400);
+  background: color-mix(in srgb, var(--accent-500) 18%, transparent);
 }
 .quiz-explain {
   display: none;
