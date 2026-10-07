@@ -45,7 +45,7 @@ export const STORE_CHANGE_EVENT = 'cortex:store-change';
 const LEGACY_PROGRESS_KEY = 'cortex:progress';
 
 /** Current schema version. Bump when {@link StoreDoc}'s shape changes. */
-export const SCHEMA_VERSION = 3 as const;
+export const SCHEMA_VERSION = 4 as const;
 
 /**
  * In-memory cache of the parsed document.
@@ -139,11 +139,45 @@ export interface StoreDoc {
    * per note.
    */
   attempts: Record<string, QuizAttempt>;
+  /**
+   * When each note was FIRST marked complete, keyed by note route, in epoch ms.
+   * Added by Phase 4 (Cumulative Recall). Stamped once by `@/lib/progress`'s
+   * `markDone` and never overwritten, so it anchors the weekly recall cycles
+   * and reports which topics fell inside a 30-day window.
+   *
+   * NOTE: legacy completions carried over from before this slice existed are
+   * routes present in `progress` but ABSENT here. That gap is intentional —
+   * such undated topics cannot be placed on a weekly timeline, so the recall
+   * scheduler surfaces them only in the monthly / all-topics sweeps.
+   */
+  completedAt: Record<string, number>;
+  /**
+   * The `cycleEnd` timestamp (epoch ms) of each weekly recall cycle the reader
+   * has already completed. Added by Phase 4. A cycle is identified by its end
+   * boundary, so a finished cycle is excluded from future "pending weekly"
+   * lists by recording that boundary here. Deduped on save.
+   */
+  recallWeeklyDone: number[];
+  /**
+   * Epoch ms of the last completed monthly (30-day) recall sweep, or `0` if the
+   * reader has never done one. Added by Phase 4. The scheduler offers a new
+   * monthly sweep only once this is `0` or at least 30 days in the past.
+   */
+  recallMonthlyDone: number;
 }
 
 /** A fresh, empty document at the current version. */
 function emptyDoc(): StoreDoc {
-  return { version: SCHEMA_VERSION, progress: [], scratchpad: {}, review: {}, attempts: {} };
+  return {
+    version: SCHEMA_VERSION,
+    progress: [],
+    scratchpad: {},
+    review: {},
+    attempts: {},
+    completedAt: {},
+    recallWeeklyDone: [],
+    recallMonthlyDone: 0,
+  };
 }
 
 /**
@@ -162,6 +196,9 @@ function cloneDoc(doc: StoreDoc): StoreDoc {
     scratchpad: { ...doc.scratchpad },
     review,
     attempts,
+    completedAt: { ...doc.completedAt },
+    recallWeeklyDone: [...doc.recallWeeklyDone],
+    recallMonthlyDone: doc.recallMonthlyDone,
   };
 }
 
@@ -203,6 +240,27 @@ function toStringRecord(v: unknown): Record<string, string> {
 /** A finite number, or `fallback` when the value is missing/invalid. */
 function num(v: unknown, fallback: number): number {
   return typeof v === 'number' && Number.isFinite(v) ? v : fallback;
+}
+
+/**
+ * Coerce an unknown value into a Record<string,number>, keeping only entries
+ * whose value is a finite number. Used for the `completedAt` slice so a
+ * hand-edited or partial object still loads its usable timestamps.
+ */
+function toNumberRecord(v: unknown): Record<string, number> {
+  if (!isObject(v)) return {};
+  const out: Record<string, number> = {};
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === 'number' && Number.isFinite(val)) out[k] = val;
+  }
+  return out;
+}
+
+/** Coerce an unknown value into a number[] of just its finite-number members. */
+function toNumberArray(v: unknown): number[] {
+  return Array.isArray(v)
+    ? v.filter((x): x is number => typeof x === 'number' && Number.isFinite(x))
+    : [];
 }
 
 /**
@@ -283,6 +341,9 @@ export function migrate(raw: unknown): StoreDoc {
     scratchpad: toStringRecord(raw.scratchpad),
     review: toReviewRecord(raw.review),
     attempts: toAttemptRecord(raw.attempts),
+    completedAt: toNumberRecord(raw.completedAt),
+    recallWeeklyDone: toNumberArray(raw.recallWeeklyDone),
+    recallMonthlyDone: num(raw.recallMonthlyDone, 0),
   };
   return doc;
 }
@@ -339,6 +400,9 @@ export function save(doc: StoreDoc): void {
     ),
     review: doc.review,
     attempts: doc.attempts,
+    completedAt: doc.completedAt,
+    recallWeeklyDone: [...new Set(doc.recallWeeklyDone)],
+    recallMonthlyDone: doc.recallMonthlyDone,
   };
   // Refresh the in-memory cache so subsequent reads in this tab are instant and
   // consistent with what we just wrote, even if persistence below fails.

@@ -39,7 +39,14 @@ export function markDone(route: string): void {
   const key = normalizeRoute(route);
   update((doc) => {
     if (doc.progress.includes(key)) return doc;
-    return { ...doc, progress: [...doc.progress, key] };
+    // Stamp the first-completion time once. The early return above guarantees
+    // this branch runs only when the route is new, so an existing timestamp is
+    // never overwritten — the anchor for weekly recall cycles stays stable.
+    return {
+      ...doc,
+      progress: [...doc.progress, key],
+      completedAt: { ...doc.completedAt, [key]: Date.now() },
+    };
   });
 }
 
