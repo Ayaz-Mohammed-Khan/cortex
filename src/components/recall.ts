@@ -36,7 +36,6 @@
 
 import {
   pendingWeeklies,
-  isLagging,
   pendingMonthly,
   onRecallChange,
   type WeeklyCycle,
@@ -152,12 +151,15 @@ function sync(): void {
   const wrap = document.querySelector<HTMLElement>(WRAP);
   if (!wrap) return;
 
-  const weeklies = pendingWeeklies();
+  // Only count cycles the reader can actually act on — those whose topics
+  // still have a quiz to recall from. A cycle whose notes all lost their quiz
+  // is not something the reader can clear, so it must not inflate the backlog
+  // count or the "behind" message (the card can only start actionable cycles).
+  const actionableWeeklies = pendingWeeklies().filter((c) => topicsWithQuiz(c.routes) > 0);
   const monthly = pendingMonthly();
 
-  // The oldest pending weekly is the one we surface first; keep only cycles
-  // whose topics actually have a quiz to recall from.
-  const oldestWeekly = weeklies.find((c) => topicsWithQuiz(c.routes) > 0) ?? null;
+  // The oldest actionable weekly is the one we surface first.
+  const oldestWeekly = actionableWeeklies[0] ?? null;
   const monthlyRoutes = monthly ? monthly.routes.filter((r) => banks.has(r)) : [];
   const hasMonthly = monthlyRoutes.length > 0;
 
@@ -169,14 +171,16 @@ function sync(): void {
   }
   wrap.hidden = false;
 
-  // --- Lagging / priority state (two or more weeklies pending at once). ------
-  const lagging = isLagging();
+  // --- Lagging / priority state (two or more ACTIONABLE weeklies pending). ---
+  // Derived from the actionable set, not the raw schedule, so the count the
+  // reader sees always matches the number of cycles they can clear.
+  const lagging = actionableWeeklies.length >= 2;
   const laggingMsg = wrap.querySelector<HTMLElement>('[data-recall-lagging-msg]');
   if (lagging) {
     wrap.classList.add('recall-lagging');
     wrap.setAttribute('data-recall-lagging', '');
     if (laggingMsg) {
-      const n = weeklies.length;
+      const n = actionableWeeklies.length;
       laggingMsg.hidden = false;
       laggingMsg.textContent = `Priority: you're ${n} week${n === 1 ? '' : 's'} behind on recall. Clear the oldest first.`;
     }
