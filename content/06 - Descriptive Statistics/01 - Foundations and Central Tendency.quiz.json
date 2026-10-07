@@ -2,47 +2,232 @@
   "questions": [
     {
       "type": "scenario",
-      "scenario": "A dataset of annual incomes includes a few billionaires. You report the mean as the typical income.",
-      "question": "What is the problem, and which measure is more representative here?",
+      "concept": "mean-vs-median",
+      "difficulty": "medium",
+      "scenario": "A class of students mostly earns around 30,000 a month. One graduate signs a package worth several lakhs. The reported average salary jumps to a figure no student recognises.",
+      "question": "Which measure should be reported instead, and why does it resist the problem?",
       "options": [
-        "The mean is pulled upward by the extreme high values. The median is more representative because it is resistant to outliers.",
-        "The mean is always best; the median hides information.",
-        "There is no problem; the mean ignores outliers.",
-        "The mode is the only valid choice for income."
+        "The range, because it alone shows the full extent of all the salaries.",
+        "The median, because sorting pushes an extreme value to the far end.",
+        "The mean again, recalculated once the decimal places are dropped.",
+        "The mode, because the most frequent salary is the most accurate summary."
       ],
-      "answer": 0,
-      "explanation": "The mean sums every value, so a few extreme incomes drag it away from what most people earn. The median, the middle value, barely moves when outliers are added, so it better reflects the typical case for skewed data like income.",
-      "misconception": "The mean is not robust. On skewed data with outliers, the median is the more honest summary of center."
+      "answer": 1,
+      "explanation": "The mean uses every value's magnitude, so one extreme point drags it away from the bulk of the data. The median depends only on position, and an outlier occupies an end position rather than the middle, so it cannot distort the result. This is why incomes, house prices, and response times are almost always reported as medians in practice.",
+      "misconception": "An outlier is not a reason to distrust all summaries; it is a reason to choose a robust one."
     },
     {
       "type": "mcq",
-      "question": "Why is standard deviation often preferred over variance when reporting spread?",
+      "concept": "mean-vs-median",
+      "difficulty": "medium",
+      "question": "What is the trade-off between the mean and the median?",
       "options": [
-        "They are interchangeable and identical.",
-        "Variance cannot handle negative numbers.",
-        "Standard deviation is in the same units as the data, since it is the square root of variance.",
-        "Standard deviation is always smaller, so it looks better."
+        "The mean uses every value but is distorted by outliers; the median resists them.",
+        "The median is always the more accurate figure, so the mean should be avoided.",
+        "The mean works only on samples, while the median works only on populations.",
+        "The median needs continuous data, whereas the mean also works on categories."
+      ],
+      "answer": 0,
+      "explanation": "Using all the information is a genuine strength when the data is clean, because the mean reflects every observation. The median deliberately discards magnitude in favour of position, which buys robustness at the cost of sensitivity. Neither dominates, so the choice depends on whether extreme values in your data are errors to be resisted or real signal worth reflecting.",
+      "misconception": "Robustness is a trade, not a free improvement; the median throws information away to get it."
+    },
+    {
+      "type": "mcq",
+      "concept": "mode",
+      "difficulty": "easy",
+      "question": "For which kind of data is the mode the most useful measure of centre?",
+      "options": [
+        "Continuous physical measurements, such as a person's height and weight.",
+        "Any data at all, on the grounds that a mode is always defined for it.",
+        "Categorical and discrete data, where it names the most frequent value.",
+        "Only data that happens to be perfectly symmetric about its centre."
       ],
       "answer": 2,
-      "explanation": "Variance is the average squared deviation, so its units are the data's units squared, which is hard to interpret. Taking the square root returns the standard deviation to the original units, so it reads as a spread in the same scale as the values."
+      "explanation": "Asking for the mean of a column of state names is meaningless, but asking which state appears most often is exactly the right question, and that is the mode. It also suits counted quantities. On continuous measurements it is nearly useless, because precise values rarely repeat, so almost every observation is unique.",
+      "misconception": "The mode is about frequency, which makes it the only centre available for unordered categories."
     },
     {
       "type": "mcq",
-      "question": "What does the coefficient of variation (CV) let you do that standard deviation alone does not?",
+      "concept": "variance",
+      "difficulty": "medium",
+      "question": "For the values 3, 2, 1, 5, and 4, whose mean is 3, what is the sum of squared deviations and the resulting population variance?",
       "options": [
-        "Compare the relative spread of two datasets with different units or very different means, since CV is the standard deviation divided by the mean.",
-        "Convert a sample into a population.",
-        "Measure the center rather than the spread.",
-        "Remove outliers automatically."
+        "A sum of 10 and a variance of 2.5",
+        "A sum of 15 and a variance of 3",
+        "A sum of 10 and a variance of 2",
+        "A sum of 20 and a variance of 4"
+      ],
+      "answer": 2,
+      "explanation": "The squared deviations are 0, 1, 4, 4, and 1, which total 10. Dividing by the five observations gives a population variance of 2, and the standard deviation is its square root, about 1.41. Had this been treated as a sample, the divisor would be one less than the count, giving 2.5 instead, which is why identifying the data as a population or a sample matters before computing anything.",
+      "misconception": "The divisor depends on whether the data is a population or a sample, so the same numbers can give two different variances."
+    },
+    {
+      "type": "mcq",
+      "concept": "standard-deviation",
+      "difficulty": "medium",
+      "question": "Why is the standard deviation usually reported instead of the variance?",
+      "options": [
+        "Because it is considerably less affected by outliers than the variance is.",
+        "Because it shares the data's original unit, so it is directly interpretable.",
+        "Because it can be computed without first having to know the data's mean.",
+        "Because a variance can come out negative, while a standard deviation cannot."
+      ],
+      "answer": 1,
+      "explanation": "Squaring the deviations leaves the variance in squared units, so a spread of salaries comes out in squared currency, which means nothing to a reader. Taking the square root restores the original unit, giving a number you can state as a typical distance from the mean. Both are equally sensitive to outliers, since the square root does not undo the squaring's emphasis on distant points.",
+      "misconception": "The square root fixes interpretability, not outlier sensitivity."
+    },
+    {
+      "type": "scenario",
+      "concept": "coefficient-of-variation",
+      "difficulty": "medium",
+      "scenario": "An analyst wants to know whether salary or years of experience varies more within a dataset. Salary has a standard deviation in the tens of thousands, experience in single digits.",
+      "question": "Which measure allows a fair comparison, and why?",
+      "options": [
+        "The variance, because squaring puts the two columns on a common footing.",
+        "The range of each column, since both are then measured from end to end.",
+        "The standard deviations directly, as both of them describe the spread.",
+        "The coefficient of variation, which is unit-free relative to each mean."
+      ],
+      "answer": 3,
+      "explanation": "Standard deviations carry their columns' units and scales, so a large number for salary says nothing about whether salary is relatively more variable than experience. Expressing spread as a proportion of that column's own mean removes both the unit and the scale, leaving comparable figures. A larger value means more spread relative to the typical size of that quantity.",
+      "misconception": "Comparing raw spreads across differently scaled columns is meaningless; the spread has to be normalised first."
+    },
+    {
+      "type": "mcq",
+      "concept": "population-vs-sample",
+      "difficulty": "medium",
+      "question": "Why do we work with samples at all, and how does the notation differ?",
+      "options": [
+        "Samples are more accurate than whole populations, and both use one notation.",
+        "The population is too large to measure, so a subset stands in with its own symbols.",
+        "Samples are required by statistical software, which cannot process a whole population.",
+        "Populations are used only for prediction, while samples are used only for description."
+      ],
+      "answer": 1,
+      "explanation": "Measuring every individual in a population of over a hundred crore people is impossible, so a carefully chosen subset stands in for it. The population mean uses the Greek letter mu with the population size, while the sample mean uses x-bar with the sample size. The arithmetic is identical, but the distinct symbols matter because they signal whether a figure is a known fact about everyone or an estimate from a subset, which determines what you are entitled to claim from it.",
+      "misconception": "A sample is a practical necessity and an estimate, not a more accurate measurement."
+    },
+    {
+      "type": "scenario",
+      "concept": "sampling-quality",
+      "difficulty": "medium",
+      "scenario": "A company measures overall customer satisfaction by surveying only those customers who contacted its support line during the month.",
+      "question": "Which requirement for a good sample is violated, and what is the consequence?",
+      "options": [
+        "It is not representative, because the happy and silent majority is excluded.",
+        "It is simply not large enough, which surveying more support callers would fix.",
+        "None of them; the people who call support are a random subset of customers.",
+        "It is not continuous, so the collected responses cannot be averaged at all."
       ],
       "answer": 0,
-      "explanation": "Standard deviation is absolute, so comparing a spread of 5 kg to a spread of 5 cm is meaningless. The coefficient of variation normalizes spread by the mean, giving a unitless ratio you can compare across datasets with different scales or units."
+      "explanation": "Contacting support correlates strongly with having had a problem, so the satisfied and silent majority has no chance of being selected. That breaks both randomness and representativeness, and no increase in sample size repairs it, because collecting more of a biased group only makes the wrong answer more precise. Fixing it requires changing how respondents are selected.",
+      "misconception": "A bigger biased sample is not a better sample; size cannot cure selection bias."
+    },
+    {
+      "type": "mcq",
+      "concept": "data-types",
+      "difficulty": "medium",
+      "question": "Feedback recorded as bad, average, and good, versus state recorded as Haryana, Bihar, and Maharashtra. How do these differ, and why does it matter?",
+      "options": [
+        "Both are nominal, so the categories of each may be ordered arbitrarily.",
+        "Feedback is ordinal with a ranking; state is nominal with no inherent order.",
+        "Feedback is discrete numerical data, while the state column is nominal.",
+        "Both are ordinal, since any set of text labels can be sorted alphabetically."
+      ],
+      "answer": 1,
+      "explanation": "An ordered set of categories supports statements about one being higher than another, so a median is meaningful. An unordered set does not, so imposing numbers on states and averaging them invents a relationship that does not exist. Classifying each column before analysing it is what prevents that whole family of mistakes.",
+      "misconception": "Alphabetical sortability is not a meaningful order; ordinal means the categories rank."
+    },
+    {
+      "type": "mcq",
+      "concept": "data-types",
+      "difficulty": "easy",
+      "question": "What separates discrete from continuous numerical data?",
+      "options": [
+        "Discrete data is always small in value, while continuous data is always large.",
+        "Discrete data is counted in whole units; continuous data is measured.",
+        "Discrete data is really categorical, while continuous data is the numerical kind.",
+        "Discrete data always comes from samples and continuous data from populations."
+      ],
+      "answer": 1,
+      "explanation": "The test is whether the quantity is counted or measured. Counting yields whole numbers with nothing meaningful in between, such as a number of children, while measuring admits arbitrary precision, such as a weight of 35.3 kilograms. The distinction shapes which summaries and plots apply, since a mode makes sense for a count of cars but almost never for a measured weight.",
+      "misconception": "The difference is counting versus measuring, not the magnitude of the numbers."
+    },
+    {
+      "type": "mcq",
+      "concept": "descriptive-vs-inferential",
+      "difficulty": "easy",
+      "question": "What separates descriptive from inferential statistics?",
+      "options": [
+        "Descriptive statistics applies to numbers, and inferential statistics to categories.",
+        "Descriptive statistics summarises your data; inferential reasons about a wider group.",
+        "Descriptive statistics is used on populations and inferential on same-sized samples.",
+        "Descriptive statistics is only ever approximate, while inferential statistics is exact."
+      ],
+      "answer": 1,
+      "explanation": "Describing means reporting what is in front of you through means, medians, spreads, and graphs, with no claim beyond the data at hand. Inferring means reasoning from a subset to the whole, which is what hypothesis tests, confidence intervals, and regression do, and which necessarily carries uncertainty. Knowing which you are doing determines whether you may generalise your finding.",
+      "misconception": "Describing makes no claim about anything outside the data; inferring does."
+    },
+    {
+      "type": "mcq",
+      "concept": "range",
+      "difficulty": "easy",
+      "question": "What is the main weakness of the range as a measure of spread?",
+      "options": [
+        "It cannot be computed at all until the data has first been sorted into order.",
+        "It is by its nature always smaller than the standard deviation of the data.",
+        "It depends only on the two extremes, so one outlier inflates it badly.",
+        "It is expressed in squared units, which makes the figure hard to interpret."
+      ],
+      "answer": 2,
+      "explanation": "Being the gap between the maximum and the minimum, the range is determined entirely by the two least typical observations and ignores everything between them. One extreme point can therefore triple it while the data is otherwise tightly clustered. That is why it is rarely reported on its own, and why quantile-based summaries are preferred for describing shape.",
+      "misconception": "The range describes the extremes, not the typical spread."
+    },
+    {
+      "type": "mcq",
+      "concept": "variance",
+      "difficulty": "medium",
+      "question": "Which statement about the variance is correct?",
+      "options": [
+        "It is the spread itself, expressed directly in the data's own original units.",
+        "It tracks the spread but is in squared units and is dominated by outliers.",
+        "It is unaffected by outliers, because the act of squaring cancels them out.",
+        "It uses one and the same denominator for both a sample and a population."
+      ],
+      "answer": 1,
+      "explanation": "Squaring the deviations means a point twice as far contributes four times as much, so distant observations carry disproportionate weight. The result tracks the spread without being expressible in the data's own units, which is why the square root is taken for reporting. The divisor also differs between a sample and a population, with samples using one fewer than the count.",
+      "misconception": "Squaring amplifies the influence of outliers rather than neutralising it."
+    },
+    {
+      "type": "mcq",
+      "concept": "robust-means",
+      "difficulty": "medium",
+      "question": "What do the weighted mean and the trimmed mean each change about an ordinary average?",
+      "options": [
+        "Both of them simply remove outliers, differing only in how many are removed.",
+        "The weighted mean sorts the data first, and the trimmed mean rescales it.",
+        "The weighted mean rates each value's importance; the trimmed mean cuts the ends.",
+        "The weighted mean applies only to categories and the trimmed mean to measurements."
+      ],
+      "answer": 2,
+      "explanation": "Weighting is the right tool when observations genuinely differ in importance, as when combining several model predictions by how much you trust each. Trimming is the right tool when the extremes are suspect, since cutting an equal share from both ends keeps the summary centred while removing the values most likely to distort it. One adjusts influence deliberately, the other removes it defensively.",
+      "misconception": "Weighting is about importance, not about outlier removal."
     },
     {
       "type": "card",
-      "question": "Explain the difference between a population and a sample, and why most statistics work with samples.",
-      "answer": "A population is the entire group you care about, for example every customer. A sample is a smaller, representative subset you actually measure. You usually work with a sample because measuring the whole population is too costly, slow, or impossible, so you estimate population parameters from sample statistics. The quality of that estimate depends on the sample being random and representative.",
-      "explanation": "This split is the root of inferential statistics: a sample mean estimates an unknown population mean, with uncertainty you quantify later."
+      "concept": "centre-and-spread",
+      "difficulty": "medium",
+      "question": "The values negative five, zero, and five have the same mean as negative ten, zero, and ten. Explain what this demonstrates and what it implies for reporting.",
+      "answer": "Both sets have a mean of zero, so the centre alone cannot distinguish them even though the second is twice as spread out. A measure of centre says where the data sits but nothing about how tightly it clusters there, so two very different datasets can share one. The implication is that a centre should never be reported alone: it needs a measure of dispersion such as the standard deviation beside it to describe the data honestly.",
+      "explanation": "This is why a summary conventionally pairs a mean with a standard deviation, or a median with a quantile-based spread. Without the second number, a reader cannot tell whether the centre is representative of most observations or merely the midpoint of something very scattered."
+    },
+    {
+      "type": "card",
+      "concept": "sampling-quality",
+      "difficulty": "medium",
+      "question": "State the three requirements for a good sample and explain what goes wrong when each is missing.",
+      "answer": "A sample must be large enough, because a handful of observations cannot stand in for a very large population and its estimates swing wildly. It must be random, so that no individual is systematically more likely to be chosen than another, since selection that correlates with the quantity being measured biases the result. And it must be representative, meaning the variation present in the population, across region, age, gender, and anything else relevant, is reflected in the subset. If any of the three fails, every inference drawn about the population is unreliable.",
+      "explanation": "Of the three, bias is the most dangerous because increasing the sample size makes a biased estimate more precise without making it more correct, so the result looks increasingly trustworthy while remaining wrong."
     }
   ]
 }

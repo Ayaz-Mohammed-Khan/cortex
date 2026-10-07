@@ -2,48 +2,202 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "Why do we measure algorithm cost with Big O rather than timing the code with a clock?",
+      "concept": "big-o-simplification",
+      "difficulty": "medium",
+      "question": "Simplify the operation count n squared plus 2n into Big O notation.",
       "options": [
-        "Big O describes how work grows with input size, independent of the machine, language, or load, which wall-clock time cannot.",
-        "Big O gives the exact number of seconds a function takes.",
-        "Big O only applies to sorting algorithms.",
-        "Clock timing is always wrong."
-      ],
-      "answer": 0,
-      "explanation": "Wall-clock time depends on the hardware, the language, and the current load, so it is not portable or stable. Big O captures the growth rate of the operation count as input size grows, which is a property of the algorithm itself.",
-      "misconception": "Big O is not a running time in seconds. It is a growth rate that ignores constants and hardware."
-    },
-    {
-      "type": "mcq",
-      "question": "A function has one loop over n items and, inside it, another loop over the same n items. What is its time complexity?",
-      "options": [
-        "O(2n)",
-        "O(log n)",
+        "O(n squared plus n)",
+        "O(3n)",
         "O(n squared)",
         "O(n)"
       ],
       "answer": 2,
-      "explanation": "Nested loops multiply: for each of n outer steps you do n inner steps, so the total is n times n, which is O(n squared). Big O drops constant factors, so O(2n) would simplify to O(n) and is not how nesting works."
+      "explanation": "Drop the multiplicative constant on the 2n term, leaving n squared plus n, then keep only the fastest-growing term because it dominates once n is large. The result is O(n squared). The smaller term is not wrong, it is simply irrelevant to how the cost grows at scale.",
+      "misconception": "Big O keeps the dominant term alone; you do not sum the terms in the final answer."
+    },
+    {
+      "type": "mcq",
+      "concept": "big-o-simplification",
+      "difficulty": "medium",
+      "question": "Simplify the operation count log n plus n plus 4 into Big O notation.",
+      "options": [
+        "O(log n)",
+        "O(n)",
+        "O(n log n)",
+        "O(n plus log n)"
+      ],
+      "answer": 1,
+      "explanation": "Discard the additive constant 4, which leaves log n plus n. For any sizable n, n is far larger than log n, so n is the dominant term and the answer is O(n). Note that this is addition, not multiplication: O(n log n) would require the two to be multiplied, which happens in efficient sorting, not here.",
+      "misconception": "Adding a logarithmic term to a linear one does not produce n log n; that shape comes from multiplication."
+    },
+    {
+      "type": "mcq",
+      "concept": "loop-structure",
+      "difficulty": "medium",
+      "question": "One loop over n items followed by a second, separate loop over n items. What is the complexity?",
+      "options": [
+        "O(n squared), because the two loops over n multiply out together",
+        "O(n), because sequential loops add and the constant is dropped",
+        "O(2 to the power n), because each loop doubles the total work",
+        "O(log n), because the second loop halves the remaining work"
+      ],
+      "answer": 1,
+      "explanation": "Loops that run one after another add their counts, giving 2n, and the multiplicative constant is then dropped to leave O(n). Multiplication happens only when one loop is nested inside another, so that the inner body runs once for every pass of the outer loop. Reading code for whether loops are sequential or nested is the fastest way to classify it.",
+      "misconception": "Two loops in sequence are still linear; only nesting makes the cost multiply."
     },
     {
       "type": "scenario",
-      "scenario": "You must check membership (is x present?) millions of times against a large collection that does not change.",
-      "question": "Which structure gives the best average lookup, and why?",
+      "concept": "loop-structure",
+      "difficulty": "medium",
+      "scenario": "A deduplication job compares every row against every other row. It finishes in under a second on a 10,000-row sample, then runs for hours on the full 1,000,000-row table.",
+      "question": "What explains the collapse in performance?",
       "options": [
-        "A list, because lists are faster for everything.",
-        "A set or dict, because hash lookup is average O(1), versus O(n) for scanning a list.",
-        "A tuple, because tuples are immutable and therefore faster to search.",
-        "It does not matter, since all lookups are O(1)."
+        "The job is linear, so the slowdown must be coming from disk read speed instead.",
+        "Comparison is quadratic, so a hundred times the rows is ten thousand times the work.",
+        "The job is logarithmic, and the slowdown comes from hitting a hard memory limit.",
+        "Quadratic and linear cost about the same at this scale, so something else is at fault."
       ],
       "answer": 1,
-      "explanation": "A set or dict uses hashing, so an average membership test is O(1) regardless of size. Scanning a list or tuple is O(n) because it checks elements one by one. For heavy repeated membership tests, the set wins decisively at scale.",
-      "misconception": "Immutability (tuple) does not make membership faster. The data structure's lookup mechanism (hashing versus linear scan) is what matters."
+      "explanation": "Comparing every row with every other row runs the inner body n times n, so the work grows with the square of the row count. Multiplying the rows by 100 multiplies the comparisons by about 10,000, which turns a sub-second sample into hours. This is exactly why a result that looks fine on a sample can be unusable in production, and why real deduplication uses hashing or sorting instead of brute force.",
+      "misconception": "Performance on a small sample does not predict performance at scale unless you know the growth rate."
+    },
+    {
+      "type": "mcq",
+      "concept": "loop-structure",
+      "difficulty": "medium",
+      "question": "A function loops over an input of size n, and inside that loop it runs another loop that always executes exactly 100 times. What is the complexity?",
+      "options": [
+        "O(n squared), because one loop is nested inside the other one",
+        "O(100n), because a fixed trip count forms its own complexity class",
+        "O(n), because the inner loop's count never depends on the input",
+        "O(log n), because a fixed inner bound compresses the growth rate"
+      ],
+      "answer": 2,
+      "explanation": "Only a loop driven by the input size contributes a factor of n. A loop with a fixed trip count is a constant however large the input gets, so the total is 100n, which simplifies to O(n). The lesson is to look at what controls each loop's bound, not merely at how deeply the loops are nested.",
+      "misconception": "Nesting alone does not make something quadratic; both loops have to scale with the input."
+    },
+    {
+      "type": "mcq",
+      "concept": "measurement-approach",
+      "difficulty": "easy",
+      "question": "Why is timing a program with a stopwatch a poor way to express its efficiency?",
+      "options": [
+        "Clock measurements in Python are always inaccurate, whatever you are timing.",
+        "It cannot be done at all without specialised profiling tooling installed.",
+        "Timing works only for programs that spend their time reading from disk.",
+        "The result depends on the machine, and it says nothing about how cost grows."
+      ],
+      "answer": 3,
+      "explanation": "A measured duration describes the hardware and the particular code as much as the algorithm, so the same algorithm scores differently on a fast and a slow machine, or after swapping one loop form for an equivalent one. It also gives a single number for a single input rather than a formula, so it cannot answer the question that matters: what happens when the input grows. Timing is still useful for tuning a chosen implementation, just not for classifying an algorithm.",
+      "misconception": "Measuring a run time is not the same as measuring an algorithm's efficiency."
+    },
+    {
+      "type": "mcq",
+      "concept": "worst-case",
+      "difficulty": "easy",
+      "question": "Complexity analysis normally focuses on the worst case. Why?",
+      "options": [
+        "The worst case is the only one of the three that can be calculated at all.",
+        "It is the guarantee the algorithm makes on the least favourable input.",
+        "The worst case and the average case always turn out to be identical anyway.",
+        "Best-case analysis is considered mathematically invalid by convention."
+      ],
+      "answer": 1,
+      "explanation": "Searching for a record that happens to be first is fast, but you cannot promise that. The worst case bounds what can happen when the input is adversarial or simply unlucky, which is the number you need in order to make a reliability promise. Average-case analysis is also legitimate and useful, it just requires assumptions about how inputs are distributed.",
+      "misconception": "The best case tells you almost nothing useful, because you cannot rely on it occurring."
+    },
+    {
+      "type": "mcq",
+      "concept": "complexity-classes",
+      "difficulty": "medium",
+      "question": "Which ordering lists the classes from slowest-growing to fastest-growing?",
+      "options": [
+        "O(1), O(n), O(log n), O(n squared), O(n log n), O(2 to the power n)",
+        "O(log n), O(1), O(n), O(n log n), O(2 to the power n), O(n squared)",
+        "O(1), O(log n), O(n), O(n log n), O(n squared), O(2 to the power n)",
+        "O(2 to the power n), O(n squared), O(n log n), O(n), O(log n), O(1)"
+      ],
+      "answer": 2,
+      "explanation": "Constant time comes first, then logarithmic, linear, linearithmic, quadratic, and finally exponential. The two comparisons worth committing to memory are that n log n sits between n and n squared, and that any polynomial eventually loses to an exponential, which is why exponential algorithms are only viable on very small inputs.",
+      "misconception": "O(log n) is better than O(n), not worse; the logarithm grows very slowly."
+    },
+    {
+      "type": "mcq",
+      "concept": "constant-time",
+      "difficulty": "medium",
+      "question": "Why is fetching the item at a given position in a list considered constant time?",
+      "options": [
+        "Python caches every element the first time that the list is read right through.",
+        "The elements sit in consecutive slots, so one calculation finds the address.",
+        "Lists are always short enough in practice for the cost never to matter.",
+        "Python scans from the start of the list, but it does so extremely quickly."
+      ],
+      "answer": 1,
+      "explanation": "Because the storage is contiguous, the position of any element is computed directly from the starting address and the index, and the list's size never enters that arithmetic. A list of fifty and a list of fifty million therefore take the same time to index. Scanning for a value is a different operation entirely and is linear, because it may have to look at every element.",
+      "misconception": "Indexing by position and searching for a value are different operations with different costs."
+    },
+    {
+      "type": "scenario",
+      "concept": "scaling-prediction",
+      "difficulty": "medium",
+      "scenario": "An algorithm is known to be quadratic. On 1,000 records it takes 2 seconds.",
+      "question": "Roughly how long should you expect it to take on 4,000 records?",
+      "options": [
+        "About 8 seconds, four times as long",
+        "About 4 seconds, twice as long",
+        "About 32 seconds, sixteen times as long",
+        "About 2 seconds, since quadratic growth applies only to very large inputs"
+      ],
+      "answer": 2,
+      "explanation": "Quadratic cost grows with the square of the input, so multiplying the records by four multiplies the work by sixteen, giving roughly 32 seconds. Being able to make this estimate before running a job is the practical payoff of complexity analysis: it tells you in advance whether an approach can survive the data you actually have.",
+      "misconception": "Quadratic growth is not proportional to the input; it is proportional to the input squared."
+    },
+    {
+      "type": "scenario",
+      "concept": "limits-of-big-o",
+      "difficulty": "hard",
+      "scenario": "Two implementations of the same task both analyse as O(n). Profiling on real data shows one of them is consistently about forty times slower than the other.",
+      "question": "Does that contradict the complexity analysis?",
+      "options": [
+        "Yes, the slower implementation must in reality be quadratic rather than linear.",
+        "No. Big O discards constant factors, so equal growth allows unequal speed.",
+        "No, but the profiling must be faulty, since two linear versions perform alike.",
+        "Yes, Big O is only valid when the constant factors are kept in the formula."
+      ],
+      "answer": 1,
+      "explanation": "Big O describes the shape of growth, not absolute cost, and discarding the constant is precisely what makes it independent of machine and implementation. So it answers the question of whether something will survive ten times the data, and it does not answer which of two options is faster today. Both questions matter in practice: use complexity to rule out approaches that cannot scale, then profile to tune the one you chose.",
+      "misconception": "Equal Big O means equal growth, not equal speed."
+    },
+    {
+      "type": "mcq",
+      "concept": "complexity-classes",
+      "difficulty": "medium",
+      "question": "An approach tries every possible combination of n items, making it O(2 to the power n). What does that imply in practice?",
+      "options": [
+        "It is slightly worse than quadratic, and usually acceptable in practice.",
+        "It is perfectly fine as long as the machine has enough memory to spare.",
+        "Each extra item doubles the work, so only a small n is ever viable.",
+        "It performs identically to O(n squared) for any realistic input size."
+      ],
+      "answer": 2,
+      "explanation": "Exponential growth means adding one item doubles the cost, so the running time explodes within a few dozen items regardless of hardware. Recognising this class matters because it tells you that no amount of faster computing will rescue the approach, and that the problem needs a smarter formulation such as dynamic programming, a greedy rule, or an approximation.",
+      "misconception": "Exponential is not merely a worse polynomial; it is a different regime that hardware cannot fix."
     },
     {
       "type": "card",
-      "question": "Explain the difference between best, average, and worst case complexity, and say which one Big O usually reports and why.",
-      "answer": "Best case is the fewest operations for a lucky input, worst case is the most for the hardest input, and average case is the expected cost over typical inputs. Big O usually reports the worst case, because it gives a guarantee that the algorithm never does more than that, which is what you need to reason about reliability at scale.",
-      "explanation": "Average case matters in practice too (for example, hash lookups are average O(1) but worst-case O(n) under collisions), so state which case you mean when it differs."
+      "concept": "big-o-simplification",
+      "difficulty": "medium",
+      "question": "State the three-step recipe for turning an operation count into Big O notation, and the one extra rule for expressions with several terms.",
+      "answer": "Start from the operation count as an expression in n. First drop the additive constants, so 5n plus 2 becomes 5n. Then drop the multiplicative constants, so 5n becomes n, giving O(n). When the expression has several terms, keep only the fastest-growing one, because it dominates the others once n is large.",
+      "explanation": "The reason the constants go is that they depend on the machine and on implementation details, which is exactly what the measure is designed to ignore. What survives is the shape of the growth, which is the property that predicts behaviour as data grows."
+    },
+    {
+      "type": "card",
+      "concept": "efficiency-axes",
+      "difficulty": "easy",
+      "question": "Efficiency is measured on two axes. Name both and give a situation where the second one, not the first, decides whether software is usable.",
+      "answer": "The two axes are time complexity, how long the program runs, and space complexity, how much memory it uses. Space decides usability whenever the memory ceiling is hard: an application needing more memory than a device has simply will not run, however fast its algorithms are, which is why a lightweight build that fits a low-memory phone can reach a far larger audience.",
+      "explanation": "The two axes often trade against each other. Caching results buys speed by spending memory, and streaming data in chunks buys memory headroom by spending time, so real engineering decisions usually involve picking a point on that curve rather than optimising one axis alone."
     }
   ]
 }

@@ -1,56 +1,211 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A colleague says a Python list is just like a C array, so appending is cheap and indexing is slow.",
-      "question": "What is the accurate picture of how a Python list is stored and performs?",
+      "type": "mcq",
+      "concept": "adding-items",
+      "difficulty": "medium",
+      "question": "Starting from `L = [1, 2]`, what do `L.append([3, 4])` and `L.extend([3, 4])` each produce?",
       "options": [
-        "A list is a dynamic array of references, so indexing is O(1) and append is amortized O(1), while insert or delete at the front is O(n).",
-        "A list is a hash table, so lookups by position are O(1) but order is lost.",
-        "A list stores values inline like a C array, so it cannot grow.",
-        "A list is a linked list, so append is O(1) but indexing is O(n)."
+        "`[1, 2, [3, 4]]` and `[1, 2, 3, 4]`",
+        "`[1, 2, 3, 4]` and `[1, 2, [3, 4]]`",
+        "Both produce `[1, 2, 3, 4]`",
+        "Both produce `[1, 2, [3, 4]]`"
       ],
       "answer": 0,
-      "explanation": "A Python list is a dynamic array holding references to objects. Index access is O(1). Append is amortized O(1) because the array occasionally reallocates with extra room. Inserting or deleting at the front shifts every element, which is O(n).",
-      "misconception": "A Python list is not a linked list. Indexing is fast; it is front insertion and deletion that are expensive."
-    },
-    {
-      "type": "mcq",
-      "question": "What is the result of `[1, 2, 3] * 2`?",
-      "options": [
-        "[2, 4, 6]",
-        "A TypeError",
-        "[1, 2, 3, 2]",
-        "[1, 2, 3, 1, 2, 3]"
-      ],
-      "answer": 3,
-      "explanation": "The `*` operator repeats a list, so the three elements appear twice in order. Elementwise multiplication of values is a NumPy operation, not a Python list operation."
+      "explanation": "`append` always adds its argument as one single item, so passing a list nests that list inside. `extend` iterates its argument and adds each element separately. The sharp edge is that `extend` accepts any iterable, so extending with a string adds one character per item rather than the whole word.",
+      "misconception": "`append` does not unpack what you give it, and `extend` always does."
     },
     {
       "type": "scenario",
-      "scenario": "You write `grid = [[0] * 3] * 3` to make a 3 by 3 grid, then set `grid[0][0] = 1` and find that `grid[1][0]` and `grid[2][0]` also became 1.",
-      "question": "Why, and what is the correct construction?",
+      "concept": "aliasing",
+      "difficulty": "hard",
+      "scenario": "A function receives a list of records, assigns it to a second name with `working = records`, sorts and trims `working`, and returns it. The caller then finds that its own `records` has been reordered and shortened too.",
+      "question": "What happened?",
       "options": [
-        "`grid[0][0]` writes to every row by design. Use a NumPy array.",
-        "The grid is fine; the read is wrong.",
-        "Integers are mutable, so changing one changes all. Use tuples instead.",
-        "The outer `* 3` copied the same inner-list reference three times. Build independent rows with `[[0] * 3 for _ in range(3)]`."
+        "Returning a list from a function always replaces the caller's own version.",
+        "Assignment binds a second name to the same object, so both see the change.",
+        "Sorting a list secretly returns a reference back to the original list.",
+        "The function needed the `global` keyword in order to avoid this effect."
       ],
-      "answer": 3,
-      "explanation": "`[[0] * 3] * 3` repeats the SAME inner list object three times, so all rows are one shared list. Mutating one row mutates all. A list comprehension builds a fresh inner list per row, which is what you want.",
-      "misconception": "List repetition copies references, not deep structure. Repeating a list of mutable objects shares those objects."
+      "answer": 1,
+      "explanation": "Assignment never copies a list. It binds another name to the very same object, so an in-place operation through either name is visible through both. Take an explicit copy when the caller's data must stay intact. This is the most common mutation bug in Python, and it is why functions that modify their arguments in place should say so plainly or copy defensively.",
+      "misconception": "Assigning a list to a new name does not duplicate it; it creates a second label for one object."
+    },
+    {
+      "type": "scenario",
+      "concept": "copying",
+      "difficulty": "hard",
+      "scenario": "A list of rows, where each row is itself a list, is duplicated with `backup = rows.copy()`. Editing a value inside one of the rows of `backup` also changes that value in `rows`.",
+      "question": "Why does the copy not protect the inner rows?",
+      "options": [
+        "`copy` works only on lists of numbers and strings, never on nested lists.",
+        "`copy` has to be called as `copy(rows)` before it will take any effect at all.",
+        "`copy` rebuilds the outer list, but its slots still point at the same rows.",
+        "`copy` returns the original list unchanged unless a depth is supplied."
+      ],
+      "answer": 2,
+      "explanation": "A list stores references, so copying it produces a new outer list whose slots point at the same inner objects. That is a shallow copy: adding or removing whole rows in the copy is safe, but editing inside a row is not. When the nesting must be independent too, use a deep copy, which rebuilds the structure all the way down.",
+      "misconception": "A shallow copy protects only the top level; nested mutable objects are still shared."
     },
     {
       "type": "mcq",
-      "question": "Which is the idiomatic way to build a list of squares for 0 to 9?",
+      "concept": "sorting",
+      "difficulty": "medium",
+      "question": "How do `sorted(L)` and `L.sort()` differ?",
       "options": [
-        "`[range(10) * 2]`",
-        "`[x * x for x in range(10)]`",
-        "A for loop is the only correct way.",
-        "`list(x * x in range(10))`"
+        "`sorted` sorts in place, while `sort` hands back a new sorted list.",
+        "`sorted` returns a new list and leaves `L` alone; `sort` returns nothing.",
+        "They are identical, and one is simply a function and the other a method.",
+        "`sort` works only on numbers, while `sorted` accepts any sortable type."
       ],
       "answer": 1,
-      "explanation": "A list comprehension `[expr for x in iterable]` is the idiomatic, readable, and fast way to build a derived list. The other options are not valid Python for this task."
+      "explanation": "`sorted` is non-destructive and hands back a new list, so the original ordering survives. `sort` rearranges the list in place and returns `None`, which means writing `L = L.sort()` silently replaces your data with nothing. Prefer `sorted` whenever the original order still matters, which in data work it usually does.",
+      "misconception": "`sort` returns `None`, so assigning its result discards the list."
+    },
+    {
+      "type": "scenario",
+      "concept": "zip",
+      "difficulty": "medium",
+      "scenario": "A script pairs a list of 1,000 feature values with a list of 950 labels using `zip`, builds a combined list, and reports 950 rows with no error raised.",
+      "question": "What has happened to the other 50 values?",
+      "options": [
+        "They were paired with `None` placeholders in the missing label slots.",
+        "They were silently dropped, because `zip` stops at the shorter input.",
+        "They raised a warning that the logging configuration suppressed.",
+        "They were appended at the end of the combined list without labels."
+      ],
+      "answer": 1,
+      "explanation": "`zip` pairs by position and halts as soon as any input is exhausted, so a length mismatch quietly truncates rather than failing. That silence is dangerous when features and labels come from different sources, because the pipeline keeps running on misaligned data. Assert that the lengths match before zipping, or use a variant that raises on mismatch.",
+      "misconception": "`zip` does not warn about unequal lengths; it just stops early."
+    },
+    {
+      "type": "mcq",
+      "concept": "memory-model",
+      "difficulty": "medium",
+      "question": "A Python list is described as a referential array. What does that explain?",
+      "options": [
+        "Why a list must hold items that all share one single declared type.",
+        "Why a list cannot grow in size once it has first been created.",
+        "Why indexing a list is slower than scanning right through it.",
+        "Why a list can mix types freely, and why it costs extra memory."
+      ],
+      "answer": 3,
+      "explanation": "Each slot of a list holds the address of an object rather than the object itself. Since an address can point at anything, one list can hold integers, strings, other lists, even functions. The cost is that both the values and the table of addresses occupy memory, so a list is heavier than a C-style array that packs values directly into one block.",
+      "misconception": "The flexibility and the memory overhead are two consequences of the same storage decision."
+    },
+    {
+      "type": "mcq",
+      "concept": "comprehension",
+      "difficulty": "easy",
+      "question": "What does `[i for i in range(1, 21) if i % 5 == 0]` produce?",
+      "options": [
+        "`[5, 10, 15, 20]`",
+        "`[1, 5, 10, 15, 20]`",
+        "`[0, 5, 10, 15]`",
+        "`[5, 10, 15]`"
+      ],
+      "answer": 0,
+      "explanation": "The comprehension walks 1 through 20 and keeps only the values whose remainder on division by 5 is zero. Read it left to right as collect this expression, for each item in this range, when this condition holds. Besides being shorter than the equivalent loop with `append`, a comprehension is optimised by Python and is usually faster.",
+      "misconception": "The range excludes its stop value, so 20 is included here only because the range ends at 21."
+    },
+    {
+      "type": "mcq",
+      "concept": "nested-access",
+      "difficulty": "easy",
+      "question": "For `L = [[1, 2, 3], [4, 5, 6]]`, what does `L[1][0]` return?",
+      "options": [
+        "`1`",
+        "`[4, 5, 6]`",
+        "`4`",
+        "`2`"
+      ],
+      "answer": 2,
+      "explanation": "The first bracket selects the item at position 1 of the outer list, which is the second inner list, and the second bracket then takes position 0 of that inner list. Nested access reads outside in, one bracket per dimension, which is the same pattern that later indexes rows and columns of a two-dimensional array.",
+      "misconception": "The leftmost index applies to the outer list, not the innermost one."
+    },
+    {
+      "type": "mcq",
+      "concept": "deleting-items",
+      "difficulty": "medium",
+      "question": "You know the value you want gone but not its position. Which removal tool fits?",
+      "options": [
+        "`del L[i]`, because deletion always needs a position index.",
+        "`L.clear()`, followed by rebuilding the list without that one item.",
+        "`L.pop()`, which searches the list for the matching value.",
+        "`L.remove(x)`, which deletes the first item equal to that value."
+      ],
+      "answer": 3,
+      "explanation": "`remove` searches by value and deletes the first match, which suits data generated at runtime whose layout you cannot predict. `del` and `pop` both work by position, and `pop` additionally returns the item it removed, which is what makes it useful for consuming a list as a stack or queue. `clear` empties the list entirely.",
+      "misconception": "`remove` takes a value while `pop` and `del` take a position; mixing them up removes the wrong item."
+    },
+    {
+      "type": "mcq",
+      "concept": "editing-items",
+      "difficulty": "medium",
+      "question": "Which operation works on a list but raises an error on a string?",
+      "options": [
+        "Reading a single position back out with a bracket index expression",
+        "Assigning to a position, such as replacing the first element",
+        "Taking a slice that spans a range of several list positions",
+        "Testing membership of a value using the `in` operator keyword"
+      ],
+      "answer": 1,
+      "explanation": "Lists are mutable, so assigning to an index or to a slice overwrites items in place. Strings are immutable and reject item assignment outright. Reading, slicing, and membership testing are shared behaviours of sequences and work on both, which is why so much of what you learn about one sequence type transfers to the others.",
+      "misconception": "Mutability governs writing, not reading; both types read the same way."
+    },
+    {
+      "type": "scenario",
+      "concept": "membership-cost",
+      "difficulty": "medium",
+      "scenario": "A cleaning step checks, for each of 100,000 incoming records, whether its identifier appears in a list of 50,000 known identifiers. The step is extremely slow.",
+      "question": "What is the cost problem, given how membership works on a list?",
+      "options": [
+        "Membership scans the list, so the total work is about five billion comparisons.",
+        "Membership on a list is constant time, so the slowness is in reading the records.",
+        "The list should be sorted first, which would make membership constant time.",
+        "The problem is memory and not time, because a list stores only addresses."
+      ],
+      "answer": 0,
+      "explanation": "A list has no index over its values, so `in` walks it until it finds a match or runs out, which is linear in the list's length. Repeating that for every incoming record multiplies the two sizes together. Converting the known identifiers to a set first makes each lookup effectively constant, turning the whole step from quadratic-feeling work into something linear.",
+      "misconception": "Direct indexing on a list is constant time, but searching it by value is not."
+    },
+    {
+      "type": "mcq",
+      "concept": "loop-styles",
+      "difficulty": "medium",
+      "question": "When is an index-wise loop over `range(len(L))` genuinely preferable to looping over the items directly?",
+      "options": [
+        "Always, because index-wise iteration is faster than the item-wise form.",
+        "Never, since item-wise iteration can do absolutely everything it can.",
+        "When the position matters, for example to write a value back into a slot.",
+        "Only when the list holds numbers rather than strings or any other objects."
+      ],
+      "answer": 2,
+      "explanation": "Item-wise iteration is the idiomatic default and reads better, because it says what you mean. The index form earns its place when the position carries information, such as assigning a new value into that slot or reporting which row failed. When you need both the position and the item, enumerating the list gives you the pair without manual bookkeeping.",
+      "misconception": "The index-wise loop is not the faster option; it is the one that gives you positions."
+    },
+    {
+      "type": "mcq",
+      "concept": "list-vs-array",
+      "difficulty": "easy",
+      "question": "What are the two main ways a Python list differs from a C-style array?",
+      "options": [
+        "A list is both faster to work with and lighter in memory use.",
+        "A list grows dynamically rather than being fixed, and it mixes types.",
+        "A list cannot be indexed at all, although it can still be sliced freely.",
+        "A list stores its values directly, while an array stores addresses."
+      ],
+      "answer": 1,
+      "explanation": "An array is declared with a fixed size and requires every element to share one type. A list grows as you add to it and tolerates any mixture of types. The trade is performance: because the list stores addresses rather than packed values, it is slower and uses more memory, which is exactly why numerical work moves to compact typed arrays.",
+      "misconception": "The flexibility of a list is paid for in speed and memory, not given away free."
+    },
+    {
+      "type": "card",
+      "concept": "mutability",
+      "difficulty": "medium",
+      "question": "Lists are mutable and strings are immutable. Give one capability and one hazard that mutability creates.",
+      "answer": "The capability is in-place change: you can append, insert, overwrite a position or a slice, and delete items, so a list can be built up and edited without rebuilding it each time, which is why it is the natural accumulator in a loop. The hazard is sharing: assigning a list to another name binds a second label to the same object, so a change made through one name is visible through the other, and a function that edits its argument quietly alters the caller's data.",
+      "explanation": "The same property has a third consequence that arrives with dictionaries and sets: because a mutable object's contents can change, it cannot be hashed reliably, so a list cannot serve as a dictionary key while an immutable tuple can."
     }
   ]
 }

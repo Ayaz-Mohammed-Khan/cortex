@@ -1,44 +1,249 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A test returns p equals 0.03. A colleague says this means there is a 3 percent chance the null hypothesis is true.",
-      "question": "What does the p-value actually mean?",
+      "type": "mcq",
+      "concept": "p-value-definition",
+      "difficulty": "hard",
+      "question": "What is the precise definition of a p-value?",
       "options": [
-        "It is the chance the experiment was run correctly.",
-        "It is the probability the null is true, so the colleague is right.",
-        "It is the probability the alternative is true.",
-        "It is the probability of observing data at least as extreme as this, assuming the null is true. It is not the probability that the null is true."
+        "The probability that the null hypothesis is true, given the data observed.",
+        "The chance of a sample this extreme or more so, assuming the null is true.",
+        "The probability that the alternate hypothesis is true, given the data observed.",
+        "The proportion of the sample that directly contradicts the null hypothesis."
       ],
-      "answer": 3,
-      "explanation": "A p-value is computed under the assumption that the null holds, measuring how surprising the data would be in that world. It says nothing directly about the probability of either hypothesis. Treating it as P(null is true) is the most common and consequential misreading.",
-      "misconception": "A p-value is not the probability the null is true. It is the probability of the data (or more extreme) given the null."
-    },
-    {
-      "type": "scenario",
-      "scenario": "You compare the mean conversion of the same users before and after a UI change, with each user measured twice.",
-      "question": "Which t-test fits, and why?",
-      "options": [
-        "An independent two-sample t-test, because there are two groups.",
-        "A one-sample t-test against zero on the raw after-values.",
-        "A paired (dependent) t-test, because the two measurements come from the same units, so you analyze the within-user differences.",
-        "A chi-square test, because the data is numerical."
-      ],
-      "answer": 2,
-      "explanation": "The same users measured twice are paired, so the observations are dependent. A paired t-test works on each user's before-minus-after difference, which removes between-user variation and gives more power than treating the groups as independent.",
-      "misconception": "Repeated measurements on the same subjects are not independent groups. Pairing them is both correct and more powerful."
+      "answer": 1,
+      "explanation": "Every part of the definition matters, and the conditional clause most of all: the probability is computed in a world where the null holds. More extreme means providing more evidence against the null. So a small value says the observed result would be surprising if the null were true, which is why it counts as evidence against it.",
+      "misconception": "The p-value is computed assuming the null is true, so it cannot be the probability that the null is true."
     },
     {
       "type": "mcq",
-      "question": "Why are p-values often preferred over a simple reject-or-not rejection-region decision?",
+      "concept": "p-value-definition",
+      "difficulty": "hard",
+      "question": "A test returns a p-value of 0.03. Which statement is correct?",
       "options": [
-        "A rejection region is more informative than a p-value.",
-        "A p-value reports how strong the evidence is on a continuous scale, not just a binary verdict at one threshold.",
-        "P-values prove the alternative hypothesis.",
-        "P-values remove the need to choose any significance level ever."
+        "There is a 3 percent chance that the null hypothesis is in fact the true one.",
+        "There is a 97 percent chance that the alternate hypothesis is the true one.",
+        "If the null were true, a result this extreme would occur about 3 percent of the time.",
+        "The size of the effect that was actually observed in the data is 3 percent."
+      ],
+      "answer": 2,
+      "explanation": "The value describes how unusual the data would be under the null, not how likely either hypothesis is, and it says nothing at all about the size or importance of the effect. Reading it as the probability of a hypothesis inverts the conditioning, which is the single most common error in applied statistics. A tiny p-value can accompany an effect far too small to matter in practice.",
+      "misconception": "Statistical significance is a statement about surprise under the null, not about the probability of a hypothesis or the magnitude of an effect."
+    },
+    {
+      "type": "mcq",
+      "concept": "p-value-intuition",
+      "difficulty": "medium",
+      "question": "Tossing a coin 100 times yields 53 heads, and the probability of 53 or more heads for a fair coin is about 0.30. What does this indicate?",
+      "options": [
+        "Weak evidence against fairness, since this happens often for a fair coin.",
+        "Strong evidence that the coin is rigged, on the grounds that 53 exceeds 50.",
+        "That the coin is definitely fair, since the probability is well above 0.05.",
+        "That the whole experiment should be repeated until a significant result appears."
+      ],
+      "answer": 0,
+      "explanation": "A fair coin produces 53 or more heads roughly three times in ten, so the result is entirely unremarkable and provides little reason to doubt fairness. Getting 60 heads would give about 0.02 and 80 heads almost zero, which is how the measure expresses increasing strength of evidence. Note also that a large p-value does not establish fairness, and repeating until something turns significant would invalidate the whole procedure.",
+      "misconception": "A large p-value means the data is unsurprising under the null, not that the null is confirmed."
+    },
+    {
+      "type": "mcq",
+      "concept": "decision-rule",
+      "difficulty": "easy",
+      "question": "What is the decision rule using a p-value?",
+      "options": [
+        "Reject the null when the p-value is greater than the significance level.",
+        "Reject the null when the p-value is at or below the significance level.",
+        "Reject the null whenever the p-value turns out to exceed one half.",
+        "Reject the null only in the case where the p-value is exactly zero."
       ],
       "answer": 1,
-      "explanation": "The rejection-region approach gives only a yes or no at a fixed cutoff. A p-value quantifies the strength of evidence against the null continuously, so a reader can judge a result near the boundary and apply their own threshold. It conveys more information than a bare decision."
+      "explanation": "The significance level is the threshold of surprise you fixed in advance, so a p-value at or below it means the data is sufficiently unlikely under the null to warrant rejecting it. Without a pre-chosen level, a rough scale applies: below 0.01 is strong evidence, between 0.01 and 0.05 moderate, between 0.05 and 0.10 weak and worth further investigation, and above 0.10 insufficient.",
+      "misconception": "Small p-values favour rejection; large ones do not."
+    },
+    {
+      "type": "mcq",
+      "concept": "tailed-p-values",
+      "difficulty": "medium",
+      "question": "How does computing a p-value differ between a one-tailed and a two-tailed test?",
+      "options": [
+        "A one-tailed p-value is doubled, while a two-tailed one is used directly.",
+        "Both use the single tail area, differing only in which of the tails it is.",
+        "A two-tailed p-value is halved to account for there being a second tail.",
+        "A one-tailed test uses the single tail area; a two-tailed one doubles it."
+      ],
+      "answer": 3,
+      "explanation": "A directional alternate concentrates all the scepticism in one tail, so the area beyond the statistic is the answer. A non-directional alternate treats an equally extreme departure in the opposite direction as equally damning, so the area is doubled. Forgetting to double is a silent error that makes a result look twice as significant as it is.",
+      "misconception": "The doubling applies to the two-tailed case, which is the more conservative of the two."
+    },
+    {
+      "type": "scenario",
+      "concept": "z-test-p-value",
+      "difficulty": "medium",
+      "scenario": "A factory's output averaged 50 units with a population standard deviation of 5. After training, a sample of 30 gives a mean of 53, producing a test statistic of about 3.28 against the alternate that the mean has increased.",
+      "question": "What is the approximate p-value and the conclusion at a five percent level?",
+      "options": [
+        "About 0.0005, so reject the null: the training increased output.",
+        "About 0.0005, so fail to reject the null, as the value is below the level.",
+        "About 0.05, so the result is sitting exactly on the borderline of the level.",
+        "About 0.114, so fail to reject the null and conclude nothing has changed."
+      ],
+      "answer": 0,
+      "explanation": "Because the alternate is directional, the p-value is the single upper-tail area beyond 3.28, which is roughly five in ten thousand. That is far below the five percent threshold, so the null is rejected. Note the direction of the comparison: a very small p-value is strong evidence against the null, so it supports rejection rather than the reverse.",
+      "misconception": "A p-value far below the threshold is the strongest case for rejecting, not for retaining, the null."
+    },
+    {
+      "type": "scenario",
+      "concept": "z-test-p-value",
+      "difficulty": "medium",
+      "scenario": "A watchdog tests whether packets differ from a claimed 50 grams and obtains a statistic of about negative 1.58. The area to the left of that value is about 0.057.",
+      "question": "What is the p-value and the conclusion at a five percent level?",
+      "options": [
+        "0.057, so reject the null, since the value is fairly close to the threshold.",
+        "0.114, doubled for the two-tailed alternate, so fail to reject the null.",
+        "0.0285, halved for the two tails, so the null hypothesis is duly rejected.",
+        "0.943, the complement of the tail area, so fail to reject the null hypothesis."
+      ],
+      "answer": 1,
+      "explanation": "The alternate claims only a difference, so the test is two-tailed and the single tail area is doubled to about 0.114. Since that exceeds five percent, there is insufficient evidence that the weight departs from the claim. Had the one-sided area been used by mistake, the result would have looked borderline significant, which illustrates why the number of tails must be settled before computing anything.",
+      "misconception": "The two-tailed p-value is twice the one-sided area, not half of it."
+    },
+    {
+      "type": "mcq",
+      "concept": "p-value-advantage",
+      "difficulty": "medium",
+      "question": "Why is the p-value approach preferred over the rejection-region approach?",
+      "options": [
+        "It does away with the need to choose any significance level in advance.",
+        "It works for a far wider range of underlying distributions than the other.",
+        "It conveys the strength of the evidence, so 0.001 differs from 0.049.",
+        "It eliminates Type I errors from the testing procedure altogether."
+      ],
+      "answer": 2,
+      "explanation": "Both approaches reach the same verdict at a given threshold, but one reduces the evidence to a yes or no while the other reports it on a continuum. That extra information matters for judgement, since a result that barely clears the line deserves less confidence than one that clears it by orders of magnitude. The error rates and the need for a threshold are unchanged.",
+      "misconception": "The p-value adds information about strength; it does not remove the need for a threshold or reduce error rates."
+    },
+    {
+      "type": "mcq",
+      "concept": "t-vs-z",
+      "difficulty": "medium",
+      "question": "What distinguishes a t-test from a Z-test?",
+      "options": [
+        "A t-test is for proportions, whereas a Z-test is for the means of a sample.",
+        "A t-test is used when the population standard deviation is unknown.",
+        "A t-test needs a sample of at least 30, while a Z-test has no such need.",
+        "A t-test is always two-tailed, while a Z-test is always a one-tailed test."
+      ],
+      "answer": 1,
+      "explanation": "The structure of the two is otherwise the same. Estimating the spread from the sample introduces extra uncertainty, which the heavier-tailed t-distribution accounts for, and that correction is what makes the t-test usable on small samples. Since the population spread is rarely known in practice, the t-test is the common case.",
+      "misconception": "The deciding factor is whether the population spread is known, not the sample size or the number of tails."
+    },
+    {
+      "type": "mcq",
+      "concept": "one-sample-t",
+      "difficulty": "medium",
+      "question": "A sample of 25 chocolate bars has a mean of 49.7 grams and a sample standard deviation of 1.2, tested against a claimed mean of 50. What statistic and degrees of freedom apply?",
+      "options": [
+        "A statistic of about negative 1.25 with 24 degrees of freedom.",
+        "A statistic of about negative 0.25 with 25 degrees of freedom.",
+        "A statistic of about negative 6.25 with 24 degrees of freedom.",
+        "A statistic of about negative 1.25 with 25 degrees of freedom."
+      ],
+      "answer": 0,
+      "explanation": "The numerator is the difference of negative 0.3 and the denominator is the sample standard deviation divided by the square root of 25, which is 0.24, giving about negative 1.25. Degrees of freedom are one less than the sample size. The resulting two-tailed p-value exceeds five percent, so the claim of fifty grams would not be rejected.",
+      "misconception": "The denominator is the standard error, so the sample size enters through its square root."
+    },
+    {
+      "type": "mcq",
+      "concept": "independent-two-sample-t",
+      "difficulty": "medium",
+      "question": "For an independent two-sample t-test comparing two groups of 30, what are the degrees of freedom and the assumptions?",
+      "options": [
+        "30 degrees of freedom, assuming only that the observations are independent.",
+        "29 degrees of freedom, assuming the paired differences are normally distributed.",
+        "58 degrees of freedom, assuming independence, normality, and equal variances.",
+        "60 degrees of freedom, assuming nothing at all beyond simple random sampling."
+      ],
+      "answer": 2,
+      "explanation": "Degrees of freedom are the combined sample sizes less two, one for each estimated mean, giving 58 here. The test also requires that observations be independent, that each group be approximately normal, and that the two groups share a common variance. Normality of differences is the assumption of the paired test, which applies to a different design entirely.",
+      "misconception": "Equal variance across groups is a genuine requirement of this test, not an optional nicety."
+    },
+    {
+      "type": "scenario",
+      "concept": "levene-welch",
+      "difficulty": "hard",
+      "scenario": "Before comparing two independent groups, an analyst runs a test for equal variances and obtains a small p-value, indicating the variances differ.",
+      "question": "What should they do?",
+      "options": [
+        "Proceed with the standard independent t-test, as it is robust to the difference.",
+        "Use Welch's t-test instead, which drops the equal-variance assumption.",
+        "Combine the two groups together and then run a single one-sample test.",
+        "Transform both of the groups until the variances match, and only then proceed."
+      ],
+      "answer": 1,
+      "explanation": "A small p-value from the variance test rejects its null of equal variances, so the standard test's assumption fails and its results would be unreliable. The Welch variant relaxes exactly that assumption and is the standard remedy, which is why many practitioners use it by default. Pooling the groups would discard the comparison that was the point of the exercise.",
+      "misconception": "A failed assumption calls for a different test, not for proceeding regardless."
+    },
+    {
+      "type": "scenario",
+      "concept": "paired-t",
+      "difficulty": "medium",
+      "scenario": "Fifteen people have their weight recorded before and after a programme, and the analyst wants to know whether weight fell.",
+      "question": "Which test applies, and what does it actually operate on?",
+      "options": [
+        "An independent two-sample t-test, treating before and after as two groups.",
+        "A one-sample t-test on the after readings against the before readings' mean.",
+        "A paired t-test, which tests whether each person's mean difference is zero.",
+        "A test for equal variances, since the two sets come from the same people."
+      ],
+      "answer": 2,
+      "explanation": "The two measurements are linked by person, so treating them as independent groups discards that pairing and the extra precision it provides. The paired test reduces each pair to a single difference and then tests those differences, which is also why the normality assumption applies to the differences rather than to either set of readings. Matched designs such as siblings are handled the same way.",
+      "misconception": "Related measurements must be paired; treating them as independent throws away the design's advantage."
+    },
+    {
+      "type": "mcq",
+      "concept": "shapiro-wilk",
+      "difficulty": "hard",
+      "question": "A normality check returns a p-value of 0.42. What does this mean, given that the test's null hypothesis is that the data is normally distributed?",
+      "options": [
+        "The data is, loosely speaking, about 42 percent of the way to being normal.",
+        "The null of normality cannot be rejected, so treat the data as approximately normal.",
+        "The data is significantly non-normal, on the grounds that the value exceeds 0.05.",
+        "The normality test has failed and ought to be repeated on a larger sample first."
+      ],
+      "answer": 1,
+      "explanation": "The logic is inverted relative to most tests, because here the null is the assumption you hope to retain. A large p-value means there is no evidence against normality, so proceeding with a t-test is reasonable, while a small one would signal a problem. As always, failing to reject is not proof, so a large value permits the assumption rather than confirming it.",
+      "misconception": "For a normality check, a large p-value is the reassuring outcome, which reverses the usual reading."
+    },
+    {
+      "type": "mcq",
+      "concept": "choosing-a-test",
+      "difficulty": "medium",
+      "question": "Which question decides between the independent and the paired two-sample t-test?",
+      "options": [
+        "Whether the two sets of measurements are related, such as from the same people.",
+        "Whether the two groups being compared happen to have the same sample size.",
+        "Whether the alternate hypothesis is directional or merely claims a difference.",
+        "Whether the population standard deviation is a known quantity or an unknown one."
+      ],
+      "answer": 0,
+      "explanation": "Related measurements, typically before and after on the same subjects or matched individuals, call for the paired test, while separate unrelated groups call for the independent one. Comparing a single sample against a known population mean is the one-sample case. Equal sample sizes are neither required for the independent test nor sufficient to justify pairing.",
+      "misconception": "Pairing is a property of the study design, not of the sample sizes."
+    },
+    {
+      "type": "card",
+      "concept": "p-value-definition",
+      "difficulty": "hard",
+      "question": "Define the p-value precisely, state the decision rule, and name the two things a p-value does not tell you.",
+      "answer": "The p-value is the probability of obtaining a sample as extreme as, or more extreme than, the one observed, computed under the assumption that the null hypothesis is true, where more extreme means providing more evidence against the null. The decision rule is to reject the null when the p-value is less than or equal to the pre-chosen significance level. It does not give the probability that the null hypothesis is true, since it is computed assuming the null, and it says nothing about the size or practical importance of the effect, since a very small p-value can accompany a trivially small difference.",
+      "explanation": "Both omissions matter in practice. Treating it as the probability of a hypothesis inverts the conditioning, and treating it as a measure of effect size leads teams to ship changes that are statistically detectable but commercially irrelevant, which is why an effect estimate and interval should be reported alongside it."
+    },
+    {
+      "type": "card",
+      "concept": "choosing-a-test",
+      "difficulty": "medium",
+      "question": "Name the three t-tests, the situation each addresses, and the distinctive assumption or detail of each.",
+      "answer": "The one-sample t-test compares a single sample's mean against a known population mean, assuming normality, independent observations, and an unknown population standard deviation. The independent two-sample t-test compares the means of two separate groups, assuming independence, normality within each group, and equal variances, with degrees of freedom equal to the combined sizes less two, and Welch's variant used when the equal-variance assumption fails. The paired two-sample t-test compares two related measurements on the same subjects, operating on each pair's difference and assuming those differences are normal.",
+      "explanation": "The deciding question is the structure of the data rather than anything about the numbers: one sample against a claim, two unrelated groups, or two readings per subject. Checking normality beforehand, typically with a dedicated normality test whose null is that the data is normal, is the standard preliminary in all three cases."
     }
   ]
 }

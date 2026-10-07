@@ -2,54 +2,217 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What does `7 // 2` and `7 % 2` evaluate to in Python?",
+      "concept": "arithmetic",
+      "difficulty": "easy",
+      "question": "What does `print(7 // 2, 7 % 2, 7 / 2)` output?",
       "options": [
-        "3 and 0",
-        "3 and 1",
-        "4 and 1",
-        "3.5 and 1"
+        "3.5 1 3.5",
+        "3 1 3.5",
+        "3 1 3",
+        "4 1 3.5"
       ],
       "answer": 1,
-      "explanation": "`//` is floor division, so 7 divided by 2 floored is 3. `%` is the remainder, which is 1. Regular `/` would give the float 3.5."
+      "explanation": "Floor division discards the fractional part and gives 3, the remainder of 7 divided by 2 is 1, and true division always produces a float, so the last value is 3.5. The float result matters in practice: a single slash returns 2.0 rather than 2 even when the division is exact, so an index or a count built that way needs floor division or an explicit conversion.",
+      "misconception": "Division with a single slash always yields a float, even when the result is a whole number."
     },
     {
       "type": "mcq",
-      "question": "Why does `0.1 + 0.2 == 0.3` return False in Python?",
+      "concept": "arithmetic",
+      "difficulty": "medium",
+      "question": "For a positive integer `n`, which pair of expressions gives its last digit and then the number with that digit removed?",
       "options": [
-        "The equality operator does not work on floats.",
-        "Python rounds all floats to one decimal place.",
-        "Floating-point numbers are stored in binary, so 0.1, 0.2, and 0.3 cannot be represented exactly, leaving a tiny rounding error.",
-        "0.3 is interpreted as a string."
+        "`n // 10` and `n % 10`",
+        "`n % 1` and `n // 1`",
+        "`n % 10` and `n // 10`",
+        "`n / 10` and `n % 10`"
       ],
       "answer": 2,
-      "explanation": "Floats use binary IEEE 754 representation, and 0.1 and 0.2 have no exact binary form, so their sum differs from 0.3 by about 1e-16. Compare floats with a tolerance, for example `math.isclose(a, b)`, rather than `==`.",
-      "misconception": "Do not test float equality with `==`. Use a tolerance, because exact decimal values rarely survive binary storage."
+      "explanation": "The remainder after dividing by 10 is the final digit, and floor division by 10 shifts the number one place right. Applying the pair repeatedly walks through every digit. The same two operators split a flat position into a row and a column, or an item count into whole pages plus a remainder, which is why they turn up throughout batching and pagination code.",
+      "misconception": "Order matters here: the remainder extracts, and the floor division shifts."
+    },
+    {
+      "type": "mcq",
+      "concept": "logical-vs-bitwise",
+      "difficulty": "medium",
+      "question": "The word operators `and`, `or`, and `not` are easy to confuse with the symbols `&`, `|`, and `~`. What is the real difference?",
+      "options": [
+        "They are interchangeable, so the symbol forms are simply a shorter way to write the same three operations.",
+        "The symbols work only on strings and sequences, while the word forms work on numbers alone.",
+        "The word forms are faster, optimised versions of the symbols and behave identically otherwise.",
+        "The word forms combine whole boolean values, while the symbols combine the individual bits of integers."
+      ],
+      "answer": 3,
+      "explanation": "`and`, `or`, and `not` evaluate operands as single true or false values. The symbols line up two numbers bit by bit and combine each pair. The distinction becomes a daily concern later in data work, because the bitwise symbols are the ones that libraries overload to combine conditions element by element across a column.",
+      "misconception": "The two families are not stylistic alternatives; they operate at different levels."
     },
     {
       "type": "scenario",
-      "scenario": "A loop should stop at the first negative number but keep processing the rest of a cleaning routine for non-negatives.",
-      "question": "Which pair of statements fits: stop the whole loop early, versus skip just this iteration?",
+      "concept": "logical-vs-bitwise",
+      "difficulty": "hard",
+      "scenario": "While filtering a table of records, an analyst combines two conditions with the word `and` and gets an error complaining that the truth value of a multi-element object is ambiguous.",
+      "question": "What is going wrong?",
       "options": [
-        "`break` stops the loop entirely; `continue` skips to the next iteration.",
-        "`pass` stops the loop; `break` skips an iteration.",
-        "`continue` stops the loop entirely; `break` skips to the next iteration.",
-        "`return` stops the loop; `continue` restarts it."
+        "The two conditions must be converted with `bool()` before the word operators will accept them.",
+        "`and` needs one true or false value, and a column of many values has none, so `&` is required.",
+        "The comparisons are missing parentheses, so the parser groups the expression the wrong way.",
+        "A single filter expression can hold only one condition, so the two must be applied in turn."
       ],
-      "answer": 0,
-      "explanation": "`break` exits the enclosing loop immediately. `continue` abandons the current iteration and moves to the next. `pass` does nothing at all and is only a syntactic placeholder.",
-      "misconception": "`pass` is not a control-flow jump. It is a no-op placeholder where a statement is required."
+      "answer": 1,
+      "explanation": "The word operators reduce an operand to one true or false value. A column holding thousands of comparison results has no single truth value, so the library refuses to guess and raises instead. Element-wise combination uses `&` for and, `|` for or, and `~` for not. Keep each comparison in parentheses, because `&` binds more tightly than a comparison operator does.",
+      "misconception": "`and` is not the element-wise form of `&`. On a column or an array you need the bitwise symbol."
     },
     {
       "type": "mcq",
-      "question": "What does `range(1, 10, 2)` produce?",
+      "concept": "relational",
+      "difficulty": "easy",
+      "question": "What is the difference between `x = 5` and `x == 5`?",
       "options": [
-        "1, 3, 5, 7, 9",
-        "2, 4, 6, 8, 10",
-        "1, 2, 3, ..., 10",
-        "1, 3, 5, 7, 9, 11"
+        "They are equivalent, and the double form is simply the more explicit way of writing the same thing.",
+        "`x == 5` stores 5 in `x` and then returns the stored value, which is why it prints 5.",
+        "`x = 5` stores 5 in `x`, while `x == 5` asks whether `x` equals 5 and evaluates to a boolean.",
+        "`x = 5` compares the two values, and `x == 5` is the form that performs the assignment."
+      ],
+      "answer": 2,
+      "explanation": "A single equals sign assigns: it binds the value on the right to the name on the left and performs no comparison. A double equals sign is a test that evaluates to `True` or `False`. Writing an assignment where a comparison belongs is a classic bug, and Python guards against the worst case by rejecting a bare assignment inside an `if` condition.",
+      "misconception": "One equals sign never compares, and two never assign."
+    },
+    {
+      "type": "scenario",
+      "concept": "branching-order",
+      "difficulty": "medium",
+      "scenario": "A grading routine checks, in this order, whether the score is above 40 and returns a pass, then whether it is above 70 and returns a merit, then whether it is above 90 and returns a distinction. Every student scoring above 40 is graded as a plain pass.",
+      "question": "Why does this happen, and what is the fix?",
+      "options": [
+        "An `elif` branch runs only when the condition before it raised an error rather than returning false.",
+        "Branches are tried top to bottom and the first true one wins, so the widest test must come last.",
+        "The three conditions have to be joined with `and` so that all of them are evaluated together.",
+        "A branch chain may contain only one `elif`, so the later two conditions are silently ignored."
+      ],
+      "answer": 1,
+      "explanation": "A branch chain stops at the first condition that holds. Since a score above 40 is also true for 95, the first test captures everyone and the later branches can never be reached. Order the tests from most specific to least, checking above 90 first, or give each band an explicit upper bound. Overlapping conditions in the wrong order is one of the most common logic bugs in branching code.",
+      "misconception": "A branch chain does not select the best-matching condition; it selects the first true one."
+    },
+    {
+      "type": "mcq",
+      "concept": "indentation",
+      "difficulty": "easy",
+      "question": "In Python, what marks which lines belong inside an `if` block?",
+      "options": [
+        "A pair of curly braces wrapped around the lines, as in C and Java.",
+        "A semicolon terminating the final line that belongs to the block.",
+        "Indentation, which is part of the syntax rather than mere styling.",
+        "A closing `end if` keyword placed on the line after the block."
+      ],
+      "answer": 2,
+      "explanation": "Indentation itself is the grouping syntax, so a line shifted back out of the block runs no matter what the condition evaluated to. This is why mis-indenting a single line quietly changes a program's behaviour instead of raising an error, and why consistent indentation is a correctness concern rather than a matter of taste.",
+      "misconception": "Indentation in Python is not cosmetic; it determines what the code means."
+    },
+    {
+      "type": "mcq",
+      "concept": "modules",
+      "difficulty": "easy",
+      "question": "What does `import numpy as np` accomplish?",
+      "options": [
+        "It loads the NumPy module and binds it to the shorter local name `np`.",
+        "It imports only a single function called `np` out of the NumPy module.",
+        "It installs NumPy from the package index if the package is not present.",
+        "It copies NumPy's contents into the current file so that no prefix is needed."
       ],
       "answer": 0,
-      "explanation": "`range(start, stop, step)` begins at 1, steps by 2, and stops before 10, giving 1, 3, 5, 7, 9. The stop value is exclusive, so 10 is never produced."
+      "explanation": "The `as` clause renames a module locally, so the very same module object becomes reachable as `np`. Besides being shorter, it is a shared convention: `np` means NumPy and `pd` means pandas to every reader of data science code. Importing never installs anything, so a missing package raises an error about the module not being found.",
+      "misconception": "`import` does not install a package; installation happens separately through a package manager."
+    },
+    {
+      "type": "scenario",
+      "concept": "while-loop",
+      "difficulty": "medium",
+      "scenario": "A script sets `i = 1`, then runs `while i < 11:` and prints a value inside the body. The program never stops and keeps printing the same number.",
+      "question": "What is missing?",
+      "options": [
+        "The comparison should be less-than-or-equal, because a strict less-than can never become false.",
+        "Nothing in the body changes `i`, so the condition never becomes false; the loop needs `i += 1`.",
+        "A `while` loop needs an `else` block, and that block is what tells the loop to stop.",
+        "`i` must be given a declared integer type before the loop is allowed to compare it."
+      ],
+      "answer": 1,
+      "explanation": "A `while` loop re-tests the same condition on every pass, so if no statement in the body moves `i` toward the limit, the condition stays true indefinitely. Forgetting the update is the most common loop bug there is. The habit worth building is to confirm, before running, that something inside the body changes the value the condition depends on.",
+      "misconception": "A loop does not advance on its own; the body has to move the condition toward becoming false."
+    },
+    {
+      "type": "mcq",
+      "concept": "for-range",
+      "difficulty": "medium",
+      "question": "What does `list(range(10, 0, -2))` produce?",
+      "options": [
+        "[10, 8, 6, 4, 2, 0]",
+        "[8, 6, 4, 2, 0]",
+        "An empty list, because the step is negative.",
+        "[10, 8, 6, 4, 2]"
+      ],
+      "answer": 3,
+      "explanation": "`range` includes its start and excludes its stop, and a negative step counts downward, so it yields 10, 8, 6, 4, and 2, halting before it reaches 0. The excluded stop is the origin of most off-by-one errors: `range(n)` produces exactly n values, running from 0 up to n minus 1.",
+      "misconception": "The stop value is never included, whichever direction the step runs in."
+    },
+    {
+      "type": "mcq",
+      "concept": "loop-control",
+      "difficulty": "medium",
+      "question": "Inside a loop, what do `break`, `continue`, and `pass` each do?",
+      "options": [
+        "`break` skips one iteration, `continue` leaves the loop, and `pass` restarts the loop from its start.",
+        "All three leave the loop immediately, and they differ only in the value each one returns.",
+        "`pass` leaves the loop, `break` skips a single iteration, and `continue` does nothing at all.",
+        "`break` leaves the loop, `continue` skips to the next iteration, and `pass` does nothing."
+      ],
+      "answer": 3,
+      "explanation": "`break` abandons the loop, which is what a search does the moment it finds a match. `continue` ends only the current pass and moves to the next item, which suits skipping malformed rows. `pass` is a syntactic placeholder with no runtime effect, so a loop whose body is just `pass` still runs every iteration.",
+      "misconception": "`pass` is not really a loop control statement; it changes nothing about the flow."
+    },
+    {
+      "type": "scenario",
+      "concept": "nested-loops",
+      "difficulty": "medium",
+      "scenario": "A script compares every record in a 5,000-row table against every other record using one loop inside another, and it runs far longer than expected.",
+      "question": "How much work is that nested pair actually doing?",
+      "options": [
+        "About 10,000 comparisons, since each of the two loops runs 5,000 times and they add up.",
+        "About 5,000 comparisons, because the two loops advance together through the rows.",
+        "About 25 million comparisons, because the inner loop runs in full on every outer pass.",
+        "It depends only on how many matching records exist, not on how many rows there are."
+      ],
+      "answer": 2,
+      "explanation": "Nested loops multiply rather than add: the inner body runs the outer count times the inner count, so 5,000 by 5,000 is 25 million. This quadratic growth is why all-pairs comparison stops being viable as data grows, and why real deduplication and join operations use hashing or sorting instead of brute force.",
+      "misconception": "Nested loops feel additive when you read them, but their cost multiplies."
+    },
+    {
+      "type": "mcq",
+      "concept": "membership",
+      "difficulty": "easy",
+      "question": "What does `'D' in 'Delhi'` evaluate to, and what does `in` do in general?",
+      "options": [
+        "`True`; `in` tests whether a value occurs in a sequence and yields a boolean.",
+        "`False`, because `in` works only on lists and never on a string of characters.",
+        "`0`, which is the index in the string at which the character was found.",
+        "An error, because two strings have to be compared with a double equals sign."
+      ],
+      "answer": 0,
+      "explanation": "`in` is a membership test that evaluates to `True` or `False`, and it works across strings, lists, tuples, sets, and dictionaries alike. It replaces a hand-written scan with one readable expression, and on a set or a dictionary it is also far faster than looping, which starts to matter once collections grow large.",
+      "misconception": "`in` returns a boolean, not the position of the match."
+    },
+    {
+      "type": "mcq",
+      "concept": "assignment",
+      "difficulty": "easy",
+      "question": "Python has no `++` operator. How do you increment a counter, and why was `++` left out?",
+      "options": [
+        "Write `a++`, which Python treats as a synonym for adding one to the name.",
+        "Write `a += 1`; the compound forms were kept, but `++` was left out as confusing.",
+        "Write `a = a++ 1`, which is how Python spells the post-increment operator.",
+        "Call the `increment` function that the standard library's operator module provides."
+      ],
+      "answer": 1,
+      "explanation": "`a += 1` reads the current value, adds one, and rebinds the name. Python supports the compound assignments `+=`, `-=`, `*=`, and `/=` among others, but not `++` or `--`, which in C invite confusion between their pre- and post-increment forms. Typing `a++` in Python is a syntax error.",
+      "misconception": "There is no increment operator in Python; the compound assignment is the idiom."
     }
   ]
 }

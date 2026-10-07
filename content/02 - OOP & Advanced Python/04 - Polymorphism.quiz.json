@@ -2,41 +2,155 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What does `__add__` let you do, and what expression triggers it?",
+      "concept": "forms-of-polymorphism",
+      "difficulty": "easy",
+      "question": "What are the three forms polymorphism takes in Python?",
       "options": [
-        "It makes the class iterable.",
-        "It defines what `a + b` means for your objects; `a + b` calls `a.__add__(b)`.",
-        "It is called by `a.add(b)` only.",
-        "It adds a method to the class at runtime."
+        "Method overriding, method overloading, and operator overloading.",
+        "Inheritance, encapsulation, and the abstraction of a behaviour.",
+        "Single dispatch, multiple dispatch, and hybrid method dispatch.",
+        "Type casting, numeric coercion, and explicit type conversion."
       ],
-      "answer": 1,
-      "explanation": "`__add__` is operator overloading for `+`. Writing `a + b` invokes `a.__add__(b)`, so you can define addition for a Fraction or Vector naturally. Each operator has its own dunder, for example `__sub__` for `-` and `__mul__` for `*`."
-    },
-    {
-      "type": "scenario",
-      "scenario": "You write a function `def total_area(shapes):` that loops and calls `shape.area()` on each item, where shapes may be circles, squares, or triangles.",
-      "question": "Which idea makes this one function work for every shape type?",
-      "options": [
-        "Inheritance of the `total_area` function.",
-        "Polymorphism: each class implements `area()` its own way, and the caller uses the shared interface without knowing the concrete type.",
-        "Encapsulation of the loop variable.",
-        "Operator overloading of the plus sign."
-      ],
-      "answer": 1,
-      "explanation": "Polymorphism lets objects of different types respond to the same method call in their own way. The function depends only on the shared `area()` interface, so adding a new shape needs no change to `total_area`. This is the open-closed benefit of polymorphism.",
-      "misconception": "The function does not branch on type. It relies on each type honoring a common interface, which is the point of polymorphism."
+      "answer": 0,
+      "explanation": "Polymorphism means one thing taking many forms, and the three cases differ in what varies and what decides. A method name varies across a parent and child according to the object's class, a method name varies inside one class according to the arguments supplied, and an operator varies according to the types of its operands.",
+      "misconception": "The other pillars of object-oriented programming are separate ideas, not forms of polymorphism."
     },
     {
       "type": "mcq",
-      "question": "Python does not support classic method overloading (same name, different signatures). What is the common Pythonic substitute?",
+      "concept": "method-overriding",
+      "difficulty": "easy",
+      "question": "In method overriding, what determines which version of a shared method name runs?",
       "options": [
-        "Overloading is fully supported with type annotations.",
-        "Using a different class per signature.",
-        "Defining the method twice; the second wins.",
-        "Default arguments or `*args` and `**kwargs` so one method handles varied inputs."
+        "The order in which the classes were defined.",
+        "The number of arguments passed to the method.",
+        "The class of the object the method is called on.",
+        "Whether the parent's version is marked as overridable."
+      ],
+      "answer": 2,
+      "explanation": "The object carries its class, and lookup begins there, so a child object runs the child's version while a parent object runs the parent's. This is why the same written call can behave differently at different points in a program, which is exactly the polymorphic property: one name, many forms, selected by the object.",
+      "misconception": "Overriding is resolved by the object's type, not by the call site or argument count."
+    },
+    {
+      "type": "mcq",
+      "concept": "method-overloading",
+      "difficulty": "hard",
+      "question": "What happens if you define two methods with the same name in one Python class?",
+      "options": [
+        "Python picks whichever one of the two best matches the arguments supplied.",
+        "Python raises an error complaining about a duplicate method name.",
+        "Both are kept and then tried in order until one of them succeeds.",
+        "The second definition simply replaces the first, so the first is lost."
       ],
       "answer": 3,
-      "explanation": "Defining a method twice just replaces the first with the second in Python. Instead, you write one method that adapts using default parameters or variadic arguments. True compile-time overloading does not exist in Python."
+      "explanation": "A class body executes like ordinary code, so the second definition rebinds the name and the first becomes unreachable. Python has no true method overloading. Languages that do have it choose between same-named methods by signature, which Python does not do. The same convenience is achieved instead with default arguments, letting one method adapt to how many arguments arrive.",
+      "misconception": "Python does not dispatch on signature; a repeated method name is a silent replacement."
+    },
+    {
+      "type": "mcq",
+      "concept": "method-overloading",
+      "difficulty": "medium",
+      "question": "A single `area` method takes one required value and one defaulted value, treating a missing second value as a circle and a supplied one as a rectangle. What do a call with 5 and a call with 4 and 6 return?",
+      "options": [
+        "78.5 and 24",
+        "25 and 24",
+        "15.7 and 10",
+        "78.5 and 10"
+      ],
+      "answer": 0,
+      "explanation": "With one value the method applies the circle formula, giving pi times 5 squared, about 78.5. With two values it multiplies them for the rectangle, giving 24. The default argument is what lets one name serve both shapes, so the caller thinks in a single verb and the method adapts to what it was given.",
+      "misconception": "The branch is chosen by whether the second argument was supplied, not by the values themselves."
+    },
+    {
+      "type": "mcq",
+      "concept": "operator-overloading",
+      "difficulty": "medium",
+      "question": "The plus sign concatenates two strings, adds two integers, and merges two lists. What does this demonstrate?",
+      "options": [
+        "That Python converts all of the operands to a common type first.",
+        "That operators are polymorphic, with the operand types deciding.",
+        "That the plus sign is really a function rather than an operator.",
+        "That strings and lists are in fact internally the very same type."
+      ],
+      "answer": 1,
+      "explanation": "One written symbol maps to three different behaviours, selected by what sits on either side of it. Nothing is converted to a shared type; each type supplies its own meaning for the operator. This is operator overloading already at work in the built-in types, before you define any class of your own.",
+      "misconception": "The operator does not have one universal behaviour that types adapt to; each type defines its own."
+    },
+    {
+      "type": "mcq",
+      "concept": "operator-overloading",
+      "difficulty": "medium",
+      "question": "Which magic methods give the subtraction, multiplication, and division operators meaning for your own class?",
+      "options": [
+        "`__minus__`, `__times__`, and `__divide__`",
+        "`__sub__`, `__mul__`, and `__div__`",
+        "`__subtract__`, `__multiply__`, and `__truediv__`",
+        "`__sub__`, `__mul__`, and `__truediv__`"
+      ],
+      "answer": 3,
+      "explanation": "Each operator maps to a specifically named method, and division uses the true-division name to distinguish it from floor division, which has its own. Defining them is what lets a custom numeric type be used with ordinary arithmetic notation rather than through named method calls, and it is the mechanism behind the readable arithmetic offered by numerical libraries.",
+      "misconception": "The names are fixed by the language; they are not descriptive labels you can choose."
+    },
+    {
+      "type": "scenario",
+      "concept": "operator-overloading",
+      "difficulty": "medium",
+      "scenario": "Adding two strings works, and adding two integers works, but adding an integer to a string raises an unsupported operand type error.",
+      "question": "Why does the mixed case fail, given that the operator is polymorphic?",
+      "options": [
+        "Because the operator is polymorphic only within a single type family.",
+        "Because strings must be converted with a formatting method first.",
+        "Because no meaning was ever defined for a number combined with text.",
+        "Because integers are immutable in Python while strings are not."
+      ],
+      "answer": 2,
+      "explanation": "Polymorphism supplies a behaviour for each combination the types agree on, and nobody defined what adding a number to text should mean, since it could reasonably be arithmetic or concatenation. Rather than guess, Python reports that no such operation exists. The same error appears on your own classes the moment someone combines them with a type you never accounted for.",
+      "misconception": "An overloaded operator is not universal; it covers exactly the operand combinations that were defined."
+    },
+    {
+      "type": "mcq",
+      "concept": "forms-of-polymorphism",
+      "difficulty": "medium",
+      "question": "Matching each form of polymorphism to what decides its behaviour, which row is correct?",
+      "options": [
+        "Method overriding is decided by the arguments passed.",
+        "Operator overloading is decided by the object's class.",
+        "Method overloading is decided by the operand types.",
+        "Method overloading is decided by the arguments passed."
+      ],
+      "answer": 3,
+      "explanation": "Overriding varies a name across a parent and a child and is settled by the class of the object. Overloading varies a name inside one class and is settled by the arguments supplied. Operator overloading varies a symbol and is settled by the types of the operands. Keeping the three deciding factors straight is what makes the category more than a label.",
+      "misconception": "The three forms are distinguished by what selects the behaviour, not merely by where they appear."
+    },
+    {
+      "type": "mcq",
+      "concept": "library-design",
+      "difficulty": "medium",
+      "question": "Why does operator overloading matter for libraries such as those used in numerical computing?",
+      "options": [
+        "It lets a custom type use arithmetic notation, so code reads well.",
+        "It makes those libraries run considerably faster than plain Python can.",
+        "It allows a library to redefine the operators for the built-in types too.",
+        "It removes the need for any of those libraries to define classes at all."
+      ],
+      "answer": 0,
+      "explanation": "Defining the arithmetic magic methods on an array or table type means users can add, scale, and divide with familiar symbols instead of calling named methods, which keeps numerical code close to the formulas it expresses. The speed of those libraries comes from compiled inner loops, a separate matter; overloading buys expressiveness rather than performance.",
+      "misconception": "Overloading improves the interface, not the execution speed."
+    },
+    {
+      "type": "card",
+      "concept": "forms-of-polymorphism",
+      "difficulty": "medium",
+      "question": "Define polymorphism and distinguish its three forms by naming, for each, what varies and what decides which version applies.",
+      "answer": "Polymorphism means one thing taking many forms depending on context. In method overriding, a method name varies between a parent and a child class, and the object's class decides which runs. In method overloading, a method name varies within a single class, and the arguments supplied decide the behaviour. In operator overloading, an operator varies in meaning, and the types of its operands decide which behaviour applies.",
+      "explanation": "All three rest on material already covered: overriding came from inheritance, overloading is achieved through default arguments because Python lacks true signature dispatch, and operator overloading is the arithmetic magic methods used to build a custom numeric type."
+    },
+    {
+      "type": "card",
+      "concept": "method-overloading",
+      "difficulty": "medium",
+      "question": "Python has no classic method overloading. Explain what classic overloading means, why Python cannot do it, and how the same goal is reached.",
+      "answer": "Classic overloading means a class may hold several methods sharing one name but differing in their parameter lists, with the language selecting the right one from the arguments at the call. Python cannot do this because a class body executes sequentially and each definition binds the name, so a second method of the same name simply replaces the first and the earlier one becomes unreachable. The same outcome is achieved with a single method that uses default arguments and branches on what it actually received.",
+      "explanation": "The practical gain is the same either way: the caller works with one verb such as area or save, and the method adapts, which keeps the published interface small and readable."
     }
   ]
 }

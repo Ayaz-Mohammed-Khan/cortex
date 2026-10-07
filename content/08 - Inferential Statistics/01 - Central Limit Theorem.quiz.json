@@ -1,42 +1,202 @@
 {
   "questions": [
     {
+      "type": "mcq",
+      "concept": "sampling-distribution",
+      "difficulty": "medium",
+      "question": "What exactly is a sampling distribution?",
+      "options": [
+        "The distribution of the raw individual values held inside one single sample.",
+        "The distribution of a statistic, such as the mean, across many samples.",
+        "The distribution of the whole population from which the sample was drawn.",
+        "The distribution of the differences between a sample and its parent population."
+      ],
+      "answer": 1,
+      "explanation": "The observations are the individual values in one sample, whereas a sampling distribution is one level up: each of its data points is a statistic computed from an entire sample. Draw fifty salaries a hundred times, compute a mean each time, and those hundred means form the sampling distribution of the mean. You can build one for any statistic, including the variance.",
+      "misconception": "Its data points are statistics, not the original observations."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-statement",
+      "difficulty": "medium",
+      "question": "What does the central limit theorem assert?",
+      "options": [
+        "That any sufficiently large single sample will itself be normally distributed.",
+        "That the population itself gradually becomes normal as the sample size grows.",
+        "That the sampling distribution of the mean approaches normal, whatever the population.",
+        "That the sample mean always comes out exactly equal to the population mean."
+      ],
+      "answer": 2,
+      "explanation": "The claim is specifically about the distribution of sample means, not about the data within a sample and not about the population, neither of which changes. What makes it remarkable is the indifference to the starting shape: uniform, exponential, Poisson, or anything else, the means still come out normal, which is what lets normal-based tools be applied so widely.",
+      "misconception": "The theorem concerns the distribution of the statistic, not of the raw data."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-results",
+      "difficulty": "medium",
+      "question": "The sampling distribution of the mean is centred on what value, and what is its standard deviation called?",
+      "options": [
+        "The population mean, with a standard deviation called the standard error.",
+        "The first sample's mean, with a standard deviation equal to the population's.",
+        "Zero, with a standard deviation of exactly one, since it has been standardised.",
+        "The population median, with a standard deviation equal to the inter-quartile range."
+      ],
+      "answer": 0,
+      "explanation": "The sampling distribution sits exactly on the population mean, which is what makes the sample mean an unbiased estimate of it. Its spread is smaller than the population's by a factor of the square root of the sample size, giving the standard error, which equals the population standard deviation divided by the square root of the sample size. The separate name distinguishes it from the spread of the raw data.",
+      "misconception": "The standard error describes how much a sample mean varies, not how much the data varies."
+    },
+    {
       "type": "scenario",
-      "scenario": "A population of transaction amounts is heavily right-skewed. A colleague says you cannot use normal-based confidence intervals because the data is not normal.",
-      "question": "How does the central limit theorem address this?",
+      "concept": "standard-error-scaling",
+      "difficulty": "hard",
+      "scenario": "A team's estimate of a population mean currently has a standard error they consider twice as large as they need. They ask how much additional data would halve it.",
+      "question": "What should you tell them?",
       "options": [
-        "The CLT says the sampling distribution of the sample mean is approximately normal for a large enough sample, regardless of the population shape, so normal-based intervals apply to the mean.",
-        "The colleague is right; nothing can be done.",
-        "The CLT only applies when the population is already normal.",
-        "The CLT makes the raw data normal if you collect enough of it."
+        "Twice the current sample size, since the error scales directly with that size.",
+        "Four times the size, since the error shrinks with the square root of it.",
+        "Half the current sample size, on the grounds that smaller samples are tighter.",
+        "No amount of extra data will ever change the standard error of the estimate."
       ],
-      "answer": 0,
-      "explanation": "The CLT is about the distribution of the sample MEAN, not the raw data. Even from a skewed population, the means of many samples cluster into an approximately normal sampling distribution as sample size grows, which is what justifies the usual interval for the mean.",
-      "misconception": "The CLT does not normalize the raw data. It makes the distribution of the sample mean approximately normal."
+      "answer": 1,
+      "explanation": "Because the sample size enters under a square root, precision improves far more slowly than data collection cost rises: quadrupling the sample halves the error, and halving the error again would need sixteen times the original. This is the fundamental diminishing return in data collection, and it is why effort is often better spent on reducing bias or measurement noise than on gathering ever more observations.",
+      "misconception": "Precision does not improve in proportion to sample size; it improves with its square root."
     },
     {
       "type": "mcq",
-      "question": "The CLT says the sampling distribution of the mean has standard deviation (the standard error) equal to what?",
+      "concept": "clt-results",
+      "difficulty": "hard",
+      "question": "In the standard error formula, what does the sample size refer to?",
       "options": [
-        "The population standard deviation divided by the square root of n.",
-        "The population standard deviation times n.",
-        "The population variance divided by n.",
-        "The population standard deviation unchanged."
+        "The number of separate samples that were drawn from the population.",
+        "The total number of observations across every sample added together.",
+        "The size of each individual sample, not the number of samples drawn.",
+        "The size of the whole population that the samples are being drawn from."
       ],
-      "answer": 0,
-      "explanation": "The standard error of the mean is the population standard deviation divided by the square root of the sample size. The square-root relationship is why halving the standard error requires quadrupling the sample size, a key cost consideration in experiment design."
+      "answer": 2,
+      "explanation": "Drawing fifty people a hundred times means the sample size is fifty, and the hundred is merely how many times the exercise was repeated. The distinction matters because only increasing the size of each sample tightens the sampling distribution; taking more samples of the same size simply fills in the shape of a distribution whose spread is already fixed.",
+      "misconception": "More repetitions do not reduce the standard error; larger individual samples do."
     },
     {
       "type": "mcq",
-      "question": "A common rule of thumb is that the CLT approximation is reasonable once the sample size reaches about what, with more needed for very skewed populations?",
+      "concept": "sample-size-rule",
+      "difficulty": "easy",
+      "question": "What is the usual rule of thumb for the sample size at which the central limit theorem is considered to apply?",
       "options": [
-        "About 1000 always.",
-        "About 5.",
-        "Exactly 100 regardless of the population.",
-        "About 30."
+        "At least 10",
+        "At least 30",
+        "At least 100",
+        "At least 5 percent of the population"
       ],
-      "answer": 3,
-      "explanation": "A sample size of roughly 30 is the usual rule of thumb for the sampling distribution of the mean to look approximately normal. Heavier skew or extreme outliers push that requirement higher, so treat 30 as a guideline, not a guarantee."
+      "answer": 1,
+      "explanation": "Thirty is the conventional threshold at which the sampling distribution of the mean is close enough to normal for normal-based methods to be used. It is a guideline rather than a theorem, and strongly skewed or heavy-tailed populations may need more before the approximation is comfortable. It also concerns the size of each sample rather than any proportion of the population.",
+      "misconception": "The threshold is an absolute count, not a fraction of the population."
+    },
+    {
+      "type": "scenario",
+      "concept": "sampling-conditions",
+      "difficulty": "hard",
+      "scenario": "To estimate an average salary across a whole country, an analyst collects many large samples but draws all of them from residents of major cities.",
+      "question": "Does the central limit theorem rescue the estimate?",
+      "options": [
+        "Yes, because a large sample guarantees the mean converges on the population mean.",
+        "Yes, as long as enough samples are taken for the distribution to look normal.",
+        "No, the samples are biased, so the machinery converges on the wrong value.",
+        "No, because the theorem can only ever apply to normally distributed populations."
+      ],
+      "answer": 2,
+      "explanation": "The theorem describes how sample means behave when samples are drawn fairly from the population of interest. Sampling only city residents means the means converge on the city average, not the national one, and the resulting distribution will look reassuringly normal around a wrong centre. Bias is a defect of design that no sample size can repair, which makes good sampling a very large precondition.",
+      "misconception": "A normal-looking sampling distribution is no evidence that the samples were representative."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-importance",
+      "difficulty": "medium",
+      "question": "Which standard statistical tools rest on the central limit theorem?",
+      "options": [
+        "Confidence intervals, t-tests, analysis of variance, and linear regression.",
+        "Decision trees and random forests.",
+        "Correlation and covariance.",
+        "Histograms and box plots."
+      ],
+      "answer": 0,
+      "explanation": "Each of these reasons about a sample statistic as though its behaviour were normal, which is precisely the licence the theorem grants. That is why it is described as the foundation of inferential statistics: without it, inference about means would require knowing the population's shape. Descriptive tools such as box plots make no inferential claim and so need no such assumption.",
+      "misconception": "The theorem underpins inference about statistics, not descriptive summaries or tree-based models."
+    },
+    {
+      "type": "mcq",
+      "concept": "confidence-preview",
+      "difficulty": "medium",
+      "question": "Given a sample mean and a standard error, how does the empirical rule produce an approximate 95 percent interval?",
+      "options": [
+        "By taking the sample mean plus or minus a single standard error either side.",
+        "By taking the mean plus or minus two standard errors, from the empirical rule.",
+        "By taking the sample mean plus or minus two full population standard deviations.",
+        "By taking the sample mean plus or minus 95 percent of one standard error either way."
+      ],
+      "answer": 1,
+      "explanation": "Since the sampling distribution is normal, the empirical rule applies to it, and the relevant spread is the standard error rather than the population standard deviation. Two standard errors either side therefore captures about 95 percent of where sample means fall. Using the population spread instead would give an interval far too wide, because individual values vary much more than sample means do.",
+      "misconception": "The interval is built from the standard error, not from the spread of the raw data."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-statement",
+      "difficulty": "medium",
+      "question": "Samples of size 30 are repeatedly drawn from a strongly right-skewed exponential population and their means plotted. What shape results?",
+      "options": [
+        "Exponential, matching the population.",
+        "Right-skewed but less so than the population.",
+        "Approximately normal, whatever the population shape.",
+        "Uniform, since the sampling randomises the values."
+      ],
+      "answer": 2,
+      "explanation": "This is the demonstration that makes the theorem vivid: the population can be any shape at all and the distribution of its sample means still comes out normal, with larger samples making the approximation tighter. Running it on uniform, exponential, Poisson, and binomial populations in turn produces the same normal result every time.",
+      "misconception": "The sampling distribution does not inherit the population's shape."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-results",
+      "difficulty": "medium",
+      "question": "If a population has variance of 100 and samples of size 25 are drawn, what is the variance of the sampling distribution of the mean?",
+      "options": [
+        "4, being the population variance divided by the sample size",
+        "100, unchanged from the population",
+        "2, being the population standard deviation divided by the sample size",
+        "2500, being the population variance times the sample size"
+      ],
+      "answer": 0,
+      "explanation": "The variance of the sampling distribution is the population variance divided by the sample size, so 100 divided by 25 gives 4, and the standard error is its square root, 2. Note the two are easy to confuse: the division by the sample size applies to the variance, while the standard error involves the square root of the sample size.",
+      "misconception": "The sample size divides the variance, and its square root divides the standard deviation."
+    },
+    {
+      "type": "mcq",
+      "concept": "clt-importance",
+      "difficulty": "medium",
+      "question": "Why is the central limit theorem described as practically powerful?",
+      "options": [
+        "It lets a parameter be estimated from samples, so the population is never fully measured.",
+        "It does away entirely with the need for sampling to be random and representative.",
+        "It proves that most phenomena occurring in the natural world are normally distributed.",
+        "It guarantees that any sample mean will come out equal to the population mean."
+      ],
+      "answer": 0,
+      "explanation": "Measuring every member of a very large population is impossible, and the theorem shows that modest samples suffice to recover the population mean along with a quantified uncertainty. It does not claim populations are normal, only that means of samples behave normally, and it makes random representative sampling more essential rather than less.",
+      "misconception": "The theorem is about the behaviour of sample means, not about the normality of the world."
+    },
+    {
+      "type": "card",
+      "concept": "clt-statement",
+      "difficulty": "medium",
+      "question": "State the central limit theorem and its two quantitative results, defining the standard error.",
+      "answer": "The theorem states that the sampling distribution of the mean of a large number of independent, identically distributed observations approaches a normal distribution, whatever the shape of the underlying population. Its two results are that this sampling distribution is centred on the population mean, making the sample mean an unbiased estimate of it, and that its variance is the population variance divided by the sample size. The standard deviation of the sampling distribution, the population standard deviation divided by the square root of the sample size, is called the standard error.",
+      "explanation": "The square root is the consequential detail, since it means precision improves only with the square root of the effort: quadrupling the sample size halves the standard error, which sets a hard practical ceiling on buying certainty through volume alone."
+    },
+    {
+      "type": "card",
+      "concept": "sampling-conditions",
+      "difficulty": "medium",
+      "question": "Name the conditions the central limit theorem requires of its samples, and explain what happens when they are not met.",
+      "answer": "The samples must be random, so that every member of the population has a fair chance of selection, and representative, so that the variation present in the population is reflected in the samples. If they are not, the theorem's arithmetic still produces a normal-looking sampling distribution with a tight standard error, but it is centred on the mean of whatever subpopulation was actually sampled rather than the one of interest. The result therefore looks precise and trustworthy while being systematically wrong, and no increase in sample size corrects it.",
+      "explanation": "This is why sampling design deserves more attention than it usually gets: the theorem quantifies random variation, which more data reduces, and is silent about bias, which more data does not."
     }
   ]
 }

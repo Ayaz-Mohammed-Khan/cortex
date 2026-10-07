@@ -1,43 +1,202 @@
 {
   "questions": [
     {
+      "type": "mcq",
+      "concept": "covariance-flaw",
+      "difficulty": "medium",
+      "question": "What is the fundamental flaw of covariance as a summary of a relationship?",
+      "options": [
+        "It can only ever be computed for a sample, and never for a whole population.",
+        "It gives direction but not strength, as it is not scale-invariant or bounded.",
+        "It always comes out positive, so it cannot express any inverse relationship.",
+        "It requires both of the columns involved to be categorical rather than numeric."
+      ],
+      "answer": 1,
+      "explanation": "The sign tells you whether the two move together or in opposition, but the magnitude depends on the units and scale of the columns, so multiplying both by a constant changes the number while the relationship is identical. Since the value can be anywhere from negative to positive infinity, there is no reference point against which to judge whether a relationship is strong.",
+      "misconception": "A large covariance does not mean a strong relationship; it may just mean large units."
+    },
+    {
+      "type": "mcq",
+      "concept": "correlation",
+      "difficulty": "medium",
+      "question": "What does the Pearson correlation coefficient add over covariance, and what is its range?",
+      "options": [
+        "It adds statistical significance to the figure, and ranges from 0 up to 1.",
+        "It adds a causal direction, ranging from negative to positive infinity itself.",
+        "It adds strength on a fixed, scale-invariant scale from minus one to one.",
+        "It adds the ability to handle categorical columns, ranging from 0 to 100."
+      ],
+      "answer": 2,
+      "explanation": "Dividing the covariance by both standard deviations cancels the units, which bounds the result between negative one and positive one and makes it unchanged by rescaling either column. Now the magnitude is interpretable: values near the extremes mean tightly clustered points along a line, values near zero mean no linear association. Covariance exists mainly as an ingredient of this calculation.",
+      "misconception": "Normalising supplies strength and comparability; it says nothing about significance or causality."
+    },
+    {
+      "type": "mcq",
+      "concept": "correlation",
+      "difficulty": "medium",
+      "question": "How is the Pearson correlation coefficient built from covariance?",
+      "options": [
+        "By dividing the covariance by the product of the two standard deviations.",
+        "By dividing the covariance by the product of the two means.",
+        "By taking the square root of the covariance.",
+        "By dividing the covariance by the number of observations."
+      ],
+      "answer": 0,
+      "explanation": "Each standard deviation carries the unit of its own column, so dividing by both removes the units entirely and leaves a dimensionless ratio. That single step is what converts a quantity with no fixed range into one bounded between negative one and positive one. It also explains why the correlation of a variable with itself is exactly one, since there the covariance is the variance and the denominator is the same variance.",
+      "misconception": "The normalisation uses the spreads, not the centres or the sample size."
+    },
+    {
       "type": "scenario",
-      "scenario": "An analyst finds ice-cream sales and drowning deaths rise together, correlation 0.9, and proposes banning ice cream to save lives.",
-      "question": "What is the flaw?",
+      "concept": "correlation-not-causation",
+      "difficulty": "medium",
+      "scenario": "An analyst finds that ice cream sales and the number of homicides rise and fall together across the year, and proposes restricting ice cream sales.",
+      "question": "What is the flaw in the reasoning?",
       "options": [
-        "A correlation of 0.9 is too low to matter.",
-        "Correlation does not imply causation. A third variable, hot weather, drives both, so this is a confounded relationship.",
-        "Correlation always implies causation when it is above 0.8.",
-        "The two variables must be measured in the same units."
+        "The correlation is far too weak to act on, and a lot more data is needed first.",
+        "The two variables should have been compared using covariance, not correlation.",
+        "Correlation is not causation; a hidden factor, the hot weather, drives both.",
+        "The relationship is real, so the proposal is sound if it is trialled gradually."
       ],
-      "answer": 1,
-      "explanation": "A strong correlation only says the two move together, not that one causes the other. Here a confounder, temperature, raises both ice-cream sales and swimming (and thus drownings). Establishing causation needs an experiment or careful causal reasoning, not a correlation coefficient.",
-      "misconception": "A high correlation is not evidence of causation. Always ask whether a confounder could drive both variables."
+      "answer": 2,
+      "explanation": "Two series can move together because a common cause moves both, which is what happens here: warm weather independently raises ice cream sales and the amount of time people spend outside. Intervening on one would therefore change nothing about the other. The same pattern explains why more firefighters appear at larger fires without causing them.",
+      "misconception": "Co-movement is consistent with a shared cause, with reverse causation, or with coincidence, as well as with direct causation."
+    },
+    {
+      "type": "scenario",
+      "concept": "linearity-limit",
+      "difficulty": "hard",
+      "scenario": "A scatter plot of two columns shows a clear, tight U-shape, yet the computed correlation is close to zero.",
+      "question": "What should you conclude?",
+      "options": [
+        "The correlation is miscomputed, since a visible pattern must give a non-zero value.",
+        "There is no relationship at all, and the apparent U-shape is a plotting artefact.",
+        "The two columns need rescaling before the correlation between them means much.",
+        "There is a strong relationship, but a non-linear one, which Pearson cannot see."
+      ],
+      "answer": 3,
+      "explanation": "The coefficient quantifies how well the points fit a straight line, so a curve that rises as much as it falls produces offsetting contributions and a value near zero despite an almost deterministic relationship. A correlation near zero therefore means no linear association rather than no association at all. This is the strongest practical argument for plotting the data rather than relying on the number alone.",
+      "misconception": "A correlation of zero rules out a linear relationship, not every relationship."
     },
     {
       "type": "mcq",
-      "question": "Why is the Pearson correlation coefficient often preferred over raw covariance for describing the strength of a linear relationship?",
+      "concept": "covariance-intuition",
+      "difficulty": "medium",
+      "question": "What is the covariance of a variable with itself?",
       "options": [
-        "Covariance only works for categorical data.",
-        "It is standardized to the range minus 1 to 1, so its magnitude is comparable across datasets, unlike covariance whose scale depends on the units.",
-        "Pearson correlation detects any relationship, including non-linear ones.",
-        "Covariance cannot be negative."
+        "Its variance.",
+        "One, since a variable is perfectly correlated with itself.",
+        "Zero, since there is no relationship to measure.",
+        "Its standard deviation."
       ],
-      "answer": 1,
-      "explanation": "Covariance captures the direction of a linear relationship but its size depends on the variables' units, so you cannot compare it across datasets. Pearson correlation divides covariance by the product of the standard deviations, giving a unitless value in minus 1 to 1 that is directly comparable.",
-      "misconception": "Pearson correlation measures LINEAR association only. A strong non-linear relationship can show a near-zero coefficient."
+      "answer": 0,
+      "explanation": "Substituting the same variable for both terms makes each product a squared deviation from the mean, which is exactly the variance calculation. This also makes the correlation of a variable with itself equal to one, since the covariance and the denominator then coincide, and it is why the diagonal of a correlation matrix is always one.",
+      "misconception": "The value one belongs to the correlation of a variable with itself; the covariance gives the variance."
     },
     {
       "type": "mcq",
-      "question": "You want to see how a numerical variable differs across the categories of a categorical variable (for example, fare by passenger class).",
+      "concept": "bivariate-cases",
+      "difficulty": "medium",
+      "question": "Which pairing of variable types to visualisation is correct?",
       "options": [
-        "Use a single histogram of the numerical variable only.",
-        "Use a grouped box plot or violin plot, comparing the numerical distribution within each category.",
-        "Correlation is the only valid tool.",
-        "Use a scatter plot of the category against itself."
+        "Two categorical columns are best shown together on a single scatter plot.",
+        "Two numerical columns are best summarised with a contingency table of counts.",
+        "Two numerical columns call for a scatter plot; two categorical, a cross tab.",
+        "A categorical and a numerical column call for a pie chart of the raw counts."
+      ],
+      "answer": 2,
+      "explanation": "A scatter plot gives each row a position from its two numbers, which is what reveals the pattern between them. Two categorical columns have no numeric positions, so the natural summary is a table of counts for each combination, from which stacked or grouped bars follow. A mixed pair is handled by aggregating the numerical column within each category or by placing a box plot per category side by side.",
+      "misconception": "The plot follows from the variable types, so the first question is always what kind of columns you have."
+    },
+    {
+      "type": "mcq",
+      "concept": "scale-invariance",
+      "difficulty": "medium",
+      "question": "Both columns of a dataset are multiplied by two. What happens to the covariance and to the correlation?",
+      "options": [
+        "The covariance changes while the correlation stays the same.",
+        "Both stay the same, since the relationship is unchanged.",
+        "The covariance stays the same while the correlation changes.",
+        "Both change by a factor of two."
+      ],
+      "answer": 0,
+      "explanation": "Rescaling leaves the underlying relationship untouched, so a trustworthy measure of it should not move. The covariance does move, because it carries the product of the two units, which is precisely its weakness. The correlation divides that out and is unchanged, which is why it can be compared across datasets measured in different units entirely.",
+      "misconception": "A measure that changes under rescaling cannot be describing relationship strength alone."
+    },
+    {
+      "type": "mcq",
+      "concept": "establishing-causation",
+      "difficulty": "medium",
+      "question": "What kind of evidence is needed to move from an observed correlation to a causal claim?",
+      "options": [
+        "A much larger sample, which eventually turns a correlation into a causation.",
+        "A correlation whose magnitude climbs above some threshold such as 0.8.",
+        "Computing the covariance alongside the correlation to confirm the direction.",
+        "A controlled experiment, a randomised trial, or a careful observational study."
+      ],
+      "answer": 3,
+      "explanation": "Observational co-movement cannot distinguish a direct effect from a common cause or from reverse causation, and no amount of extra data resolves that, because the ambiguity is structural rather than statistical. Randomly assigning the treatment breaks any link between it and hidden factors, which is what licenses a causal reading. Where randomisation is impossible, a design that explicitly accounts for confounders is the alternative.",
+      "misconception": "Strength and sample size do not create causal warrant; study design does."
+    },
+    {
+      "type": "mcq",
+      "concept": "multivariate",
+      "difficulty": "medium",
+      "question": "A scatter plot of two numerical columns is coloured by a categorical column. How many variables does it display, and what is this technique called?",
+      "options": [
+        "Three, using the hue parameter to encode the category as colour.",
+        "Two, since colour is decorative and adds no information.",
+        "Four, because colour adds two dimensions.",
+        "Three, which requires a three-dimensional scatter plot."
+      ],
+      "answer": 0,
+      "explanation": "Colour is a genuine encoding channel, so mapping a category onto it carries a third variable without leaving two dimensions, which usually reads more clearly than rotating a three-dimensional plot. Splitting the same plot into a grid of panels by another category reaches a fourth, and sizing the points by a numerical value is a further option.",
+      "misconception": "Adding a visual channel adds a variable; it is not merely styling."
+    },
+    {
+      "type": "mcq",
+      "concept": "multivariate",
+      "difficulty": "medium",
+      "question": "A joint plot shows a scatter plot with histograms along its margins. Is it bivariate or multivariate?",
+      "options": [
+        "Multivariate, because it in effect combines three separate plots into one figure.",
+        "Bivariate, because the marginal histograms describe those same two columns.",
+        "Multivariate, because the two marginal histograms add a distributional dimension.",
+        "Neither of the two; it is really a univariate display simply repeated twice over."
       ],
       "answer": 1,
-      "explanation": "Comparing a numerical distribution across categories is the categorical-numerical case. A grouped box plot or violin plot shows center, spread, and outliers per category side by side, which a single pooled histogram would hide."
+      "explanation": "What determines the classification is how many columns are involved, not how many panels appear. The margins simply show each of the two columns on its own alongside their relationship, which is informative but adds no third variable. A pair plot, by contrast, is genuinely multivariate because it lays out every pair of columns in a grid.",
+      "misconception": "Counting plots is not the same as counting variables."
+    },
+    {
+      "type": "mcq",
+      "concept": "bivariate-cases",
+      "difficulty": "easy",
+      "question": "What does a contingency table contain?",
+      "options": [
+        "The count of observations for each combination of two categorical variables.",
+        "The correlation coefficient between every pair of numerical columns present.",
+        "The mean of one numerical column computed within each separate category.",
+        "The cumulative frequency built up across a single categorical column's values."
+      ],
+      "answer": 0,
+      "explanation": "Also called a cross tab, it lays one variable's categories across the rows and the other's down the columns, filling each cell with how many observations fall into that pair, as in survival against travel class. It is the natural starting point for two categorical columns, and the counts it holds are exactly what later feeds a test of whether the two variables are independent.",
+      "misconception": "The cells hold counts of combinations, not summaries of a numerical column."
+    },
+    {
+      "type": "card",
+      "concept": "covariance-flaw",
+      "difficulty": "medium",
+      "question": "Compare covariance and correlation on what each measures, its range, and its behaviour under rescaling, and state which you should report.",
+      "answer": "Covariance measures the direction of a linear relationship, taking any value from negative to positive infinity, and it changes when the columns are rescaled because it retains their units. Correlation measures both direction and strength, is bounded between negative one and positive one, and is unchanged by rescaling because dividing by both standard deviations removes the units. Correlation is therefore the measure to report, and covariance mainly exists as the ingredient from which it is computed.",
+      "explanation": "The practical upshot is that a covariance of 5,000 and a covariance of 5 tell you nothing about which relationship is stronger, whereas correlations of 0.9 and 0.2 are immediately comparable, even across datasets with entirely different units."
+    },
+    {
+      "type": "card",
+      "concept": "correlation-not-causation",
+      "difficulty": "medium",
+      "question": "Explain why correlation does not imply causation, naming the alternative explanations, and state how causation can actually be established.",
+      "answer": "Two variables moving together is consistent with several explanations besides one causing the other: a hidden common cause may drive both, as hot weather drives both ice cream sales and time spent outdoors; the causation may run the opposite way, as more firefighters attend fires that are already large; or the association may be coincidence. Because the data alone cannot distinguish these, a causal claim requires design rather than more measurement: a controlled experiment, a randomised trial, or an observational study built to account for the confounding factors.",
+      "explanation": "Randomisation is what does the work, because assigning a treatment at random severs any relationship between it and hidden characteristics, leaving the difference in outcome attributable to the treatment itself."
     }
   ]
 }

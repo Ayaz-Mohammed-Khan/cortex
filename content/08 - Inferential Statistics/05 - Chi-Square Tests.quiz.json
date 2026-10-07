@@ -2,41 +2,216 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What type of data is a chi-square test designed for?",
+      "concept": "chi-square-distribution",
+      "difficulty": "medium",
+      "question": "How is the chi-square distribution constructed?",
       "options": [
-        "Categorical (count) data, comparing observed counts against expected counts.",
-        "A single sample mean.",
-        "Paired continuous before-and-after values.",
-        "Continuous measurements like height."
+        "By summing independent squared standard normals, the count being the degrees.",
+        "By squaring the mean value of a single underlying normal distribution.",
+        "By taking the ratio of one normal distribution to a second normal one.",
+        "By summing together a number of independent uniform random variables."
       ],
       "answer": 0,
-      "explanation": "Chi-square tests work on counts in categories. They compare the frequencies you observed with the frequencies you would expect under the null, summing the squared, scaled differences. They are not for continuous data or for means."
-    },
-    {
-      "type": "scenario",
-      "scenario": "You want to know whether a customer's region and their preferred product category are related, using a contingency table of counts.",
-      "question": "Which chi-square test applies, and what is its null hypothesis?",
-      "options": [
-        "The goodness-of-fit test, with a null that the data is normal.",
-        "A paired t-test on the counts.",
-        "The test of independence, with a null that the variables are perfectly correlated.",
-        "The chi-square test of independence, with a null that the two categorical variables are independent (not associated)."
-      ],
-      "answer": 3,
-      "explanation": "Testing whether two categorical variables in a contingency table are related is the chi-square test of independence. Its null hypothesis is that the variables are independent, so the expected counts are computed from the row and column totals under that assumption.",
-      "misconception": "The null is independence (no association), not correlation. A small p-value is evidence the variables are associated."
+      "explanation": "Squaring a single standard normal gives a chi-square distribution with one degree of freedom, and adding more independent squared standard normals raises the degrees of freedom accordingly. Because it is built from squares, the distribution can never take a negative value, which is the first thing to notice about its shape.",
+      "misconception": "The degrees of freedom count how many squared normals were summed, not the sample size directly."
     },
     {
       "type": "mcq",
-      "question": "A chi-square test can become unreliable when which condition is violated?",
+      "concept": "chi-square-distribution",
+      "difficulty": "medium",
+      "question": "Which set of properties describes the chi-square distribution?",
       "options": [
-        "When the sample is larger than 1000.",
-        "When the data is perfectly balanced.",
-        "When expected counts in cells are very small (a common rule is each expected count should be at least 5).",
-        "When there are exactly two categories."
+        "Symmetric, able to take on negative values, and having a mean of exactly zero.",
+        "Continuous, never negative, right-skewed when the degrees of freedom are small.",
+        "Discrete, non-negative, with a mean fixed at one whatever the degrees of freedom.",
+        "Continuous, bounded strictly between zero and one, and left-skewed in its shape."
+      ],
+      "answer": 1,
+      "explanation": "Being a sum of squares keeps it at or above zero, and with few degrees of freedom the mass bunches near the low end with a long upper tail. As the degrees of freedom grow it becomes more symmetric and approaches a normal shape. Its mean coinciding with its degrees of freedom is a convenient fact worth remembering.",
+      "misconception": "It is not symmetric for small degrees of freedom, and it has no upper bound."
+    },
+    {
+      "type": "mcq",
+      "concept": "two-tests",
+      "difficulty": "medium",
+      "question": "What do the two chi-square tests each require and answer?",
+      "options": [
+        "Both of them require two categorical columns, differing only in the formula used.",
+        "Goodness-of-fit needs two columns and asks about association; independence needs one.",
+        "Goodness-of-fit uses one column against a theory; independence uses two columns.",
+        "Both of them require numerical columns that have first been converted into categories."
       ],
       "answer": 2,
-      "explanation": "The chi-square approximation degrades when expected cell counts are too small, with a common guideline of at least 5 per cell. With sparse cells you combine categories or use an exact test such as Fisher's exact test instead."
+      "explanation": "One test compares a single variable's observed counts against what some assumed distribution predicts, while the other asks whether knowing one variable tells you anything about another. They share the same statistic, a sum over categories of the squared difference between observed and expected counts divided by the expected count, but differ in how the expected counts are derived and in the degrees of freedom.",
+      "misconception": "The two differ in their question and their data requirements, not in their formula."
+    },
+    {
+      "type": "mcq",
+      "concept": "chi-square-formula",
+      "difficulty": "easy",
+      "question": "What is the chi-square test statistic?",
+      "options": [
+        "The sum over categories of the squared observed-minus-expected, over expected.",
+        "The sum of the absolute differences between the observed and expected counts.",
+        "The ratio of the observed grand total to the expected grand total of the table.",
+        "The single squared difference between the observed total and the expected total."
+      ],
+      "answer": 0,
+      "explanation": "Squaring makes every discrepancy contribute positively and penalises large gaps more heavily, while dividing by the expected count scales each contribution by how many observations were anticipated there. That scaling matters because being ten off from an expectation of twelve is far more surprising than being ten off from an expectation of a thousand.",
+      "misconception": "The division by the expected count is essential; it makes discrepancies comparable across categories of different sizes."
+    },
+    {
+      "type": "mcq",
+      "concept": "goodness-of-fit",
+      "difficulty": "medium",
+      "question": "A die is rolled 60 times to test fairness. What are the expected counts and the degrees of freedom?",
+      "options": [
+        "Expected counts of 10 for each face, with 6 degrees of freedom.",
+        "Expected counts of 10 for each face, with 5 degrees of freedom.",
+        "Expected counts of 6 for each face, with 5 degrees of freedom.",
+        "Expected counts derived from the observed data, with 59 degrees of freedom."
+      ],
+      "answer": 1,
+      "explanation": "Under the null of a fair die, the sixty rolls divide evenly across six faces, giving ten each. Degrees of freedom for a goodness-of-fit test are one fewer than the number of categories, because once five of the counts are known the sixth is determined by the total. A small resulting p-value would be evidence that the die is not fair.",
+      "misconception": "Degrees of freedom are one less than the category count, not equal to it."
+    },
+    {
+      "type": "mcq",
+      "concept": "goodness-of-fit",
+      "difficulty": "hard",
+      "question": "For 800 families with four children, under a binomial null with equal chance of a boy, what are the expected counts for 0, 1, 2, 3, and 4 boys?",
+      "options": [
+        "160 for each of the five categories",
+        "100, 200, 200, 200, 100",
+        "50, 200, 300, 200, 50",
+        "200, 200, 200, 100, 100"
+      ],
+      "answer": 2,
+      "explanation": "Each arrangement of four children has probability one sixteenth, and the numbers of arrangements giving zero through four boys are one, four, six, four, and one. Multiplying eight hundred by each of those sixteenths gives 50, 200, 300, 200, and 50, which correctly sums to eight hundred. Degrees of freedom here are four, one less than the five categories.",
+      "misconception": "The expected counts follow the assumed distribution's shape; they are not spread evenly unless the null is uniform."
+    },
+    {
+      "type": "mcq",
+      "concept": "independence-test",
+      "difficulty": "medium",
+      "question": "For a test of independence on a table with three rows and three columns, what are the degrees of freedom?",
+      "options": [
+        "9, the number of cells",
+        "8, one fewer than the number of cells",
+        "6, the sum of rows and columns",
+        "4, the product of one less than each dimension"
+      ],
+      "answer": 3,
+      "explanation": "Once the row and column totals are fixed, only a portion of the cells can vary freely, and that count is the product of one less than each dimension, giving four here. This differs from the goodness-of-fit rule because a two-way table constrains the counts in both directions, so more information is pinned down by the margins.",
+      "misconception": "The rule for a two-way table is multiplicative across dimensions, not simply one less than the cell count."
+    },
+    {
+      "type": "mcq",
+      "concept": "expected-counts",
+      "difficulty": "medium",
+      "question": "In a test of independence, how is each cell's expected count computed, and what reasoning justifies it?",
+      "options": [
+        "Row total times column total, over the grand total, as independence multiplies.",
+        "The grand total divided by the number of cells, because independence means uniformity.",
+        "The simple average of that cell's own row total and its corresponding column total.",
+        "The observed count adjusted by the overall proportion that the whole table covers."
+      ],
+      "answer": 0,
+      "explanation": "Under independence, the chance of falling in a particular row and a particular column is the product of the two marginal probabilities, exactly as for independent events. Multiplying that product by the grand total converts it into an expected frequency. Comparing these with what was actually observed is what the statistic measures.",
+      "misconception": "Independence implies multiplying the marginal proportions, not spreading counts evenly."
+    },
+    {
+      "type": "scenario",
+      "concept": "assumptions",
+      "difficulty": "hard",
+      "scenario": "An analyst builds a contingency table with many categories, and several cells have expected counts of two or three.",
+      "question": "Why is this a problem, and what is the usual remedy?",
+      "options": [
+        "It is no problem at all, since the test makes no distributional assumptions.",
+        "The approximation needs expected counts above five, so combine sparse cells.",
+        "The observed counts must be above five, so gather more data in those cells.",
+        "The degrees of freedom have to be reduced in order to compensate for it."
+      ],
+      "answer": 1,
+      "explanation": "The test statistic only approximately follows a chi-square distribution, and that approximation degrades when expected counts are very small, making the resulting p-value untrustworthy. The standard responses are to merge related sparse categories into a broader one or to use an exact test designed for small counts. Note the condition applies to expected rather than observed counts.",
+      "misconception": "Being non-parametric about the data's distribution does not mean the test has no assumptions at all."
+    },
+    {
+      "type": "mcq",
+      "concept": "when-to-use",
+      "difficulty": "medium",
+      "question": "What kind of data does the chi-square test work on, and how does that distinguish it from Z-tests and t-tests?",
+      "options": [
+        "Categorical data, whereas the Z-test and t-test both work on numerical data.",
+        "Numerical data, whereas the Z-test and t-test both work on categorical data.",
+        "Only binary data, whereas the other two can handle any number of categories.",
+        "Both categorical and numerical data equally, which is unlike the other two."
+      ],
+      "answer": 0,
+      "explanation": "Tests about means require numbers to average, while the chi-square statistic works on counts of category memberships. It is also non-parametric, making no assumption about the shape of an underlying distribution, which is part of why it is reached for so readily. Identifying your variables' types is therefore the first step in choosing any test.",
+      "misconception": "The choice of test follows from the type of the variables involved."
+    },
+    {
+      "type": "mcq",
+      "concept": "ml-applications",
+      "difficulty": "medium",
+      "question": "How is the chi-square test used in feature selection?",
+      "options": [
+        "By ranking categorical features by their association with the prediction target.",
+        "By transforming the categorical features of a dataset into numerical features.",
+        "By measuring how much each individual feature improves accuracy after training.",
+        "By testing whether a fitted model's residuals turn out to be normally distributed."
+      ],
+      "answer": 0,
+      "explanation": "Running a test of independence between each categorical feature and the target gives a measure of association, so weakly related features showing little relationship are candidates for removal. This is a filter approach, assessing features before and independently of any model, which makes it cheap compared with methods that require repeated training. Some tree algorithms also use the statistic to choose splits.",
+      "misconception": "A filter method evaluates features without training a model, unlike wrapper approaches."
+    },
+    {
+      "type": "scenario",
+      "concept": "sample-vs-population",
+      "difficulty": "medium",
+      "scenario": "A cross-tabulation of passenger class against survival in a sample plainly shows higher survival in the first class, and a colleague says the formal test is unnecessary.",
+      "question": "Why is the test still needed?",
+      "options": [
+        "Because running the test corrects any arithmetic errors in the table's counts.",
+        "Because the contingency table might well contain a calculation mistake somewhere.",
+        "Because the pattern is in a sample, and the test licenses generalising it.",
+        "Because the test is the only means available for computing the expected counts."
+      ],
+      "answer": 2,
+      "explanation": "An apparent pattern in a limited sample could arise by chance, and eyeballing it provides no way to distinguish a real association from a coincidence. The test quantifies how unlikely the observed table would be if the two variables were genuinely independent. On this particular pairing the resulting p-value is essentially zero, so the association is real, which is exactly why the class variable is useful for prediction.",
+      "misconception": "A visible pattern in a sample is a hypothesis, not a conclusion about the population."
+    },
+    {
+      "type": "mcq",
+      "concept": "independence-test",
+      "difficulty": "medium",
+      "question": "A test of independence between two categorical variables returns a p-value close to zero. What do you conclude?",
+      "options": [
+        "The null of independence is rejected, so the two variables are associated.",
+        "The null of independence is retained, since a small p-value supports it.",
+        "The variables are independent and the result is spurious.",
+        "One variable causes the other."
+      ],
+      "answer": 0,
+      "explanation": "A very small p-value means the observed table would be extraordinarily unlikely if the variables were unrelated, which is evidence against independence. It establishes association only, with no claim about direction or causation, since the same caution that applies to correlation applies here. What it does support is treating the variable as informative for prediction.",
+      "misconception": "Rejecting independence demonstrates association, never causation."
+    },
+    {
+      "type": "card",
+      "concept": "two-tests",
+      "difficulty": "medium",
+      "question": "Compare the two chi-square tests: the data each needs, how expected counts are obtained, and the degrees of freedom for each.",
+      "answer": "The goodness-of-fit test uses a single categorical column and asks whether its observed counts match a theoretical distribution, with expected counts computed from whatever distribution the null assumes, such as uniform or binomial, and degrees of freedom equal to one less than the number of categories. The test for independence uses two categorical columns arranged in a contingency table and asks whether they are related, with each cell's expected count obtained as the row total times the column total divided by the grand total, and degrees of freedom equal to one less than the rows times one less than the columns. Both compute the same statistic, summing the squared difference between observed and expected counts divided by the expected count, and both reject their null when the p-value is small.",
+      "explanation": "The expected-count step is where the two genuinely differ and where the reasoning lives. One encodes an assumed distribution, the other encodes the multiplication rule for independent events, and in each case the statistic simply measures how far reality departs from that assumption."
+    },
+    {
+      "type": "card",
+      "concept": "chi-square-distribution",
+      "difficulty": "medium",
+      "question": "Explain why the chi-square statistic is never negative and why its distribution is right-skewed for small degrees of freedom.",
+      "answer": "The statistic sums squared differences between observed and expected counts, each divided by a positive expected count, so every term is non-negative and the total cannot fall below zero. The underlying distribution is itself a sum of squared standard normal variables, which reinforces the same bound. It is right-skewed with few degrees of freedom because small discrepancies are common and produce values near zero, while large totals require several sizeable departures at once and so grow progressively rarer, producing a long upper tail. Adding more degrees of freedom averages out these extremes and the shape becomes increasingly symmetric, approaching a normal curve.",
+      "explanation": "This shape explains why the test is inherently one-sided in practice: only large values of the statistic indicate a poor match, since a value near zero means the observed counts sat close to what was expected."
     }
   ]
 }

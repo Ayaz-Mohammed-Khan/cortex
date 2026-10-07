@@ -2,48 +2,210 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "You build a result with `out = out + [x]` inside a loop over n items. Why is this O(n squared), and what is the fix?",
+      "concept": "indexing",
+      "difficulty": "easy",
+      "question": "For `s = 'hello world'`, what do `s[0]` and `s[-1]` give?",
       "options": [
-        "List indexing is O(n), so switch to a tuple.",
-        "It is actually O(n). The concern is a myth.",
-        "Python lists are linked lists, so use a NumPy array instead.",
-        "Each concatenation copies the whole list so far, so the total work is quadratic. Use `out.append(x)`, which is amortized O(1)."
+        "`'h'` and `'r'`",
+        "`'h'` and `'d'`",
+        "`'e'` and `'d'`",
+        "`'h'` and an error, because an index cannot be negative"
       ],
-      "answer": 3,
-      "explanation": "`list + [x]` allocates a new list and copies every current element on each iteration, so the work is 1 plus 2 plus ... plus n, which is O(n squared). `append` mutates in place and is amortized O(1), giving O(n) overall.",
-      "misconception": "Concatenation and append are not the same. One copies, the other mutates in place."
+      "answer": 1,
+      "explanation": "Positive indexing counts from 0 at the left, so `s[0]` is the first character. Negative indexing counts from -1 at the right, so `s[-1]` is the last one. Negative indexing is what makes reaching the end cheap: you get the final character without first measuring the length.",
+      "misconception": "A negative index is not an error; it counts backward from the end."
     },
     {
       "type": "mcq",
-      "question": "What does `\"data science\"[::2]` return?",
+      "concept": "slicing",
+      "difficulty": "easy",
+      "question": "For `s = 'hello world'`, what does `s[0:5]` return?",
       "options": [
-        "\"ecneics atad\"",
-        "\"aasine\"",
-        "\"dt cec\"",
-        "\"data\""
+        "`'hello '`",
+        "`'hell'`",
+        "`'hello'`",
+        "`'ello'`"
       ],
       "answer": 2,
-      "explanation": "A step of 2 takes every other character starting at index 0: d, t, space, c, e, c, which gives \"dt cec\". A step of -1 would reverse the string instead."
+      "explanation": "A slice includes the start index and excludes the stop index, so positions 0 through 4 are taken and position 5, the space, is left out. The excluded stop is the single most common source of off-by-one errors in slicing, and it matches the behaviour of `range`.",
+      "misconception": "The stop index marks where slicing halts, not the last character it keeps."
+    },
+    {
+      "type": "mcq",
+      "concept": "slicing",
+      "difficulty": "medium",
+      "question": "What does `s[::-1]` do, and why?",
+      "options": [
+        "It raises an error, because a slice step is not permitted to be a negative number.",
+        "It removes the last character of the string and returns everything before it.",
+        "It returns the string unchanged, since both of the slice bounds were omitted.",
+        "It returns the string reversed, since a step of -1 walks the whole string backward."
+      ],
+      "answer": 3,
+      "explanation": "With both bounds left out, the slice spans the entire string, and a step of -1 traverses it backward, so the result is the reverse. It is the shortest idiomatic reversal in Python. Note that a negative step requires the start to sit to the right of the stop when you do supply bounds, so a slice like `s[0:6:-1]` yields nothing.",
+      "misconception": "A negative step is legal; it simply changes the direction of travel."
+    },
+    {
+      "type": "mcq",
+      "concept": "immutability",
+      "difficulty": "easy",
+      "question": "What happens when you run `s = 'hello'` followed by `s[0] = 'H'`?",
+      "options": [
+        "`s` becomes `'Hello'`, with the first character replaced in place.",
+        "It raises an error, because a string does not support item assignment.",
+        "`s` becomes `'H'`, because the assignment replaces the whole value.",
+        "Nothing happens at all and `s` is left unchanged, with no error raised."
+      ],
+      "answer": 1,
+      "explanation": "Strings are immutable, so once created a string cannot be altered in place and assigning to one of its positions raises a TypeError. To get a changed version you build a new string, for example `'H' + s[1:]`, and bind it to a name.",
+      "misconception": "There is no in-place edit for a string; every change produces a new object."
     },
     {
       "type": "scenario",
-      "scenario": "A teammate joins thousands of tokens into one string with `s = s + token` inside a loop and the function is slow on large inputs.",
-      "question": "What is the idiomatic, fast fix in Python?",
+      "concept": "immutability",
+      "difficulty": "medium",
+      "scenario": "A teammate calls `name.upper()` on a column value to normalise it, then prints `name` on the next line and sees the original lowercase text.",
+      "question": "Why did the value not change?",
       "options": [
-        "Use `s += token`, which Python optimizes to O(1).",
-        "Preallocate the string with `s = \" \" * n`.",
-        "Collect the tokens in a list and call `\"\".join(tokens)` once.",
-        "Convert each token to bytes first."
+        "`upper` works only on strings that contain no spaces, so a multi-word value is left alone.",
+        "`upper` applies its change lazily, and the variable updates the next time it is read.",
+        "`upper` returns a new string and leaves the original alone, so the result needs assigning.",
+        "`upper` does mutate the string, but `print` is showing a cached copy of the old value."
       ],
       "answer": 2,
-      "explanation": "Strings are immutable, so repeated concatenation rebuilds the whole string each time, giving O(n squared) behavior. Building a list and calling `join` once is linear and is the standard Python idiom.",
-      "misconception": "`+=` on a string does not avoid the copies in general. The occasional CPython in-place optimization is not guaranteed and should not be relied on."
+      "explanation": "Because strings are immutable, every string method returns a new value rather than editing in place. The fix is to bind the result, as in `name = name.upper()`. This applies to every string method, including `replace`, `strip`, `title`, and `lower`, and it is a frequent cause of normalisation silently doing nothing in a cleaning script.",
+      "misconception": "String methods never modify the original; their return value is the whole point."
+    },
+    {
+      "type": "scenario",
+      "concept": "immutability-performance",
+      "difficulty": "hard",
+      "scenario": "A script builds one large report string by repeatedly appending to it inside a loop over 100,000 records, and it slows down dramatically as the loop progresses.",
+      "question": "What is the underlying cause, and the idiomatic fix?",
+      "options": [
+        "Appending to a string is cheap, so the slowness must be coming from reading the records.",
+        "Each append copies the whole accumulated text, so collect the pieces and `join` once.",
+        "The string has to be declared with triple quotes before it can grow efficiently.",
+        "The loop should use `+` rather than `+=`, which is the form that avoids the copy."
+      ],
+      "answer": 1,
+      "explanation": "Immutability means a string cannot grow in place, so every append allocates a new string and copies everything accumulated so far. Doing that once per record makes the total work grow with the square of the record count. Collecting the pieces in a list and calling `join` once copies the data a single time, which is why `join` is the standard way to assemble text.",
+      "misconception": "Repeated string concatenation is not a cheap append; it is a full copy each time."
+    },
+    {
+      "type": "scenario",
+      "concept": "searching",
+      "difficulty": "hard",
+      "scenario": "A validation check reads `if text.find('error'):` and is meant to act whenever the word appears. It behaves correctly for most inputs but fails on the string `'error in row 3'`.",
+      "question": "Why does that particular input break the check?",
+      "options": [
+        "`find` is case sensitive, so the lowercase word in that input is never matched at all.",
+        "`find` returns a list of positions, and a list is always truthy regardless of content.",
+        "`find` raises an error whenever the substring happens to sit at the very start of the text.",
+        "`find` returns the position, which is 0 here, and 0 is falsy, so the test reads as false."
+      ],
+      "answer": 3,
+      "explanation": "`find` reports the index of the first match, or -1 when there is none. A match at the start returns 0, which Python treats as false, so the branch is skipped exactly when the word is most prominent. Test explicitly with `text.find('error') != -1`, or better, use the membership operator `'error' in text`, which returns a boolean and cannot be misread.",
+      "misconception": "The result of `find` is a position, not a yes-or-no answer, so it must never be used directly as a condition."
+    },
+    {
+      "type": "mcq",
+      "concept": "searching",
+      "difficulty": "medium",
+      "question": "How do `find` and `index` differ when the substring is absent?",
+      "options": [
+        "`find` returns -1, while `index` raises a ValueError.",
+        "`find` raises a ValueError, while `index` returns -1.",
+        "Both return `None`.",
+        "Both raise the same error, so the choice is purely stylistic."
+      ],
+      "answer": 0,
+      "explanation": "They search identically, but they differ in how they report failure: `find` signals absence with -1, whereas `index` raises. Choose `find` when a missing substring is a normal, expected case you want to branch on, and `index` when absence means the data is wrong and the program should stop rather than continue on a bad assumption.",
+      "misconception": "These are not interchangeable; the difference is entirely in the failure path."
+    },
+    {
+      "type": "mcq",
+      "concept": "split-join",
+      "difficulty": "medium",
+      "question": "What do `'a-b-c'.split('-')` and `' '.join(['hi', 'there'])` each produce?",
+      "options": [
+        "`'abc'` and `['hi', 'there']`",
+        "`['a-b-c']` and `'hithere'`",
+        "`['a', 'b', 'c']` and `'hi there'`",
+        "`['a', 'b', 'c']` and `['hi there']`"
+      ],
+      "answer": 2,
+      "explanation": "`split` breaks a string on a separator and returns a list of the pieces, defaulting to whitespace when no separator is given. `join` is its inverse: it is called on the separator and takes the pieces, returning one string. The pair is the backbone of parsing delimited text and reassembling it, and remembering that `join` lives on the separator rather than on the list saves a lot of confusion.",
+      "misconception": "`join` is called on the separator string, not on the list being joined."
+    },
+    {
+      "type": "scenario",
+      "concept": "comparison",
+      "difficulty": "medium",
+      "scenario": "A deduplication step compares city names directly and treats `'Delhi'` and `'delhi'` as two different cities.",
+      "question": "Why does this happen, and what is the standard remedy?",
+      "options": [
+        "String comparison in Python ignores case, so the real bug must lie somewhere else.",
+        "Comparison is case sensitive, so normalise both sides first by lowercasing them.",
+        "The comparison has to use `is` rather than a double equals sign for strings.",
+        "Only strings of equal length can be compared reliably, and these two differ."
+      ],
+      "answer": 1,
+      "explanation": "Strings compare lexicographically by character code, and every uppercase letter sorts below every lowercase one, so case differences make otherwise identical text unequal. Real text data is inconsistently cased, so normalising case, and usually trimming surrounding whitespace too, is a routine first step before comparing, grouping, or deduplicating.",
+      "misconception": "String equality is case sensitive by default; case folding is something you have to do yourself."
+    },
+    {
+      "type": "mcq",
+      "concept": "formatting",
+      "difficulty": "easy",
+      "question": "Which is the modern, preferred way to insert a variable's value into a sentence?",
+      "options": [
+        "Concatenate with `+`, converting every non-string value with `str()`.",
+        "Call the older numbered-placeholder method on the sentence template.",
+        "Write an f-string, placing the variable inside braces in the text.",
+        "Build the sentence by passing the pieces to `join` with a separator."
+      ],
+      "answer": 2,
+      "explanation": "An f-string puts the expression exactly where its value will appear, so the code reads the way the output looks. That is clearer than concatenation, which needs manual conversion of non-strings, and clearer than positional placeholders, where the values sit far from the slots they fill. The older method is still worth recognising in existing code.",
+      "misconception": "Concatenation is not the normal way to build a message; it is noisier and easier to get wrong."
+    },
+    {
+      "type": "mcq",
+      "concept": "counting",
+      "difficulty": "easy",
+      "question": "For `s = 'my name is aarav'`, what does `s.count('a')` return?",
+      "options": [
+        "2",
+        "3",
+        "4",
+        "1"
+      ],
+      "answer": 2,
+      "explanation": "The letter appears once in `name` and three times in `aarav`, giving four in total. `count` tallies non-overlapping occurrences of a substring, not just single characters, so it also answers questions like how many times a delimiter appears in a line before you split it.",
+      "misconception": "`count` counts every occurrence, not just the first."
     },
     {
       "type": "card",
-      "question": "Explain why strings being immutable is a feature, not just a restriction. Give one concrete benefit it enables.",
-      "answer": "Immutability means a string's value never changes after creation, so it is safe to share and hash. That lets strings be dictionary keys and set members, enables interning and caching, and makes them thread safe to pass around without defensive copies.",
-      "explanation": "The practical tell: you can use a string as a dict key but not a list, because a key must be hashable, and hashability relies on the value being fixed."
+      "concept": "immutability",
+      "difficulty": "hard",
+      "question": "Strings are immutable. Name three concrete consequences of that single property.",
+      "answer": "First, you cannot edit a string in place: assigning to an index raises an error, and partial deletion is impossible. Second, every method that appears to modify a string actually returns a new one, so its result must be assigned or it is lost. Third, repeatedly appending to a string copies the whole accumulated value each time, which makes loop-built text quadratic and is why pieces are collected in a list and combined once with `join`.",
+      "explanation": "A fourth consequence arrives later: because an immutable value cannot change, it can be hashed safely, which is what allows strings to serve as dictionary keys and set members while lists cannot."
+    },
+    {
+      "type": "mcq",
+      "concept": "unicode",
+      "difficulty": "easy",
+      "question": "A Python string is a sequence of Unicode characters. What does that buy you in practice?",
+      "options": [
+        "Strings are stored far more compactly than the equivalent text in other languages.",
+        "Text in any language, plus symbols and emoji, fits in an ordinary string.",
+        "A string becomes mutable as soon as it contains non-English characters in it.",
+        "Comparison between two strings becomes case insensitive automatically."
+      ],
+      "answer": 1,
+      "explanation": "The older ASCII scheme covered only a small set of mostly English characters. Unicode spans the writing systems of the world plus symbols and emoji, so a Python string handles international text without special handling. This matters the moment real user-generated data arrives, because names, addresses, and reviews are rarely pure English.",
+      "misconception": "Unicode support concerns which characters can be represented, not how strings behave otherwise."
     }
   ]
 }

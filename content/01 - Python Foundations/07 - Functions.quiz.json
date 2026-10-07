@@ -1,50 +1,231 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A function `def add(x, items=[]):` appends x to items and returns it. Called repeatedly, it keeps accumulating values from earlier calls.",
-      "question": "What causes this, and what is the fix?",
+      "type": "mcq",
+      "concept": "parameter-vs-argument",
+      "difficulty": "easy",
+      "question": "In `def power(a, b)` called as `power(2, 3)`, which are the parameters and which are the arguments?",
       "options": [
-        "Python caches return values by default. Disable the cache.",
-        "Lists cannot be function arguments. Pass a tuple.",
-        "The function needs the `global` keyword.",
-        "The default list is created once at definition and shared across calls. Use `items=None` and create a new list inside the function."
+        "`a` and `b` are parameters; 2 and 3 are arguments.",
+        "`a` and `b` are arguments; 2 and 3 are parameters.",
+        "All four are parameters, since they appear in a function.",
+        "The terms are interchangeable in Python."
       ],
-      "answer": 3,
-      "explanation": "A default argument value is evaluated once, when the function is defined, not on each call. A mutable default like a list is then shared by every call. The fix is to default to None and build a fresh list in the body.",
-      "misconception": "This is the classic mutable-default-argument trap. Defaults are created at definition time, not per call."
+      "answer": 0,
+      "explanation": "A parameter is the name listed in the definition, and an argument is the concrete value supplied at the call. The distinction matters when reading error messages and documentation, which talk about parameters when describing a function and arguments when describing a particular call.",
+      "misconception": "Parameters belong to the definition and arguments to the call; they are not two words for the same thing."
+    },
+    {
+      "type": "scenario",
+      "concept": "return-vs-print",
+      "difficulty": "medium",
+      "scenario": "A colleague writes a function that computes a total and finishes with a `print` of that total rather than returning it. A second script calls the function, tries to use the result in further arithmetic, and gets a TypeError mentioning `NoneType`.",
+      "question": "What is the cause and the fix?",
+      "options": [
+        "The function has to be called with a different kind of bracket entirely.",
+        "`print` evaluates to `None`, so the caller gets nothing; return the total.",
+        "The total needs converting to a string before it can be returned to anyone.",
+        "`print` hands back its value only when called at a script's top level."
+      ],
+      "answer": 1,
+      "explanation": "`print` writes to the screen and evaluates to `None`, so a function ending in `print` reports its answer to a human and gives the program nothing. A function that computes something should return it and leave the choice of whether to display it to the caller. That separation is also what makes the function testable, because you can assert on a returned value but not easily on text that was printed.",
+      "misconception": "Printing is not returning; a function with no `return` statement hands back `None`."
     },
     {
       "type": "mcq",
-      "question": "In `def f(*args, **kwargs):`, what do `args` and `kwargs` capture?",
+      "concept": "keyword-arguments",
+      "difficulty": "medium",
+      "question": "Why do library functions with many settings tend to be called with keyword arguments, and what ordering rule applies?",
       "options": [
-        "Both are tuples.",
-        "`args` captures keywords; `kwargs` captures positionals.",
-        "`args` is a tuple of extra positional arguments; `kwargs` is a dict of extra keyword arguments.",
-        "`args` is a dict; `kwargs` is a list."
+        "Keyword arguments run faster, and they must appear before any positional ones.",
+        "Keyword arguments are required whenever a function has defaults, in any order.",
+        "Naming values makes a long call readable, and positional arguments come first.",
+        "Keyword arguments let a function be called with no arguments supplied at all."
       ],
       "answer": 2,
-      "explanation": "`*args` gathers any extra positional arguments into a tuple. `**kwargs` gathers any extra keyword arguments into a dict. This is how a function accepts a variable number of inputs, which is exactly what a generic decorator wrapper needs."
+      "explanation": "A model or estimator may expose dozens of settings, and nobody remembers their order, so passing them by name makes the call self-documenting and robust against the library reordering its signature. Python requires positional arguments first, because once a name is bound explicitly the remaining positions become ambiguous.",
+      "misconception": "Keyword arguments are about clarity and safety, not speed."
     },
     {
-      "type": "scenario",
-      "scenario": "A reviewer asks you to pass a transformation to `map` so it applies to every row, instead of writing an explicit loop.",
-      "question": "Which statement about `map`, `filter`, and `lambda` is correct?",
+      "type": "mcq",
+      "concept": "default-arguments",
+      "difficulty": "easy",
+      "question": "What does a default value in a parameter list accomplish?",
       "options": [
-        "A `lambda` can contain many statements and a return.",
-        "`map` keeps only matching items; `filter` transforms every item.",
-        "`map(f, xs)` applies f to each item lazily; `filter(f, xs)` keeps items where f is truthy; a `lambda` is a small anonymous function to pass to them.",
-        "`map` returns a list immediately in Python 3."
+        "It forces the caller to supply that argument on every single call.",
+        "It gives the parameter a fallback for when the caller omits it.",
+        "It fixes the parameter's type for every call that is ever made.",
+        "It makes the parameter keyword-only, so position no longer works."
+      ],
+      "answer": 1,
+      "explanation": "A default makes an argument optional: supply it to override, omit it to accept the fallback. This is how a function offers sensible behaviour out of the box while still allowing control, which is why almost every library function has many defaulted settings. One caution worth carrying forward: a default is evaluated once when the function is defined, so using a mutable value such as a list as a default causes that single object to be shared across calls.",
+      "misconception": "A default does not constrain the type; it only supplies a value when none is given."
+    },
+    {
+      "type": "mcq",
+      "concept": "variable-arguments",
+      "difficulty": "medium",
+      "question": "A function is defined with a starred parameter and a double-starred parameter. What does each collect, and in what form?",
+      "options": [
+        "A star gathers keyword arguments into a dictionary, and two stars gather the positional ones.",
+        "Both forms gather positional arguments, and the double-starred form additionally allows duplicates.",
+        "A star gathers extra positional arguments into a tuple, and two stars gather keyword arguments.",
+        "Both forms have to be the only parameters in the definition, with nothing else alongside."
       ],
       "answer": 2,
-      "explanation": "`map` transforms each element, `filter` selects elements by a predicate, and a `lambda` is a one-expression anonymous function convenient to pass inline. In Python 3 both `map` and `filter` return lazy iterators, so wrap in `list()` to materialize.",
-      "misconception": "A lambda holds a single expression, not a block of statements. For anything larger, use a named function."
+      "explanation": "A single star gathers however many positional arguments remain into a tuple, and a double star gathers the remaining named arguments into a dictionary. The names conventionally used are not special; the stars do the work. When ordinary parameters appear alongside them, the order must be ordinary parameters, then the starred one, then the double-starred one.",
+      "misconception": "The stars determine the behaviour, not the parameter names."
+    },
+    {
+      "type": "mcq",
+      "concept": "frames",
+      "difficulty": "medium",
+      "question": "A function assigns a local variable and returns. Why is that variable unavailable afterwards?",
+      "options": [
+        "Python deletes the variable only if it was never actually used anywhere.",
+        "It still exists, but stays hidden until the function is called again.",
+        "Local variables do persist, so the later lookup must be misspelled.",
+        "Each call gets its own frame of locals, and returning discards it."
+      ],
+      "answer": 3,
+      "explanation": "Calling a function creates a private workspace, stacked on top of the caller's, holding the parameters and locals for that call. Returning destroys it, which is why locals are both private and temporary and why two calls cannot see each other's variables. Only the returned value survives, passed back into the caller's frame.",
+      "misconception": "Locals are not merely out of scope while preserved somewhere; the frame holding them is gone."
+    },
+    {
+      "type": "mcq",
+      "concept": "scope",
+      "difficulty": "medium",
+      "question": "A function reads a global variable successfully, but reassigning that same name inside the function does not affect the global. Why is Python designed this way?",
+      "options": [
+        "Assignment inside a function creates a local, which protects shared state.",
+        "Global variables are treated as read-only constants throughout Python.",
+        "The global was defined after the function, so it is invisible to any writes.",
+        "Only functions defined at the module's top level may modify globals."
+      ],
+      "answer": 0,
+      "explanation": "A function may read a global when it has no local of that name, but an assignment inside the body creates a local instead of touching the global. The motivation is containment: if any function could reassign shared state, several functions using the same global would interfere in ways that are very hard to debug. A local and a global may even share a name without colliding, because the scopes are independent.",
+      "misconception": "The restriction is on rebinding the name, and it exists to protect shared state rather than to inconvenience you."
+    },
+    {
+      "type": "mcq",
+      "concept": "first-class-functions",
+      "difficulty": "medium",
+      "question": "What does `say = greet` do, when `greet` is a function defined with `def`?",
+      "options": [
+        "It calls `greet` immediately and stores its return value in `say`.",
+        "It creates an independent copy of the function body under a new name entirely.",
+        "It raises an error, because a function object cannot be assigned.",
+        "It binds a second name to the same function object, so `say()` runs it."
+      ],
+      "answer": 3,
+      "explanation": "A function name is an ordinary variable that happens to point at a function object, so assigning it binds another name to the very same function. Note the absence of brackets: writing `say = greet()` would call the function and store its result instead. This is the foundation of treating functions as values, which is what makes passing and returning them possible.",
+      "misconception": "Omitting the brackets refers to the function; adding them calls it."
+    },
+    {
+      "type": "mcq",
+      "concept": "lambda",
+      "difficulty": "easy",
+      "question": "Which statement about a lambda is correct?",
+      "options": [
+        "It has to be given a name of its own before it can be used at all.",
+        "It may contain several statements, as long as semicolons separate them.",
+        "It is anonymous, holds one expression, and returns that value for you.",
+        "It cannot take more than one parameter in its parameter list."
+      ],
+      "answer": 2,
+      "explanation": "A lambda is a one-line anonymous function: parameters, a colon, and one expression whose value is handed back automatically. It may take any number of parameters, but it cannot hold statements or span lines. Its purpose is to define a small piece of behaviour right where it is needed, which is why it is nearly always written as an argument to another function.",
+      "misconception": "A lambda holds an expression, not a block of statements."
+    },
+    {
+      "type": "mcq",
+      "concept": "map-filter-reduce",
+      "difficulty": "medium",
+      "question": "How do `map`, `filter`, and `reduce` differ in what they produce?",
+      "options": [
+        "`map` transforms each item, `filter` keeps some, and `reduce` gives one value.",
+        "All three return a collection of exactly the same size as their input.",
+        "`map` selects the items, `filter` transforms them, and `reduce` sorts them all.",
+        "`map` and `filter` both reduce to one value, while `reduce` gives a list."
+      ],
+      "answer": 0,
+      "explanation": "The trio covers the three shapes a transformation can take. `map` is one-to-one, so the output length matches the input. `filter` is a subset, so the output is the same length or shorter. `reduce` folds pairs together until one value remains, and it lives in the `functools` module rather than being built in. Together they express most data transformations without an explicit loop.",
+      "misconception": "Only `filter` can change the number of items, and only `reduce` returns a single value."
+    },
+    {
+      "type": "mcq",
+      "concept": "map-filter-reduce",
+      "difficulty": "medium",
+      "question": "Tracing `reduce` with an addition over the values 1, 2, 3, 4, and 5, what sequence of intermediate results does it produce?",
+      "options": [
+        "1, 2, 3, 4, 5, then 15 at the end",
+        "3, 6, 10, 15",
+        "5, 10, 15",
+        "15 only, because reduce works in a single step"
+      ],
+      "answer": 1,
+      "explanation": "`reduce` consumes two items at a time, carrying the running result forward: 1 and 2 give 3, that 3 and the next 3 give 6, 6 and 4 give 10, and 10 and 5 give 15. Understanding the fold is what lets you use it for things other than sums, such as combining dictionaries or finding a maximum by a custom rule.",
+      "misconception": "`reduce` accumulates pairwise; it does not apply the function to all items at once."
+    },
+    {
+      "type": "mcq",
+      "concept": "higher-order-functions",
+      "difficulty": "medium",
+      "question": "What makes a function higher-order?",
+      "options": [
+        "It is defined at the very top level of a module rather than nested.",
+        "It takes a function as input, returns one as output, or does both.",
+        "It has more than three parameters in its own parameter list.",
+        "It calls itself recursively somewhere in the course of its body."
+      ],
+      "answer": 1,
+      "explanation": "A higher-order function treats functions as data, which lets one function's behaviour be chosen by its caller rather than fixed in its body. That is why a transform helper accepting a function can square, cube, or reshape values without being rewritten, and it is the reason lambdas exist: they supply the small behaviour inline at the call site.",
+      "misconception": "Being higher-order is about accepting or returning functions, not about size or recursion."
+    },
+    {
+      "type": "mcq",
+      "concept": "docstring",
+      "difficulty": "easy",
+      "question": "How can you read what a function expects without opening its source?",
+      "options": [
+        "By printing the function's name without any brackets after it.",
+        "Only by reading the project's own external documentation files.",
+        "Through its docstring, read as `__doc__` or printed by `help()`.",
+        "By calling it with no arguments and reading the resulting error."
+      ],
+      "answer": 2,
+      "explanation": "Python stores the triple-quoted string at the top of a function body and makes it available afterwards, so `help()` can print the name, signature, and description. This works for built-in functions too, and it is the same text an editor shows in a tooltip. It is the practical reason to write a docstring: without one, the only documentation is the body itself.",
+      "misconception": "The docstring is retrievable at runtime, not merely a comment for readers of the source."
     },
     {
       "type": "card",
-      "question": "What does it mean that functions in Python are first-class citizens, and name two things that enables.",
-      "answer": "A first-class function is an ordinary object: you can store it in a variable, put it in a list or dict, pass it as an argument, and return it from another function. This enables higher-order functions like map and filter, and it is the foundation decorators are built on, since a decorator takes a function and returns a wrapped function.",
-      "explanation": "The practical tell: `f = len` then `f([1, 2])` works, because the name just points at the function object."
+      "concept": "writer-responsibility",
+      "difficulty": "medium",
+      "question": "Two people are involved with any function: the one who writes it and the one who calls it. Explain where responsibility lies when a function breaks, and what that implies for how you write one.",
+      "answer": "When a function misbehaves, the fault belongs to whoever wrote it rather than whoever called it, because the caller is relying on an interface the author published. The implication is to assume the function will be misused: validate the input it receives, and respond to something unexpected with a clear, actionable message instead of letting an obscure error surface from deep inside the body.",
+      "explanation": "This is why library functions give precise messages naming the offending argument. It is also the practical argument for writing a docstring, since a stated contract tells the caller what counts as valid input before they get it wrong."
+    },
+    {
+      "type": "card",
+      "concept": "first-class-functions",
+      "difficulty": "hard",
+      "question": "Python functions are first-class values. Name the four abilities that follow, and say which two are important enough to have their own term.",
+      "answer": "Because a function is an ordinary value, you can store it in a variable, delete its name, pass it into another function as an argument, and return it from a function as a result. The last two, passing and returning functions, are common enough to have their own name: a function that does either is called a higher-order function.",
+      "explanation": "Everything built on this follows from one idea, that a function name is just a label pointing at a function object. That is what makes lambdas useful, what lets `map` and `filter` accept behaviour as a parameter, and what later makes decorators possible, since a decorator is simply a function that takes a function and returns a replacement."
+    },
+    {
+      "type": "mcq",
+      "concept": "return-vs-print",
+      "difficulty": "medium",
+      "question": "What does a function return when its body contains no `return` statement?",
+      "options": [
+        "`0`",
+        "An empty string",
+        "`None`",
+        "It raises an error at the call site."
+      ],
+      "answer": 2,
+      "explanation": "Reaching the end of a body without returning yields `None`, Python's explicit stand-in for no value. This is why assigning the result of an in-place method such as a list sort gives `None`, and why a function that only prints cannot be composed into a larger expression. When a function exists for its effect rather than its value, returning `None` is correct and intentional.",
+      "misconception": "A function without a `return` does not fail; it quietly produces `None`."
     }
   ]
 }

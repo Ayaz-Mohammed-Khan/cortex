@@ -2,57 +2,225 @@
   "questions": [
     {
       "type": "scenario",
-      "scenario": "A script opens a file with `f = open(path, \"w\")`, writes rows in a loop, and sometimes raises partway through. Later reads find the file empty or truncated.",
-      "question": "What is the robust fix?",
+      "concept": "write-modes",
+      "difficulty": "medium",
+      "scenario": "A nightly job is meant to add each day's results to a running log. It opens the log with the write mode and writes the new results. After a week, the file contains only the most recent day.",
+      "question": "What went wrong, and what should the mode have been?",
       "options": [
-        "Use `with open(path, \"w\") as f:`, so the file is flushed and closed even if an exception is raised.",
-        "Write to the file in binary mode.",
-        "Add `f.flush()` and nothing else.",
-        "Call `open` twice to be safe."
+        "The file needed closing after each write, and the write mode itself was correct.",
+        "The write mode truncates on open, so the append mode should have been used.",
+        "The job should have used the read mode, which also permits writing at the end.",
+        "Each write overwrote the first line only, and the rest was lost to buffering."
       ],
-      "answer": 0,
-      "explanation": "A `with` block is a context manager that closes the file automatically when the block exits, including on an exception. Closing flushes buffered writes to disk. A forgotten `close` after an error leaves buffered data unwritten, which is what truncates the file.",
-      "misconception": "Relying on manual `close` is fragile. The context manager guarantees cleanup on both success and failure."
+      "answer": 1,
+      "explanation": "Opening in write mode empties the file immediately, before anything is written, so every run discarded the previous days. Append mode keeps what is already there and adds at the end. This is one of the most destructive easy mistakes in file handling, because the data is gone the moment the file is opened, and no later error reveals it.",
+      "misconception": "The write mode does not add to a file; it replaces its contents."
     },
     {
       "type": "mcq",
-      "question": "You must process a file far larger than available memory. What is the right reading strategy?",
+      "concept": "context-manager",
+      "difficulty": "medium",
+      "question": "What does the `with` statement give you when working with files?",
       "options": [
-        "Convert it to a list with `list(f)` first.",
-        "Increase the Python recursion limit.",
-        "Call `f.read()` to load it all, then slice it.",
-        "Read it in chunks (or line by line), processing and discarding each piece, so only a small part is in memory at once."
-      ],
-      "answer": 3,
-      "explanation": "Reading a fixed-size chunk or iterating line by line keeps memory flat regardless of file size, because you hold only the current piece. `f.read()` and `list(f)` both pull the whole file into memory, which fails on a file larger than RAM.",
-      "misconception": "`read()` is not safe for huge files. Stream the content so memory stays bounded."
-    },
-    {
-      "type": "mcq",
-      "question": "You dump a Python dict to a file with `json.dump` and read it back with `json.load`. A value that was a tuple comes back as a list. Why?",
-      "options": [
-        "Tuples are not serializable at all.",
-        "The dict was corrupted on write.",
-        "JSON has no tuple type, so tuples serialize as arrays and deserialize as lists.",
-        "`json.load` is buggy."
+        "It opens the file faster by caching the underlying handle for reuse.",
+        "It converts the file's contents into a list of lines automatically.",
+        "It closes the file automatically at the end, even if an error occurs.",
+        "It allows a single handle to both read and write in the same mode."
       ],
       "answer": 2,
-      "explanation": "JSON only has arrays, not a separate tuple type, so a tuple is written as an array and read back as a list. If you need a tuple again, convert it after loading. This is a known JSON round-trip detail, not a bug.",
-      "misconception": "JSON does not preserve Python-specific types. For exact Python object round-trips you would use pickle, with its own trade-offs."
+      "explanation": "The context manager takes responsibility for closing, which removes an easy thing to forget and, more importantly, still closes the handle when an exception interrupts the block. Manual closing after an error requires extra structure to get right. This is why the `with` form is the default way to work with files in modern Python.",
+      "misconception": "The benefit is guaranteed cleanup, including on the error path, not performance."
+    },
+    {
+      "type": "mcq",
+      "concept": "closing-files",
+      "difficulty": "medium",
+      "question": "Why does closing a file matter?",
+      "options": [
+        "Because an unclosed file cannot be read by the same program a second time.",
+        "Because closing the handle is what actually creates the file on the disk.",
+        "Because the file's whole contents are lost if the program ends while open.",
+        "Because an open file holds memory, and an open stream is a route in."
+      ],
+      "answer": 3,
+      "explanation": "There is a memory argument and a safety argument. The handle and its buffer stay resident until closed, which matters when files are large or numerous, and an open stream is an active door into the file. Note also that a closed handle is dead: calling read or write on it raises an error about an operation on a closed file.",
+      "misconception": "Closing releases resources; it is not what commits the file into existence."
+    },
+    {
+      "type": "mcq",
+      "concept": "reading-methods",
+      "difficulty": "medium",
+      "question": "When looping with `readline()` over a large file, how do you detect the end?",
+      "options": [
+        "The method returns `None` once the end of the file has been reached.",
+        "The method returns an empty string, since a blank line is not empty.",
+        "The method raises a StopIteration exception at the end of the file.",
+        "You must count the lines in advance and loop exactly that many times."
+      ],
+      "answer": 1,
+      "explanation": "Each call returns the next line including its trailing newline, so even a blank line comes back as a one-character string. Only a genuinely exhausted file yields an empty string, which makes it a safe sentinel. Reading line by line is what lets you process a file far larger than memory, since only one line is held at a time.",
+      "misconception": "A blank line is not an empty string; it still carries its newline character."
     },
     {
       "type": "scenario",
-      "scenario": "A teammate pickles a trained model on their laptop and asks you to load the pickle, which came from an untrusted shared drive.",
-      "question": "What is the key safety point about pickle versus JSON here?",
+      "concept": "chunked-reading",
+      "difficulty": "hard",
+      "scenario": "A developer reads a very large file in fixed-size chunks, but calls the read method both in the loop condition and again inside the body to print it. Output is missing roughly half the file.",
+      "question": "What is the defect?",
       "options": [
-        "Pickle is always safer than JSON.",
-        "JSON can run code on load, so prefer pickle.",
-        "Unpickling can execute arbitrary code, so never unpickle data you do not trust. JSON only carries data and is safe to parse.",
-        "Both are equally safe for untrusted input."
+        "The chunk size has to divide the total file size exactly with no remainder.",
+        "Printing a chunk consumes it, so the body must write to a buffer instead.",
+        "Each read advances the cursor, so calling it twice per pass skips a chunk.",
+        "Chunked reading requires binary mode in order to work correctly at all."
       ],
       "answer": 2,
-      "explanation": "Pickle can reconstruct arbitrary Python objects, which means a malicious pickle can run code during loading. Only unpickle data from a source you trust. JSON parses to plain data types and cannot execute code, so it is safe for untrusted input, at the cost of not preserving custom Python objects.",
-      "misconception": "Convenience is not the only axis. Pickle's power to rebuild objects is also a security risk with untrusted data."
+      "explanation": "Reading is not a peek, it moves the cursor forward, so every extra call pulls new data. Checking one chunk and then printing a different one silently drops alternate chunks. The correct shape reads once into a variable, tests that variable for the empty string to detect the end, and then processes the same variable.",
+      "misconception": "A read call is destructive progress through the file, not a repeatable inspection of the current position."
+    },
+    {
+      "type": "mcq",
+      "concept": "chunked-reading",
+      "difficulty": "medium",
+      "question": "Why read a file in chunks at all?",
+      "options": [
+        "Because a file larger than memory cannot be loaded whole, so one chunk is held.",
+        "Because chunked reading is always faster than reading the whole file at once.",
+        "Because reading a whole file into memory corrupts any binary data inside it.",
+        "Because the cursor can move only a fixed number of characters per call."
+      ],
+      "answer": 0,
+      "explanation": "A ten gigabyte file will not fit in eight gigabytes of memory, so loading it in one call fails regardless of how fast the disk is. Processing a chunk and discarding it keeps the memory footprint flat no matter how big the file grows. Data libraries do this internally when they stream large datasets, which is why they can handle files bigger than the machine's memory.",
+      "misconception": "Chunking is about bounding memory, not about going faster."
+    },
+    {
+      "type": "mcq",
+      "concept": "cursor",
+      "difficulty": "medium",
+      "question": "What do `tell()` and `seek(n)` do?",
+      "options": [
+        "`tell` counts the lines in the file, and `seek` jumps straight to line `n`.",
+        "`tell` reports the current cursor position, and `seek` moves it to `n`.",
+        "`tell` returns the file's total size, and `seek` resizes it to `n` bytes.",
+        "`tell` reads the next character, and `seek` skips over `n` characters."
+      ],
+      "answer": 1,
+      "explanation": "The cursor marks where the next read or write will happen, so reading ten characters leaves it at position ten. Moving it back to zero lets you read the same content again, which a straight sequential read could not do. The analogy is a scrub bar over a video: seeking jumps anywhere in the file and telling reports where the bar sits.",
+      "misconception": "Both work in character positions, not line numbers."
+    },
+    {
+      "type": "mcq",
+      "concept": "binary-files",
+      "difficulty": "medium",
+      "question": "Reading an image with the ordinary text read mode fails with a decode error. Why, and what is the fix?",
+      "options": [
+        "Images must be converted into text before being read, so use an encoder first.",
+        "The file must be opened twice, once for the header and once for the data body.",
+        "Text mode decodes bytes as Unicode, which image bytes are not, so read binary.",
+        "The error is spurious and can simply be suppressed with an encoding argument."
+      ],
+      "answer": 2,
+      "explanation": "Text mode decodes the bytes on the way in, and arbitrary image bytes do not form valid characters, so decoding fails. The binary modes hand you raw bytes with no decoding, which is what the data actually is. The flow is otherwise identical, so copying an image is simply reading bytes from one handle and writing them to another.",
+      "misconception": "The difference between text and binary mode is whether decoding happens, not how the file is structured."
+    },
+    {
+      "type": "mcq",
+      "concept": "text-files-store-strings",
+      "difficulty": "medium",
+      "question": "What happens if you try to write the integer 5 to a text file, and what does reading numbers back give you?",
+      "options": [
+        "The write succeeds as it is, and reading the value back gives an integer.",
+        "The write converts the value silently, and reading it back gives a string.",
+        "The write raises an error, and numbers read from a text file come as strings.",
+        "The write succeeds only in append mode, and reading the value gives a float."
+      ],
+      "answer": 2,
+      "explanation": "A text file holds characters, so writing accepts only strings and the integer must be converted first. Equally, everything read back is text, so a stored number returns as a string and needs converting before arithmetic. This limitation is exactly what serialization exists to overcome, since it preserves real types across a save and load.",
+      "misconception": "A text file has no notion of data types; everything in it is characters."
+    },
+    {
+      "type": "mcq",
+      "concept": "json",
+      "difficulty": "medium",
+      "question": "What does serialization with JSON achieve that writing a dictionary as plain text does not?",
+      "options": [
+        "It compresses the data so that the resulting file ends up smaller on disk.",
+        "It stores the data in a standard notation, so loading gives a real dictionary.",
+        "It encrypts the data so that other programs on the machine cannot read it.",
+        "It allows the resulting file to be opened in binary mode later if needed."
+      ],
+      "answer": 1,
+      "explanation": "Writing a dictionary as text and reading it back gives you characters, leaving you to reconstruct the structure by hand. Serialization records the structure in a defined notation and deserialization rebuilds the real object, so nested lists and dictionaries round-trip correctly with no manual conversion. JSON in particular is understood by effectively every language and web interface, which is why it is the default interchange format.",
+      "misconception": "JSON is about portability and preserving structure, not compression or secrecy."
+    },
+    {
+      "type": "scenario",
+      "concept": "json",
+      "difficulty": "hard",
+      "scenario": "A configuration dictionary containing a tuple of coordinates is written to a JSON file. After loading it back, code that unpacks the coordinates as a tuple behaves differently, and a check on the value's type fails.",
+      "question": "What happened to the tuple?",
+      "options": [
+        "It was dropped entirely, because JSON has no way to store any sequences.",
+        "It was stored as a plain string and has to be parsed back out manually.",
+        "It was serialized as a list, so it returns as a list and needs converting.",
+        "It was converted into a dictionary keyed by each coordinate's position."
+      ],
+      "answer": 2,
+      "explanation": "JSON has one array type, so a tuple and a list are written identically and both come back as lists. The data survives but the type does not, which matters when later code relies on a tuple's immutability or uses the value as a dictionary key. Convert explicitly after loading when the distinction matters, and keep in mind that the string-based variants of these functions behave the same way.",
+      "misconception": "A JSON round trip preserves values and structure, but not every Python type."
+    },
+    {
+      "type": "mcq",
+      "concept": "custom-object-serialization",
+      "difficulty": "hard",
+      "question": "Serializing an instance of your own class to JSON raises an error about the object not being serializable. What is the remedy and what is its limitation?",
+      "options": [
+        "Add a string method to the class; the limitation is that numbers become text.",
+        "Supply a function that turns the object into a dictionary; methods are lost.",
+        "Serialize each attribute on its own; the limitation is an unreadable file.",
+        "Open the file in binary mode; the limitation is other languages cannot read it."
+      ],
+      "answer": 1,
+      "explanation": "JSON has no idea how your class maps onto its small set of types, so you provide the mapping through a conversion function, usually one that returns a dictionary. What lands in the file is therefore a readable record of the object's data, not the object itself, so behaviour is lost on the way back. When the live object with its methods must survive, pickling is the tool instead.",
+      "misconception": "JSON stores data; it cannot carry an object's behaviour."
+    },
+    {
+      "type": "mcq",
+      "concept": "pickle-vs-json",
+      "difficulty": "medium",
+      "question": "Which row correctly contrasts pickling with JSON?",
+      "options": [
+        "Pickle is human-readable text, while JSON is an opaque binary stream.",
+        "Pickle is readable across many languages, while JSON is Python-only.",
+        "Both preserve an object's methods, and they differ only in file size.",
+        "Pickle is binary and keeps behaviour but is Python-only; JSON is universal."
+      ],
+      "answer": 3,
+      "explanation": "The trade is portability against fidelity. JSON travels anywhere and can be inspected by eye, at the cost of reducing an object to plain data. Pickle reconstitutes the object so its methods work again, at the cost of being tied to Python. Choose by what you need: readable, portable data, or a live object.",
+      "misconception": "Neither format is simply better; they optimise for different things."
+    },
+    {
+      "type": "scenario",
+      "concept": "pickle-vs-json",
+      "difficulty": "medium",
+      "scenario": "A data scientist trains a model on a powerful workstation and needs to run it on a separate server, with all of its methods intact.",
+      "question": "Which approach fits, and why?",
+      "options": [
+        "Pickle the model and unpickle it on the server, since pickling keeps behaviour.",
+        "Write the model's parameters to a text file and rebuild it by hand on the server.",
+        "Serialize the model to JSON, because JSON is universal and so keeps everything.",
+        "Re-train the model on the server, since objects cannot move between machines."
+      ],
+      "answer": 0,
+      "explanation": "A trained model is a Python object, and pickling turns it into a byte stream that reconstructs into a fully working object elsewhere, which is why this is the routine way models are saved and shipped. One caution for real deployments: unpickling executes code during reconstruction, so a pickle file should only ever be loaded from a source you trust.",
+      "misconception": "JSON being universal does not make it more capable; it cannot carry behaviour at all."
+    },
+    {
+      "type": "card",
+      "concept": "json",
+      "difficulty": "medium",
+      "question": "Define serialization and deserialization, and name the function pair that performs each against a file in both the JSON and pickle modules.",
+      "answer": "Serialization converts a Python object into a standard notation that can be stored or transmitted, and deserialization converts that notation back into a Python object. In the JSON module, dump writes an object into an open file and load reads a file back into an object, working in text mode. The pickle module mirrors this with dump and load as well, but operates on a byte stream, so its files must be opened in binary mode.",
+      "explanation": "The variants whose names end in an s work against strings rather than files, which is what you use when the serialized form is being sent over a network or embedded in another document instead of saved to disk."
     }
   ]
 }

@@ -1,51 +1,217 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "At the module level you write `max = 5`, then later call `max([1, 2, 3])` and get `TypeError: 'int' object is not callable`.",
-      "question": "Why, in terms of the LEGB rule?",
+      "type": "mcq",
+      "concept": "legb",
+      "difficulty": "medium",
+      "question": "In what order does Python search namespaces to resolve a name, and when does it stop?",
       "options": [
-        "Built-ins always win over globals, so this should work.",
-        "The list is malformed.",
-        "Name lookup checks Local, then Enclosing, then Global, then Built-in. Your global `max = 5` is found before the built-in `max`, so the name now refers to the integer.",
-        "`max` cannot be reassigned."
+        "Built-in, then global, then enclosing, then local, stopping at the last match.",
+        "Local, then enclosing, then global, then built-in, stopping at the first match.",
+        "Global, then local, then built-in, checking all and preferring the nearest.",
+        "Local, then global only; enclosing and built-in are searched only on failure."
+      ],
+      "answer": 1,
+      "explanation": "The search runs outward from the current function through any enclosing functions, then the module, then the names Python always provides, and it halts the moment it finds a match. Two consequences follow: the search never looks inward into a nested scope, and a nearer definition always hides a further one, which is the root of shadowing bugs.",
+      "misconception": "The search stops at the first hit; it does not survey every scope and pick the best."
+    },
+    {
+      "type": "scenario",
+      "concept": "shadowing",
+      "difficulty": "hard",
+      "scenario": "A script assigns the integer 5 to a name that matches a built-in function. Later, calling that name with a list raises a TypeError saying an integer object is not callable.",
+      "question": "What happened?",
+      "options": [
+        "Assigning to a built-in name is forbidden, so the name itself was corrupted.",
+        "The list has to be converted first before the built-in function will accept it.",
+        "The name resolves in global first, which now holds an integer, not the function.",
+        "Built-in functions have to be imported explicitly before they can be used."
       ],
       "answer": 2,
-      "explanation": "Python resolves a name by searching Local, Enclosing, Global, then Built-in, and stops at the first match. The global `max = 5` shadows the built-in function, so calling `max(...)` tries to call the integer 5. Avoid naming variables after built-ins.",
-      "misconception": "Built-ins do not take priority. They are last in LEGB, so a global of the same name shadows them."
+      "explanation": "Global is searched before built-in, so once a module-level name exists the original built-in becomes unreachable from global code, and calling it attempts to call an integer. Python permits the assignment because the built-in namespace is simply the last place it looks. The practical rule is to avoid naming variables after built-ins such as list, sum, max, id, or type, since the breakage appears far from the assignment.",
+      "misconception": "Shadowing does not overwrite the built-in; it just hides it behind a nearer name."
     },
     {
       "type": "mcq",
-      "question": "A decorator's inner wrapper is defined as `def wrapper():` with no parameters. You apply it to a function that takes arguments, and calls fail.",
+      "concept": "global-keyword",
+      "difficulty": "medium",
+      "question": "Inside a function, what does the `global` keyword accomplish?",
       "options": [
-        "Decorators cannot be applied to functions with arguments.",
-        "The decorated function must be made global.",
-        "The wrapper must accept `*args, **kwargs` and forward them, so it works for functions of any signature.",
-        "You must write one decorator per argument count."
+        "It makes a module-level name reassignable from inside the function.",
+        "It makes a local variable of the function visible to every other function.",
+        "It imports the entire global namespace into the current function body.",
+        "It marks the variable as a constant that is not allowed to change later."
+      ],
+      "answer": 0,
+      "explanation": "Reading a module-level name from inside a function works without any declaration, but assigning to that name would ordinarily create a separate local. The declaration redirects the assignment to the module-level name. It is worth using sparingly, because freely rewritable shared state is exactly what makes behaviour hard to reason about.",
+      "misconception": "The keyword changes where an assignment lands; it does not export a local variable."
+    },
+    {
+      "type": "mcq",
+      "concept": "nonlocal-keyword",
+      "difficulty": "medium",
+      "question": "An inner function needs to reassign a variable belonging to the function that encloses it. Which keyword applies?",
+      "options": [
+        "`global`, on the basis that any name that is not local must be a global one.",
+        "No keyword at all, since an assignment finds the enclosing variable itself.",
+        "`nonlocal`, the enclosing-scope counterpart to the global declaration.",
+        "`enclosing`, a keyword that targets the immediately surrounding scope."
       ],
       "answer": 2,
-      "explanation": "The wrapper stands in for the decorated function, so it must accept whatever that function accepts. Writing `def wrapper(*args, **kwargs):` and calling `func(*args, **kwargs)` makes the decorator generic across signatures. A zero-parameter wrapper only works for zero-argument functions.",
-      "misconception": "A hard-coded wrapper signature breaks most functions. Variadic arguments keep a decorator reusable."
+      "explanation": "Without the declaration, an assignment inside the inner function creates a fresh local and the enclosing variable is untouched, exactly mirroring the global case. The non-local declaration tells Python to bind the name in the nearest enclosing function scope instead. This is how a closure can maintain state that is updated across calls, such as a running counter.",
+      "misconception": "The enclosing scope is distinct from the global scope and needs its own declaration."
+    },
+    {
+      "type": "mcq",
+      "concept": "scope-boundaries",
+      "difficulty": "medium",
+      "question": "Does a variable assigned inside an `if` block or a `for` loop live in a new scope?",
+      "options": [
+        "Yes, because every indented block introduces a scope of its very own.",
+        "No, only a function creates a scope, so the name joins the surrounding one.",
+        "Yes for loops, as the loop variable is temporary, but not for conditionals.",
+        "Only when the block in question happens to sit inside a function body."
+      ],
+      "answer": 1,
+      "explanation": "Indentation does not create scope in Python; only a function call does. So a name first assigned inside a conditional or a loop is perfectly readable afterwards, and a loop variable survives the loop. This differs from languages where a block introduces its own scope, and it explains why a variable assigned only on one branch can later raise a name error if that branch never ran.",
+      "misconception": "Blocks are not scopes in Python; functions are."
+    },
+    {
+      "type": "mcq",
+      "concept": "closures",
+      "difficulty": "hard",
+      "question": "What is a closure, and which condition keeps the enclosing variable alive?",
+      "options": [
+        "A function taking no arguments, which Python then caches between its calls.",
+        "A function stored in a variable, which keeps the whole module alive in memory.",
+        "A function that declares a variable non-local, copying it into the local scope.",
+        "A returned inner function using an outer variable, so that variable survives."
+      ],
+      "answer": 3,
+      "explanation": "Normally a function's locals are destroyed when it returns. The exception is when a returned inner function still refers to one of them, in which case the value is kept alive because something still needs it. So a child function can reach its parent's variables even after the parent has completed, and that single behaviour is the mechanism every decorator relies on.",
+      "misconception": "The variable survives because the returned function still references it, not because of any caching."
+    },
+    {
+      "type": "mcq",
+      "concept": "decorator-definition",
+      "difficulty": "medium",
+      "question": "What does a decorator do?",
+      "options": [
+        "It receives a function, adds behaviour around it, and returns a replacement.",
+        "It renames a function so that the same code can be called under a new name.",
+        "It converts an ordinary standalone function into a method on some class.",
+        "It runs the function immediately and stores the result it produced for reuse."
+      ],
+      "answer": 0,
+      "explanation": "The pattern is an outer function that accepts the target, an inner wrapper that calls the target with extra behaviour surrounding it, and a return of that wrapper. It is possible only because functions are ordinary values that can be passed and returned, and because a closure lets the wrapper still reach the original function after the decorator has finished running.",
+      "misconception": "A decorator returns a new function; it does not edit the original in place."
+    },
+    {
+      "type": "mcq",
+      "concept": "decorator-syntax",
+      "difficulty": "medium",
+      "question": "Placing `@my_decorator` above a function definition is shorthand for what?",
+      "options": [
+        "Calling the decorator once at import time and then discarding its result.",
+        "Registering the function with the decorator so it can be looked up later.",
+        "Rebinding the function's name to the decorator applied to the function.",
+        "Marking the function so the decorator is re-run after every single call."
+      ],
+      "answer": 2,
+      "explanation": "The syntax performs the assignment for you, so the original name now refers to the wrapper and every subsequent call goes through the added behaviour. Recognising this equivalence demystifies the symbol and explains the decorators already met, such as the markers for a static method and an abstract method, which are the same mechanism applied to class members.",
+      "misconception": "The symbol is syntax for an immediate reassignment, not a registration or a hook."
     },
     {
       "type": "scenario",
-      "scenario": "A decorator returns an inner `wrapper` that still uses the decorated `func` after the decorator function has already returned.",
-      "question": "What language feature makes this work?",
+      "concept": "argument-forwarding",
+      "difficulty": "hard",
+      "scenario": "A timing decorator is written with a wrapper that takes no parameters. It works on a function that takes nothing, but raises a TypeError as soon as it is applied to a function that takes an argument.",
+      "question": "What is the defect and the fix?",
       "options": [
-        "Static variables on the module.",
-        "Global variables, which all functions share.",
-        "The `nonlocal` keyword, which copies the variable.",
-        "A closure: the inner function retains access to variables from the enclosing scope even after that outer function has finished."
+        "The wrapper must forward what it gets, so it needs a starred parameter.",
+        "The decorator must be applied below the function definition, not above it.",
+        "The decorated function must be rewritten so that it takes no arguments.",
+        "The decorator should return the original function rather than the wrapper."
       ],
-      "answer": 3,
-      "explanation": "When an inner function references a name from its enclosing function and is returned, Python keeps that enclosing variable alive in a closure. That is why the returned wrapper can still call `func` after the decorator has returned. Closures are the mechanism every decorator relies on.",
-      "misconception": "It is not globals keeping `func` alive. The closure captures the specific enclosing variable."
+      "answer": 0,
+      "explanation": "After decoration the wrapper is what callers actually reach, so its signature becomes the function's signature. A wrapper accepting nothing therefore rejects any argument the caller supplies. Accepting a starred parameter and forwarding it keeps the decorator usable on any function, and adding the double-starred form covers keyword arguments too.",
+      "misconception": "The wrapper replaces the function at the call site, so it must tolerate the original's arguments."
+    },
+    {
+      "type": "mcq",
+      "concept": "argument-forwarding",
+      "difficulty": "easy",
+      "question": "Inside a decorator, why read the wrapped function's `__name__`?",
+      "options": [
+        "To check whether the function in question has already been decorated once.",
+        "To recover the original name so printed messages can identify the function.",
+        "To allow the inner wrapper to call the original function by its own name.",
+        "To prevent the same decorator from being accidentally applied to it twice."
+      ],
+      "answer": 1,
+      "explanation": "A timing decorator that reports elapsed time is only useful if it says which function was timed, and the attribute supplies that without the caller passing a label. It matters because, after decoration, the name a caller uses points at the wrapper, so the original identity has to be read from the function object itself.",
+      "misconception": "The attribute is read for reporting; it plays no part in making the call."
+    },
+    {
+      "type": "mcq",
+      "concept": "parameterized-decorators",
+      "difficulty": "hard",
+      "question": "Why does a decorator that takes its own argument require three nested functions?",
+      "options": [
+        "Because each of the three levels handles one argument of the decorated function.",
+        "Because Python needs one wrapper for the arguments and one for the return value.",
+        "Because the outer level holds the configuration in a closure the wrapper reads.",
+        "Because the extra level is what re-applies the decorator again on every call."
+      ],
+      "answer": 2,
+      "explanation": "Written with an argument, the symbol first calls the outer function with that argument, which returns something that is then applied to the target function exactly like an ordinary decorator. The additional layer exists purely to hold the configuration in a closure so the eventual wrapper can consult it, for instance to check that an argument matches a required type.",
+      "misconception": "The extra nesting carries the decorator's own configuration, not the decorated function's arguments."
+    },
+    {
+      "type": "mcq",
+      "concept": "namespaces",
+      "difficulty": "easy",
+      "question": "What is a namespace, and what is a scope?",
+      "options": [
+        "A namespace maps names to objects; a scope is the region where it applies.",
+        "A namespace is a module file, and a scope is the set of functions inside it.",
+        "A namespace is a scope's name, and a scope is the block's indentation level.",
+        "They are really the same single thing, described from two directions."
+      ],
+      "answer": 0,
+      "explanation": "A namespace is effectively a dictionary, so assigning a value records an entry mapping that name to the object. A scope is where a particular namespace applies, and every function call creates a fresh one. That is precisely why a variable in one function does not leak into another: the two calls have separate mappings.",
+      "misconception": "A namespace is the mapping and a scope is its region of validity; they are related but distinct."
+    },
+    {
+      "type": "mcq",
+      "concept": "namespaces",
+      "difficulty": "easy",
+      "question": "Which namespace holds names such as `print`, `len`, and `sorted`?",
+      "options": [
+        "The global namespace belonging to each module that happens to use them.",
+        "The enclosing namespace, which every function in the program shares.",
+        "The built-in namespace, present everywhere and searched last of all.",
+        "The local namespace of whichever function is currently calling them."
+      ],
+      "answer": 2,
+      "explanation": "These names live in the built-in namespace, which is always present and is the final place the name search looks. Being last is exactly why a module-level name of your own takes precedence and can hide one of them. The full list can be inspected by examining the built-ins module.",
+      "misconception": "Built-in names are not copied into each module; they are a separate namespace searched last."
     },
     {
       "type": "card",
-      "question": "Describe how the `@my_decorator` syntax relates to plain function calls, using `hello` as the decorated function.",
-      "answer": "Writing `@my_decorator` above `def hello(): ...` is shorthand for `hello = my_decorator(hello)`. The decorator receives the original `hello`, builds and returns a wrapper, and that wrapper is bound back to the name `hello`. So every later call to `hello()` runs the wrapper, which adds behavior around the original and calls it. The at-sign is pure convenience for that reassignment.",
-      "explanation": "The tell: anything you can do with `@decorator` you can do by hand with `name = decorator(name)`; the syntax just reads better."
+      "concept": "closures",
+      "difficulty": "hard",
+      "question": "Explain how a closure makes a decorator possible, tracing what survives after the decorator function has returned.",
+      "answer": "A decorator is a function that receives the target function, defines an inner wrapper that calls it with extra behaviour, and returns that wrapper. By the time the wrapper is eventually called, the decorator has already finished, so its local variables, including the reference to the original function, would normally be gone. They survive because the returned wrapper still refers to them, which is a closure: an inner function keeping an enclosing variable alive because it is returned and still needs it. So the wrapper can invoke the original function long after the decorator completed.",
+      "explanation": "This is why the two halves of the topic belong together. Without the scope rules and the closure exception, the returned wrapper would have no way to reach the function it is supposed to wrap, and the whole pattern would be impossible."
+    },
+    {
+      "type": "card",
+      "concept": "legb",
+      "difficulty": "medium",
+      "question": "Name the four namespaces in the search order, say what creates each, and state the one rule that explains shadowing.",
+      "answer": "The order is local, enclosing, global, then built-in. Local is created by the current function call and dies when it returns. Enclosing belongs to an outer function wrapping an inner one and lives while that outer call is active. Global is the module or main program and lasts for the whole run. Built-in holds the names Python always provides. The rule that explains shadowing is that the search stops at the first match and only ever moves outward, so a nearer definition hides a further one.",
+      "explanation": "That single rule covers both the common cases: a local variable hiding a module-level one of the same name, and a module-level name hiding a built-in function so that calling it fails with a message about the wrong kind of object being callable."
     }
   ]
 }

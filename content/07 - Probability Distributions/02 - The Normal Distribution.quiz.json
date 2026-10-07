@@ -2,41 +2,231 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "According to the empirical rule for a normal distribution, roughly what fraction of values lie within one standard deviation of the mean?",
+      "concept": "parameters",
+      "difficulty": "easy",
+      "question": "What do the two parameters of a normal distribution control?",
       "options": [
-        "About 68 percent.",
-        "About 95 percent.",
-        "About 50 percent.",
-        "About 99.7 percent."
+        "The mean controls the spread of the curve and the standard deviation its height.",
+        "The mean sets the centre and the standard deviation the spread, so wider is flatter.",
+        "Both of them control the centre of the curve, and they differ only in their units.",
+        "The mean controls the skew of the curve and the standard deviation its symmetry."
       ],
-      "answer": 0,
-      "explanation": "The empirical rule says about 68 percent of values fall within one standard deviation, about 95 percent within two, and about 99.7 percent within three. These thresholds are why two and three sigma are common flags for unusual values."
-    },
-    {
-      "type": "scenario",
-      "scenario": "You must compare a student's score of 82 on a biology test (mean 70, standard deviation 6) with 78 on a chemistry test (mean 60, standard deviation 12).",
-      "question": "How do you compare them fairly, and which is relatively better?",
-      "options": [
-        "Average the two means and compare.",
-        "Compare raw scores; 82 beats 78, so biology wins by 4 points.",
-        "You cannot compare scores from different tests.",
-        "Convert to z-scores. Biology is (82 minus 70) over 6, which is 2.0; chemistry is (78 minus 60) over 12, which is 1.5. Biology is relatively better."
-      ],
-      "answer": 3,
-      "explanation": "Standardizing to a z-score, the number of standard deviations from the mean, puts both scores on one scale. Biology is 2.0 standard deviations above its mean, chemistry 1.5, so the biology performance is relatively stronger despite both being above average.",
-      "misconception": "Raw scores are not comparable across tests with different means and spreads. Standardize first."
+      "answer": 1,
+      "explanation": "Changing the mean slides the whole curve along the axis without altering its shape. Changing the standard deviation stretches or compresses it, and because the enclosed area must stay at one, a wider curve is necessarily flatter and a narrower one taller. Knowing both values and that the data is normal is enough to draw the entire distribution.",
+      "misconception": "Widening the curve lowers its peak, because the total area is fixed."
     },
     {
       "type": "mcq",
-      "question": "What is the standard normal distribution?",
+      "concept": "standardization",
+      "difficulty": "medium",
+      "question": "What does standardising a normal variable do, and what are the resulting parameters?",
       "options": [
-        "A normal distribution with mean 1 and standard deviation 0.",
-        "Any symmetric distribution.",
-        "A normal distribution with mean 0 and standard deviation 1, obtained by standardizing any normal variable with a z-score.",
-        "The distribution of z-scores for non-normal data."
+        "It subtracts the mean and divides by the spread, giving mean 0 and spread 1.",
+        "It divides by the mean and subtracts the spread, bounding the result in 0 to 1.",
+        "It takes the logarithm of every value, which has the effect of removing the skew.",
+        "It rescales the values into the range zero to one by dividing by the maximum."
+      ],
+      "answer": 0,
+      "explanation": "The transformation is mean-centring followed by scaling, so the centre moves to zero and the spread becomes one unit. The resulting variable is the standard normal, conventionally written with a capital Z. Rescaling into a fixed range by the maximum is a different operation and does not produce a standard normal.",
+      "misconception": "Standardising fixes the centre and spread; it does not bound the values or change the shape."
+    },
+    {
+      "type": "mcq",
+      "concept": "standardization",
+      "difficulty": "medium",
+      "question": "What are the two main benefits of standardising?",
+      "options": [
+        "It removes the outliers from the data, and it makes a continuous column discrete.",
+        "It makes any data normal, and it removes the need to assume a distribution at all.",
+        "It makes two different normals comparable, and it lets probabilities be tabled.",
+        "It reduces the sample size that is needed, and it guarantees a symmetric shape."
       ],
       "answer": 2,
-      "explanation": "Standardizing a normal variable by subtracting the mean and dividing by the standard deviation yields the standard normal: mean 0, standard deviation 1. That single reference distribution is what z-tables and the empirical rule are built on."
+      "explanation": "Once both variables are expressed in standard deviations from their own means, a value of two means the same thing in each, so they become comparable despite different original units. And since every normal distribution maps onto the single standard one, the areas only had to be computed once, which is what a table of values provides. Standardising does not make non-normal data normal.",
+      "misconception": "Standardising changes the scale, not the shape; a skewed variable stays skewed."
+    },
+    {
+      "type": "mcq",
+      "concept": "z-table",
+      "difficulty": "medium",
+      "question": "What does a value looked up in a standard normal table represent?",
+      "options": [
+        "The height of the density curve at that particular standardised point.",
+        "The area to the left of the point, the probability of being at or below it.",
+        "The area under the curve lying between the mean and that point only.",
+        "The combined area in both of the two tails beyond that point outward."
+      ],
+      "answer": 1,
+      "explanation": "The table holds cumulative probability, so it answers the question of how much of the distribution lies at or below a given standardised value. Anything else is obtained from that: the right-hand area is one minus the looked-up value, and the area between two points is the difference between their two lookups. Reading it as anything other than a left-hand area is the most common source of error.",
+      "misconception": "The table is cumulative from the far left, not measured from the mean."
+    },
+    {
+      "type": "scenario",
+      "concept": "z-table",
+      "difficulty": "hard",
+      "scenario": "Male heights are normally distributed with a mean of 68 inches and a standard deviation of 3 inches. The standard normal table gives 0.9082 at a standardised value of 1.33.",
+      "question": "What proportion of males are taller than 72 inches?",
+      "options": [
+        "About 90.82 percent",
+        "About 9.18 percent",
+        "About 1.33 percent",
+        "About 50 percent"
+      ],
+      "answer": 1,
+      "explanation": "Standardising 72 gives four divided by three, which is 1.33. The table value of 0.9082 is the share at or below that height, so the share above is one minus it, roughly 9.18 percent. Forgetting to subtract is the classic slip here, which is why it is worth sketching the curve and shading the region you actually want before reading any table.",
+      "misconception": "The looked-up value is the area below the threshold, so a greater-than question needs the complement."
+    },
+    {
+      "type": "mcq",
+      "concept": "empirical-rule",
+      "difficulty": "easy",
+      "question": "What proportions does the empirical rule give for one, two, and three standard deviations either side of the mean?",
+      "options": [
+        "About 50 percent, 75 percent, and 90 percent",
+        "About 34 percent, 68 percent, and 95 percent",
+        "About 68 percent, 95 percent, and 99.7 percent",
+        "About 90 percent, 95 percent, and 99 percent"
+      ],
+      "answer": 2,
+      "explanation": "These three figures hold for every normal distribution regardless of its mean and spread, which is what makes the rule so useful. Knowing only that data is normal lets you assert that almost all of it lies within three standard deviations of the centre, and that anything beyond is in a region containing roughly three hundredths of a percent of the data.",
+      "misconception": "The 34 percent figure is one side of the first interval, not the whole interval."
+    },
+    {
+      "type": "mcq",
+      "concept": "empirical-rule",
+      "difficulty": "medium",
+      "question": "Using table values of 0.50 at zero and 0.8413 at one, how is the 68 percent figure derived?",
+      "options": [
+        "By doubling the value 0.8413 and then subtracting one from the result.",
+        "By subtracting to get 34.13 percent for one side, then doubling by symmetry.",
+        "By adding 0.50 and 0.8413 to reach roughly 1.34, and then rescaling it.",
+        "By taking 0.8413 on its own, since it already covers both of the two sides."
+      ],
+      "answer": 1,
+      "explanation": "Both looked-up values are areas from the far left, so their difference is the area between the mean and one standard deviation above it, which is 34.13 percent. Because the curve is symmetric, the matching interval below the mean holds the same share, and the two together give roughly 68 percent. The same subtraction logic gives the area between any two points.",
+      "misconception": "A cumulative value includes everything below, so the interval is a difference of two lookups."
+    },
+    {
+      "type": "mcq",
+      "concept": "outlier-detection",
+      "difficulty": "medium",
+      "question": "How is the normal distribution used to detect outliers?",
+      "options": [
+        "Any single point that lies above the mean is treated as a candidate outlier.",
+        "Points beyond three standard deviations are flagged, as almost none sit there.",
+        "Points beyond one standard deviation are outliers, as 32 percent lies out there.",
+        "Outliers are found by comparing each point against the median, not the mean."
+      ],
+      "answer": 1,
+      "explanation": "The empirical rule says almost everything sits within three standard deviations, so a point outside that range is extraordinarily unlikely under the assumed distribution and worth flagging; the region beyond holds roughly three hundredths of a percent of the data. Applied to an age column with a mean near 29 and a spread near 14, the upper bound lands around 73, so older passengers get flagged. One caveat is that the method presumes the data really is approximately normal.",
+      "misconception": "The threshold rests on the distribution's tails being thin, so it only applies when normality is plausible."
+    },
+    {
+      "type": "mcq",
+      "concept": "properties",
+      "difficulty": "easy",
+      "question": "For a proper normal distribution, what is the relationship between the mean, median, and mode?",
+      "options": [
+        "The mean exceeds the median, which in turn exceeds the mode of the data.",
+        "All three of them fall at exactly the same point.",
+        "The mode is undefined, although the mean does equal the median there.",
+        "The median lands exactly halfway between the mean and the mode."
+      ],
+      "answer": 1,
+      "explanation": "Perfect symmetry puts the balance point, the middle observation, and the peak at the same place. This is also a quick diagnostic in reverse: if the three measures of centre differ noticeably in real data, the distribution is skewed rather than normal, which tells you something before any formal test.",
+      "misconception": "Separation between the three measures is evidence of skew, not of normality."
+    },
+    {
+      "type": "mcq",
+      "concept": "ml-assumptions",
+      "difficulty": "hard",
+      "question": "Linear regression carries a normality assumption. What exactly is assumed to be normal?",
+      "options": [
+        "The target variable itself, which has to be normal before the model is fitted.",
+        "Every one of the input features, each of which must be normally distributed.",
+        "The residuals, meaning the errors between the predicted and actual values.",
+        "The coefficients that the fitted model produces for each of the features."
+      ],
+      "answer": 2,
+      "explanation": "The assumption concerns the errors the model leaves behind, not the raw distribution of the predictors. This matters in practice because people often transform input features chasing normality when the diagnostic that actually counts is whether the residuals look normal after fitting. Several other methods, such as Gaussian mixture models, do assume normality of the data itself, so the requirement varies by algorithm.",
+      "misconception": "Normality of inputs is not what linear regression requires; normality of residuals is."
+    },
+    {
+      "type": "mcq",
+      "concept": "cdf",
+      "difficulty": "medium",
+      "question": "What shape does the cumulative function of a normal distribution take, and what is its value at the mean?",
+      "options": [
+        "A bell-shaped curve, reaching a value of exactly one right at the mean.",
+        "A straight diagonal line, passing through a value of 0.5 at the mean.",
+        "A smooth S-shaped curve from zero to one, passing 0.5 at the mean.",
+        "A discrete step function, taking the value 0.5 right at the mean itself."
+      ],
+      "answer": 2,
+      "explanation": "Accumulating area under the bell shape produces a gradual rise that is shallow in the thin tails and steep through the dense middle, giving the characteristic S. Symmetry puts exactly half the area below the centre, so the curve passes through one half there. A smaller spread makes the rise steeper around the centre, and a larger one stretches it out.",
+      "misconception": "The cumulative function of a continuous distribution is smooth; step shapes come from discrete variables."
+    },
+    {
+      "type": "mcq",
+      "concept": "pdf-equation",
+      "difficulty": "medium",
+      "question": "In the normal density formula, what is the purpose of the constant factor in front of the exponential term?",
+      "options": [
+        "It forces the total area under the curve to equal one, as every density needs.",
+        "It is what positions and centres the whole curve at the distribution's mean.",
+        "It governs how quickly the two tails of the distribution decay to nothing.",
+        "It converts the density value at a point directly into a probability there."
+      ],
+      "answer": 0,
+      "explanation": "The exponential part alone already produces the bell shape, with the mean term handling location and the variance term handling width. Without normalisation the enclosed area would not be one, which would disqualify it as a density. So the leading factor is bookkeeping that makes the function a legitimate distribution rather than something that shapes the curve.",
+      "misconception": "The leading factor normalises the area; it does not position or shape the curve."
+    },
+    {
+      "type": "mcq",
+      "concept": "properties",
+      "difficulty": "medium",
+      "question": "Do the tails of a normal distribution ever reach the horizontal axis?",
+      "options": [
+        "Yes, they touch down at exactly three standard deviations from the mean.",
+        "Yes, they reach it at the minimum and maximum of the observed data.",
+        "No, they approach it only at infinity, so every value keeps some density.",
+        "No, because the curve is bounded below by a small fixed positive constant."
+      ],
+      "answer": 2,
+      "explanation": "The density shrinks rapidly as you move outward but never actually becomes zero, which means the distribution formally assigns some tiny density to arbitrarily extreme values. That is why a three standard deviation rule flags outliers rather than declaring them impossible, and why an observation five standard deviations out, as with an exceptional sportsman, is remarkable yet not forbidden.",
+      "misconception": "Extreme values are vanishingly unlikely under a normal model, not impossible."
+    },
+    {
+      "type": "scenario",
+      "concept": "standardization",
+      "difficulty": "medium",
+      "scenario": "A student scores 85 on an exam with a mean of 70 and a standard deviation of 10, and 48 on another with a mean of 40 and a standard deviation of 4.",
+      "question": "On which exam did the student perform better relative to peers, and what makes the comparison possible?",
+      "options": [
+        "The second, with a standardised score of 2 against 1.5, once both are standardised.",
+        "The first, simply because 85 is the higher of the two raw marks scored.",
+        "Neither of them, because scores from two different exams cannot be compared.",
+        "The first, with a standardised score of 1.5 against 2, as a lower score is better."
+      ],
+      "answer": 0,
+      "explanation": "Raw marks are not comparable when the exams differ in difficulty and spread. Standardising gives 1.5 on the first and 2 on the second, so the second performance sits further above its own cohort. Expressing each result in units of its own distribution's spread is precisely what makes different scales commensurable, and it is the same reasoning behind scaling features before training a model.",
+      "misconception": "A higher raw score can be a weaker relative performance once the cohort's spread is accounted for."
+    },
+    {
+      "type": "card",
+      "concept": "empirical-rule",
+      "difficulty": "medium",
+      "question": "State the empirical rule and explain why it is powerful enough to drive outlier detection.",
+      "answer": "For any normal distribution, roughly 68 percent of the data lies within one standard deviation of the mean, roughly 95 percent within two, and roughly 99.7 percent within three. It is powerful because these proportions depend only on normality, not on the particular mean or spread, so knowing a dataset is approximately normal is enough to assert where almost all of it must lie. Anything beyond three standard deviations sits in a region holding about three hundredths of a percent of the data, which makes it a reasonable candidate outlier without any further modelling.",
+      "explanation": "The caution is that the rule inherits its authority from the normal shape, in particular from thin tails. Applied to a heavy-tailed or strongly skewed distribution it will flag far too many points, so checking normality first is part of using it responsibly."
+    },
+    {
+      "type": "card",
+      "concept": "why-normal-matters",
+      "difficulty": "medium",
+      "question": "Name the main places the normal distribution is used in data science, and the result that explains why it appears even when the underlying data is not normal.",
+      "answer": "It is used for outlier detection through the three standard deviation rule, for satisfying the assumptions of algorithms such as linear regression, whose residuals are assumed normal, and Gaussian mixture models, and for hypothesis testing, where many procedures assume normality. The result that explains its wider reach is the central limit theorem: repeatedly sampling from almost any distribution and taking the sample means produces a normal distribution of those means, which is why normal-based reasoning applies even to data that is not itself normal.",
+      "explanation": "That theorem is the bridge into inferential statistics, because it means confidence intervals and tests built on the normal curve remain valid for sample means drawn from populations of unknown shape, provided the samples are large enough."
     }
   ]
 }

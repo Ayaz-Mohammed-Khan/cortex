@@ -1,44 +1,232 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "You must compare the mean conversion rate across four landing-page designs. A teammate suggests running a t-test on every pair.",
-      "question": "Why is one-way ANOVA the better first step?",
+      "type": "mcq",
+      "concept": "f-distribution",
+      "difficulty": "medium",
+      "question": "How is the F-distribution constructed, and what are its key properties?",
       "options": [
-        "ANOVA compares variances, so it cannot say anything about means.",
-        "Pairwise t-tests are invalid for more than two groups and will not run.",
-        "Running many pairwise t-tests inflates the overall Type 1 error from multiple comparisons. ANOVA tests all group means at once with a single controlled test.",
-        "ANOVA is just a faster t-test with identical assumptions and no benefit."
+        "A ratio of two chi-square quantities, each over its own degrees of freedom.",
+        "A sum of several squared normal variables, giving a symmetric one-parameter shape.",
+        "The difference of two chi-square quantities, so it may come out negative.",
+        "A ratio of two plain normal variables, bounded strictly between zero and one."
       ],
-      "answer": 2,
-      "explanation": "Each pairwise t-test carries its own false-positive risk, and six comparisons across four groups compound that risk well above the nominal level. One-way ANOVA asks a single question, are any group means different, with one test that controls the error, after which a post-hoc test identifies which pairs differ.",
-      "misconception": "The problem with many t-tests is multiple comparisons inflating Type 1 error, which ANOVA sidesteps with one omnibus test."
+      "answer": 0,
+      "explanation": "Because both the numerator and denominator are non-negative, the ratio cannot fall below zero, and the shape is skewed with a long right tail. The two parameters correspond to the degrees of freedom of the two quantities being compared. It is the natural distribution whenever two variances are being compared, which is precisely what the analysis of variance does.",
+      "misconception": "It has two degrees-of-freedom parameters, not one, because two quantities are being compared."
     },
     {
       "type": "mcq",
-      "question": "What is the core idea behind how ANOVA detects a difference in means?",
+      "concept": "multiple-comparisons",
+      "difficulty": "hard",
+      "question": "Why not simply run a separate two-sample t-test on every pair of three groups?",
       "options": [
-        "It compares each group's median to the grand median.",
-        "It compares the variance between group means to the variance within groups; a large ratio (the F-statistic) signals real differences.",
-        "It measures the correlation between group labels.",
-        "It counts how many groups are above average."
+        "Because a t-test can never be applied to more than two groups under any conditions.",
+        "Because each test adds its own error, pushing the overall rate from 5 to about 15 percent.",
+        "Because pairwise t-tests would require every one of the groups to be the same size.",
+        "Because a t-test relies on the t-distribution, which does not apply once there are three groups."
       ],
       "answer": 1,
-      "explanation": "ANOVA partitions total variation into between-group and within-group parts. The F-statistic is the between-group variance over the within-group variance. If groups truly differ, between-group variation dominates and F is large relative to its distribution under the null.",
-      "misconception": "Despite the name analysis of variance, ANOVA tests whether MEANS differ, using variance as the lens."
+      "explanation": "Each individual test is valid, but the probability of at least one spurious result accumulates across the family of tests, so the overall error rate is no longer what you chose. Testing all groups together in a single procedure keeps that rate controlled. This multiple-comparisons problem is the same reason that checking many hypotheses on one dataset invites false discoveries.",
+      "misconception": "Each test keeps its own error rate; it is the combined probability across tests that inflates."
     },
     {
       "type": "mcq",
-      "question": "A one-way ANOVA returns a significant result. What can you conclude, and what is the necessary next step?",
+      "concept": "hypotheses",
+      "difficulty": "hard",
+      "question": "In a one-way analysis of variance, what exactly does the alternate hypothesis claim?",
       "options": [
-        "No further analysis is needed; ANOVA names the different group.",
-        "Every group mean differs from every other group mean.",
-        "At least one group mean differs from another, but not which ones; a post-hoc test (for example Tukey's HSD) is needed to locate the differences.",
-        "The group with the highest mean is significantly best."
+        "That all of the group means differ from one another.",
+        "That the group variances differ.",
+        "That at least one group mean differs significantly from the others.",
+        "That the largest and smallest group means differ."
       ],
       "answer": 2,
-      "explanation": "A significant ANOVA is an omnibus result: it says the group means are not all equal, without identifying which pairs differ. A post-hoc test with correction for multiple comparisons, such as Tukey's HSD, pinpoints the specific differences.",
-      "misconception": "A significant ANOVA does not tell you which groups differ. You need a post-hoc test for that."
+      "explanation": "The null states that every group mean is equal, and its negation is satisfied by a single group standing apart, not by all of them differing. This is why a significant result is uninformative about which group is responsible, and why a follow-up procedure is needed to locate the difference. Reading the alternate as a claim about all groups overstates what rejection establishes.",
+      "misconception": "Rejecting equality of all means does not imply that every mean is distinct."
+    },
+    {
+      "type": "mcq",
+      "concept": "variance-partition",
+      "difficulty": "medium",
+      "question": "How does the analysis of variance partition the total variability, and what is the useful consequence?",
+      "options": [
+        "Total equals between-group plus within-group, which also checks the arithmetic.",
+        "Total equals the between-group variability minus the within-group variability.",
+        "The between-group variability equals the total plus the within-group variability.",
+        "The total variability is in fact unrelated to how the data is grouped at all."
+      ],
+      "answer": 0,
+      "explanation": "Every point's deviation from the overall mean decomposes into how far its group sits from the overall mean and how far the point sits from its own group's mean. The identity always holds exactly, so if the two components fail to sum to the total you have made a computational error. The whole test then rests on comparing the two components.",
+      "misconception": "The decomposition is additive and exact, which makes it a reliable sanity check."
+    },
+    {
+      "type": "mcq",
+      "concept": "variance-partition",
+      "difficulty": "medium",
+      "question": "What do the between-group and within-group sums of squares each measure?",
+      "options": [
+        "Between measures the scatter inside each group; within measures the group means.",
+        "Between measures group means against the overall mean; within measures scatter.",
+        "Both measure deviations from the overall mean, differing only in their weighting.",
+        "Between measures the largest group difference; within measures the smallest one."
+      ],
+      "answer": 1,
+      "explanation": "The between-group term captures how far apart the groups are, measured as each group mean against the overall mean weighted by group size, which is the signal you are testing for. The within-group term captures the ordinary scatter of points around their own group's mean, summed across groups, which is the noise against which that signal must be judged.",
+      "misconception": "The between-group term concerns group means; the within-group term never involves the overall mean."
+    },
+    {
+      "type": "mcq",
+      "concept": "degrees-of-freedom",
+      "difficulty": "medium",
+      "question": "With a total of N observations across k groups, what are the degrees of freedom for the between, within, and total sums of squares?",
+      "options": [
+        "N minus 1, N minus k, and k minus 1 respectively.",
+        "k, N minus k, and N respectively.",
+        "k minus 1, N minus k, and N minus 1 respectively.",
+        "k minus 1, N minus 1, and N respectively."
+      ],
+      "answer": 2,
+      "explanation": "The between-group component has one fewer than the number of groups, the within-group component loses one degree per group mean estimated, and the total loses one for the overall mean. Consistently with the sums of squares, the first two add to the third, which is another useful check on your working.",
+      "misconception": "The degrees of freedom add in the same way the sums of squares do."
+    },
+    {
+      "type": "mcq",
+      "concept": "f-statistic",
+      "difficulty": "medium",
+      "question": "What is the F-statistic in an analysis of variance, expressed in words?",
+      "options": [
+        "The between-group variance over the within-group variance, from the mean squares.",
+        "The difference between the between-group and the within-group sums of squares.",
+        "The ratio of the total variance of the data to the within-group variance alone.",
+        "The product of the between-group variance and the total number of groups present."
+      ],
+      "answer": 0,
+      "explanation": "Dividing each sum of squares by its degrees of freedom converts it into a variance, and the ratio of the two is the statistic. It reads naturally as a signal-to-noise comparison: how far apart the groups are, measured against how much the observations scatter within groups. That ratio follows an F-distribution, which is where the p-value comes from.",
+      "misconception": "The statistic is a ratio of variances, not of raw sums of squares."
+    },
+    {
+      "type": "mcq",
+      "concept": "f-statistic",
+      "difficulty": "medium",
+      "question": "What does a large F-statistic indicate, and what does a value near zero indicate?",
+      "options": [
+        "A large value means the groups are similar; a value near zero means they differ.",
+        "Both of the extremes point to a problem with the assumptions, not the means.",
+        "A large value indicates unequal variances; a value near zero indicates equal ones.",
+        "A large value means means lie far apart relative to scatter; near zero, bunched."
+      ],
+      "answer": 3,
+      "explanation": "The statistic is large when the between-group component dominates, meaning the group means sit far from the overall mean compared with ordinary scatter, which gives a small p-value and rejection. When the means cluster tightly the between-group component is small, the ratio approaches zero, the null is retained, and the data looks like a single population split arbitrarily.",
+      "misconception": "Only large values of the statistic are evidence against the null, which makes the test effectively one-sided."
+    },
+    {
+      "type": "mcq",
+      "concept": "assumptions",
+      "difficulty": "medium",
+      "question": "What are the assumptions of one-way analysis of variance?",
+      "options": [
+        "Independence of observations, normality within each group, and equal variances.",
+        "Equal sample sizes, normality of the fully combined data, and unequal variances.",
+        "Independence, categorical outcome data, and expected cell counts above five.",
+        "Only that there are at least three distinct groups being compared in the test."
+      ],
+      "answer": 0,
+      "explanation": "Observations must be independent across groups, each group should be approximately normal or large enough for the central limit theorem to apply, and the groups should share a common variance. The expected-count condition belongs to the chi-square test, which handles categorical data, while this procedure compares means of numerical data.",
+      "misconception": "Equal sample sizes are not required, but equal variances are."
+    },
+    {
+      "type": "scenario",
+      "concept": "welch-anova",
+      "difficulty": "medium",
+      "scenario": "Before running the analysis, a test for equal variances across the groups returns a small p-value.",
+      "question": "What does this mean and what should be done?",
+      "options": [
+        "The variances are equal, so the standard procedure can be applied as usual.",
+        "The equal-variance assumption fails, so use Welch's variant, which drops it.",
+        "The groups ought to be merged into one before any testing is carried out.",
+        "The significance level should be lowered in order to compensate for the problem."
+      ],
+      "answer": 1,
+      "explanation": "The variance test's null is that the variances are equal, so a small p-value rejects it and the assumption fails. Proceeding with the standard procedure would produce an unreliable p-value, while the Welch variant relaxes exactly that requirement. Adjusting the significance level addresses a different problem entirely and would not repair a broken assumption.",
+      "misconception": "A small p-value from the variance check is bad news for the standard procedure, not confirmation of it."
+    },
+    {
+      "type": "scenario",
+      "concept": "post-hoc",
+      "difficulty": "hard",
+      "scenario": "An analysis across four teaching sections returns a highly significant result, and a colleague concludes that section C is the best performer.",
+      "question": "What is wrong with that conclusion?",
+      "options": [
+        "Nothing at all; a significant result does identify the group with the highest mean.",
+        "The conclusion depends on the variances being equal, which was never checked here.",
+        "The test shows only that one group differs, so a post-hoc procedure is needed.",
+        "The test cannot be applied to four groups in the first place, only ever to three."
+      ],
+      "answer": 2,
+      "explanation": "The procedure compares between-group against within-group variability and so detects that the groups are not all alike, without attributing the difference to any particular group. Identifying the specific pairs that differ requires a follow-up such as Tukey's method or Bonferroni-corrected pairwise tests, designed to make multiple comparisons while keeping the overall error rate controlled.",
+      "misconception": "A significant overall result locates no individual group; that requires a separate step."
+    },
+    {
+      "type": "mcq",
+      "concept": "post-hoc",
+      "difficulty": "medium",
+      "question": "What does the Bonferroni correction do, and why?",
+      "options": [
+        "It raises the significance level in step with the number of groups, to add power.",
+        "It divides the significance level by the number of comparisons being made.",
+        "It transforms the underlying data so that the group variances become equal.",
+        "It combines all of the pairwise p-values together into one single overall p-value."
+      ],
+      "answer": 1,
+      "explanation": "Since the chance of at least one false positive grows with the number of tests, demanding a proportionally stricter threshold on each brings the overall rate back toward the intended level. It is deliberately conservative, which costs power, and alternatives such as Tukey's method compare all pairs at once while reporting intervals. Either way, the correction addresses the multiple-comparisons problem that motivated using a single omnibus test in the first place.",
+      "misconception": "The correction tightens each individual threshold; it does not loosen it or pool the results."
+    },
+    {
+      "type": "mcq",
+      "concept": "why-anova",
+      "difficulty": "medium",
+      "question": "What does one-way mean in one-way analysis of variance?",
+      "options": [
+        "That the groups are split by a single factor.",
+        "That the test is one-tailed.",
+        "That only one group is compared against the overall mean.",
+        "That the data has one observation per group."
+      ],
+      "answer": 0,
+      "explanation": "The groups are defined by one categorical variable, such as which section a student belongs to or which class a passenger travelled in. Designs that split the data by two factors simultaneously, and can therefore examine their interaction, are a separate and more elaborate case. The term describes the structure of the grouping rather than anything about the tails or the data volume.",
+      "misconception": "The name refers to the number of grouping factors, not to the test's directionality."
+    },
+    {
+      "type": "mcq",
+      "concept": "ml-applications",
+      "difficulty": "medium",
+      "question": "How is analysis of variance used in machine learning practice?",
+      "options": [
+        "To test whether a feature's mean differs across classes, and to compare models.",
+        "To convert the numerical features of a dataset into categorical ones for a model.",
+        "To estimate the coefficients of a model during the course of its training phase.",
+        "To detect and then remove outliers lying within the target variable's values."
+      ],
+      "answer": 0,
+      "explanation": "A numerical feature whose mean shifts noticeably across the target's classes carries information about the target, which makes the test a natural filter for feature screening. The same logic applies when several models or configurations are compared at once, where a single omnibus test avoids the error inflation of many pairwise comparisons. It plays no part in fitting the model itself.",
+      "misconception": "The test evaluates whether differences are real; it does not estimate model parameters."
+    },
+    {
+      "type": "card",
+      "concept": "variance-partition",
+      "difficulty": "hard",
+      "question": "Explain how analysis of variance works, from the partitioning of variability through to the statistic and its interpretation.",
+      "answer": "The total variability of the combined data, measured as deviations from the overall mean, splits exactly into a between-group component, capturing how far each group mean lies from the overall mean weighted by group size, and a within-group component, capturing the scatter of points around their own group means. Dividing each component by its degrees of freedom, one fewer than the number of groups and the total less the number of groups respectively, converts them into variances, and the statistic is their ratio. A large ratio means the groups are far apart relative to the noise inside them, giving a small p-value and rejection of the hypothesis that all means are equal, while a ratio near zero means the group means are bunched together and the data looks like one population.",
+      "explanation": "Reading the statistic as signal over noise is what makes it intuitive: the same separation between group means is compelling when groups are tight and unremarkable when they are already widely scattered, which is exactly what dividing by the within-group variance expresses."
+    },
+    {
+      "type": "card",
+      "concept": "multiple-comparisons",
+      "difficulty": "hard",
+      "question": "Explain the multiple-comparisons problem, how analysis of variance addresses it, and why a post-hoc test is still required afterwards.",
+      "answer": "Each hypothesis test carries its own false-positive rate, so running one on every pair of groups makes the probability of at least one spurious finding accumulate, rising from about five percent to roughly fifteen percent for three groups. The analysis of variance avoids this by testing all groups in a single procedure, keeping the error rate at the level chosen. The cost is that rejection establishes only that at least one group mean differs, not which, so a post-hoc procedure is needed to locate the difference, using either Tukey's method, which compares all pairs at once with intervals, or pairwise tests with a Bonferroni correction that divides the threshold by the number of comparisons.",
+      "explanation": "The structure is deliberate: one controlled test answers whether there is anything to find, and only if there is do you pay the price of multiple comparisons to find it, with a correction that keeps the overall error in check."
     }
   ]
 }

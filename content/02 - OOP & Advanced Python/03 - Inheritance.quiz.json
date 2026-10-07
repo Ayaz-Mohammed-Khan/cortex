@@ -1,44 +1,210 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A `SavingsAccount` subclass defines its own `__init__` to add an interest rate, but after construction the base `Account` attributes like `balance` are missing.",
-      "question": "What was forgotten?",
+      "type": "mcq",
+      "concept": "aggregation",
+      "difficulty": "medium",
+      "question": "What is the technical heart of aggregation?",
       "options": [
-        "The base class attributes are inherited automatically with no call needed.",
-        "The subclass `__init__` must call `super().__init__(...)` so the base class sets up its own attributes.",
-        "Subclasses cannot define `__init__`.",
-        "`balance` must be a class variable."
+        "The owned class is listed in parentheses after the owner class's name.",
+        "The owner creates its own copy of the owned class's attributes inside it.",
+        "The owner is handed another class's object and keeps it as an attribute.",
+        "Both of the two classes inherit from one shared parent class."
       ],
-      "answer": 1,
-      "explanation": "When a subclass defines its own constructor, it overrides the base one, so the base initialization no longer runs unless you call `super().__init__(...)`. That call lets the base class set up `balance` and the rest before the subclass adds its own.",
-      "misconception": "Defining a subclass `__init__` does not auto-run the parent's. You must call `super().__init__` explicitly."
+      "answer": 2,
+      "explanation": "Aggregation is a has-a relationship: a customer has an address, a restaurant has a menu. It is built by constructing the owned object first and handing it to the owner, which keeps it as one of its attributes. Listing a class in parentheses is inheritance instead, which expresses is-a rather than has-a.",
+      "misconception": "Aggregation is composition through an attribute, not a parent-child declaration."
     },
     {
       "type": "mcq",
-      "question": "What does method overriding mean?",
+      "concept": "aggregation",
+      "difficulty": "medium",
+      "question": "An `Address` class keeps its city private. A `Customer` holds an `Address` object. How can the customer obtain the city?",
       "options": [
-        "A method accepts a different number of arguments depending on the call.",
-        "A method is marked abstract.",
-        "A subclass provides its own implementation of a method already defined in the base class.",
-        "Two methods in the same class share a name."
+        "Directly, since owning an object grants access to all of its private data.",
+        "Through the address object's public getter, since ownership is not access.",
+        "Not at all, because private data is unreachable from any other class.",
+        "By inheriting from `Address` rather than holding an instance of one."
       ],
-      "answer": 2,
-      "explanation": "Overriding is a subclass redefining an inherited method to change its behavior. Calls on a subclass instance then use the subclass version. Having two same-named methods differing by arguments would be overloading, which Python does not support in the classic sense."
+      "answer": 1,
+      "explanation": "Holding an object gives you its public interface and nothing more, so private state is still reached only through whatever accessors the owner class chose to publish. This is a feature rather than a limitation: each class keeps authority over its own data, which is what lets you change its internals without breaking everyone who holds one.",
+      "misconception": "Ownership is not privileged access; encapsulation applies to the owner too."
     },
     {
       "type": "scenario",
-      "scenario": "A class inherits from two parents that both define a method with the same name.",
-      "question": "How does Python decide which one runs, and what is this called?",
+      "concept": "relationship-choice",
+      "difficulty": "medium",
+      "scenario": "You are modelling a food-delivery platform. You need to decide whether a restaurant should inherit from a menu class or hold one as an attribute.",
+      "question": "Which relationship fits, and what is the test?",
       "options": [
-        "The method resolution order (MRO) determines it, following C3 linearization left to right through the base classes.",
-        "It picks randomly at runtime.",
-        "The last-listed parent always wins unconditionally.",
-        "Python raises an error on any multiple inheritance."
+        "Inheritance, because the restaurant needs to use the menu's own methods.",
+        "Either one works identically in Python, so the choice is only stylistic.",
+        "Inheritance, because it avoids having to pass the menu object in at all.",
+        "Aggregation, because a restaurant has a menu rather than being one."
+      ],
+      "answer": 3,
+      "explanation": "Read the relationship aloud: a student is a user, so inheritance fits, while a restaurant has a menu, so ownership fits. Choosing inheritance merely to borrow methods couples the classes much more tightly than necessary and claims a kinship that does not exist, which tends to collapse as the model grows. Needing another class's behaviour is an argument for holding one, not for becoming one.",
+      "misconception": "Wanting to reuse methods is not sufficient reason to inherit."
+    },
+    {
+      "type": "mcq",
+      "concept": "what-is-inherited",
+      "difficulty": "medium",
+      "question": "What does a child class inherit from its parent?",
+      "options": [
+        "Every single member of the parent, including the private ones.",
+        "Only the parent's methods, and never any of its attributes.",
+        "The constructor, plus the non-private attributes and methods.",
+        "Only the members that are explicitly re-declared in the child."
+      ],
+      "answer": 2,
+      "explanation": "The constructor and all public members come down to the child, while double-underscore members do not, because name mangling ties them to the class that declared them. A child can still reach private parent state indirectly when the parent publishes a getter, since the getter itself is an ordinary public method and is inherited normally.",
+      "misconception": "Private members are not inherited, though public accessors to them are."
+    },
+    {
+      "type": "scenario",
+      "concept": "constructor-inheritance",
+      "difficulty": "hard",
+      "scenario": "A `Phone` parent sets price, brand, and camera in its constructor. A `SmartPhone` child defines its own constructor to set an operating system. Creating a smartphone and then reading its brand raises an AttributeError.",
+      "question": "Why is the brand missing?",
+      "options": [
+        "Because the child's constructor runs instead of the parent's one.",
+        "Because brand is private in the parent and so is never inherited.",
+        "Because the child must redeclare every inherited attribute itself.",
+        "Because the parent's constructor runs first and the child's undoes it."
       ],
       "answer": 0,
-      "explanation": "Python computes a method resolution order using C3 linearization, a deterministic ordering of the class and its ancestors. A lookup walks that order and uses the first match. This is also how the diamond problem is resolved cleanly.",
-      "misconception": "Multiple inheritance is not forbidden or random in Python. The MRO gives a well-defined lookup order."
+      "explanation": "The constructor is just a method, so defining one in the child overrides the parent's and only the child's version runs. Attributes are created by the code that executes, so skipping the parent's constructor means skipping the assignments inside it. The remedy is for the child's constructor to call the parent's explicitly through `super`, passing the values it needs, and then add its own attributes.",
+      "misconception": "A child constructor does not extend the parent's automatically; it replaces it."
+    },
+    {
+      "type": "mcq",
+      "concept": "super",
+      "difficulty": "medium",
+      "question": "What is the standard pattern for a child constructor that needs both the parent's attributes and its own?",
+      "options": [
+        "Copy the parent's own assignments straight into the child's constructor.",
+        "Omit the child's constructor and set the extra attributes afterwards.",
+        "Declare the parent's attributes again in the child's own class body.",
+        "Call the parent through `super`, then set the child's own attributes."
+      ],
+      "answer": 3,
+      "explanation": "Delegating to the parent keeps shared setup in exactly one place and leaves the child responsible only for what is genuinely new, so a later change to the parent's initialisation benefits every child. Copying the assignments duplicates logic and reintroduces the problem inheritance was meant to solve. This pattern is why subclassing a framework class almost always begins by calling up to the parent.",
+      "misconception": "Duplicating the parent's setup defeats the purpose of inheriting from it."
+    },
+    {
+      "type": "mcq",
+      "concept": "super",
+      "difficulty": "medium",
+      "question": "Which statement about `super` is correct?",
+      "options": [
+        "It reaches the parent's methods and constructor, but not its attributes.",
+        "It reaches the parent's stored attributes as well as all of its methods.",
+        "It can be called on an object from outside the class that declared it.",
+        "It has to be the very last statement in any child class's constructor."
+      ],
+      "answer": 0,
+      "explanation": "`super` is a way for a class to reach upward to its parent's behaviour, so it resolves methods and the constructor but not stored attributes, and it only makes sense inside the class body where there is a current class to be the child of. Attributes are reached through `self` once they exist, which is precisely why the parent's constructor has to run before they can be read.",
+      "misconception": "`super` provides behaviour, not data; attributes still come from `self`."
+    },
+    {
+      "type": "mcq",
+      "concept": "method-overriding",
+      "difficulty": "easy",
+      "question": "A parent and a child both define a method named `buy`. Calling it on a child object runs which version?",
+      "options": [
+        "The parent's, because the parent was the one defined first.",
+        "The child's, because its definition overrides the inherited one.",
+        "Both of them, the parent's version first and then the child's.",
+        "Neither of them, because the ambiguity raises an error at runtime."
+      ],
+      "answer": 1,
+      "explanation": "Lookup starts at the object's own class and stops at the first match, so a child's definition shadows the inherited one. This is method overriding, and it is how a child specialises inherited behaviour. The constructor rule you have already met is simply this same mechanism applied to the initialisation method.",
+      "misconception": "Overriding replaces the inherited behaviour; it does not run in addition to it."
+    },
+    {
+      "type": "mcq",
+      "concept": "mro",
+      "difficulty": "medium",
+      "question": "A class inherits from two parents, written as `class SmartPhone(Product, Phone)`, and both parents define `buy`. Which runs, and what rule decides?",
+      "options": [
+        "`Phone.buy`, because the last-listed parent always takes precedence here.",
+        "Neither of them, because Python forbids multiple inheritance outright.",
+        "Both of them in sequence, as determined by the class hierarchy order.",
+        "`Product.buy`, because resolution order prefers the first parent listed."
+      ],
+      "answer": 3,
+      "explanation": "Python resolves the ambiguity with a defined method resolution order in which the earlier-listed parent wins, so swapping the order in the parentheses changes which method runs. Java bans multiple inheritance precisely because this ambiguity has no obvious answer, while Python accepts it and supplies a predictable rule instead.",
+      "misconception": "The order of parents in the declaration is meaningful, not cosmetic."
+    },
+    {
+      "type": "mcq",
+      "concept": "inheritance-types",
+      "difficulty": "easy",
+      "question": "Which description matches hierarchical inheritance?",
+      "options": [
+        "One parent with multiple children.",
+        "A chain running from grandparent to parent to child.",
+        "One child with multiple parents.",
+        "One parent with exactly one child."
+      ],
+      "answer": 0,
+      "explanation": "Hierarchical means a single parent branching out to several children, as when both a student and an instructor inherit from a shared user class. A chain of successive parents is multilevel, a child with several parents is multiple, a single pairing is single, and any mixture is hybrid. The shapes matter mainly because they determine where shared behaviour should live.",
+      "misconception": "Hierarchical branches downward from one parent; it is not a chain."
+    },
+    {
+      "type": "mcq",
+      "concept": "dry",
+      "difficulty": "easy",
+      "question": "A platform has students and instructors, both of whom can log in and register. What is the inheritance argument for a shared parent class?",
+      "options": [
+        "It makes the program run faster by letting it share memory.",
+        "It avoids duplicating shared code, keeping it in one place.",
+        "It is required by Python before two classes can work together.",
+        "It allows both of the classes to have private members of their own."
+      ],
+      "answer": 1,
+      "explanation": "Writing the login and registration logic in both classes means every future change has to be made twice and the two copies will eventually disagree. Lifting the shared behaviour into a common parent leaves one definition and one place to change it. Spotting what can be a parent and what should be a child is a large part of keeping a codebase short and clean.",
+      "misconception": "The benefit is maintainability, not performance."
+    },
+    {
+      "type": "mcq",
+      "concept": "class-diagrams",
+      "difficulty": "medium",
+      "question": "In a class diagram, what do a diamond and a triangle at the end of a connecting line mean?",
+      "options": [
+        "A diamond marks a private member and a triangle marks a public one here.",
+        "A diamond marks the child and a triangle marks the parent class.",
+        "A diamond marks aggregation on the owner; a triangle points at a parent.",
+        "Both of them mark inheritance, differing only in drawing convention."
+      ],
+      "answer": 2,
+      "explanation": "The symbol identifies the relationship and its end identifies the direction, so a diamond on one class says that class owns the other, and a triangle says the class it points to is the parent. Visibility is shown separately, with a minus sign for private members and a plus sign for public ones inside the class box.",
+      "misconception": "The two symbols denote different relationships, not two ends of the same one."
+    },
+    {
+      "type": "scenario",
+      "concept": "method-overriding",
+      "difficulty": "medium",
+      "scenario": "A child class overrides a method, and inside its version it calls another method on `self`. That second method has also been overridden to call back into the first. Running it ends with an error about maximum recursion depth.",
+      "question": "What has happened?",
+      "options": [
+        "The two methods invoke each other endlessly, so Python stops the runaway.",
+        "Overriding a method more than once in one hierarchy is simply forbidden.",
+        "The child is missing a call up to the parent's own version through `super`.",
+        "The recursion limit must be raised before any overridden methods work."
+      ],
+      "answer": 0,
+      "explanation": "Because overriding redirects every call through the child's versions, two methods that each call the other form a cycle with no exit. Python caps the call stack and reports the depth error, which is a diagnostic rather than a limit to be lifted. Raising the ceiling would only delay the crash; the fix is to break the cycle, usually by having one side call the parent's implementation explicitly.",
+      "misconception": "A recursion-depth error signals a logic cycle, not an inadequate limit."
+    },
+    {
+      "type": "card",
+      "concept": "constructor-inheritance",
+      "difficulty": "hard",
+      "question": "State what happens to the parent's constructor in the two cases where a child does and does not define its own, and explain why, in terms of a mechanism you already know.",
+      "answer": "When the child defines no constructor, the parent's runs on child creation and the parent's attributes are created normally. When the child defines its own, only the child's runs, so the parent's assignments never execute and the parent's attributes do not exist, which surfaces later as an attribute error. The reason is that the constructor is an ordinary method, so this is simply method overriding applied to initialisation, with the child's definition shadowing the inherited one.",
+      "explanation": "The fix follows from the same framing: since overriding replaces rather than extends, the child must opt back into the parent's behaviour by calling it through `super` before adding its own attributes."
     }
   ]
 }

@@ -2,42 +2,209 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "In Python, what does a single leading underscore (for example `_balance`) on an attribute mean?",
+      "concept": "reference-variables",
+      "difficulty": "medium",
+      "question": "After `p = Person('Aarav', 'India')` and `q = p`, editing the name through `q` also changes what `p` reports. Why?",
       "options": [
-        "The attribute is read-only.",
-        "The attribute is a class variable.",
-        "The attribute is strictly private and cannot be accessed from outside.",
-        "A convention signalling the attribute is internal, with no access enforcement by the language."
+        "Assignment copies the object, and Python keeps the two copies synchronised.",
+        "A name holds the object's address, so assignment gives two names for one.",
+        "`Person` objects are immutable, so both names end up seeing the change.",
+        "The constructor registered both of the names with the class on creation."
       ],
-      "answer": 3,
-      "explanation": "Python has no hard private keyword. A single underscore is a convention meaning do not touch this from outside. A double underscore triggers name mangling, which discourages access but still does not truly forbid it.",
-      "misconception": "Python encapsulation is by convention, not enforcement. The underscore signals intent; it does not lock the attribute."
+      "answer": 1,
+      "explanation": "A name does not contain an object; it stores the address of one, which is why it is called a reference variable. Copying the name copies the address, so the two names refer to a single object and an edit through either is visible through both. Pointing a new name at an existing object never creates a second object.",
+      "misconception": "Assignment duplicates a reference, never the object it refers to."
     },
     {
       "type": "scenario",
-      "scenario": "Two variables point at the same list: `b = a`. You append to `b`, and `a` changes too.",
-      "question": "Why does this happen?",
+      "concept": "pass-by-reference",
+      "difficulty": "medium",
+      "scenario": "A helper function is given a customer object and sets one of its attributes to a cleaned-up value. The author expected the caller's object to be untouched, but afterwards the caller sees the modified value.",
+      "question": "Why did the caller's object change?",
       "options": [
-        "`a` and `b` are two references to the same list object, so mutating through one is visible through the other.",
-        "Python copies the list on assignment, so this should not happen.",
-        "`b = a` creates a deep copy.",
-        "Lists are immutable, so neither should change."
+        "The function returned the object, and that return replaced the original.",
+        "Attribute assignment inside a function is always treated as global.",
+        "Passing an object sends a reference, so both names are one object.",
+        "Objects are copied on the way in, but then copied back out on return."
       ],
-      "answer": 0,
-      "explanation": "Assignment binds a new name to the same object; it does not copy. Both names reference one list, so an in-place mutation shows through both. Use `a.copy()` or `list(a)` for an independent shallow copy.",
-      "misconception": "Assignment never copies the object. It copies the reference, so mutations are shared."
+      "answer": 2,
+      "explanation": "Arguments carry references, so the object inside the function has the same identity as the one outside and every edit is shared. This is convenient when mutation is intended and a trap when it is not. If the caller's data must survive untouched, the function should build and return a new object rather than editing what it was handed.",
+      "misconception": "There is no implicit copy of an object at a function boundary."
     },
     {
       "type": "mcq",
-      "question": "What is the difference between an instance variable and a static (class) variable?",
+      "concept": "object-mutability",
+      "difficulty": "medium",
+      "question": "How can you demonstrate that user-defined objects in Python are mutable by default?",
       "options": [
-        "A class variable is unique per object; an instance variable is shared.",
-        "Class variables cannot be read by instances.",
-        "They are the same thing.",
-        "An instance variable is unique per object; a class variable is shared by every instance of the class."
+        "By checking that the class defines no immutability marker of any kind.",
+        "By confirming that the object can be stored inside an ordinary list.",
+        "By printing the object before and after the change, and seeing different text.",
+        "By comparing the object's id before and after an edit and finding it equal."
       ],
       "answer": 3,
-      "explanation": "An instance variable, set on `self`, holds per-object state. A class variable, defined in the class body, is one value shared across all instances, which suits a shared counter or a constant. Instances can read a class variable through `self` unless they shadow it."
+      "explanation": "An in-place change leaves the object at the same address, whereas an immutable type would have to build a new object and so report a new id. Since the id is stable across the edit, the object itself was modified. This makes your own classes behave like lists, sets, and dictionaries rather than like strings and tuples, and it is the precise answer to a common interview question.",
+      "misconception": "Identity, not appearance, is the test for mutability."
+    },
+    {
+      "type": "scenario",
+      "concept": "encapsulation-motivation",
+      "difficulty": "medium",
+      "scenario": "An account class exposes its balance as an ordinary attribute. Somewhere far away in the codebase, a line assigns the text value 'hehe' to that balance. Much later, a withdrawal method fails while subtracting an amount.",
+      "question": "What problem does this illustrate, and what is the structural fix?",
+      "options": [
+        "Outside writes can break the logic inside, so guard it with a setter.",
+        "The withdrawal method should convert the balance to a number before using it.",
+        "The class needs a second attribute to hold a correctly typed balance value.",
+        "The assignment should simply have used a different variable name over there."
+      ],
+      "answer": 0,
+      "explanation": "Nothing prevented an outsider from putting a wrong type into state the class depends on, and the failure surfaced far from its cause. Defensive conversion inside every method treats the symptom. The structural answer is to stop the bad value entering at all, by making the data private and accepting changes only through a setter that checks them, which is exactly what encapsulation provides.",
+      "misconception": "The bug is not in the method that crashed; it is in allowing invalid state to be set in the first place."
+    },
+    {
+      "type": "mcq",
+      "concept": "private-attributes",
+      "difficulty": "medium",
+      "question": "Python has no `private` keyword. What marks an attribute as private, and what does Python actually do with it?",
+      "options": [
+        "A single leading underscore, which makes the attribute strictly read-only.",
+        "A `private` decorator applied directly to the attribute declaration.",
+        "A double leading underscore, after which Python mangles the name.",
+        "Declaring it outside the constructor, which hides it from the objects."
+      ],
+      "answer": 2,
+      "explanation": "The double underscore triggers name mangling, which rewrites the attribute's real name to include the class, so `__balance` in class `Atm` becomes `_Atm__balance`. The practical effect is that it disappears from autocomplete and that a naive assignment from outside creates a separate, harmless attribute rather than overwriting the protected one. A single underscore is only a naming convention and changes nothing mechanically.",
+      "misconception": "Privacy is achieved through name mangling, not through an access keyword."
+    },
+    {
+      "type": "mcq",
+      "concept": "private-attributes",
+      "difficulty": "medium",
+      "question": "Is a double-underscore attribute genuinely inaccessible from outside the class?",
+      "options": [
+        "Yes, Python blocks every attempt at external access at runtime.",
+        "No, the mangled name still reaches it, so privacy is a convention.",
+        "Yes, unless the class explicitly provides a getter for the value.",
+        "No, because name mangling is applied only inside the class methods."
+      ],
+      "answer": 1,
+      "explanation": "Determined code can address the mangled name directly and reach the value. Python treats the double underscore as a clear statement of intent rather than an enforced barrier, on the view that the language should trust its users while keeping an escape hatch for the rare case that genuinely needs one. Breaking the agreement is a team discipline issue, not a language weakness.",
+      "misconception": "Nothing in Python is truly private; the marker communicates intent and raises the cost of misuse."
+    },
+    {
+      "type": "mcq",
+      "concept": "getters-setters",
+      "difficulty": "medium",
+      "question": "In an encapsulated class, where does the actual protection live?",
+      "options": [
+        "In the getter, which hides the value's real underlying type.",
+        "In the constructor, because it is the method that runs first.",
+        "In the double underscore alone, which is sufficient on its own.",
+        "In the setter, which validates a new value before storing it."
+      ],
+      "answer": 3,
+      "explanation": "Making the attribute private closes the uncontrolled door, but it is the setter that decides what may come through the controlled one, for instance refusing a value that is not a number. The getter simply reports the current value. Encapsulation is the pairing: private data bundled with the methods that guard it, which is where the capsule metaphor comes from.",
+      "misconception": "Hiding data is only half of encapsulation; validating what replaces it is the other half."
+    },
+    {
+      "type": "mcq",
+      "concept": "static-variables",
+      "difficulty": "medium",
+      "question": "A class keeps a counter in its class body, and its constructor assigns the current counter to the new object before incrementing it. What do three successive objects report?",
+      "options": [
+        "1, 1, and 1, because each object receives its own private copy",
+        "1, 2, and 3, because the counter belongs to the class and is shared",
+        "3, 3, and 3, because every object ends up reading only the final value",
+        "An error, because a variable in the class body cannot be modified"
+      ],
+      "answer": 1,
+      "explanation": "A static variable lives on the class rather than on any instance, so there is exactly one of it however many objects exist. Each construction reads the shared value and then advances it, producing a sequence. An instance variable could not do this, because each object would receive its own copy starting from the same point.",
+      "misconception": "A class-level variable is shared state; it is not copied per object."
+    },
+    {
+      "type": "mcq",
+      "concept": "static-variables",
+      "difficulty": "medium",
+      "question": "For a banking class, which pair of choices is correct?",
+      "options": [
+        "Both the customer's balance and the bank's branch code should be static.",
+        "Both should be instance variables, since both belong to the class.",
+        "The balance should be an instance variable and the branch code static.",
+        "The balance should be static and the branch code an instance variable."
+      ],
+      "answer": 2,
+      "explanation": "The decision is simply whether the value differs per object. A balance is different for every customer, so it belongs to the instance. A branch code is identical for all customers of that branch, so it belongs to the class and is reached through the class name. Getting this backwards either duplicates a constant across every object or makes per-customer data collide.",
+      "misconception": "The test is whether the value varies by object, not whether it feels important."
+    },
+    {
+      "type": "mcq",
+      "concept": "static-methods",
+      "difficulty": "medium",
+      "question": "What is the practical test for whether a method should be a static method?",
+      "options": [
+        "Whether the method returns a value back to its caller at all.",
+        "Whether it is called more than once anywhere in the program.",
+        "Whether it is defined above the constructor in the class body itself.",
+        "Whether it never touches `self`, so no object is needed to call it."
+      ],
+      "answer": 3,
+      "explanation": "A method that uses no instance state has nothing to gain from receiving the object, so marking it with the static method decorator lets it be called directly on the class with no instance at all. Class-level utilities, such as a getter for a private class variable, are the natural case. If a method does read or write `self`, it genuinely needs an instance and must stay an ordinary method.",
+      "misconception": "The criterion is the use of instance state, not how often the method is called."
+    },
+    {
+      "type": "mcq",
+      "concept": "attribute-access",
+      "difficulty": "easy",
+      "question": "What happens when you assign to an attribute name on an object that the class never defined?",
+      "options": [
+        "A new attribute is created on that object.",
+        "An AttributeError is raised, because the class did not declare it.",
+        "The assignment is ignored silently.",
+        "Every object of the class gains the new attribute."
+      ],
+      "answer": 0,
+      "explanation": "Attributes do not have to be declared inside the class; assigning through the object creates one on the spot, and only on that object. The flexibility is occasionally handy and is also precisely the hole encapsulation is designed to close, because it means outside code can invent or overwrite state the class relies on.",
+      "misconception": "Reading a missing attribute errors, but writing one creates it."
+    },
+    {
+      "type": "scenario",
+      "concept": "static-variables",
+      "difficulty": "hard",
+      "scenario": "A class declares an empty list in its class body to collect each object's log messages. After creating three objects and appending one message through each, every object reports all three messages.",
+      "question": "What went wrong?",
+      "options": [
+        "The list needs to be cleared inside the constructor on each creation.",
+        "Appending to a list is always a class-level operation regardless.",
+        "A class-body variable is shared, so all three appended to one list.",
+        "Lists cannot be used as attributes and must be replaced by tuples."
+      ],
+      "answer": 2,
+      "explanation": "Declaring the list in the class body makes it static, so there is a single list shared by every instance, and each append adds to that one collection. Because the list is mutable, nothing reassigns the name and so nothing reveals the sharing until the contents are read. Creating the list inside the constructor through `self` gives each object its own.",
+      "misconception": "Shared mutable class state accumulates silently; it looks per object until you inspect the contents."
+    },
+    {
+      "type": "mcq",
+      "concept": "collections-of-objects",
+      "difficulty": "easy",
+      "question": "Can objects of your own class be stored in a list and iterated over?",
+      "options": [
+        "Only if the class defines an iteration method of its own first.",
+        "Yes, objects are ordinary values, so the list behaves normally.",
+        "No, because a list will accept only the built-in types.",
+        "Only if every one of the objects is of a different class."
+      ],
+      "answer": 1,
+      "explanation": "A list stores references to objects of any kind, so collections of your own objects need nothing special. This is the ordinary way a program holds many modelled things, such as every customer or every row, and looping over them to read or update attributes is routine. It follows from a list being a referential structure in the first place.",
+      "misconception": "Custom objects are not second-class; they can be collected like any value."
+    },
+    {
+      "type": "card",
+      "concept": "encapsulation-motivation",
+      "difficulty": "hard",
+      "question": "Explain encapsulation by starting from the problem it solves, then naming its two mechanisms and the limit of its enforcement in Python.",
+      "answer": "The problem is that public attributes let any outside code write whatever it likes into an object's state, including a value of the wrong type, after which methods that depend on that state break far from the point where the damage was done. Encapsulation answers this with two moves: make the data private using a double-underscore prefix so there is no uncontrolled way in, and expose it where genuinely needed through a getter that reports it and a setter that validates a new value before accepting it. The limit is that Python does not enforce privacy, since the mangled name remains reachable, so the marker states intent and relies on discipline.",
+      "explanation": "The name comes from capsule: the data and the methods that guard it are wrapped into one unit. That framing is why a getter and setter pair that performs no validation misses the point, as it recreates a public attribute with extra steps."
     }
   ]
 }

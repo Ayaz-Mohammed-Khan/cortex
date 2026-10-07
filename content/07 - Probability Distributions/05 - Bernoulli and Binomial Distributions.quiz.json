@@ -2,41 +2,201 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What does a Bernoulli distribution model?",
+      "concept": "bernoulli",
+      "difficulty": "easy",
+      "question": "What does a Bernoulli distribution model, and how many parameters does it have?",
       "options": [
-        "A continuous measurement like height.",
-        "The number of successes in many trials.",
-        "A single trial with two outcomes, success with probability p and failure with probability 1 minus p.",
-        "The time between events."
+        "A single trial with exactly two outcomes, with one parameter for success.",
+        "A fixed number of two-outcome trials, governed by two separate parameters.",
+        "Any discrete variable with finitely many outcomes, one parameter per outcome.",
+        "A continuous variable bounded in zero to one, with a mean and a spread parameter."
       ],
-      "answer": 2,
-      "explanation": "A Bernoulli variable is one yes-or-no trial: 1 with probability p, 0 with probability 1 minus p. Counting the successes across n independent Bernoulli trials gives the binomial distribution, which builds directly on it."
-    },
-    {
-      "type": "scenario",
-      "scenario": "A model classifies 20 emails independently, each spam with probability 0.1, and you want the probability that exactly 3 are spam.",
-      "question": "Which distribution applies, and what must hold for it to be valid?",
-      "options": [
-        "The uniform distribution, because each email is equally likely.",
-        "The binomial distribution, valid because there is a fixed number of independent trials, each with the same success probability and two outcomes.",
-        "The Pareto distribution, because spam is rare.",
-        "The normal distribution, because counts are always normal."
-      ],
-      "answer": 1,
-      "explanation": "Counting successes in a fixed number n of independent, identical two-outcome trials is exactly the binomial setting. Its criteria are: fixed n, independent trials, constant p, and binary outcomes. Here n is 20, p is 0.1, and you want the probability of 3 successes.",
-      "misconception": "A count of successes is binomial, not normal. The normal can approximate it only when n is large and p is not extreme."
+      "answer": 0,
+      "explanation": "One trial, two outcomes, and a single probability is the whole model, since the probability of failure is whatever is left over from one. Its graph is therefore always just two bars whose heights are the success probability and its complement. Counting over many such trials is a different distribution.",
+      "misconception": "The failure probability is not a separate parameter; it is determined by the success probability."
     },
     {
       "type": "mcq",
-      "question": "Why does the Bernoulli distribution matter in machine learning?",
+      "concept": "bernoulli",
+      "difficulty": "medium",
+      "question": "In a spam classifier built on Bernoulli reasoning, spam is labelled as the success outcome. What does this reveal about the term?",
       "options": [
-        "It models continuous target variables in regression.",
-        "It is used only in physics, not machine learning.",
-        "It underlies binary classification: a model outputs p, the probability of the positive class, and log loss comes from the Bernoulli likelihood.",
-        "It is the distribution of model weights."
+        "The labelling is a plain mistake, since success has to denote the desirable outcome.",
+        "Success here means whichever of the two outcomes is the more probable one.",
+        "Success is just whichever event you chose to call one, with no judgement of good.",
+        "Success must always be the outcome whose probability happens to exceed one half."
       ],
       "answer": 2,
-      "explanation": "Binary classification treats each label as a Bernoulli outcome with success probability p predicted by the model. Maximizing the Bernoulli likelihood over the data is equivalent to minimizing log loss (binary cross-entropy), which is the standard objective for logistic regression and many classifiers."
+      "explanation": "The word is a convention for the event being counted, not an evaluation of it. When the task is detecting spam, spam is the event of interest and so gets coded as one. Keeping this straight matters because the probability you report, and the direction of every subsequent calculation, depends on which outcome you designated.",
+      "misconception": "Success is a naming convention, unrelated to desirability or to being more likely."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial",
+      "difficulty": "medium",
+      "question": "What does a binomial distribution describe, and what are its parameters?",
+      "options": [
+        "The probability of success on a single trial, parameterised by that probability alone.",
+        "The successes across a fixed number of trials, with that count and the probability.",
+        "The number of trials needed before the first success, parameterised by the probability.",
+        "The time elapsing between two successive successes, parameterised by a rate value."
+      ],
+      "answer": 1,
+      "explanation": "It answers how many successes occur when the same binary trial is repeated a set number of times, so the two parameters are the count of trials and the per-trial success probability. Counting trials until a first success is a different distribution entirely, as is modelling waiting times, so being precise about what is being counted is what identifies the right model.",
+      "misconception": "The binomial counts successes in a fixed number of trials, not trials until a success."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial",
+      "difficulty": "medium",
+      "question": "What happens to the binomial distribution when the number of trials is one?",
+      "options": [
+        "It becomes a Bernoulli distribution.",
+        "It becomes a uniform distribution over two values.",
+        "It becomes undefined, since at least two trials are required.",
+        "It becomes a normal distribution with a very small spread."
+      ],
+      "answer": 0,
+      "explanation": "Counting successes in a single binary trial can only yield zero or one, which is exactly what the Bernoulli model describes, and substituting one into the binomial formula reduces it to the Bernoulli formula. This is why the Bernoulli is best understood as the seed of the binomial: one is the single-trial case of the other.",
+      "misconception": "The two are not separate models; one is a special case of the other."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial-pmf",
+      "difficulty": "medium",
+      "question": "Three people each independently like a video with probability one half. What is the probability that exactly two of them like it?",
+      "options": [
+        "One eighth",
+        "One half",
+        "Three eighths",
+        "Two thirds"
+      ],
+      "answer": 2,
+      "explanation": "There are three arrangements in which exactly two of the three succeed, and each specific arrangement has probability one eighth, giving three eighths in total. This matches the count obtained by listing all eight equally likely cases, which is the value of working one small example by hand before trusting the formula.",
+      "misconception": "The arrangement count matters: two successes is three times as likely as all three succeeding."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial-pmf",
+      "difficulty": "medium",
+      "question": "In the binomial formula, what is the role of the combinations factor?",
+      "options": [
+        "It normalises all of the probabilities so that they sum to exactly one.",
+        "It counts the distinct arrangements giving that number of successes.",
+        "It corrects the result for the trials not being perfectly independent.",
+        "It converts the result from a probability density into a true probability."
+      ],
+      "answer": 1,
+      "explanation": "The power terms give the chance of one particular sequence of successes and failures, but many different orderings yield the same total, and all are equally likely. Multiplying by the number of such orderings accounts for them all. Seeing the formula as a specific-sequence probability multiplied by an arrangement count makes it far easier to remember than memorising the symbols.",
+      "misconception": "The factor counts arrangements; it is not a normalising constant."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial-shape",
+      "difficulty": "medium",
+      "question": "How does the success probability affect the shape of a binomial distribution?",
+      "options": [
+        "Low gives a right skew, near one half is symmetric, and high gives a left skew.",
+        "A low probability gives a left-skewed shape, and a high one gives a right skew.",
+        "The shape stays symmetric throughout, with only its centre position shifting.",
+        "The shape depends solely on the number of trials, never on the probability."
+      ],
+      "answer": 0,
+      "explanation": "With success rare, most of the probability sits at low counts and a tail stretches toward higher ones, which is a right skew. With success likely, the mass piles up at high counts and the tail runs the other way. Near one half the two sides balance and the shape approaches a bell curve, which is the first hint of the connection to the normal distribution.",
+      "misconception": "The skew runs opposite to where the mass sits, as always, since skew is named for the tail."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial-criteria",
+      "difficulty": "medium",
+      "question": "Which four conditions must hold for an experiment to be binomial?",
+      "options": [
+        "A large number of trials, numeric outcomes, independence, and a known mean.",
+        "A fixed count of trials, binary outcomes, independence, and a constant probability.",
+        "A fixed count of trials, binary outcomes, dependent trials, and a varying probability.",
+        "Random sampling, a normal shape, independence, and equal odds for the two outcomes."
+      ],
+      "answer": 1,
+      "explanation": "All four matter and each can fail in practice. The count of trials must be decided in advance, each trial must resolve to one of two outcomes, no trial may influence another, and the success probability must not drift between trials. Equal probabilities are not required, so a biased coin is still perfectly binomial.",
+      "misconception": "The success probability must be constant, not necessarily one half."
+    },
+    {
+      "type": "scenario",
+      "concept": "independence",
+      "difficulty": "hard",
+      "scenario": "A researcher surveys ten students in the same room about whether they would recommend a course, and the students discuss their answers with each other before responding.",
+      "question": "Which binomial condition fails, and why does it matter?",
+      "options": [
+        "The outcomes are not really binary, because opinions vary in their strength.",
+        "The number of trials is not fixed, because some students may decline to answer.",
+        "Independence fails, as one student's opinion sways another's response.",
+        "The success probability is not constant, because the students differ in their views."
+      ],
+      "answer": 2,
+      "explanation": "The model assumes each trial resolves without reference to the others, and conversation between respondents breaks that directly. It matters because clustered responses carry less information than the same number of independent ones, so the model understates the real uncertainty and any resulting interval or test looks more precise than it deserves. Surveying students separately restores the assumption.",
+      "misconception": "Differing individual views do not break the model; one response affecting another does."
+    },
+    {
+      "type": "scenario",
+      "concept": "constant-probability",
+      "difficulty": "hard",
+      "scenario": "An analyst pools a month of website visits and models the number of sign-ups as binomial. Midway through the month, the sign-up page was substantially redesigned.",
+      "question": "Which condition is violated, and what is the consequence?",
+      "options": [
+        "Independence, because visits that happen in the same month are related to each other.",
+        "The constant probability, since the redesign changed the conversion rate partway.",
+        "The binary outcome condition, because a single visit has more than two results.",
+        "Nothing at all is violated here, since the total number of visits is still fixed."
+      ],
+      "answer": 1,
+      "explanation": "The pooled data mixes two regimes with different underlying rates, so no single probability describes all the trials and the fitted model describes a process that never existed. The practical response is to split the period at the change and model each separately, which is also exactly what makes the before-and-after comparison meaningful rather than confounded.",
+      "misconception": "Pooling across a known change hides the very effect you would want to measure."
+    },
+    {
+      "type": "mcq",
+      "concept": "ml-link",
+      "difficulty": "easy",
+      "question": "Why does the Bernoulli distribution appear so often in machine learning?",
+      "options": [
+        "Because any two-class classification target is a binary Bernoulli trial.",
+        "Because it is simply the fastest of the distributions to compute with.",
+        "Because it models the continuous prediction error of a regression model.",
+        "Because every dataset has to be converted to binary before any training."
+      ],
+      "answer": 0,
+      "explanation": "Whenever the thing being predicted is a yes or no, such as spam or not spam, the outcome is exactly the binary trial the distribution describes, which is why it sits inside logistic regression, naive Bayes, and other classifiers. Counting such outcomes over many cases then brings in the binomial, which is how questions about numbers of positive predictions are framed.",
+      "misconception": "Its relevance comes from binary targets, not from computational convenience."
+    },
+    {
+      "type": "mcq",
+      "concept": "binomial-pmf",
+      "difficulty": "medium",
+      "question": "Three independent binary trials give a sample space of eight equally likely cases. How many of those cases produce exactly one success, and what is the resulting probability?",
+      "options": [
+        "One case, giving one eighth",
+        "Two cases, giving one quarter",
+        "Three cases, giving three eighths",
+        "Four cases, giving one half"
+      ],
+      "answer": 2,
+      "explanation": "The single success can fall on any of the three trials, so three of the eight cases qualify, giving three eighths. Listing the full space shows counts of one, three, three, and one across zero through three successes, which sum to eight as they must. Working this out by hand is what makes the arrangement factor in the general formula intuitive.",
+      "misconception": "Outcomes with the same number of successes are multiple distinct cases, not one."
+    },
+    {
+      "type": "card",
+      "concept": "bernoulli-to-binomial",
+      "difficulty": "medium",
+      "question": "Explain the relationship between the Bernoulli and binomial distributions, including how the binomial formula is built from the Bernoulli one.",
+      "answer": "A Bernoulli distribution models one binary trial with a single parameter, the probability of success. A binomial distribution counts the successes when that same trial is repeated a fixed number of independent times, so it adds a second parameter for the number of trials. Its formula is the Bernoulli probability for one specific sequence of successes and failures, multiplied by a combinations factor that counts how many distinct sequences give the desired number of successes. Setting the number of trials to one collapses the binomial back into the Bernoulli.",
+      "explanation": "Seeing the formula in these two pieces, a specific-sequence probability and an arrangement count, makes it memorable and explains why the distribution peaks in the middle for a fair trial: middling counts have far more arrangements than extreme ones."
+    },
+    {
+      "type": "card",
+      "concept": "binomial-criteria",
+      "difficulty": "medium",
+      "question": "List the four criteria for a binomial experiment and give a realistic way each one can fail.",
+      "answer": "First, the number of trials must be fixed in advance, which fails if you keep sampling until you see enough successes. Second, each trial must have a binary outcome, which fails if a response has several levels rather than two. Third, the trials must be independent, which fails when respondents discuss their answers and influence one another. Fourth, the success probability must be constant across trials, which fails when the underlying process changes partway through, as when a page is redesigned mid-measurement.",
+      "explanation": "The last two failures are the dangerous ones in practice, because the arithmetic still runs and produces a confident-looking answer. Dependence makes the result appear more precise than the data supports, and a drifting probability describes an average process that never actually operated."
     }
   ]
 }

@@ -2,54 +2,201 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What is the difference between a syntax error and an exception?",
+      "concept": "syntax-vs-exception",
+      "difficulty": "medium",
+      "question": "What distinguishes a syntax error from an exception?",
       "options": [
-        "A syntax error happens at run time; an exception happens at parse time.",
-        "They are two names for the same thing.",
-        "Exceptions cannot be caught, but syntax errors can.",
-        "A syntax error is caught before the code runs because it breaks Python's grammar; an exception occurs at run time in otherwise valid code."
+        "A syntax error happens before the run, in code that breaks the grammar.",
+        "A syntax error is raised by the runtime, while an exception is from the parser.",
+        "A syntax error can be caught with `try` and `except`, but an exception cannot.",
+        "A syntax error occurs only inside modules that another file has imported."
       ],
-      "answer": 3,
-      "explanation": "A syntax error means Python cannot parse the source, so nothing runs. An exception is a runtime event, like dividing by zero, in code that parsed fine. You can handle exceptions with try and except; you cannot handle a syntax error, you must fix it.",
-      "misconception": "A try and except block cannot rescue a syntax error. It only handles runtime exceptions."
+      "answer": 0,
+      "explanation": "A syntax error means Python cannot parse the file at all, so nothing runs and no handler can help; the fix is to rewrite the code. An exception arises while correct code is executing, because the situation is wrong rather than the code, which is exactly the case handlers exist for. Bad indentation is reported as its own kind of syntax error.",
+      "misconception": "You cannot handle a syntax error at runtime, because the program never starts."
+    },
+    {
+      "type": "mcq",
+      "concept": "error-types",
+      "difficulty": "medium",
+      "question": "Converting the text 'a' to an integer raises one error, while adding 1 to 'a' raises another. Which pair is correct?",
+      "options": [
+        "A TypeError for the conversion, and then a ValueError for the addition.",
+        "A ValueError for the conversion, and a TypeError for the addition.",
+        "Both raise a ValueError, since both of them involve a piece of text.",
+        "Both raise a TypeError, since both of them involve a string somewhere."
+      ],
+      "answer": 1,
+      "explanation": "The conversion function accepts strings, so handing it a string is the right type; the problem is that this particular value cannot be parsed, which is a value problem. The addition fails earlier than that, because combining a number with text is not a defined operation at all, which is a type problem. Reading which of the two you got tells you whether to clean the value or fix the operation.",
+      "misconception": "The distinction is whether the type was acceptable, not whether a string was involved."
+    },
+    {
+      "type": "mcq",
+      "concept": "why-handle",
+      "difficulty": "medium",
+      "question": "What are the two reasons to handle exceptions rather than let a stack trace reach the user?",
+      "options": [
+        "It makes the whole program run faster, and it reduces the file's size on disk.",
+        "It satisfies the language's own requirements, and it removes the need to test.",
+        "User experience, since a raw trace is alarming, and security, since it leaks.",
+        "It prevents the error from occurring at all, and it logs that error for you."
+      ],
+      "answer": 2,
+      "explanation": "A stack trace is Python talking to the developer and it is genuinely useful during development, but to a user who has just completed a payment it is frightening and meaningless. It also leaks internal detail, such as file names, line numbers, and code structure, that an attacker can assemble into a picture of your application. Handling the error replaces both problems with a calm, deliberate message.",
+      "misconception": "Handling an exception does not prevent the failure; it controls the response to it."
     },
     {
       "type": "scenario",
-      "scenario": "A data loader wraps everything in `try: ... except: pass` so it never crashes. In production, bad records vanish silently and nobody notices for weeks.",
-      "question": "What is wrong with this pattern, and what is better?",
+      "concept": "except-ordering",
+      "difficulty": "hard",
+      "scenario": "A developer writes a generic handler for the base exception type first, followed by specific handlers for a missing file and a division by zero. Every failure prints the generic message and the specific handlers never run.",
+      "question": "Why?",
       "options": [
-        "Nothing is wrong; silent failure is safest.",
-        "A bare `except: pass` hides every error, including bugs. Catch specific exceptions and log or handle them, so real problems surface.",
-        "The try block is too small; wrap more code.",
-        "You should catch exceptions with `if` statements instead."
+        "The two specific handlers need to be combined into a single shared block.",
+        "Handlers match top to bottom, and the base type catches nearly everything.",
+        "Only one single handler is ever permitted per `try` block in Python.",
+        "The specific errors have to be raised explicitly before they are catchable."
       ],
       "answer": 1,
-      "explanation": "A bare except swallows all exceptions, including ones you never anticipated, so genuine bugs and data problems disappear without a trace. Catch the specific exception types you expect, handle them deliberately, and let the unexpected ones propagate or get logged.",
-      "misconception": "Silent catch-all is not robustness. It is how serious failures go unnoticed; specificity and logging are what make code resilient."
+      "explanation": "Matching stops at the first handler whose type fits, and because almost all errors inherit from the base exception, a handler for it matches everything. The specific blocks below become unreachable code. The rule is to order handlers from most specific to most general, with the catch-all last so it only sees what you did not anticipate.",
+      "misconception": "Handlers are not matched by best fit; they are matched in the order written."
     },
     {
       "type": "mcq",
-      "question": "In a `try / except / else / finally` block, when does the `finally` clause run?",
+      "concept": "else-finally",
+      "difficulty": "medium",
+      "question": "How do the `else` and `finally` blocks differ?",
       "options": [
-        "Always, whether the try succeeded, raised and was handled, or raised and propagated.",
-        "Only when the except block ran.",
-        "Only when no exception occurred.",
-        "Only when an exception was raised."
+        "`else` runs when an exception occurs, and `finally` runs when none does.",
+        "Both of them run only on success, with the `finally` block running second.",
+        "`else` runs only when the `try` succeeded, while `finally` runs either way.",
+        "`else` runs only when an `except` block was skipped by the handler ordering."
+      ],
+      "answer": 2,
+      "explanation": "The flow branches after `try`: on failure a handler runs, on success the `else` block runs, and the two are mutually exclusive. Both paths then converge on `finally`, which executes regardless. So `else` is for follow-up work that only makes sense when nothing went wrong, and `finally` is for work that must happen whatever the outcome.",
+      "misconception": "`else` is the success path, not an alternative handler."
+    },
+    {
+      "type": "mcq",
+      "concept": "else-finally",
+      "difficulty": "medium",
+      "question": "What is `finally` principally used for?",
+      "options": [
+        "Logging the type of the error that occurred, for later offline analysis.",
+        "Retrying the operation that failed, now that the handler has run first.",
+        "Converting the caught exception into an ordinary return value instead.",
+        "Releasing resources such as a file or connection, as it always runs."
+      ],
+      "answer": 3,
+      "explanation": "Cleanup must happen on both the success and the failure path, which is exactly the guarantee `finally` provides. Without it, an exception midway through a block would skip the release and leave a connection open, wasting memory and leaving a route into the system. This is the same guarantee the `with` statement gives for files, implemented through the same underlying idea.",
+      "misconception": "`finally` is for cleanup, not for recovering from or retrying the failure."
+    },
+    {
+      "type": "mcq",
+      "concept": "raise",
+      "difficulty": "medium",
+      "question": "A withdrawal method checks its inputs and raises an error when the amount exceeds the balance, which the caller catches. What does this division of labour achieve?",
+      "options": [
+        "The method decides what counts as invalid; the caller decides how to respond.",
+        "The method handles the error entirely itself, so the caller needs no handler.",
+        "Raising spares the method from having to return any value to its caller at all.",
+        "It converts a runtime exception into a syntax error that is caught much earlier."
       ],
       "answer": 0,
-      "explanation": "`finally` always executes, which makes it the place for cleanup like closing a resource. `else` runs only when the try block raised nothing. `except` runs only on a matching exception. That split lets you separate the success path, the failure path, and guaranteed cleanup."
+      "explanation": "The method holds the domain knowledge about what is valid, so it is the right place to detect a bad amount, but it has no idea whether the application should show a dialog, retry, or write a log, so it should not choose. Raising signals the problem precisely and leaves the policy to the caller, which keeps the method reusable in contexts its author never imagined.",
+      "misconception": "Raising is not a failure to handle; it is a deliberate handoff of the decision."
     },
     {
       "type": "mcq",
-      "question": "Why would you create a custom exception class instead of raising a built-in like `ValueError`?",
+      "concept": "custom-exceptions",
+      "difficulty": "medium",
+      "question": "How do you create a custom exception, and why bother?",
       "options": [
-        "Built-in exceptions cannot be raised by your code.",
-        "It gives callers a precise, meaningful type to catch, so they can handle your domain's failures specifically.",
-        "Custom exceptions run faster.",
-        "It is required whenever you use try and except."
+        "Define a function returning an error message, so callers can read the text.",
+        "Define a class inheriting from `Exception`, naming a domain failure clearly.",
+        "Define a class with a double-underscore name, which registers it as an error.",
+        "Raise the base exception with a message, since custom classes are unsupported."
       ],
       "answer": 1,
-      "explanation": "A custom exception (subclassing Exception) names a domain-specific failure, so callers can `except InsufficientFundsError` and handle exactly that case without catching unrelated ValueErrors. It makes error handling expressive and targeted."
+      "explanation": "Inheriting from the base exception is what plugs your class into the existing hierarchy, so raising and catching it work exactly as they do for built-in errors. The benefit is expressiveness and precision: a handler can catch insufficient funds specifically without also swallowing every unrelated failure, which a generic exception would force it to do.",
+      "misconception": "A custom error is a class in the exception hierarchy, not a message or a function."
+    },
+    {
+      "type": "mcq",
+      "concept": "error-types",
+      "difficulty": "easy",
+      "question": "Why is reading an error's type the first step in debugging?",
+      "options": [
+        "Because the type is what determines whether the error can be caught at all.",
+        "Because the type is the only part of the error that is ever shown to users.",
+        "Because the type names the category of cause, narrowing it before you read.",
+        "Because the type reliably indicates which exact line number to inspect first."
+      ],
+      "answer": 2,
+      "explanation": "The names are deliberately descriptive, so a missing dictionary key, an out-of-range index, an undefined name, and a method that does not exist on an object each announce themselves distinctly. That tells you what kind of mistake to look for before you start reading the traceback in detail, which is usually the fastest route to the cause.",
+      "misconception": "The type is a diagnosis of the category, not a pointer to a location."
+    },
+    {
+      "type": "mcq",
+      "concept": "error-types",
+      "difficulty": "easy",
+      "question": "Calling a string method on a list raises which error, and what does it indicate?",
+      "options": [
+        "A ValueError, because the contents of the list are unsuitable for the method.",
+        "A KeyError, because the name of the method was not found within the list.",
+        "A TypeError, because a list simply cannot be converted into a string here.",
+        "An AttributeError, because the object's class provides no such member."
+      ],
+      "answer": 3,
+      "explanation": "An object can only use the members of its own class, so asking a list for a string method finds nothing and the error reports a missing attribute rather than a bad value or type combination. In practice this almost always means the value is not the type you assumed, so checking the actual type is the natural next step.",
+      "misconception": "A missing method is an attribute problem, which usually points at a wrong assumption about the object's type."
+    },
+    {
+      "type": "mcq",
+      "concept": "when-to-wrap",
+      "difficulty": "easy",
+      "question": "Which code is the strongest candidate for being wrapped in a `try` block?",
+      "options": [
+        "Opening a file, connecting to a database, or making a network request.",
+        "Arithmetic on two values that you have already fully validated earlier.",
+        "A list comprehension iterating over a short list literal in the source.",
+        "Defining a class and the methods that belong to it inside a module."
+      ],
+      "answer": 0,
+      "explanation": "Anything that reaches outside your program can fail for reasons your code cannot prevent: the file was moved, the server is down, the connection dropped mid-query. Pure computation over values you control is far more predictable. The habit is to identify the boundary where your program depends on the outside world, and handle failures there.",
+      "misconception": "Handlers belong where failure is possible and outside your control, not sprinkled everywhere."
+    },
+    {
+      "type": "scenario",
+      "concept": "except-ordering",
+      "difficulty": "hard",
+      "scenario": "A team replaces all of their specific handlers with a single bare handler that catches everything and prints one message asking the user to try again. Bug reports become very hard to diagnose.",
+      "question": "What has been lost?",
+      "options": [
+        "Nothing of substance, since a single message is simpler and just as informative.",
+        "Only the ability to show the error text, which printing the exception restores.",
+        "The ability to respond to failures differently, and the record of what failed.",
+        "The `finally` block, which can no longer be used alongside a bare handler."
+      ],
+      "answer": 2,
+      "explanation": "Catching everything identically means a missing file, an undefined name, and a bad conversion all produce the same output, so neither the user nor the developer learns anything actionable. Worse, genuine programming mistakes are quietly swallowed and look like ordinary runtime conditions. Specific handlers with tailored responses, plus a catch-all placed last for the unforeseen, preserves both the user experience and the diagnosis.",
+      "misconception": "A single vague message is not simplicity; it discards the information that makes a failure fixable."
+    },
+    {
+      "type": "card",
+      "concept": "else-finally",
+      "difficulty": "medium",
+      "question": "Describe the complete control flow through a `try` block that has `except`, `else`, and `finally` sections, for both the success and the failure case.",
+      "answer": "The flow branches after the `try` section. If an exception is raised, the first matching handler runs and the `else` section is skipped. If no exception is raised, the handlers are all skipped and the `else` section runs. The two routes are mutually exclusive, and both then converge on `finally`, which runs in either case. So follow-up work that only makes sense on success belongs in `else`, and cleanup that must happen regardless belongs in `finally`.",
+      "explanation": "Picturing it as a diamond helps: one split at the top into the error and no-error paths, and one join at the bottom where `finally` always executes. That join is what makes resource release reliable even when the body failed halfway through."
+    },
+    {
+      "type": "card",
+      "concept": "raise",
+      "difficulty": "medium",
+      "question": "Explain the relationship between raising and catching an exception, and why the pairing is useful inside a method.",
+      "answer": "Raising throws an exception at a chosen point, and a handler elsewhere catches it, which other languages name as throwing and catching. The pairing is useful because a method can validate its inputs and signal each invalid case with a specific, well-named error, while the caller keeps all of the decisions about how to respond in one place. The method therefore owns the definition of what is invalid and the caller owns the policy for dealing with it.",
+      "explanation": "This is the same principle as a function author being responsible for handling bad input, taken one step further: rather than printing a message or returning a sentinel value, the method raises, which cannot be ignored silently by the caller the way a returned value can."
     }
   ]
 }
