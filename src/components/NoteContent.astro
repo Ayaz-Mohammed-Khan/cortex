@@ -50,16 +50,28 @@ const {
   quiz = null,
 } = Astro.props;
 
-// Count of questions, used in the banner copy. Zero means no banner is shown.
-const quizCount = quiz?.questions.length ?? 0;
-// Timed budget for the graded quiz: a per-type allowance summed over the quiz.
-// Kept in sync with SECONDS_PER_TYPE in `src/components/quiz.ts`.
+// Size of the whole question POOL. Zero means no banner is shown.
+const quizPool = quiz?.questions.length ?? 0;
+
+// A graded attempt samples a stratified SUBSET of the pool, not the whole bank,
+// so the banner's test length, time, and pass mark must describe that subset,
+// not the pool. This mirrors `gradedCount` in `src/components/quiz.ts`: about
+// half the pool, bounded to [6, 8]. Keep both in sync.
+const GRADED_MIN = 6;
+const GRADED_MAX = 8;
+const quizCount =
+  quizPool > 0 ? Math.max(GRADED_MIN, Math.min(GRADED_MAX, Math.min(Math.round(quizPool / 2), quizPool))) : 0;
+
+// Timed budget estimate: the pool's average per-question allowance times the
+// sampled count (the exact subset is not known until the attempt samples, so
+// this is an estimate, deliberately rounded to a "~N min"). Per-type seconds
+// kept in sync with SECONDS_PER_TYPE in `src/components/quiz.ts`.
 const QUIZ_SECONDS_PER_TYPE: Record<string, number> = { mcq: 45, scenario: 75, card: 60 };
-const quizSeconds =
+const quizPoolSeconds =
   quiz?.questions.reduce((s, q) => s + (QUIZ_SECONDS_PER_TYPE[q.type] ?? 60), 0) ?? 0;
+const quizSeconds = quizPool > 0 ? Math.round((quizPoolSeconds / quizPool) * quizCount) : 0;
 const quizMinutes = quizSeconds > 0 ? Math.max(1, Math.round(quizSeconds / 60)) : 0;
-// Pass threshold: the quiz counts as passed at two thirds correct, so this is
-// the number of questions a reader must get right. Kept in sync with
+// Pass threshold: two thirds correct of the SAMPLED count. Kept in sync with
 // PASS_RATIO in `src/components/quiz.ts`.
 const quizPassMark = quizCount > 0 ? Math.ceil((quizCount * 2) / 3) : 0;
 
@@ -154,7 +166,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     complete" so the flow reads: read the note, test yourself, mark it done. The
     `./quiz` island reads the serialized quiz below and opens the modal.
   */}
-  {quizCount > 0 && (
+  {quizPool > 0 && (
     <div
       class="mt-10 flex flex-col gap-4 rounded-2xl border border-accent-200 bg-accent-50/60 px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center dark:border-accent-500/25 dark:bg-accent-500/10"
       data-quiz-banner
@@ -171,7 +183,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
       <div class="min-w-0 flex-1">
         <p class="font-semibold text-gray-900 dark:text-gray-100">Test yourself</p>
         <p class="text-sm text-gray-600 dark:text-gray-400">
-          {quizCount} {quizCount === 1 ? 'question' : 'questions'}. <strong class="font-semibold text-gray-700 dark:text-gray-300">Quiz me</strong> is a timed test (~{quizMinutes} {quizMinutes === 1 ? 'min' : 'mins'}, score {quizPassMark}+ to complete the note; miss it and it locks until review). <strong class="font-semibold text-gray-700 dark:text-gray-300">Flashcards</strong> is untimed recall practice.
+          <strong class="font-semibold text-gray-700 dark:text-gray-300">Quiz me</strong> is a timed test of {quizCount} questions drawn from a pool of {quizPool} (~{quizMinutes} {quizMinutes === 1 ? 'min' : 'mins'}, score {quizPassMark}+ to complete the note; miss it and it locks until review). Each attempt is a fresh mix. <strong class="font-semibold text-gray-700 dark:text-gray-300">Flashcards</strong> is untimed recall practice over the whole pool.
         </p>
       </div>
       <div class="flex shrink-0 gap-2">
@@ -215,13 +227,13 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     class="mt-10 flex flex-col items-center gap-3 border-t border-gray-200 pt-6 text-center dark:border-white/10"
     data-note-progress
     data-route={route}
-    data-requires-quiz={quizCount > 0 ? 'true' : undefined}
+    data-requires-quiz={quizPool > 0 ? 'true' : undefined}
   >
     <p
       data-note-progress-heading
       class="text-sm text-gray-500 dark:text-gray-400"
     >
-      {quizCount > 0 ? 'Completion' : 'Finished this note?'}
+      {quizPool > 0 ? 'Completion' : 'Finished this note?'}
     </p>
     <button
       type="button"
@@ -238,7 +250,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     </button>
     {/* Shown by the island only when a quiz gates completion and it is not yet
         passed. Explains why the button is disabled and points at the quiz. */}
-    {quizCount > 0 && (
+    {quizPool > 0 && (
       <p data-note-progress-hint class="text-xs text-gray-400 dark:text-gray-500" hidden>
         Score at least {quizPassMark} of {quizCount} on the quiz above to complete this note.
       </p>
@@ -284,7 +296,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
 </article>
 
 {
-  quizCount > 0 && (
+  quizPool > 0 && (
     <>
       {/*
         Quiz data for the island, serialized as JSON (the same pattern the

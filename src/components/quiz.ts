@@ -45,14 +45,29 @@ function inReviewMode(): boolean {
 const PASS_RATIO = 2 / 3;
 
 /**
- * Hard cap on the number of questions a single GRADED attempt draws from a
- * note's bank. Banks now hold 10-17 questions; sampling a stratified subset
- * (spread across concepts and difficulty, see `@/lib/quiz-sample`) keeps a
- * sitting focused and makes repeat attempts vary instead of replaying the whole
- * bank in authored order. A bank at or below the cap is used in full (just
- * reshuffled). Flashcards practice is unaffected and always uses the whole bank.
+ * How many questions a single GRADED attempt draws from a note's bank.
+ *
+ * Banks hold 11-17 questions. A graded sitting samples a stratified SUBSET
+ * (spread across concepts and difficulty, see `@/lib/quiz-sample`) rather than
+ * replaying the whole bank, which keeps the test focused and, crucially, makes
+ * repeat attempts genuinely different instead of near-identical.
+ *
+ * The count is proportional, not fixed: about half the bank, bounded to
+ * [GRADED_MIN, GRADED_MAX]. Half keeps it a clear minority of every bank (so
+ * two attempts overlap little); the floor stops a small bank becoming a
+ * trivially short test; the ceiling stops a big bank becoming a slog. For the
+ * current banks this yields 6-8 questions, a ~5-8 minute sitting that still
+ * clears the two-thirds pass bar fairly. Flashcards practice is unaffected and
+ * always uses the whole bank.
  */
-const MAX_GRADED_QUESTIONS = 10;
+const GRADED_MIN = 6;
+const GRADED_MAX = 8;
+
+/** The sampled question count for a graded attempt over a bank of `bankSize`. */
+function gradedCount(bankSize: number): number {
+  const half = Math.round(bankSize / 2);
+  return Math.max(GRADED_MIN, Math.min(GRADED_MAX, Math.min(half, bankSize)));
+}
 
 /**
  * Per-question time budget (seconds) for the GRADED quiz, by question kind.
@@ -487,7 +502,7 @@ function resolveOrder(
     const n = Math.min(answerCount, bankLength);
     return Array.from({ length: n }, (_, i) => i);
   }
-  return sampleQuizOrder(state.quiz, MAX_GRADED_QUESTIONS, Math.random);
+  return sampleQuizOrder(state.quiz, gradedCount(state.quiz.questions.length), Math.random);
 }
 
 /**
