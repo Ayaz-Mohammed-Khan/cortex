@@ -665,10 +665,10 @@ function syncBanner(): void {
     if (locked) {
       const when = new Date(unlockAt);
       hint.hidden = false;
-      hint.textContent = `Quiz locked after a miss — next attempt opens ${formatDue(unlockAt)} (${when.toLocaleString()}). Keep practising with Flashcards.`;
+      hint.textContent = `Quiz locked after a miss. Your next attempt opens ${formatDue(unlockAt)} (${when.toLocaleString()}). Keep practising with Flashcards.`;
     } else if (resuming) {
       hint.hidden = false;
-      hint.textContent = `A timed attempt is in progress — the clock keeps running while this is closed. Reopen to resume with ${clock(attemptSecondsLeft(live!))} left.`;
+      hint.textContent = `A timed attempt is in progress, the clock keeps running while this is closed. Reopen to resume with ${clock(attemptSecondsLeft(live!))} left.`;
     } else {
       hint.hidden = true;
     }
