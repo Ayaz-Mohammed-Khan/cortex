@@ -2,41 +2,223 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "The interquartile range (IQR) is defined as which of the following?",
+      "concept": "percentile-meaning",
+      "difficulty": "easy",
+      "question": "What is the difference between scoring in the 90th percentile and scoring 90 percent?",
       "options": [
-        "The mean plus or minus one standard deviation.",
-        "The maximum minus the minimum.",
-        "Q3 minus Q1, the spread of the middle 50 percent of the data.",
-        "The median minus the mode."
+        "They are simply two equivalent ways of reporting one and the same result.",
+        "The 90th percentile means 90 percent scored below you; 90 percent is 90 marks.",
+        "The 90th percentile means you scored 90 marks, while 90 percent means you beat 90.",
+        "The 90th percentile applies to a sample, and the 90 percent figure to a population."
       ],
-      "answer": 2,
-      "explanation": "The IQR is the third quartile minus the first quartile, so it captures the range covering the central half of the data. Because it ignores the tails, it is a robust measure of spread, much like the median is a robust measure of center."
-    },
-    {
-      "type": "scenario",
-      "scenario": "A box plot of request latency shows a box from 80 to 140 milliseconds, a median line at 95, and several points plotted far above the upper whisker.",
-      "question": "How do you read the points above the whisker?",
-      "options": [
-        "They are the mode of the distribution.",
-        "They are the mean of the data.",
-        "They are plotting errors that should be removed.",
-        "They are outliers, values beyond 1.5 times the IQR above Q3, flagged by the box-plot rule."
-      ],
-      "answer": 3,
-      "explanation": "A standard box plot draws whiskers to the furthest points within 1.5 times the IQR of the quartiles, and marks anything past that as individual outlier points. Those high-latency points are statistical outliers worth investigating, not errors to delete blindly.",
-      "misconception": "Outlier points are not errors by default. The 1.5 times IQR rule flags them for inspection, not automatic removal."
+      "answer": 1,
+      "explanation": "A percentile is a statement about your position relative to everyone else, so it depends on how the rest of the group performed. A percentage is a statement about your own marks and is independent of anyone else. In a hard exam a modest raw score can sit at a high percentile, and in an easy one a high score may not.",
+      "misconception": "A percentile describes rank within a group; a percentage describes an absolute score."
     },
     {
       "type": "mcq",
-      "question": "The 90th percentile of a response-time dataset is 300 milliseconds. What does that mean?",
+      "concept": "percentile-value-formula",
+      "difficulty": "medium",
+      "question": "For 10 observations, the 75th percentile is located at position 0.75 times 11, which is 8.25. The 8th value is 96 and the 9th is 98. What is the 75th percentile?",
       "options": [
-        "90 percent of responses were at or below 300 milliseconds, and 10 percent were slower.",
-        "The response time is 90 percent accurate.",
-        "The average response time is 300 milliseconds.",
-        "90 percent of responses were slower than 300 milliseconds."
+        "98, rounding the position up to the 9th value",
+        "97, the midpoint of the two neighbouring values",
+        "96, taking the 8th value since the position begins there",
+        "96.5, interpolating a quarter of the way from 96 toward 98"
+      ],
+      "answer": 3,
+      "explanation": "The fractional position says the percentile lies a quarter of the way between the eighth and ninth observations, so you add a quarter of their difference to the lower one, giving 96.5. This is also why a quantile value need not appear in the data at all: it can fall between two observations.",
+      "misconception": "A fractional position is interpolated, not rounded to the nearest observation."
+    },
+    {
+      "type": "mcq",
+      "concept": "value-percentile-formula",
+      "difficulty": "medium",
+      "question": "In a set of 10 observations, 3 values lie below 88 and exactly one value equals 88. Using the count below plus half the count equal, divided by the total, what percentile is 88?",
+      "options": [
+        "The 30th percentile",
+        "The 35th percentile",
+        "The 40th percentile",
+        "The 88th percentile"
+      ],
+      "answer": 1,
+      "explanation": "Three below plus half of the single tied value gives 3.5, and dividing by the ten observations gives 0.35, so 88 sits at the 35th percentile. Counting half of the tied values is what keeps the measure symmetric when several observations share the same value, rather than arbitrarily placing them all above or all below.",
+      "misconception": "The value itself, 88, has nothing to do with the percentile it occupies."
+    },
+    {
+      "type": "mcq",
+      "concept": "iqr",
+      "difficulty": "easy",
+      "question": "What does the inter-quartile range represent?",
+      "options": [
+        "The central half of the data, from the 25th percentile to the 75th.",
+        "The full spread of the data, running from its minimum to its maximum.",
+        "The average distance of every observation in the data from the median.",
+        "The middle quarter of the data, holding 25 percent of the observations."
       ],
       "answer": 0,
-      "explanation": "A percentile is the value below which that share of the data falls. The 90th percentile at 300 ms means nine in ten responses were no slower than 300 ms. Tail percentiles like p90 and p99 are standard for latency because the mean hides the slow tail."
+      "explanation": "With a quarter of the data below the first quartile and a quarter above the third, the gap between them contains the central half of the observations, which is drawn as the box in a box plot. Because it ignores both tails entirely, it is a robust measure of spread, unlike the range, which is determined solely by the two most extreme points.",
+      "misconception": "The quartiles bound the central half, not a quarter, of the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "outlier-rule",
+      "difficulty": "medium",
+      "question": "With a first quartile of 234, a third quartile of 328, and therefore an inter-quartile range of 94, what are the whisker limits?",
+      "options": [
+        "234 and 328, the two quartiles themselves taken as the limits",
+        "140 and 422, extending one inter-quartile range beyond each quartile",
+        "About 93 and 469, each quartile extended one and a half ranges",
+        "6 and 1500, which are the minimum and maximum observed values"
+      ],
+      "answer": 2,
+      "explanation": "The convention subtracts one and a half times the inter-quartile range from the lower quartile and adds the same amount above the upper one, giving roughly 93 and 469. Anything beyond those bounds is flagged as an outlier. This rule is the standard automatic outlier check in exploratory work precisely because it is built from robust quantiles rather than from the mean.",
+      "misconception": "The multiplier is one and a half, not one, and the limits extend outward from the quartiles."
+    },
+    {
+      "type": "scenario",
+      "concept": "whiskers",
+      "difficulty": "hard",
+      "scenario": "A dataset runs 6, 213, 241, 260, 281, 290, 314, 321, 350, 1500, with whisker limits computed at roughly 93 and 469.",
+      "question": "Where do the whiskers actually end, and which points are outliers?",
+      "options": [
+        "They end exactly at the limits 93 and 469, with both 6 and 1500 as outliers.",
+        "They end at 213 and 350, the last real values inside, with 6 and 1500 outside.",
+        "They end at the data extremes 6 and 1500, so there are no outliers at all.",
+        "They end at the quartiles 234 and 328, with every point beyond them an outlier."
+      ],
+      "answer": 1,
+      "explanation": "The computed limits only decide which points qualify as outliers; the whiskers are then drawn to the furthest genuine observation that falls within them, here 213 and 350. Drawing them to the limits themselves would imply data exists at those values when none does. The two points outside, 6 and 1500, are plotted individually.",
+      "misconception": "A whisker reaches the last real data point inside the limit, not the limit itself."
+    },
+    {
+      "type": "mcq",
+      "concept": "five-number-summary",
+      "difficulty": "easy",
+      "question": "Which five values make up the five-number summary?",
+      "options": [
+        "Mean, median, mode, variance, and standard deviation",
+        "Count, mean, standard deviation, minimum, and maximum",
+        "The 10th, 25th, 50th, 75th, and 90th percentiles",
+        "Minimum, first quartile, median, third quartile, and maximum"
+      ],
+      "answer": 3,
+      "explanation": "These five, equivalently the 0th, 25th, 50th, 75th, and 100th percentiles, convey centre, spread, and a sense of shape in a compact form, and they are exactly what a box plot draws. A standard dataframe description returns them alongside the count and mean, which is why that output is usually the first thing to read for a numerical column.",
+      "misconception": "The summary is built from quantiles, so it contains no mean or standard deviation."
+    },
+    {
+      "type": "mcq",
+      "concept": "box-plot-reading",
+      "difficulty": "medium",
+      "question": "In a box plot, the median line sits noticeably left of centre within the box and the right whisker is much longer. What does this indicate?",
+      "options": [
+        "A right skew, with the data bunched low and a tail stretching upward.",
+        "A left skew, with the long tail of the data stretching downward instead.",
+        "A symmetric distribution that happens to have been plotted incorrectly.",
+        "That the dataset being shown contains no outliers of any kind at all."
+      ],
+      "answer": 0,
+      "explanation": "An off-centre median says the central half of the data is not evenly distributed, and a long whisker on one side says the tail extends that way. Both pointing right means values bunch at the low end with a few large ones pulling upward, the familiar shape of incomes, response times, and claim sizes. Reading the median's position and the whisker lengths is how a box plot conveys shape as well as spread.",
+      "misconception": "Skew is read from asymmetry in the box and whiskers, not from the presence of outliers."
+    },
+    {
+      "type": "scenario",
+      "concept": "percentile-meaning",
+      "difficulty": "medium",
+      "scenario": "A service reports a median response time of 120 milliseconds, yet a steady stream of users complain that the application feels slow.",
+      "question": "Why can the median look healthy while users suffer, and what should be reported instead?",
+      "options": [
+        "The median must be miscomputed, and a correct one would reflect the complaints.",
+        "The mean should be reported in its place, because it accounts for every request.",
+        "The median hides the slow tail, so high percentiles like the 95th should be watched.",
+        "Response time should be given as a percentage of the limit, not as a percentile."
+      ],
+      "answer": 2,
+      "explanation": "Half of all requests being fast is compatible with a substantial minority being very slow, and it is those requests that generate complaints. A high percentile answers the question that matters, namely how bad the experience is for the unlucky few, which is why service targets are written against tail percentiles rather than averages. The mean would help a little but is itself dragged around by extremes.",
+      "misconception": "A healthy central measure does not imply a healthy tail; they are different questions."
+    },
+    {
+      "type": "mcq",
+      "concept": "histogram-bins",
+      "difficulty": "medium",
+      "question": "Why does bin size matter when reading a histogram?",
+      "options": [
+        "Bin size alters the underlying data, so it has to be fixed before any analysis.",
+        "Too few bins hide detail, while too many turn noise into apparent structure.",
+        "Smaller bins are always more accurate, because they make use of more of the data.",
+        "Bin size has an effect only on the chart's chosen colours and axis labels."
+      ],
+      "answer": 1,
+      "explanation": "The bins are a choice made during plotting, not a property of the data, and that choice determines what shape you perceive. Over-wide bins can make a bimodal distribution look uniform, while over-narrow bins can make random fluctuation look like peaks. Because the same column can be made to tell different stories, it is worth viewing more than one bin width before concluding anything about shape.",
+      "misconception": "A histogram's appearance is partly an artefact of a parameter you chose."
+    },
+    {
+      "type": "mcq",
+      "concept": "categorical-graphs",
+      "difficulty": "medium",
+      "question": "What is the difference between what a bar chart and a pie chart are built from?",
+      "options": [
+        "A bar chart shows raw frequency counts; a pie chart shows each category's share.",
+        "A bar chart shows the percentages, while a pie chart shows the underlying counts.",
+        "Both of them show cumulative frequency, differing only in their orientation.",
+        "A bar chart suits numerical columns, whereas a pie chart suits categorical ones."
+      ],
+      "answer": 0,
+      "explanation": "Both start from a frequency table, but the bar chart plots the counts directly while the pie chart converts them to proportions of the total, which is what lets its slices sum to a whole. The consequence is that a pie chart answers questions about composition and a bar chart about magnitude, so comparing counts between categories is easier on bars.",
+      "misconception": "The two are not interchangeable; one encodes magnitude, the other share of a total."
+    },
+    {
+      "type": "mcq",
+      "concept": "histogram-shapes",
+      "difficulty": "medium",
+      "question": "A histogram shows values bunched toward the low end with a long tail extending to the right. What is this called, and what does it imply for choosing a measure of centre?",
+      "options": [
+        "Left-skewed, and the mean is the preferable measure of centre here.",
+        "Bimodal, and the mode is the measure that should be reported for it.",
+        "Uniform, so any one of the measures of centre will serve equally well.",
+        "Right-skewed, and the median is safer because the tail pulls the mean up."
+      ],
+      "answer": 3,
+      "explanation": "The skew is named for the direction of the tail, not where the bulk sits, so a tail to the right is a right skew. Because the mean responds to the magnitude of those large values it is dragged upward, away from where most observations lie, while the median stays with the bulk. This is the shape of income, house price, and duration data, which is why those are conventionally reported as medians.",
+      "misconception": "Skew direction follows the tail, so data bunched on the left is right-skewed."
+    },
+    {
+      "type": "mcq",
+      "concept": "quantile-basics",
+      "difficulty": "medium",
+      "question": "Which statement about quantiles is correct?",
+      "options": [
+        "Every quantile value computed must be one of the actual observed data points.",
+        "Sorting the data first is optional, provided that the total count is known.",
+        "The data must be sorted first, and the result may fall between two observations.",
+        "The quartiles must always be computed before any percentiles can be derived."
+      ],
+      "answer": 2,
+      "explanation": "A quantile is fundamentally a position in the ordered data, so ordering is a precondition and an unsorted computation is meaningless. Since a position may land between observations, the value is interpolated and need not be anything actually recorded. Percentiles are the finest division, so quartiles, quintiles, and deciles can all be derived from them rather than the other way round.",
+      "misconception": "A quantile locates a position, so its value can be a number that no observation takes."
+    },
+    {
+      "type": "mcq",
+      "concept": "box-plot-reading",
+      "difficulty": "medium",
+      "question": "What is the particular advantage of drawing two box plots side by side?",
+      "options": [
+        "It compares the centre, spread, skew, and outliers of two groups at a glance.",
+        "It increases the accuracy of the quartile estimates for each of the groups.",
+        "It is the only available way to detect any outliers at all in grouped data.",
+        "It turns the visual comparison into a formal statistical test of difference."
+      ],
+      "answer": 0,
+      "explanation": "Because each plot compresses a five-number summary plus outliers into one compact shape, placing two together makes differences in level and in variability visible simultaneously, which neither a pair of means nor a pair of histograms conveys as cleanly. It remains a descriptive comparison, though: establishing whether an apparent difference is real requires an inferential test.",
+      "misconception": "Seeing a difference between two box plots is not the same as demonstrating one statistically."
+    },
+    {
+      "type": "card",
+      "concept": "box-plot-construction",
+      "difficulty": "medium",
+      "question": "List the steps to construct a box plot from raw data, being precise about where the whiskers end.",
+      "answer": "Sort the data, then compute the first quartile, the median, and the third quartile, and draw the box from the first to the third quartile with a line at the median, so the box is the inter-quartile range. Compute the limits as the first quartile minus one and a half inter-quartile ranges and the third quartile plus the same amount. Extend each whisker to the furthest actual observation that still lies inside its limit, not to the limit itself. Finally, plot every point beyond the limits individually as an outlier.",
+      "explanation": "The distinction in the whisker step is what people most often get wrong. The limits are a test for outlier status, while the whiskers mark real data, which is why two datasets with identical quartiles can have whiskers of different lengths."
     }
   ]
 }

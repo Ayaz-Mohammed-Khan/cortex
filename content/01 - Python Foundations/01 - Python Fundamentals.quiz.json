@@ -1,21 +1,34 @@
 {
   "questions": [
     {
-      "type": "mcq",
-      "question": "Python is described as dynamically typed. What does that mean for a variable?",
+      "type": "scenario",
+      "concept": "execution-model",
+      "difficulty": "medium",
+      "scenario": "A data-cleaning script runs for two minutes, prints progress along the way, then crashes with a NameError on a misspelled variable near the end of the file.",
+      "question": "Why did Python not report the misspelled name before any work started?",
       "options": [
-        "Every variable must be declared with its type before use.",
-        "A variable can hold only one type for the life of the program.",
-        "Types are checked only when you run `mypy`.",
-        "A variable has no fixed type and can be rebound to a value of any type at runtime."
+        "Python validates names only inside function bodies, so a misspelling at the top level of a file is never checked at all.",
+        "Python translates and runs the file line by line, so it reaches the faulty line only after the earlier lines have executed.",
+        "A NameError counts as a warning, so Python collects it quietly and reports it only once the program has exited.",
+        "The file carried no type annotations, and Python relies on those to catch misspelled names before execution begins."
       ],
-      "answer": 3,
-      "explanation": "Dynamic typing means the type travels with the value, not the variable name. The same name can point at an integer and later at a string. Static languages bind a type to the variable at declaration instead.",
-      "misconception": "Dynamic typing is not the same as untyped. Values still have types; the name just is not pinned to one."
+      "answer": 1,
+      "explanation": "Python is interpreted: it executes statements in order rather than compiling and validating the whole program up front, so a bad name on a late line surfaces only when execution arrives there. A compiled language would reject the program before running anything. The practical lesson is to fail fast: validate paths, credentials, and inputs at the top of a long job instead of two minutes in.",
+      "misconception": "A script that starts running is not a script that has been checked. Only the lines that executed have been exercised."
+    },
+    {
+      "type": "card",
+      "concept": "execution-model",
+      "difficulty": "hard",
+      "question": "Python is often called a slow language, yet it dominates data science. Explain how both statements can be true at once.",
+      "answer": "Interpreted Python executes line by line and its native objects carry per-object overhead, so a pure-Python loop really is slow. Data science avoids paying that cost by pushing the heavy work into libraries whose inner loops are compiled C, above all NumPy's `ndarray`. You write Python that orchestrates vectorized operations, and the arithmetic itself runs at C speed.",
+      "explanation": "This is exactly why looping over rows of a dataframe crawls while the equivalent vectorized column operation is fast: one keeps the work in the interpreter, the other hands it to compiled code. Vectorize first, and reach for a Python loop only when nothing else fits."
     },
     {
       "type": "mcq",
-      "question": "What does `print(1, 2, 3, sep=\"-\", end=\"!\")` output?",
+      "concept": "print",
+      "difficulty": "easy",
+      "question": "What does `print(1, 2, 3, sep='-', end='!')` output?",
       "options": [
         "1-2-3!",
         "1 2 3!",
@@ -23,27 +36,192 @@
         "1-2-3 followed by a newline"
       ],
       "answer": 0,
-      "explanation": "`sep` sets the string placed between the arguments, so the values join as 1-2-3. `end` replaces the default trailing newline, so the line ends with ! and no newline."
+      "explanation": "`sep` sets what goes between the arguments, so the values join as 1-2-3. `end` replaces the default trailing newline, so the line finishes with an exclamation mark and no line break. Overriding `end` is the usual way to build a progress indicator that stays on one line."
+    },
+    {
+      "type": "mcq",
+      "concept": "numeric-types",
+      "difficulty": "medium",
+      "question": "What happens when an integer calculation grows very large, such as `2 ** 1000`?",
+      "options": [
+        "It silently wraps around to a negative value, as fixed-width integers do when they exceed their range.",
+        "It raises an OverflowError, because Python caps integers at the machine's native word size.",
+        "It returns `inf`, since the result is larger than the biggest number Python can represent.",
+        "It computes the exact value, because Python integers have arbitrary precision."
+      ],
+      "answer": 3,
+      "explanation": "A Python integer grows to whatever memory allows, so `2 ** 1000` is evaluated exactly as a 302-digit number. Fixed-width integers in C or Java would wrap around or overflow at this size. Floats are the type with a real ceiling in Python, so overflow bites there, not in `int`.",
+      "misconception": "Arbitrary precision applies to `int` only. Floating-point values do overflow."
+    },
+    {
+      "type": "mcq",
+      "concept": "numeric-types",
+      "difficulty": "medium",
+      "question": "What does `print(1e309)` display, given that a float holds values up to roughly 1.8 times 10 to the power 308?",
+      "options": [
+        "1e+309",
+        "inf",
+        "An OverflowError is raised.",
+        "0.0"
+      ],
+      "answer": 1,
+      "explanation": "The value exceeds the float range, so it becomes `inf` instead of raising. Silent infinities are dangerous in numerical work because they propagate: later arithmetic on `inf` stays `inf` or turns into `nan`, so a pipeline can produce meaningless output without ever crashing. Guard against it by checking for non-finite values after a risky computation.",
+      "misconception": "Float overflow in Python does not raise an error; it quietly yields infinity, so you have to detect it yourself."
     },
     {
       "type": "scenario",
-      "scenario": "A new learner writes `age = input(\"Age: \")` then checks `if age > 18:` and gets a TypeError.",
-      "question": "What is the cause and the fix?",
+      "concept": "type-conversion",
+      "difficulty": "medium",
+      "scenario": "A teammate reads a numeric field from a form as text into `raw`, calls `int(raw)` to use it as a number, then later logs `type(raw)` and sees `str`.",
+      "question": "Why is `raw` still a string?",
       "options": [
-        "`input` cannot be assigned to a variable.",
-        "The comparison needs `==` instead of `>`.",
-        "`input` returns a string, so compare after converting with `int(age)`.",
-        "`input` returns a float, so round it first."
+        "`int()` does convert in place, but only when the text happens to be a valid number.",
+        "`type()` reports the type a name was first given rather than the type it currently holds.",
+        "`int()` builds a new integer object and leaves `raw` pointing at the unchanged string.",
+        "The conversion failed silently and handed back the original input completely untouched."
       ],
       "answer": 2,
-      "explanation": "`input` always returns a string, and Python will not order a string against an integer, so the comparison raises a TypeError. Convert the input with `int(age)` (or `float`) before comparing.",
-      "misconception": "`input` does not infer numbers. Treat its result as text until you convert it."
+      "explanation": "Conversion in Python is non-destructive. `int(raw)` returns a new object and never touches the value you passed in, so you must bind the result, as in `raw = int(raw)` or a fresh name. This differs from casting in languages where the original value itself is reinterpreted.",
+      "misconception": "Calling a converter does not mutate its argument. You have to store what it returns."
+    },
+    {
+      "type": "mcq",
+      "concept": "type-conversion",
+      "difficulty": "medium",
+      "question": "Which of these expressions raises an error instead of producing a value?",
+      "options": [
+        "`int('4')`",
+        "`float(4)`",
+        "`int(4.9)`",
+        "`int(4 + 5j)`"
+      ],
+      "answer": 3,
+      "explanation": "`int('4')` parses the text to 4, `float(4)` widens it to 4.0, and `int(4.9)` truncates toward zero to 4. Converting a complex number to `int` would have to throw away the imaginary part, and Python refuses to lose that information silently, so it raises a TypeError.",
+      "misconception": "`int()` on a float truncates rather than rounds, so `int(4.9)` is 4, not 5."
     },
     {
       "type": "card",
-      "question": "Explain the difference between implicit and explicit type conversion in Python, with one example of each.",
-      "answer": "Implicit conversion is done by Python automatically when it is safe, for example `3 + 2.0` promotes the integer to a float and gives 5.0. Explicit conversion is done by you with a constructor, for example `int(\"42\")` turns a string into an integer. Python never implicitly converts a string to a number, which is why reading input needs an explicit cast.",
-      "explanation": "The rule of thumb: Python converts implicitly only when there is no risk of losing data or guessing intent, and asks you to be explicit otherwise."
+      "concept": "type-conversion",
+      "difficulty": "medium",
+      "question": "Explain the difference between implicit and explicit type conversion in Python, with one example of each, and state the rule that decides which one applies.",
+      "answer": "Implicit conversion is performed by Python automatically when the intent is unambiguous and nothing is lost, for example `3 + 2.0` promotes the integer and gives 5.0. Explicit conversion is requested by you through a constructor, for example `int('42')` turns text into a number. The rule is that Python converts for you only when there is no risk of guessing your intent or discarding data, and makes you ask otherwise, which is why `4 + '4'` is an error rather than a guess.",
+      "explanation": "This is also why reading user input always needs an explicit cast: Python will not assume that text containing digits was meant as a number."
+    },
+    {
+      "type": "scenario",
+      "concept": "literals-bool",
+      "difficulty": "medium",
+      "scenario": "A data scientist has a list of boolean flags, `hits = [True, False, True, True]`, and writes `sum(hits)`.",
+      "question": "What is the result, and why does this idiom work?",
+      "options": [
+        "An error, because `sum` requires numeric arguments and refuses booleans.",
+        "3, because `True` counts as 1 and `False` as 0 in arithmetic.",
+        "1, because `sum` reduces a sequence of flags using a logical or.",
+        "4, because `sum` counts the elements rather than adding their values."
+      ],
+      "answer": 1,
+      "explanation": "In Python `bool` is a subclass of `int`, with `True` equal to 1 and `False` equal to 0, so adding booleans counts how many are true. This is the mechanism behind counting matches on a mask, as in summing the result of a comparison over a dataframe column to get the number of rows that satisfy it.",
+      "misconception": "Booleans are not a separate non-numeric type. They take part in arithmetic as 1 and 0."
+    },
+    {
+      "type": "mcq",
+      "concept": "variables",
+      "difficulty": "medium",
+      "question": "Python is described as dynamically typed. What does that mean for a variable?",
+      "options": [
+        "Every variable has to be declared along with its type before it can be used.",
+        "A variable can hold only one type of value for the entire life of the program.",
+        "Types are verified only when a separate static type checker is run over the source.",
+        "A variable has no fixed type and can be rebound to a value of any type at runtime."
+      ],
+      "answer": 3,
+      "explanation": "Dynamic typing means the type travels with the value, not with the name. The same name can refer to an integer and later to a string. A statically typed language binds a type to the variable at declaration and rejects anything else.",
+      "misconception": "Dynamic typing is not the same as untyped. Values still have types; the name is simply not pinned to one."
+    },
+    {
+      "type": "card",
+      "concept": "variables",
+      "difficulty": "hard",
+      "question": "Explain why Python needs no type declaration and why the same variable can later hold a different type. Build the answer from what a variable actually is underneath.",
+      "answer": "A variable in Python is a label bound to an object in memory, and the type belongs to the object rather than to the label. Dynamic typing follows from this: the interpreter inspects the object to learn its type, so you never state it. Dynamic binding follows too: assigning again simply re-points the label at a different object, which may be of any type at all.",
+      "explanation": "Carrying the label-and-object picture forward pays off later, because it is the same model that explains mutability, aliasing, and why passing a list into a function can change the caller's list."
+    },
+    {
+      "type": "mcq",
+      "concept": "identifiers",
+      "difficulty": "easy",
+      "question": "Which of these is a valid Python identifier?",
+      "options": [
+        "`2nd_place`",
+        "`class`",
+        "`total-score`",
+        "`_running_total`"
+      ],
+      "answer": 3,
+      "explanation": "An identifier may contain letters, digits, and underscores, but it cannot start with a digit, which rules out `2nd_place`. A hyphen is not a word separator in Python, so `total-score` reads as a subtraction. `class` is a reserved keyword. A leading underscore is legal and conventionally marks a name as internal.",
+      "misconception": "Use an underscore, not a hyphen, to separate words in a Python name."
+    },
+    {
+      "type": "scenario",
+      "concept": "literals-string",
+      "difficulty": "medium",
+      "scenario": "A script on Windows cannot find its data file. The path was written as an ordinary quoted string containing C:\\new_folder\\table.csv.",
+      "question": "Why does the path break, and what is the cleanest fix?",
+      "options": [
+        "Windows paths require forward slashes, because a backslash is never valid inside a Python string and must always be replaced.",
+        "The backslash sequences were read as escape characters, turning parts of the path into a newline and a tab, so use a raw string.",
+        "The literal needs double quotes rather than single quotes, since single quotes do not preserve backslash characters in a path.",
+        "Python strips backslashes out of every string literal, so a path containing them has to be rebuilt with a path-joining helper."
+      ],
+      "answer": 1,
+      "explanation": "Inside an ordinary string a backslash begins an escape sequence, so the segment starting with n contributed a newline and the segment starting with t contributed a tab, producing a path that does not exist. Prefixing the literal with `r` makes it raw and leaves every backslash literal. The same reasoning is why regular-expression patterns are conventionally written as raw strings. Doubling each backslash also works but reads worse.",
+      "misconception": "A backslash in a string is not literal by default; it escapes the character that follows unless the string is raw."
+    },
+    {
+      "type": "mcq",
+      "concept": "type-function",
+      "difficulty": "easy",
+      "question": "A value displays as 56, yet adding it to another number joins the digits instead of summing them. Which single check identifies the cause fastest?",
+      "options": [
+        "`len(value)`, which reports how many characters or digits it contains",
+        "Printing the value a second time and inspecting how it is formatted",
+        "`type(value)`, which reveals whether it is a `str` or an `int`",
+        "`bool(value)`, which shows whether the value is treated as true"
+      ],
+      "answer": 2,
+      "explanation": "Printing cannot distinguish the string '56' from the integer 56, because both display the same characters. `type(value)` reports the class outright and immediately explains why the plus sign concatenated rather than added. Checking types is the fastest first move whenever a value behaves in a way the display does not explain.",
+      "misconception": "What a value looks like when printed does not tell you what type it is."
+    },
+    {
+      "type": "scenario",
+      "concept": "input",
+      "difficulty": "easy",
+      "scenario": "A learner writes `age = input('Age: ')`, then checks `if age > 18:` and gets a TypeError.",
+      "question": "What is the cause, and what is the fix?",
+      "options": [
+        "`input` cannot have its result assigned directly to a variable name.",
+        "The comparison should use `==` instead of a greater-than sign here.",
+        "`input` returns a string, so convert it first, as in `int(age) > 18`.",
+        "`input` returns a float, so the value must be rounded before comparing."
+      ],
+      "answer": 2,
+      "explanation": "`input` always returns a string, and Python refuses to order a string against an integer, so the comparison raises a TypeError. Convert with `int` or `float` before comparing. Converting at the point of input, as in `age = int(input('Age: '))`, keeps the variable genuinely numeric from then on.",
+      "misconception": "`input` never infers a number. Treat whatever it returns as text until you convert it."
+    },
+    {
+      "type": "mcq",
+      "concept": "none-literal",
+      "difficulty": "easy",
+      "question": "Why would you write `result = None` near the top of a function you are still designing?",
+      "options": [
+        "To release the memory the name would otherwise occupy before being given a real value.",
+        "To make the name exist with a deliberate placeholder, since Python has no declaration step.",
+        "To force the variable to accept only integer values once it is later assigned something.",
+        "Because an unassigned name would otherwise silently default to zero in Python."
+      ],
+      "answer": 1,
+      "explanation": "Python creates a name only when you assign to it, so reading `result` before any assignment raises a NameError. Binding it to `None` reserves the name and states plainly that it holds no meaningful value yet. It also reads well with the idiomatic check `if result is None:`.",
+      "misconception": "There is no declaration without assignment in Python, and names do not default to zero or to an empty value."
     }
   ]
 }

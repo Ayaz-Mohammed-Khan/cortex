@@ -2,42 +2,215 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "A distribution has a long tail stretching to the right (a few very large values). How is it described, and how do mean and median compare?",
+      "concept": "skewness-direction",
+      "difficulty": "medium",
+      "question": "For a positively skewed distribution, what is the ordering of the three measures of centre?",
       "options": [
-        "Right (positively) skewed, with the mean greater than the median because the tail pulls the mean upward.",
-        "Symmetric, with mean equal to median.",
-        "Left skewed, with the mean below the median.",
-        "Right skewed, with the median above the mean."
+        "Mean, then median, then mode, in decreasing order.",
+        "Mode, then median, then mean, in increasing order.",
+        "All three coincide, since skew affects only the tails.",
+        "Median, then mode, then mean, in increasing order."
       ],
-      "answer": 0,
-      "explanation": "A right-skewed distribution has its long tail on the high side, so the extreme large values drag the mean above the median. Income is a classic example. For left skew the tail is on the low side and the mean sits below the median.",
-      "misconception": "The skew direction is named for the tail, not the bulk. A long right tail is positive (right) skew."
-    },
-    {
-      "type": "scenario",
-      "scenario": "You fit a model that assumes normally distributed residuals and want to check that assumption visually before trusting the inference.",
-      "question": "Which plot is designed for this, and how do you read it?",
-      "options": [
-        "A quantile-quantile (QQ) plot: if the points fall close to the diagonal line, the data matches the reference distribution; systematic curves or S-shapes signal departures.",
-        "A single number, the mean of the residuals.",
-        "A pie chart of residual signs.",
-        "A bar chart of the residuals."
-      ],
-      "answer": 0,
-      "explanation": "A QQ plot compares the data's quantiles against a reference distribution's quantiles. Points on the straight diagonal mean a good match; curvature at the ends indicates heavy or light tails, and an S-shape indicates skew. It is the standard visual normality check.",
-      "misconception": "Normality is a shape question, so a single statistic is not enough. A QQ plot shows where and how the data departs."
+      "answer": 1,
+      "explanation": "A positive skew has its long tail on the right, and the mean is dragged furthest toward that tail because it responds to the magnitude of the extreme values. The mode stays at the peak where the data is densest, and the median sits between them. The size of the gap between mean and mode is itself an indication of how pronounced the skew is.",
+      "misconception": "The mean moves toward the tail, so it is the largest of the three under a right skew."
     },
     {
       "type": "mcq",
-      "question": "What does kurtosis describe about a distribution?",
+      "concept": "skewness-direction",
+      "difficulty": "medium",
+      "question": "A histogram shows values concentrated on the left with a long tail stretching right. How is this skew named, and why?",
       "options": [
-        "The heaviness of its tails and the sharpness of its peak relative to a normal distribution.",
-        "Its total area, which kurtosis adjusts to 1.",
-        "Its mean.",
-        "Whether it is skewed left or right."
+        "Left skewed, named after the side where most of the data actually sits.",
+        "Right skewed, named for the tail's side, where the outliers lie.",
+        "Negatively skewed, because the long tail extends away from the zero point.",
+        "Unskewed, because the peak of the distribution is still a single mode."
+      ],
+      "answer": 1,
+      "explanation": "The convention names the skew after the direction of the tail rather than the bulk, so a tail to the right is a right or positive skew. Naming it for the tail makes sense because the tail is where the extreme values sit and where the departure from symmetry actually lives. Reading the name backwards is an extremely common error.",
+      "misconception": "The name follows the tail, not where the mass of the data sits."
+    },
+    {
+      "type": "mcq",
+      "concept": "skewness-thresholds",
+      "difficulty": "medium",
+      "question": "A column returns a skewness value of 1.4. How should this be interpreted?",
+      "options": [
+        "Almost symmetric, so the column can safely be treated as normal.",
+        "Only moderately skewed, so its normality is a borderline call.",
+        "Highly skewed, so the data is definitely not normal here.",
+        "Invalid, since skewness is bounded between negative one and one."
+      ],
+      "answer": 2,
+      "explanation": "The usual reading is that a magnitude below 0.5 is close enough to symmetric to be treated as normal in practice, between 0.5 and 1 is moderate and should not be assumed normal, and beyond 1 is pronounced. Skewness is not bounded, so large magnitudes are entirely possible. Note also that a value near zero indicates symmetry, which is necessary but not sufficient for normality.",
+      "misconception": "Skewness is unbounded, and a value near zero shows symmetry rather than proving normality."
+    },
+    {
+      "type": "mcq",
+      "concept": "kurtosis-definition",
+      "difficulty": "hard",
+      "question": "Kurtosis is frequently described as measuring how peaked a distribution is. What does it actually measure?",
+      "options": [
+        "The height of the central peak taken relative to the overall spread.",
+        "Both the peak's sharpness and the weight of the tails, equally weighted.",
+        "The asymmetry that is still left over once the skew has been removed.",
+        "The heaviness of the tails, so how likely very extreme outcomes are."
+      ],
+      "answer": 3,
+      "explanation": "The peakedness description is a persistent myth. Kurtosis is the fourth moment and quantifies tailedness, so a high value means fat tails and a greater propensity for extreme values. Two distributions can share a mean, a standard deviation, and a skew and still differ in kurtosis, and what separates them is purely how much probability sits far out in the tails.",
+      "misconception": "Kurtosis concerns the tails; any apparent change in the peak is a side effect of the area constraint."
+    },
+    {
+      "type": "mcq",
+      "concept": "excess-kurtosis",
+      "difficulty": "medium",
+      "question": "How is excess kurtosis defined, and what do its three families mean?",
+      "options": [
+        "Kurtosis minus three: positive is fat-tailed, near zero normal, negative thin.",
+        "Kurtosis divided by three: above one is leptokurtic, below one platykurtic.",
+        "Kurtosis minus the skewness, where a positive result means heavier tails.",
+        "Kurtosis plus three, where higher values indicate progressively thinner tails."
       ],
       "answer": 0,
-      "explanation": "Kurtosis measures tail weight and peakedness. High (leptokurtic) means heavy tails and more extreme outliers than a normal; low (platykurtic) means lighter tails. Excess kurtosis subtracts 3 so a normal distribution reads as 0. It is a separate axis from skewness, which measures asymmetry."
+      "explanation": "Subtracting three re-centres the scale on the normal distribution, so the sign of the result immediately says whether the tails are heavier or lighter than normal. A positive excess is leptokurtic with fatter tails, near zero is mesokurtic like the normal, and negative is platykurtic with thinner tails. Leptokurtic distributions produce extreme values more often than a normal would, and platykurtic ones less often.",
+      "misconception": "The baseline of three is the normal distribution's kurtosis, which is why it is subtracted."
+    },
+    {
+      "type": "scenario",
+      "concept": "kurtosis-applications",
+      "difficulty": "medium",
+      "scenario": "An analyst examines the daily returns of two funds. Both have the same average return, the same standard deviation, and the same skew, but one has substantially higher kurtosis.",
+      "question": "What does the difference tell an investor?",
+      "options": [
+        "The higher-kurtosis fund has a slightly higher average return hidden by rounding.",
+        "The higher-kurtosis fund makes extreme moves, big gains and losses, more often.",
+        "The higher-kurtosis fund is the less volatile one, because its central peak is sharper.",
+        "Kurtosis is wholly irrelevant to the investor once the standard deviation is known."
+      ],
+      "answer": 1,
+      "explanation": "Standard deviation summarises typical variation but says nothing about how often the distribution delivers something far outside that range. Heavier tails mean rare, severe moves are materially more likely, which is what the term tail risk refers to. This is precisely why two investments with identical volatility can carry very different exposure to sudden large losses.",
+      "misconception": "Equal standard deviations do not imply equal exposure to extreme events."
+    },
+    {
+      "type": "mcq",
+      "concept": "moments",
+      "difficulty": "easy",
+      "question": "In the sequence of statistical moments, what are the first four?",
+      "options": [
+        "Median, range, skewness, and kurtosis",
+        "Mean, standard deviation, skewness, and correlation",
+        "Mean, variance, skewness, and kurtosis",
+        "Mode, variance, kurtosis, and skewness"
+      ],
+      "answer": 2,
+      "explanation": "The moments describe successively finer features of a distribution's shape: where it sits, how wide it is, how symmetric it is, and how heavy its tails are. Seeing skewness and kurtosis as the third and fourth members of a sequence that starts with familiar quantities makes them feel less arbitrary, since each is computed from deviations raised to the corresponding power.",
+      "misconception": "Skewness precedes kurtosis in the sequence, being the third moment rather than the fourth."
+    },
+    {
+      "type": "mcq",
+      "concept": "qq-plot",
+      "difficulty": "medium",
+      "question": "How do you read a quantile-quantile plot built to check normality?",
+      "options": [
+        "A roughly bell-shaped cloud of plotted points is what indicates normality.",
+        "Points scattered at random across the whole of the plot indicate a good match.",
+        "Points on the reference line mean a match, with departures clearest at the tails.",
+        "The data is normal when the plotted points form a flat horizontal line across."
+      ],
+      "answer": 2,
+      "explanation": "The plot sets the theoretical quantiles against the observed ones, so agreement produces a straight line. Because the tails are where distributions differ most, drift away from the line at the ends is the usual signature of a problem, and right-skewed data characteristically pulls away at the upper end. The further the points stray, the weaker the match.",
+      "misconception": "A straight line, not a bell shape, is what indicates normality on this plot."
+    },
+    {
+      "type": "mcq",
+      "concept": "qq-plot",
+      "difficulty": "medium",
+      "question": "What are the steps in constructing a quantile-quantile plot?",
+      "options": [
+        "Generate a reference distribution, sort the data, match quantiles, then plot.",
+        "Plot a histogram of the raw data and overlay a fitted normal curve on top.",
+        "Compute the skewness and the kurtosis, then plot the two of them against each other.",
+        "Plot the data in its collection order against the running cumulative sum of it."
+      ],
+      "answer": 0,
+      "explanation": "The comparison is quantile by quantile, so both distributions must be reduced to matching positions, which requires sorting the observed values and generating the reference distribution. Plotting the pairs turns the question of whether two shapes agree into the far easier visual question of whether points fall on a line, with a reference line added. Standard libraries perform all of these steps in one call.",
+      "misconception": "The plot compares quantiles of two distributions, not raw data against an overlaid curve."
+    },
+    {
+      "type": "mcq",
+      "concept": "qq-plot",
+      "difficulty": "medium",
+      "question": "Can a quantile-quantile plot check anything other than normality?",
+      "options": [
+        "No, the plot is defined only against the single standard normal distribution.",
+        "Yes, but only ever against reference distributions that happen to be symmetric.",
+        "Yes, it compares any two distributions, so a uniform or Pareto reference works.",
+        "No, because the notion of a quantile exists only for the normal distribution."
+      ],
+      "answer": 2,
+      "explanation": "Nothing in the construction is specific to the normal; the reference distribution is simply whichever one you supply, so passing a uniform, log-normal, or Pareto reference checks for that shape instead. That makes the plot a general-purpose tool for asking whether data matches a candidate shape, which is useful once you suspect a heavy-tailed or bounded distribution rather than a bell curve. Points on the line still means a match, whatever the reference.",
+      "misconception": "The normal check is the most common use, not the only possible one."
+    },
+    {
+      "type": "mcq",
+      "concept": "normality-checks",
+      "difficulty": "easy",
+      "question": "Which three methods are commonly used to check whether a column is normally distributed?",
+      "options": [
+        "The mean, the median, and the mode of the column compared with one another.",
+        "Looking at a histogram or density plot, the skewness value, and a QQ plot.",
+        "The range, the inter-quartile range, and the standard deviation of the column.",
+        "The correlation, the covariance, and the coefficient of variation of the data."
+      ],
+      "answer": 1,
+      "explanation": "Eyeballing the shape is fast but subjective and sensitive to bin choice. The skewness value gives a number but only addresses asymmetry, so it can pass data that is symmetric yet heavy-tailed. The quantile plot compares the whole shape against the reference and is the most reliable of the three, which is why it is the one most used in practice.",
+      "misconception": "A near-zero skew alone does not establish normality, since it ignores the tails."
+    },
+    {
+      "type": "mcq",
+      "concept": "kurtosis-definition",
+      "difficulty": "hard",
+      "question": "Two distributions share the same mean, standard deviation, and skewness. What can still differ between them, and what does that imply?",
+      "options": [
+        "Their medians can differ, which would imply that the two have different centres.",
+        "Nothing at all; those three values determine a whole distribution completely.",
+        "Only their ranges can differ, and that carries no real practical consequence.",
+        "Their kurtosis, so one makes extreme values more often than the other does."
+      ],
+      "answer": 3,
+      "explanation": "The first three moments pin down location, scale, and asymmetry but leave tail weight free, which is exactly what the fourth moment captures. The practical consequence is substantial: a risk assessment based on the mean and standard deviation alone can badly understate how often a severe outcome occurs. It also shows why summarising a distribution by two numbers is sometimes not enough.",
+      "misconception": "Mean and standard deviation do not determine a distribution; shape beyond them matters."
+    },
+    {
+      "type": "mcq",
+      "concept": "skewness-direction",
+      "difficulty": "medium",
+      "question": "Why does the mean move further from the mode as skewness increases?",
+      "options": [
+        "Because the mean is computed from sorted data, whereas the mode is not sorted.",
+        "Because the mean uses magnitude, so tail values drag it while the mode stays put.",
+        "Because the mode itself shifts away from the tail as the skew of the data grows.",
+        "Because the mean is undefined for a skewed distribution and must be approximated."
+      ],
+      "answer": 1,
+      "explanation": "Every observation contributes its actual size to the mean, so a handful of distant values exert leverage proportional to how far out they lie. The mode is simply where the curve peaks and is indifferent to what happens in the tail. The widening gap between them is therefore a direct readout of the skew, and it is the reason a skewed quantity is better summarised by its median.",
+      "misconception": "The gap grows because the mean moves, not because the mode does."
+    },
+    {
+      "type": "card",
+      "concept": "skewness-vs-kurtosis",
+      "difficulty": "medium",
+      "question": "Distinguish skewness from kurtosis: what does each measure, which moment is each, and what does a value near the reference point mean?",
+      "answer": "Skewness is the third moment and measures asymmetry, that is how much one tail is longer than the other, with a value near zero meaning the distribution is symmetric. Kurtosis is the fourth moment and measures tailedness, that is how heavy the tails are and therefore how likely extreme values are, with excess kurtosis near zero meaning the tails behave like a normal distribution's. They are independent descriptions, so a distribution can be symmetric yet heavy-tailed, or light-tailed yet strongly skewed.",
+      "explanation": "This independence is why a symmetry check alone cannot establish normality. A symmetric but leptokurtic column would show a skewness near zero while still producing far more extreme values than a normal model would predict."
+    },
+    {
+      "type": "card",
+      "concept": "qq-plot",
+      "difficulty": "medium",
+      "question": "Explain what a quantile-quantile plot does, how it is read, and why it is considered the most reliable of the normality checks.",
+      "answer": "It compares two distributions by plotting the quantiles of a theoretical reference against the matching quantiles of the observed data, with a reference line drawn through them. Points lying along the line mean the two shapes agree, and drift away from the line, most visibly at the ends, signals a departure such as skew or heavy tails. It is the most reliable of the usual checks because it compares the entire shape rather than reducing the question to a single number such as skewness, and because it is far less sensitive to presentation choices than eyeballing a histogram, whose appearance depends on the bin width.",
+      "explanation": "It is also more general than its usual use suggests, since substituting a different reference distribution turns the same plot into a check for that shape, which is useful once a bell curve has been ruled out."
     }
   ]
 }

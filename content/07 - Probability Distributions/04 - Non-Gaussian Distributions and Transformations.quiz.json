@@ -1,42 +1,217 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A right-skewed feature (for example, income) violates a model's normality assumption and hurts a linear model's fit.",
-      "question": "Which transformation is a common first choice, and why?",
+      "type": "mcq",
+      "concept": "uniform",
+      "difficulty": "medium",
+      "question": "For a continuous uniform distribution between a and b, why is the density equal to one divided by the width of the range?",
       "options": [
-        "Squaring the values, which makes the right skew worse.",
-        "Adding a constant to every value.",
-        "A log transform, because it compresses large values more than small ones, pulling in the right tail toward symmetry.",
-        "Multiplying by a constant to rescale."
+        "Because the density has to equal the probability of each individual value in it.",
+        "Because the total area must be one, and only that height encloses it.",
+        "Because the density is defined to be the reciprocal of the distribution's mean.",
+        "Because the two bounds of a uniform distribution are always between zero and one."
+      ],
+      "answer": 1,
+      "explanation": "The density is constant across the range and zero outside it, so the curve is a rectangle. Since every density function must enclose a total area of one, the height is forced to be the reciprocal of the width. A consequence is that a wider range gives a lower density, which is the same area constraint that makes a wide normal curve flatter.",
+      "misconception": "A density height is not the probability of a value; it is set by the area requirement."
+    },
+    {
+      "type": "mcq",
+      "concept": "uniform",
+      "difficulty": "medium",
+      "question": "Where does the uniform distribution appear in machine learning, usually behind the scenes?",
+      "options": [
+        "In initialising parameters, sampling, generating randoms, and tuning search.",
+        "In measuring how far a model's predictions deviate from the ground truth.",
+        "In deciding which of the input features are the most important to the model.",
+        "In computing the value of the loss function during gradient descent steps."
+      ],
+      "answer": 0,
+      "explanation": "Wherever a procedure needs every option in a range to be equally likely, the uniform distribution is doing the work: starting weights for a network, choosing which rows land in a test split, producing pseudo-random values, applying controlled random shifts to images, and picking parameter combinations to try. It is rarely something you model, but it is constantly something you rely on.",
+      "misconception": "Its role is in generating randomness, not in measuring error or importance."
+    },
+    {
+      "type": "mcq",
+      "concept": "log-normal",
+      "difficulty": "hard",
+      "question": "What precisely defines a log-normal distribution?",
+      "options": [
+        "Any distribution at all that happens to have a long tail stretching to the right.",
+        "A distribution whose logarithm is itself normally distributed.",
+        "A distribution produced by taking the logarithm of a normal distribution's values.",
+        "A distribution whose mean is equal to the logarithm of its standard deviation."
+      ],
+      "answer": 1,
+      "explanation": "The defining property is that taking logs of the values yields a normal distribution, which is a much stronger claim than merely being right-skewed. Many right-skewed distributions are not log-normal, so the label has to be earned by the transformation test rather than assumed from the shape. The direction matters too: it is the log of this variable that is normal, not the other way round.",
+      "misconception": "Right skew is necessary but nowhere near sufficient for a distribution to be log-normal."
+    },
+    {
+      "type": "mcq",
+      "concept": "log-normal",
+      "difficulty": "medium",
+      "question": "How do you check whether a column is log-normal?",
+      "options": [
+        "Compute the column's skewness and confirm that the value exceeds one.",
+        "Plot a histogram of the column and look for a long tail on the right.",
+        "Take the log of the values and run a normality check on the result.",
+        "Compare the column's mean against its median and note the direction."
       ],
       "answer": 2,
-      "explanation": "A log transform shrinks large values far more than small ones, so a long right tail is pulled inward and the distribution becomes more symmetric. Squaring would stretch the tail further. Adding or multiplying by a constant shifts or rescales but does not change the shape.",
-      "misconception": "Rescaling by addition or multiplication does not fix skew. Only a non-linear transform like log changes the distribution's shape."
+      "explanation": "Since the definition is that the log of the variable is normal, the test is to perform that transformation and then apply whatever normality check you trust to the result, such as a quantile-quantile plot. Points falling on the reference line in the transformed plot confirms the original was log-normal. The untransformed shape can only suggest the possibility, never establish it.",
+      "misconception": "The check operates on the transformed values, not on the original ones."
     },
     {
       "type": "mcq",
-      "question": "What advantage does the Yeo-Johnson transform have over the Box-Cox transform?",
+      "concept": "pareto",
+      "difficulty": "medium",
+      "question": "The Pareto distribution is a special case of what, and what rough rule is it famous for?",
       "options": [
-        "Yeo-Johnson handles zero and negative values, while Box-Cox requires strictly positive inputs.",
-        "Yeo-Johnson only works on integers.",
-        "They are identical in every case.",
-        "Box-Cox is non-parametric and Yeo-Johnson is not."
+        "A power law, famous for roughly 20 percent of causes giving 80 percent of effects.",
+        "An exponential family, famous for the probability halving at each successive step.",
+        "A normal distribution, famous for the rule that spans three standard deviations.",
+        "A uniform distribution, famous for equal likelihood right across its whole range."
       ],
       "answer": 0,
-      "explanation": "Box-Cox is defined only for positive data, so it fails on zeros or negatives without shifting. Yeo-Johnson extends the same power-transform idea to the whole real line, including zero and negative values, which makes it the more general default."
+      "explanation": "A power law relates one quantity to a power of another, producing a curve that falls steeply and then flattens into a long tail. The economist who studied wealth found roughly a fifth of people holding roughly four fifths of it, which is where the principle and the distribution's name come from. The exact split is not universal, since it depends on the shape parameter, so it serves as a guide rather than a law.",
+      "misconception": "The 80 to 20 split is approximate and parameter-dependent, not a fixed property."
     },
     {
       "type": "mcq",
-      "question": "A quantity where a small fraction of items accounts for most of the total (for example, wealth or web traffic) is often modeled by which distribution?",
+      "concept": "pareto",
+      "difficulty": "medium",
+      "question": "What is the standard graphical way to detect a power-law relationship such as a Pareto distribution?",
       "options": [
-        "The Pareto distribution, which captures heavy-tailed, power-law behavior.",
-        "The standard normal distribution.",
-        "The uniform distribution.",
-        "The Bernoulli distribution."
+        "A histogram drawn with a very large number of narrow bins across the range.",
+        "A box plot, relying on the fact that power laws produce no outliers at all.",
+        "A log-log plot, where a power law shows up as a straight descending line.",
+        "A scatter of the variable against its rank, which produces a clear bell shape."
+      ],
+      "answer": 2,
+      "explanation": "Taking logs of both axes turns a power relationship into a linear one, so the characteristic steep-then-flat curve straightens out and becomes easy to judge by eye. A quantile plot against a theoretical Pareto reference works as well. This is the same trick as checking log-normality by logging the values, applied to the relationship rather than the distribution.",
+      "misconception": "Logging both axes is what linearises a power law; logging one is not enough."
+    },
+    {
+      "type": "scenario",
+      "concept": "algorithm-sensitivity",
+      "difficulty": "hard",
+      "scenario": "A log transform is applied to a strongly right-skewed fare column. Logistic regression accuracy improves noticeably, while decision tree accuracy is unchanged.",
+      "question": "Why does the transform help one model and not the other?",
+      "options": [
+        "The tree was already overfitting the data, so no transform at all could help it.",
+        "The transform reduced the number of features that the tree had available to use.",
+        "The logistic regression was simply trained on more data after the transform.",
+        "Linear models care about input scale and shape; a tree splits on thresholds."
+      ],
+      "answer": 3,
+      "explanation": "A tree asks whether a value falls above or below a cut point, and a monotonic transform such as a log leaves every such comparison intact, merely relabelling where the cut sits. A linear model instead combines inputs additively and is therefore affected by skew and scale. The practical rule is that transforming inputs is worth trying for linear and distance-based methods and is largely pointless for tree-based ones.",
+      "misconception": "A monotonic transform cannot change a tree's splits, because it preserves the order of the values."
+    },
+    {
+      "type": "scenario",
+      "concept": "selective-transformation",
+      "difficulty": "hard",
+      "scenario": "A dataset has a strongly right-skewed fare column and a roughly normal age column. A log transform is applied to both, and model performance gets worse than transforming fare alone.",
+      "question": "What went wrong, and how should it be handled?",
+      "options": [
+        "The log transform should have been applied a second time to the fare column.",
+        "Transforming an already normal column distorts it, so transform only the skewed one.",
+        "Both of the two columns needed to be standardised before any log transform.",
+        "The age column should have been dropped from the model's inputs entirely."
+      ],
+      "answer": 1,
+      "explanation": "A transform is a corrective applied to a specific problem, so pushing an already well-shaped column through it introduces skew where none existed. The remedy is to route each column through the treatment it needs, which is exactly what a column-wise transformer is for. It also underlines that transforming is a per-column decision, taken after inspecting each distribution.",
+      "misconception": "Transformations are not applied wholesale; they are targeted at the columns that need them."
+    },
+    {
+      "type": "mcq",
+      "concept": "function-transforms",
+      "difficulty": "medium",
+      "question": "Which transform suits right-skewed data, and which suits left-skewed data?",
+      "options": [
+        "A reciprocal is used for a right skew, and a square root for a left skew.",
+        "A square is used for a right skew, and a logarithm for a left skew.",
+        "A logarithm is used for a right skew, and a square for a left skew.",
+        "A logarithm is used for both, and only the chosen base differs between them."
+      ],
+      "answer": 2,
+      "explanation": "A logarithm compresses large values much more than small ones, which pulls in a long right tail and is the usual first choice for right skew. Squaring does the opposite by stretching large values apart, which counteracts a left skew. A square root is a gentler version of the log for mild right skew, and a reciprocal reverses the ordering entirely, which makes it situational.",
+      "misconception": "The direction of the skew determines which transform applies; one function does not fit both."
+    },
+    {
+      "type": "mcq",
+      "concept": "function-transforms",
+      "difficulty": "medium",
+      "question": "Why use a transform that computes the logarithm of one plus the value, rather than a plain logarithm?",
+      "options": [
+        "Because it is considerably faster to compute across very large arrays of values.",
+        "Because the log of zero is undefined, so the shifted form handles zeros safely.",
+        "Because it is the version that produces a perfectly normal result in every case.",
+        "Because it also standardises the whole column to zero mean and unit variance."
+      ],
+      "answer": 1,
+      "explanation": "A plain logarithm fails on zero and on negative values, which is a real obstacle because counts and monetary amounts often include zeros. Adding one before taking the log keeps zeros valid while barely affecting larger values. If the column genuinely has no zeros or negatives, the plain logarithm is equally fine.",
+      "misconception": "The shift exists to handle zeros, not to improve normality or performance."
+    },
+    {
+      "type": "mcq",
+      "concept": "power-transforms",
+      "difficulty": "medium",
+      "question": "What is the practical difference between the Box-Cox and Yeo-Johnson power transforms?",
+      "options": [
+        "Box-Cox needs strictly positive data, while Yeo-Johnson also handles zero and negatives.",
+        "Box-Cox handles negative values, while Yeo-Johnson requires every value to be positive.",
+        "Box-Cox estimates its own exponent from data, while Yeo-Johnson uses a fixed one.",
+        "Box-Cox applies to the target variable, while Yeo-Johnson applies to the features."
       ],
       "answer": 0,
-      "explanation": "The Pareto distribution models power-law, heavy-tailed phenomena, the familiar pattern where a small share of causes drives most of the effect. A uniform distribution spreads mass evenly, and a normal distribution has light tails, so neither fits this shape."
+      "explanation": "Both search for an exponent that makes the transformed column as normal as possible, estimating it per column from the data. They differ in their domain: the older method needs every value above zero, which can be worked around by adding a small constant, while the newer one is defined for the whole real line and so needs no such patching. That robustness is why it tends to be the default choice.",
+      "misconception": "Both estimate their exponent from the data; the difference is which values they accept."
+    },
+    {
+      "type": "mcq",
+      "concept": "power-transforms",
+      "difficulty": "medium",
+      "question": "Besides reshaping the distribution, what else does a power transformer do by default?",
+      "options": [
+        "It removes any outliers that lie beyond three standard deviations of the mean.",
+        "It fills in the column's missing values using that same column's median.",
+        "It standardises the result to zero mean and unit variance for you.",
+        "It converts the continuous column into a discrete set of ordered bins."
+      ],
+      "answer": 2,
+      "explanation": "The default behaviour centres and scales the transformed values, which is convenient because the algorithms that benefit from a more normal shape are generally the same ones that benefit from comparable scales. Knowing it happens matters so you do not apply a second scaler on top and so you remember the output values are no longer in the original units.",
+      "misconception": "The transformer reshapes and scales; it does nothing about missing values or outliers."
+    },
+    {
+      "type": "mcq",
+      "concept": "validation",
+      "difficulty": "medium",
+      "question": "Having applied several candidate transforms, how should you decide which to keep?",
+      "options": [
+        "Keep whichever gives the skewness closest to zero, since normality is the goal.",
+        "Keep whichever gives the best cross-validated model performance in testing.",
+        "Keep the power transform, since it is always at least as good as a function one.",
+        "Keep the transform that happens to be fastest to compute on the full dataset."
+      ],
+      "answer": 1,
+      "explanation": "Normality is a means rather than an end, so the measure that matters is whether the model actually predicts better. Cross-validation guards against reading a chance improvement on one split as a real gain. In effect, choosing a transform is another hyperparameter decision, which is why trying the alternatives and comparing honestly is the whole method.",
+      "misconception": "Improving a column's skewness does not guarantee improving the model's performance."
+    },
+    {
+      "type": "card",
+      "concept": "algorithm-sensitivity",
+      "difficulty": "medium",
+      "question": "Explain the purpose of a mathematical transformation, which model families benefit, and why it is not a universal rule that normal data is better.",
+      "answer": "A transformation applies a function to a column to reshape its distribution toward normal, because several algorithms perform better on roughly normal, comparably scaled inputs, notably linear regression, logistic regression, and distance-based methods such as nearest neighbours. It is not a universal rule because the benefit depends entirely on the algorithm: tree-based models split on thresholds and are therefore indifferent to any transform that preserves the ordering of the values, so reshaping their inputs gains nothing. The decision is also per column, since transforming a column that is already well shaped makes it worse.",
+      "explanation": "That is why the honest workflow is to inspect each column, transform only those that need it, and confirm with cross-validation that the change actually helped, rather than applying a transform because the distribution looked untidy."
+    },
+    {
+      "type": "card",
+      "concept": "non-gaussian-distributions",
+      "difficulty": "medium",
+      "question": "Summarise the three common non-Gaussian continuous distributions: the defining property of each and a typical place it appears.",
+      "answer": "The uniform distribution gives every outcome in a range equal likelihood, so its density is constant and its skewness is zero; it appears throughout machine learning in random initialisation, sampling, and random search. The log-normal distribution is right-skewed and defined by its logarithm being normal; it appears in internet-scale behavioural data such as comment lengths, dwell times, and income. The Pareto distribution is a power law with a single shape parameter, famous for the rough 80 to 20 principle; it appears in wealth distributions, city sizes, and the file sizes making up internet traffic.",
+      "explanation": "Each has a matching detection method, which is the practically useful part: logging the values and re-checking normality for the log-normal, and plotting both axes on logarithmic scales to look for a straight line in the Pareto case."
     }
   ]
 }

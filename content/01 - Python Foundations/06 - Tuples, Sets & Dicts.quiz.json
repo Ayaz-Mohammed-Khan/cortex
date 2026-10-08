@@ -1,55 +1,233 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "You try `d = {[1, 2]: \"a\"}` and Python raises `TypeError: unhashable type: 'list'`.",
-      "question": "Why can a tuple be a dict key but a list cannot?",
+      "type": "mcq",
+      "concept": "tuple-creation",
+      "difficulty": "medium",
+      "question": "What is the difference between `(2)` and `(2,)`?",
       "options": [
-        "Only strings and numbers can be dict keys.",
-        "Dict keys must be hashable, which requires a fixed value. A tuple is immutable and hashable; a list is mutable and therefore unhashable.",
-        "Lists are too large to be keys.",
-        "Lists can be keys if you call `hash()` on them first."
+        "`(2)` is the integer 2 in brackets, while `(2,)` is a one-item tuple.",
+        "They are identical, and the comma is nothing more than optional styling.",
+        "`(2)` is a one-item tuple, and `(2,)` is reported as a syntax error.",
+        "Both are tuples, but only the second of the two is truly immutable."
+      ],
+      "answer": 0,
+      "explanation": "Brackets alone only group an expression, so `(2)` evaluates to the number itself. It is the trailing comma that makes something a tuple. Forgetting it is a real bug, because a function expecting a collection then receives a bare number and fails somewhere further on, where the cause is no longer obvious.",
+      "misconception": "What makes a tuple is the comma, not the brackets."
+    },
+    {
+      "type": "mcq",
+      "concept": "tuple-immutability",
+      "difficulty": "easy",
+      "question": "Given `t = (1, 2, 3)`, which operation raises an error?",
+      "options": [
+        "`t[0]`",
+        "`t[0:2]`",
+        "`t.append(4)`",
+        "`len(t)`"
+      ],
+      "answer": 2,
+      "explanation": "A tuple is an immutable list, so every read operation it shares with lists works: indexing, slicing, length, membership, and iteration. The write operations do not exist at all, so there is no `append`, `insert`, `remove`, or item assignment. Immutability removes the entire write half of the interface.",
+      "misconception": "A tuple is not a restricted list that errors on write; the mutating methods simply are not there."
+    },
+    {
+      "type": "scenario",
+      "concept": "hashability",
+      "difficulty": "hard",
+      "scenario": "A developer wants to cache a computed value for each map location and tries to use a two-element list of coordinates as a dictionary key, which raises an unhashable type error. Switching to a tuple of the same two numbers works.",
+      "question": "Why does the tuple work where the list does not?",
+      "options": [
+        "Tuples are shorter to write, so Python is able to optimise them as keys.",
+        "A key must be immutable so its hash stays stable, and a list can change.",
+        "Lists can be used as dictionary keys, but only when they hold numbers.",
+        "Dictionaries accept only strings and numbers as keys, and nothing else."
       ],
       "answer": 1,
-      "explanation": "A dict places a key by its hash, so the hash must never change while the key is stored. Immutable objects like tuples, strings, and numbers are hashable. A list can change in place, so its hash would be unstable, and Python forbids it as a key.",
-      "misconception": "Hashability, not type, is the rule. Any immutable, hashable object (including a tuple of immutables) can be a key."
+      "explanation": "A dictionary stores each entry in a slot derived from the key's hash. If a key could change after insertion, its hash would change too and the entry would be stranded in the wrong slot. Python therefore requires keys to be immutable and hashable. The same rule explains why a set can hold tuples but not lists, and why a frozen set can be nested inside a set while an ordinary set cannot.",
+      "misconception": "The restriction is about mutability and hashing, not about which specific types are allowed."
     },
     {
       "type": "mcq",
-      "question": "What does `{1, 2, 2, 3, 3, 3}` evaluate to?",
+      "concept": "set-creation",
+      "difficulty": "easy",
+      "question": "What does `{}` create, and how do you make an empty set?",
       "options": [
-        "{1, 2, 2, 3, 3, 3}",
-        "A dict with counts",
-        "[1, 2, 3]",
-        "{1, 2, 3}"
+        "An empty set; use `dict()` for an empty dictionary.",
+        "An empty tuple; use `set()` for an empty set.",
+        "A syntax error; an empty collection must be built with a comprehension.",
+        "An empty dictionary; use `set()` for an empty set."
       ],
       "answer": 3,
-      "explanation": "A set holds only distinct elements, so duplicates collapse to {1, 2, 3}. If you wanted counts, you would use `collections.Counter` instead."
+      "explanation": "Sets and dictionaries both use curly braces, and Python gives the ambiguous empty case to the dictionary, so `{}` is an empty dictionary. The only way to get an empty set is to call `set()`. This catches people out when initialising an accumulator, because adding to what you believed was a set fails on a dictionary.",
+      "misconception": "Empty curly braces never produce a set."
+    },
+    {
+      "type": "scenario",
+      "concept": "set-membership",
+      "difficulty": "medium",
+      "scenario": "A pipeline must remove duplicate identifiers from a 2,000,000-row extract and then check each incoming record against the surviving identifiers. Using a list for this is unusably slow.",
+      "question": "Why is a set the right structure here?",
+      "options": [
+        "A set preserves insertion order, which is what makes scanning it faster.",
+        "A set stores its items in sorted order, so lookups can use binary search.",
+        "A set drops duplicates and hashes items, so membership is nearly constant.",
+        "A set uses far less memory than a list, which is the real cause of the gain."
+      ],
+      "answer": 2,
+      "explanation": "A set places each item in a slot computed from its hash, so checking membership goes straight to that slot rather than walking the collection. Deduplication comes free because a repeated item lands in a slot that is already occupied. Both properties come from the same hashing mechanism, which is also why a set cannot be indexed or relied upon for order.",
+      "misconception": "A set is not fast because it is small or sorted; it is fast because membership is computed rather than searched."
     },
     {
       "type": "mcq",
-      "question": "What is the key difference between `d[key]` and `d.get(key)` for a missing key?",
+      "concept": "set-properties",
+      "difficulty": "hard",
+      "question": "What does `{1, 'hello', 4.5, True}` contain, and why?",
       "options": [
-        "`d.get(key)` raises KeyError; `d[key]` returns None.",
-        "`d.get(key)` creates the key with value None.",
-        "They behave identically.",
-        "`d[key]` raises KeyError; `d.get(key)` returns None (or a supplied default)."
+        "All four items, since the four values are all of entirely different types.",
+        "Three items, because `True` equals 1 and the duplicate is dropped.",
+        "An error, because a set is not allowed to mix types like these.",
+        "Two items, because every numeric value merges into one entry."
       ],
-      "answer": 3,
-      "explanation": "Indexing a missing key raises KeyError. `get` returns None by default, or a value you pass as a second argument, which is useful when a missing key is expected. `get` does not create the key.",
-      "misconception": "`get` does not insert anything. Use `setdefault` or a `defaultdict` when you want a missing key created."
+      "answer": 1,
+      "explanation": "A set rejects duplicates by equality, and in Python `True` is equal to 1 because `bool` is a subclass of `int`. The two therefore collide and only the first one encountered survives. This surprises people because the values look distinct when printed, and it is worth remembering whenever boolean flags and numeric codes end up in the same collection.",
+      "misconception": "Duplicate removal is based on equality, not on type, so values of different types can still collide."
     },
     {
       "type": "mcq",
-      "question": "Why can you not index a set with `s[0]`?",
+      "concept": "set-operations",
+      "difficulty": "medium",
+      "question": "For `s1 = {1, 2, 3, 4}` and `s2 = {3, 4, 5, 6}`, which operation yields `{1, 2}`?",
       "options": [
-        "Sets start indexing at 1.",
-        "Indexing a set is allowed but slow.",
-        "Only frozensets can be indexed.",
-        "A set is unordered, so it has no positional index to retrieve."
+        "The intersection of the two sets",
+        "The symmetric difference of the two sets",
+        "The union of the two sets",
+        "The difference of `s1` and `s2`"
       ],
       "answer": 3,
-      "explanation": "A set stores elements by hash with no defined position, so there is no first or nth element to index. You iterate a set or test membership, but you cannot subscript it. Lists and tuples are the ordered, indexable structures."
+      "explanation": "The difference keeps what is in the first set and not the second, giving the items unique to `s1`. Intersection would give the shared values, union would give everything, and symmetric difference would give everything not shared, which here is four items rather than two. Each operation also has an in-place variant that writes the result back into the first set rather than returning a new one.",
+      "misconception": "Difference is directional: reversing the operands gives a different answer, unlike union or intersection."
+    },
+    {
+      "type": "mcq",
+      "concept": "frozenset",
+      "difficulty": "medium",
+      "question": "What does a frozen set allow that an ordinary set does not?",
+      "options": [
+        "Being nested inside another set, because it is immutable and hashable.",
+        "Holding mutable items such as lists and dictionaries within itself.",
+        "Preserving the insertion order of all the items that were added to it.",
+        "Being indexed by position, in the way that a list or a tuple can be."
+      ],
+      "answer": 0,
+      "explanation": "A frozen set stands to a set as a tuple stands to a list: the reading operations such as union, intersection, and subset tests all work, while the mutating ones such as `add` and `update` do not exist. Because it cannot change, its hash is stable, so it can live inside another set or serve as a dictionary key, which an ordinary set cannot.",
+      "misconception": "Freezing a set does not give it order or indexing; it only removes mutation."
+    },
+    {
+      "type": "scenario",
+      "concept": "dict-access",
+      "difficulty": "medium",
+      "scenario": "A script reads an optional field from each record with `record['phone']`. It works on the sample data and then crashes with a KeyError on the full extract, where some records omit the field entirely.",
+      "question": "What is the most appropriate fix?",
+      "options": [
+        "Wrap every lookup in a loop that checks each key of the record in turn.",
+        "Use `record.get('phone')`, which returns `None` when the key is absent.",
+        "Convert the dictionary to a list, so that missing positions come back empty.",
+        "Add the key to every record with an empty string before processing starts."
+      ],
+      "answer": 1,
+      "explanation": "Square-bracket access demands the key and raises when it is missing, which is the right behaviour when absence means the data is broken. `get` treats absence as normal and hands back `None`, or a default you choose. Real-world records are ragged, so choosing deliberately between the two is a routine decision: use brackets to assert a field must exist, and `get` for genuinely optional fields.",
+      "misconception": "A KeyError is not a bug in the dictionary; it is the dictionary telling you the key was never there."
+    },
+    {
+      "type": "mcq",
+      "concept": "dict-iteration",
+      "difficulty": "medium",
+      "question": "For `person = {'name': 'Aarav', 'age': 26}`, what does `'Aarav' in person` return?",
+      "options": [
+        "`True`, because the value is present somewhere in the dictionary",
+        "An error, because a membership test needs both a key and a value",
+        "`False`, because membership on a dictionary tests keys, not values",
+        "`True`, because dictionary membership checks keys and values alike"
+      ],
+      "answer": 2,
+      "explanation": "Both membership testing and plain iteration over a dictionary work on its keys, so searching for a value this way silently reports absence. To test values use `in person.values()`, and to work with both at once iterate over `person.items()`, which yields key and value pairs. Assuming membership covers values is a quiet bug, because the check returns a valid answer that happens to be wrong.",
+      "misconception": "Iterating a dictionary gives keys, not pairs and not values."
+    },
+    {
+      "type": "mcq",
+      "concept": "dict-nesting",
+      "difficulty": "easy",
+      "question": "For the nested dictionary `student = {'name': 'Aarav', 'subjects': {'maths': 80}}`, how do you read the maths score, and why does this shape matter?",
+      "options": [
+        "`student['maths']`, because nested keys are flattened out automatically.",
+        "`student['subjects']['maths']`, one bracket per level, as JSON arrives.",
+        "`student['subjects'][0]`, since the inner dictionary is indexed by position.",
+        "`student.get('maths', 'subjects')`, supplying the parent key as a default."
+      ],
+      "answer": 1,
+      "explanation": "Chaining one lookup per level walks down the structure, exactly as nested lists use one bracket per dimension. The reason this is worth being fluent in is that nested dictionaries are precisely how JSON is represented in Python, so every response from a web API arrives in this form, often several levels deep.",
+      "misconception": "Nesting is not flattened; you must traverse each level explicitly."
+    },
+    {
+      "type": "mcq",
+      "concept": "comprehensions",
+      "difficulty": "medium",
+      "question": "Given `days = ['Mon', 'Tue']` and `temps = [30, 32]`, which expression builds `{'Mon': 30, 'Tue': 32}`?",
+      "options": [
+        "`{days: temps}`",
+        "`[d: t for d, t in zip(days, temps)]`",
+        "`{d + t for d, t in zip(days, temps)}`",
+        "`{d: t for d, t in zip(days, temps)}`"
+      ],
+      "answer": 3,
+      "explanation": "A dictionary comprehension writes a key and value separated by a colon before the `for`, and `zip` pairs the two lists by position. Square brackets would build a list and are not valid with a colon, while curly braces without the colon would build a set. Pairing two parallel lists into a lookup table this way is one of the most common uses of the pattern.",
+      "misconception": "The brackets decide the type: curly braces with a colon give a dictionary, curly braces without give a set."
+    },
+    {
+      "type": "mcq",
+      "concept": "set-properties",
+      "difficulty": "easy",
+      "question": "Why can a set not be indexed or sliced?",
+      "options": [
+        "Indexing is possible, but it was left out to keep the type simple.",
+        "A set is unordered, since hashing decides where each item lives.",
+        "A set can be indexed, but only after it has first been sorted.",
+        "Indexing works, but it returns the items in random order each time."
+      ],
+      "answer": 1,
+      "explanation": "Each item's location is computed from its hash rather than from an insertion position, so the notion of a first or third element does not exist. That is the price paid for constant-time membership. When order matters, keep a list alongside the set, or sort the set into a list at the point where you need a sequence.",
+      "misconception": "Unordered does not mean randomly ordered on each access; it means position carries no meaning at all."
+    },
+    {
+      "type": "mcq",
+      "concept": "choosing-a-collection",
+      "difficulty": "medium",
+      "question": "You need a collection of unique identifiers where the only operation is checking whether something is present. Which type fits best?",
+      "options": [
+        "A list, since it preserves the order in which they arrived",
+        "A tuple, since the set of identifiers will not change later",
+        "A dictionary with the identifiers as keys and `None` as every value",
+        "A set, because it enforces uniqueness and makes membership fast"
+      ],
+      "answer": 3,
+      "explanation": "The requirements are exactly what a set provides: uniqueness enforced on insertion and membership computed by hash. A list would allow duplicates and force a linear scan, a tuple would prevent the collection from growing, and a dictionary would work but carries a pointless value for every entry. Matching the structure to the operations you actually perform is the habit worth forming.",
+      "misconception": "Reaching for a list by default costs you both correctness and speed when the real requirement is uniqueness and lookup."
+    },
+    {
+      "type": "card",
+      "concept": "hashability",
+      "difficulty": "hard",
+      "question": "Dictionary keys and set items must be immutable. Explain the mechanism that forces this rule, and name which built-in types can therefore be used.",
+      "answer": "Both types place each entry in a slot derived from the item's hash, and finding it again means recomputing that hash. If the item could change after insertion its hash would change too, so the entry would sit in a slot the lookup no longer visits and would effectively be lost. Python therefore requires hashable, immutable items: numbers, strings, tuples of immutable values, and frozen sets qualify, while lists, sets, and dictionaries do not.",
+      "explanation": "This single rule explains a cluster of behaviours that otherwise look arbitrary: why a tuple can key a dictionary but a list cannot, why a set may contain a frozen set but not another set, and why there is no two-dimensional set."
+    },
+    {
+      "type": "card",
+      "concept": "tuple-unpacking",
+      "difficulty": "medium",
+      "question": "Explain tuple unpacking and what the starred form adds, with an example of each.",
+      "answer": "Unpacking assigns the items of a tuple to several names in one statement, so `a, b = (1, 2)` binds 1 and 2 respectively, with the count of names required to match the number of items. A starred name relaxes that requirement by absorbing everything left over into a list, so `a, b, *rest = (1, 2, 3, 4)` gives 1, 2, and a `rest` of `[3, 4]`.",
+      "explanation": "This is why returning several values from a function feels natural in Python: the function returns one tuple and the caller unpacks it into separate names, which is also how iterating over the pairs produced by a dictionary's items works."
     }
   ]
 }

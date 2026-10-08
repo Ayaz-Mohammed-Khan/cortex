@@ -18,8 +18,17 @@
  * survives View Transitions. No dependencies beyond the progress store.
  */
 import { markDone } from '@/lib/progress';
-import { recordReview } from '@/lib/review';
+import { recordReview, quizLock } from '@/lib/review';
+import { onStoreChange } from '@/lib/store';
 import { readQueue, writeQueue, reviewUrl } from '@/lib/review-session';
+import {
+  startAttempt,
+  getAttempt,
+  updateAttempt,
+  clearAttempt,
+  secondsLeft as attemptSecondsLeft,
+  isExpired,
+} from '@/lib/attempt';
 import type { Quiz, QuizQuestion } from '@/lib/quiz';
 
 /** Is the current page open as part of a review session (`?review=1`)? */
@@ -34,16 +43,37 @@ function inReviewMode(): boolean {
 /** Fraction correct (of auto-graded questions) needed to count as a pass. */
 const PASS_RATIO = 2 / 3;
 
+/**
+ * Per-question time budget (seconds) for the GRADED quiz, by question kind.
+ * Tuned for a data-science prep test: an MCQ is a quick recall-and-eliminate,
+ * a scenario needs reading and judgement, a self-grade card sits between. The
+ * quiz's total time is the sum over its questions, so timing scales to any
+ * note's mix automatically. Flashcards mode is untimed (practice).
+ */
+const SECONDS_PER_TYPE: Record<QuizQuestion['type'], number> = {
+  mcq: 45,
+  scenario: 75,
+  card: 60,
+};
+
+/** Total time budget (seconds) for a quiz, from its question mix. */
+function quizSeconds(quiz: Quiz): number {
+  return quiz.questions.reduce((sum, q) => sum + (SECONDS_PER_TYPE[q.type] ?? 60), 0);
+}
+
+/** Format a seconds count as M:SS for the countdown display. */
+function clock(totalSec: number): string {
+  const s = Math.max(0, Math.floor(totalSec));
+  const m = Math.floor(s / 60);
+  return `${m}:${String(s % 60).padStart(2, '0')}`;
+}
+
 /** Option letters for the multiple-choice markers. */
 const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
 /** The check-mark icon used in the modal header. */
 const ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>';
-
-/** The small tick drawn inside an option marker / score, as inline SVG. */
-const TICK =
-  '<svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 6 l2.5 2.5 L10 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 /** Parsed quiz + the note route it belongs to, read from the page once. */
 interface QuizState {
@@ -56,6 +86,31 @@ let state: QuizState | null = null;
 let index = 0;
 /** Per-question outcome: true = correct (or self-graded "got it"). */
 let outcomes: boolean[] = [];
+
+/**
+ * The run mode, chosen from the banner:
+ *   - 'quiz'       graded recognition: options shown, auto-graded, a pass marks
+ *                  the note complete and records a spaced-repetition review.
+ *   - 'flashcards' untimed recall practice: options HIDDEN, every question runs
+ *                  as a flip-and-grade card, nothing is marked or scheduled.
+ * Same questions, same island — only the interaction and the side effects
+ * differ, so recall and recognition live on one surface (no duplicate feature).
+ */
+type QuizMode = 'quiz' | 'flashcards';
+let mode: QuizMode = 'quiz';
+
+/**
+ * Countdown timer (graded quiz only).
+ *
+ * `deadline` is a cache of the LIVE ATTEMPT's deadline (epoch ms; 0 when off),
+ * read from the persisted attempt rather than invented on open. It is never
+ * extended: a graded run always counts down to the moment the attempt started
+ * plus its budget, so closing and reopening the dialog cannot buy more time.
+ * The interval only drives the on-screen display; the deadline is the source
+ * of truth and survives the modal being closed or the page reloaded.
+ */
+let deadline = 0;
+let timerId: ReturnType<typeof setInterval> | null = null;
 
 function dialog(): HTMLDialogElement | null {
   return document.querySelector<HTMLDialogElement>('[data-quiz-dialog]');
@@ -109,11 +164,16 @@ function fmt(s: string): string {
   return esc(s).replace(/`([^`]+)`/g, '<code>$1</code>');
 }
 
-function headHtml(sub: string): string {
+function headHtml(sub: string, showTimer = false): string {
+  const title = mode === 'flashcards' ? 'Flashcards' : 'Test yourself';
+  const timer = showTimer
+    ? `<span class="quiz-timer" data-quiz-timer title="Time remaining" aria-label="Time remaining">${clock(secondsLeft())}</span>`
+    : '';
   return (
     '<div class="quiz-head">' +
     `<span class="quiz-head-ic">${ICON}</span>` +
-    `<div class="quiz-head-text"><b>Test yourself</b><span>${esc(sub)}</span></div>` +
+    `<div class="quiz-head-text"><b>${title}</b><span>${esc(sub)}</span></div>` +
+    timer +
     '<button type="button" class="quiz-close" data-quiz-close>Esc <span aria-hidden="true">✕</span></button>' +
     '</div>'
   );
@@ -153,25 +213,43 @@ function render(): void {
     'scenario' in q && q.scenario
       ? `<p class="quiz-scenario"><b>Scenario.</b> ${fmt(q.scenario)}</p>`
       : '';
-  const stem = `<p class="quiz-q"><span class="quiz-qnum">Q${index + 1}.</span>${fmt(q.question)}</p>`;
+  const unitLabel = mode === 'flashcards' ? 'Card' : 'Q';
+  const stem = `<p class="quiz-q"><span class="quiz-qnum">${unitLabel}${index + 1}.</span>${fmt(q.question)}</p>`;
+
+  // Flashcards mode: EVERY question is a flip-and-grade recall card. For a
+  // multiple-choice question the options are hidden (recall, not recognition)
+  // and its correct option becomes the model answer.
+  const asCard = mode === 'flashcards' || q.type === 'card';
 
   let bodyInner = scenario + stem;
   let footInner = '';
 
-  if (q.type === 'card') {
+  if (asCard) {
+    const answerText =
+      q.type === 'card' ? q.answer : (q.options[q.answer] ?? '');
+    const note =
+      q.type === 'card'
+        ? q.explanation
+        : [q.explanation, q.misconception ? `Watch out: ${q.misconception}` : '']
+            .filter(Boolean)
+            .join(' ');
     bodyInner +=
+      (mode === 'flashcards' ? '<p class="fc-hint">Recall the answer, then flip.</p>' : '') +
       '<div class="quiz-card-answer" data-quiz-card-answer hidden>' +
-      `<b>Model answer.</b> ${fmt(q.answer)}` +
-      (q.explanation ? `<span class="quiz-card-note">${fmt(q.explanation)}</span>` : '') +
+      `<b>${mode === 'flashcards' ? 'Answer.' : 'Model answer.'}</b> ${fmt(answerText)}` +
+      (note ? `<span class="quiz-card-note">${fmt(note)}</span>` : '') +
       '</div>';
     footInner =
       `<span class="quiz-count">${index + 1} / ${total}</span>` +
-      '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-flip>Reveal answer</button>' +
+      '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-flip>Flip card</button>' +
       '<span class="quiz-grade" data-quiz-grade hidden>' +
       '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-grade-val="0">Missed it</button>' +
       `<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-grade-val="1">Got it${last ? '' : ' →'}</button>` +
       '</span>';
   } else {
+    // Graded quiz: options only. No explanation, no right/wrong reveal mid-test
+    // (that is for flashcards practice and the end-of-quiz review). Picking an
+    // option locks it and advances immediately — test conditions.
     const opts = q.options
       .map(
         (o, k) =>
@@ -179,19 +257,17 @@ function render(): void {
           `<span class="quiz-mk">${LETTERS[k]}</span><span>${fmt(o)}</span></button>`,
       )
       .join('');
-    bodyInner +=
-      `<div class="quiz-opts">${opts}</div>` +
-      '<div class="quiz-explain" data-quiz-explain>' +
-      `<b>Why.</b> ${fmt(q.explanation)}` +
-      (q.misconception ? `<span class="quiz-mis">Watch out: ${fmt(q.misconception)}</span>` : '') +
-      '</div>';
-    footInner =
-      `<span class="quiz-count">${index + 1} / ${total}</span>` +
-      `<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-next disabled>${last ? 'See results' : 'Next'} →</button>`;
+    bodyInner += `<div class="quiz-opts">${opts}</div>`;
+    footInner = `<span class="quiz-count">${index + 1} / ${total}</span>`;
   }
 
+  const headSub =
+    mode === 'flashcards'
+      ? `Flashcards · card ${index + 1} of ${total}`
+      : `Question ${index + 1} of ${total}`;
+
   m.innerHTML =
-    headHtml(`Question ${index + 1} of ${total}`) +
+    headHtml(headSub, mode === 'quiz') +
     `<div class="quiz-prog-wrap">${progressHtml()}</div>` +
     `<div class="quiz-body">${bodyInner}</div>` +
     `<div class="quiz-foot">${footInner}</div>`;
@@ -200,9 +276,38 @@ function render(): void {
 /** Render the final score card. */
 function renderScore(m: HTMLElement): void {
   if (!state) return;
+  stopTimer(); // the clock never runs on the results screen
+  // Reaching the results resolves any live graded attempt. Clearing it here
+  // (idempotent with the timeout path) means a finished quiz leaves no attempt
+  // to resume, so reopening the dialog starts a new run under the lock rules.
+  if (mode === 'quiz') clearAttempt(state.route);
   const total = state.quiz.questions.length;
   const correct = outcomes.filter(Boolean).length;
   const pct = Math.round((correct / total) * 100);
+
+  // Flashcards mode: practice only. No pass/fail, no completion, no review
+  // scheduling — just a recall tally and the option to go again.
+  if (mode === 'flashcards') {
+    const missed = total - correct;
+    const fcMsg =
+      missed === 0
+        ? 'Every card recalled from memory. Nicely done.'
+        : `${correct} recalled, ${missed} to firm up. Run it again while it is fresh.`;
+    m.innerHTML =
+      headHtml('Flashcards complete') +
+      '<div class="quiz-body"><div class="quiz-score">' +
+      `<div class="quiz-ring" style="--p:${pct}"><span>${correct}/${total}</span></div>` +
+      `<div class="quiz-score-pct">${pct}%</div>` +
+      `<div class="quiz-score-msg">${esc(fcMsg)}</div>` +
+      '</div></div>' +
+      '<div class="quiz-foot">' +
+      '<span class="quiz-count">Practice only — not graded</span>' +
+      '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-retry>Shuffle &amp; restart</button>' +
+      '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-close>Done</button>' +
+      '</div>';
+    return;
+  }
+
   const passMark = Math.ceil(total * PASS_RATIO);
   const passed = correct >= passMark;
 
@@ -217,9 +322,13 @@ function renderScore(m: HTMLElement): void {
     ? `Next review ${formatDue(nextItem.due)} (${dueDate.toLocaleDateString()}).`
     : 'This topic will come back for review shortly.';
 
+  // On a FAIL there is no instant retry: the note is scheduled for review and
+  // the quiz stays locked until that review is due (the banner enforces this).
+  // So the message tells the reader when they can try again, and points them to
+  // flashcards for practice in the meantime.
   const msg = passed
     ? `Strong recall. The note is marked complete. ${nextMsg}`
-    : `You need ${passMark} of ${total} to complete the note. Reread the misses and try again.`;
+    : `You scored ${correct} of ${total} (need ${passMark}). This topic is scheduled for review — your next attempt opens ${formatDue(nextItem.due)}. Use Flashcards to practise until then.`;
 
   // In a review session, the primary action continues to the next due note
   // (or finishes the session) rather than just closing the dialog.
@@ -234,7 +343,9 @@ function renderScore(m: HTMLElement): void {
     ? remaining.length > 0
       ? `${remaining.length} more to review`
       : 'Last one — nice work'
-    : 'Quiz complete';
+    : passed
+      ? 'Quiz complete'
+      : 'Locked until review';
 
   m.innerHTML =
     headHtml(review ? 'Review' : 'Results') +
@@ -245,18 +356,134 @@ function renderScore(m: HTMLElement): void {
     '</div></div>' +
     '<div class="quiz-foot">' +
     `<span class="quiz-count">${esc(countLabel)}</span>` +
-    '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-retry>Try again</button>' +
     primary +
     '</div>';
 }
 
-/** Start (or restart) the quiz and open the dialog. */
-function open(): void {
+/** Seconds remaining on the current quiz clock (0 when no timer is running). */
+function secondsLeft(): number {
+  return deadline > 0 ? Math.max(0, Math.round((deadline - Date.now()) / 1000)) : 0;
+}
+
+/** Update the on-screen countdown; when it hits zero, auto-submit the quiz. */
+function tick(): void {
+  const el = modal()?.querySelector<HTMLElement>('[data-quiz-timer]');
+  const left = secondsLeft();
+  if (el) {
+    el.textContent = clock(left);
+    el.classList.toggle('is-low', left <= 15); // visual urgency near the end
+  }
+  if (left <= 0) timeUp();
+}
+
+/**
+ * Begin ticking the on-screen clock against the already-fixed `deadline`. The
+ * interval is display only; it does not own the deadline, so starting it does
+ * not reset or extend the countdown. Called whenever a graded run is shown
+ * (fresh start, or resuming a live attempt after the dialog was reopened).
+ */
+function runTimer(): void {
+  if (timerId) clearInterval(timerId);
+  timerId = deadline > 0 ? setInterval(tick, 1000) : null;
+}
+
+/**
+ * Stop the on-screen ticking WITHOUT touching the deadline. Used when the
+ * dialog closes mid-attempt: the display stops, but the attempt and its
+ * deadline live on in the store, so the clock is still running conceptually and
+ * reopening resumes against the same deadline (or resolves as a timeout).
+ */
+function pauseTimerDisplay(): void {
+  if (timerId) clearInterval(timerId);
+  timerId = null;
+}
+
+/** Stop the clock and forget the local deadline cache (attempt has resolved). */
+function stopTimer(): void {
+  pauseTimerDisplay();
+  deadline = 0;
+}
+
+/** Persist the running outcomes and position onto the live attempt. */
+function persistAttempt(): void {
+  if (!state || mode !== 'quiz' || deadline <= 0) return;
+  updateAttempt(state.route, (a) => ({
+    ...a,
+    answers: state!.quiz.questions.map((_, k) => outcomes[k] ?? null),
+    index,
+  }));
+}
+
+/**
+ * Time ran out: resolve the attempt as a timeout and jump to the graded
+ * results. Any unanswered questions stay wrong. The persisted attempt is
+ * cleared so it cannot be resumed, and the results screen records the review.
+ */
+function timeUp(): void {
+  stopTimer();
   if (!state) return;
-  index = 0;
-  outcomes = [];
+  clearAttempt(state.route);
+  index = state.quiz.questions.length;
   render();
-  dialog()?.showModal();
+}
+
+/** Fisher–Yates shuffle in place (used to vary flashcard order). */
+function shuffleQuestions(): void {
+  if (!state) return;
+  const qs = state.quiz.questions;
+  for (let i = qs.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [qs[i], qs[j]] = [qs[j]!, qs[i]!];
+  }
+}
+
+/**
+ * Start (or resume) a run in the given mode and open the dialog.
+ *
+ * Flashcards is untimed practice: it always starts fresh and shuffles for
+ * variety. The graded quiz is governed by a persisted attempt (the strict
+ * timer):
+ *
+ *   - If a live attempt exists for this note, RESUME it: restore the position
+ *     and answers, and run against its original deadline. If that deadline has
+ *     already passed (the reader closed the quiz and came back too late), the
+ *     attempt resolves immediately as a timeout rather than handing back time.
+ *   - Otherwise START a fresh attempt, fixing the deadline now.
+ */
+function open(runMode: QuizMode): void {
+  if (!state) return;
+  mode = runMode;
+
+  if (mode === 'flashcards') {
+    index = 0;
+    outcomes = [];
+    stopTimer();
+    shuffleQuestions(); // fresh order each practice run
+    render();
+    if (!dialog()?.open) dialog()?.showModal();
+    return;
+  }
+
+  // Graded quiz: resume a live attempt, or begin a new one.
+  const total = state.quiz.questions.length;
+  const existing = getAttempt(state.route);
+  const attempt = existing ?? startAttempt(state.route, total, quizSeconds(state.quiz));
+  deadline = attempt.deadline;
+  outcomes = attempt.answers.map((a) => (a === null ? undefined : a)) as boolean[];
+  index = Math.min(Math.max(0, attempt.index), total);
+
+  // The deadline is authoritative: if it has already passed, this attempt is
+  // over the moment it is reopened. Resolve as a timeout instead of showing a
+  // question with a clock that is already at zero.
+  if (isExpired(attempt)) {
+    if (!dialog()?.open) dialog()?.showModal();
+    timeUp();
+    return;
+  }
+
+  runTimer();
+  render();
+  if (!dialog()?.open) dialog()?.showModal();
 }
 
 /** Answer an MCQ/scenario option: lock in, grade, reveal the explanation. */
@@ -267,18 +494,29 @@ function answerOption(optBtn: HTMLElement): void {
   if (q.type === 'card') return;
   if (outcomes[index] !== undefined) return; // already answered
 
+  // A live attempt may have expired while this question sat on screen; honour
+  // the deadline before accepting the answer.
+  if (mode === 'quiz' && deadline > 0 && secondsLeft() <= 0) {
+    timeUp();
+    return;
+  }
+
   const picked = Number(optBtn.dataset.quizOpt);
   outcomes[index] = picked === q.answer;
+  persistAttempt();
 
+  // Test conditions: briefly mark the chosen option as "picked" (no correct/
+  // wrong colour, no explanation), then advance. The short delay gives tactile
+  // feedback that the click registered without revealing the answer.
   m.querySelectorAll<HTMLElement>('[data-quiz-opt]').forEach((btn) => {
     (btn as HTMLButtonElement).disabled = true;
-    const k = Number(btn.dataset.quizOpt);
-    if (k === q.answer) btn.classList.add('is-correct');
-    else if (k === picked) btn.classList.add('is-wrong');
+    if (Number(btn.dataset.quizOpt) === picked) btn.classList.add('is-picked');
   });
-  m.querySelector('[data-quiz-explain]')?.classList.add('show');
-  const next = m.querySelector<HTMLButtonElement>('[data-quiz-next]');
-  if (next) next.disabled = false;
+  window.setTimeout(() => {
+    index += 1;
+    persistAttempt();
+    render();
+  }, 180);
 }
 
 /** Flip a self-grade card to reveal the model answer and the grade buttons. */
@@ -292,8 +530,14 @@ function flipCard(): void {
 
 /** Record a self-grade outcome and advance. */
 function gradeCard(got: boolean): void {
+  // In graded mode, a self-grade card is still under the clock.
+  if (mode === 'quiz' && deadline > 0 && secondsLeft() <= 0) {
+    timeUp();
+    return;
+  }
   outcomes[index] = got;
   index += 1;
+  persistAttempt();
   render();
 }
 
@@ -308,8 +552,13 @@ function onClick(event: MouseEvent): void {
   const target = event.target as Element | null;
   if (!target) return;
 
-  if (target.closest('[data-quiz-start]')) {
-    open();
+  const startBtn = target.closest<HTMLElement>('[data-quiz-start]');
+  if (startBtn) {
+    const requested = startBtn.dataset.quizStart === 'flashcards' ? 'flashcards' : 'quiz';
+    // Flashcards is always available. The graded quiz is blocked while locked
+    // (recently failed, cooling down until its review is due).
+    if (requested === 'quiz' && state && quizLock(state.route).locked) return;
+    open(requested);
     return;
   }
   if (target.closest('[data-quiz-close]')) {
@@ -337,6 +586,8 @@ function onClick(event: MouseEvent): void {
   if (target.closest('[data-quiz-retry]')) {
     index = 0;
     outcomes = [];
+    // Flashcards "Try again" re-shuffles for fresh practice; the quiz keeps order.
+    if (mode === 'flashcards') shuffleQuestions();
     render();
     return;
   }
@@ -371,20 +622,77 @@ function onDialogClick(event: MouseEvent): void {
   if (dlg && event.target === dlg) dlg.close();
 }
 
+/**
+ * The dialog closed (Esc, backdrop, close button, or Done). Stop the on-screen
+ * ticking but DO NOT clear the attempt or its deadline: a graded run left in
+ * progress keeps counting down in the store, so reopening resumes the same
+ * attempt against the same deadline (and resolves as a timeout if it has since
+ * passed). This is what makes the timer strict rather than pausable.
+ */
+function onDialogClose(): void {
+  pauseTimerDisplay();
+  // Reflect any lock change (e.g. a just-finished fail) back onto the banner.
+  syncBanner();
+}
+
+/**
+ * Reflect the quiz lock onto the banner's "Quiz me" button. When the graded
+ * quiz is cooling down after a fail, the button is disabled and relabelled, and
+ * a hint shows when the next attempt opens. Flashcards stay available. Runs on
+ * load and whenever the store changes (e.g. a review becomes due).
+ */
+function syncBanner(): void {
+  if (!state) return;
+  const cta = document.querySelector<HTMLButtonElement>('[data-quiz-cta]');
+  if (!cta) return;
+  const label = cta.querySelector<HTMLElement>('[data-quiz-cta-label]');
+  const arrow = cta.querySelector<HTMLElement>('[data-quiz-cta-arrow]');
+  const hint = document.querySelector<HTMLElement>('[data-quiz-lock-hint]');
+
+  const { locked, unlockAt } = quizLock(state.route);
+  cta.disabled = locked;
+
+  // A live, unexpired attempt means the strict clock is still running in the
+  // background. Surface that so the reader knows reopening resumes it rather
+  // than starting fresh. (An expired attempt is left to resolve as a timeout on
+  // the next open, so it reads as a normal start here.)
+  const live = !locked ? getAttempt(state.route) : undefined;
+  const resuming = !!live && !isExpired(live);
+
+  if (label) label.textContent = locked ? 'Locked' : resuming ? 'Resume quiz' : 'Quiz me';
+  if (arrow) arrow.hidden = locked;
+  if (hint) {
+    if (locked) {
+      const when = new Date(unlockAt);
+      hint.hidden = false;
+      hint.textContent = `Quiz locked after a miss. Your next attempt opens ${formatDue(unlockAt)} (${when.toLocaleString()}). Keep practising with Flashcards.`;
+    } else if (resuming) {
+      hint.hidden = false;
+      hint.textContent = `A timed attempt is in progress, the clock keeps running while this is closed. Reopen to resume with ${clock(attemptSecondsLeft(live!))} left.`;
+    } else {
+      hint.hidden = true;
+    }
+  }
+}
+
 function bind(): void {
   state = loadState();
   const dlg = dialog();
   dlg?.addEventListener('click', onDialogClick);
+  dlg?.addEventListener('close', onDialogClose);
+  syncBanner();
   // Review mode: when a note is opened via the "Review due today" flow it
   // carries `?review=1`, so start its quiz immediately rather than making the
   // reader hunt for the Start button.
   if (state && new URLSearchParams(window.location.search).get('review') === '1') {
-    open();
+    open('quiz'); // a review session runs the graded quiz
   }
 }
 
 document.addEventListener('click', onClick);
 document.addEventListener('astro:page-load', bind);
+// A fail (or a review becoming due) changes the lock; refresh the banner live.
+onStoreChange(syncBanner);
 bind();
 
 export {};

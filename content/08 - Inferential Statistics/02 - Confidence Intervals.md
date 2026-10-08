@@ -23,8 +23,8 @@ created: 2026-07-09
 
 | Term | Meaning | Symbol |
 | :--- | :--- | :--- |
-| Population | the entire group of interest | — |
-| Sample | a random, representative subset we actually measure | — |
+| Population | the entire group of interest | none |
+| Sample | a random, representative subset we actually measure | none |
 | Parameter | a numeric summary of the **population** (unknown) | $\mu$, $\sigma$ |
 | Statistic | a numeric summary of the **sample** (known) | $\bar{x}$, $s$ |
 
@@ -58,7 +58,7 @@ So statisticians report a **range**, called a confidence interval.
 - **Confidence level:** how sure we are that the true value lies in that interval, expressed as a percentage (commonly **95%**).
 
 > [!example]
-> "The subscribers' average age is between **25 and 32**, and I am **95% confident**." Here 25–32 is the confidence interval and 95% is the confidence level.
+> "The subscribers' average age is between **25 and 32**, and I am **95% confident**." Here 25 to 32 is the confidence interval and 95% is the confidence level.
 
 ### The master formula
 

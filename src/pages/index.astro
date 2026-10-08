@@ -30,6 +30,7 @@ import { spine, phases, conceptLabel } from '@/data/roadmap';
 import type { Concept, Difficulty, Step, Tier, Topic } from '@/data/roadmap';
 import { prerequisitesFor } from '@/data/prerequisites';
 import type { CategoryNode, TreeNode } from '@/lib/ingest/types';
+import type { Quiz } from '@/lib/quiz';
 
 export const prerender = true;
 
@@ -564,6 +565,12 @@ const noteLabelByRoute: Record<string, string> = {};
 for (const n of nodes) {
   if (n.linkKind === 'note' && n.href) noteLabelByRoute[n.href] = n.label;
 }
+
+// Every note's quiz, keyed by route, for the Cumulative Recall island. Recall
+// builds a cross-note session on the client, so the whole bank must ship with
+// the page (the review card only needs labels; recall needs the questions).
+// Routes here are the same route keys the recall scheduler normalizes against.
+const recallBanks: Record<string, Quiz> = Object.fromEntries([...site.quizzes]);
 ---
 
 <Layout
@@ -683,6 +690,92 @@ for (const n of nodes) {
       </div>
       {/* The island fills this with the due topic chips. */}
       <ul data-rm-review-list class="flex flex-wrap gap-1.5 border-t border-accent-500/15 px-4 py-2.5 dark:border-accent-400/15"></ul>
+    </div>
+
+    {/*
+      Cumulative-recall card (`recall.ts`). Hidden until the island finds a
+      pending weekly cycle or monthly sweep. Where the review card above
+      resurfaces single shaky notes, this one pulls an interleaved set across
+      ALL the topics covered in a study window and runs an UNTIMED cross-note
+      session. When two or more weeklies stack up the island adds
+      `.recall-lagging` / `data-recall-lagging` to flip the card into the amber
+      PRIORITY state and fills the lagging message. The route -> label map and
+      the per-note quiz banks are emitted at the foot of the page.
+    */}
+    <div
+      data-recall-card
+      hidden
+      class="recall-card mb-5 overflow-hidden rounded-xl border border-accent-500/30 bg-accent-500/5 dark:border-accent-400/25 dark:bg-accent-400/5"
+    >
+      <div class="flex items-start gap-3 px-4 py-3.5">
+        <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/15 text-accent-600 dark:text-accent-300" aria-hidden="true">
+          {/* "layers" glyph: recall stacks many topics into one pass. */}
+          <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" />
+          </svg>
+        </span>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">Cumulative recall</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            Recall across everything you covered in a window, not one note at a time.
+          </p>
+          {/*
+            Priority nudge for a lagging reader. Hidden unless two or more
+            weekly cycles are pending; the island fills the text and the card
+            turns amber via `.recall-lagging`.
+          */}
+          <p
+            data-recall-lagging-msg
+            hidden
+            role="status"
+            class="recall-lagging-msg mt-1.5 text-xs font-semibold"
+          ></p>
+        </div>
+      </div>
+
+      {/* Weekly cycle: the oldest pending 7-day window. */}
+      <div
+        data-recall-weekly
+        hidden
+        class="flex flex-col gap-2 border-t border-accent-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 dark:border-accent-400/15"
+      >
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Weekly recall</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            <span data-recall-weekly-topics>0 topics</span> ·
+            <span data-recall-weekly-est>~0 questions</span>
+          </p>
+        </div>
+        <button
+          type="button"
+          data-recall-weekly-start
+          class="shrink-0 self-start rounded-lg bg-accent-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:focus-visible:ring-offset-gray-900"
+        >
+          Start weekly recall →
+        </button>
+      </div>
+
+      {/* Monthly sweep: the rolling 30-day window. */}
+      <div
+        data-recall-monthly
+        hidden
+        class="flex flex-col gap-2 border-t border-accent-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 dark:border-accent-400/15"
+      >
+        <div class="min-w-0">
+          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Monthly sweep</p>
+          <p class="text-xs text-gray-500 dark:text-gray-400">
+            <span data-recall-monthly-topics>0 topics</span> ·
+            <span data-recall-monthly-est>~0 questions</span>
+          </p>
+        </div>
+        <button
+          type="button"
+          data-recall-monthly-start
+          class="shrink-0 self-start rounded-lg border-[1.75px] border-accent-500/50 px-4 py-2 text-center text-sm font-semibold text-accent-700 transition-colors hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:border-accent-400/40 dark:text-accent-200 dark:focus-visible:ring-offset-gray-900"
+        >
+          Start monthly sweep →
+        </button>
+      </div>
     </div>
 
     {/*
@@ -1151,13 +1244,29 @@ for (const n of nodes) {
     </div>
   </dialog>
 
+  {/*
+    Cumulative-recall session dialog. A native <dialog> (same accessible
+    pattern as the roadmap/quiz modals: Esc closes, backdrop click closes, focus
+    is trapped). The island fills `[data-recall-modal]`. The shell classes are
+    GLOBAL in global.css (unlike the note page's scoped quiz shell), reusing the
+    global `.quiz-*` stepper internals.
+  */}
+  <dialog data-recall-dialog class="recall-dialog">
+    <div class="recall-shell">
+      <div data-recall-modal class="recall-modal"></div>
+    </div>
+  </dialog>
+
   {/* Node syllabus data for the island. */}
   <script type="application/json" data-rm-data set:html={JSON.stringify(nodeData)} />
   {/* Route -> note label map for the spaced-repetition review card. */}
   <script type="application/json" data-rm-review-labels set:html={JSON.stringify(noteLabelByRoute)} />
+  {/* Every note's quiz, keyed by route, for the Cumulative Recall island. */}
+  <script type="application/json" data-recall-banks set:html={JSON.stringify(recallBanks)} />
   <script>
     import '@/components/roadmap';
     import '@/components/review-due';
+    import '@/components/recall';
   </script>
 </Layout>
 

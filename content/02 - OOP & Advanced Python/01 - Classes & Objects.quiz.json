@@ -2,48 +2,201 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What is the role of `self` in an instance method?",
+      "concept": "class-vs-object",
+      "difficulty": "easy",
+      "question": "What is the relationship between a class and an object?",
       "options": [
-        "It is the current object, passed automatically, through which the method reads and writes that instance's attributes.",
-        "It must be passed explicitly every time you call the method.",
-        "It is a keyword that makes a method static.",
-        "It is a copy of the class, shared by all instances."
+        "A class is a blueprint for behaviour and data; an object is an instance of it.",
+        "A class is a single instance, and an object is the template it was made from.",
+        "They are two names for exactly the same thing when used in Python.",
+        "A class holds only data, while an object holds only the methods."
       ],
       "answer": 0,
-      "explanation": "When you call `obj.method()`, Python passes `obj` as the first parameter, which convention names `self`. The method uses it to access that specific instance's state. You do not pass it yourself at the call site.",
-      "misconception": "`self` is not shared across instances. It is whichever object the method was called on."
+      "explanation": "The class states the rules, the attributes its instances will carry and the methods they can perform, and each object is one concrete thing made to those rules. Running `type` on any value names its class, which is how you see that every built-in type is itself a class and every value an object of one.",
+      "misconception": "A class is not a thing in itself; it is the description from which things are made."
     },
     {
       "type": "mcq",
-      "question": "What problem does a constructor (`__init__`) solve?",
+      "concept": "golden-rule",
+      "difficulty": "medium",
+      "question": "Why does `L.append(4)` work on a list while `L.upper()` raises an AttributeError?",
       "options": [
-        "It guarantees every object starts in a valid, fully initialized state at creation.",
-        "It makes the class immutable.",
-        "It destroys the object when it goes out of scope.",
-        "It is required for a class to have methods."
+        "`upper` requires that its own argument be passed to it explicitly by name.",
+        "`append` is a built-in function, while `upper` is not a built-in one.",
+        "`upper` works only on lists whose items all happen to be strings.",
+        "`L` belongs to the `list` class, and `upper` belongs to the `str` class."
       ],
-      "answer": 0,
-      "explanation": "`__init__` runs right after an object is created, so you set up its attributes there. That means no object can exist in a half-built state, which is the true benefit: callers always get a usable, consistent instance."
+      "answer": 3,
+      "explanation": "An object can use the members of its own class and no others, which is why the available methods change with the type. This also explains the shape of the error: Python is reporting that the attribute simply does not exist on that class, not that the arguments were wrong. Checking the type is therefore the first move when a method unexpectedly does not exist.",
+      "misconception": "Methods are not global; they belong to a specific class and travel with its objects."
+    },
+    {
+      "type": "mcq",
+      "concept": "constructor",
+      "difficulty": "medium",
+      "question": "What distinguishes the constructor from an ordinary method, and what is it therefore used for?",
+      "options": [
+        "It must be called manually before any other method, and it validates arguments.",
+        "It runs automatically when an object is created, so it is where setup goes.",
+        "It runs again after every method call, in order to reset the object's state.",
+        "It is the only method in a class that is allowed to take any parameters."
+      ],
+      "answer": 1,
+      "explanation": "An ordinary method fires when something calls it, usually behind a user action, so the user decides when. The constructor is the opposite: creating the object runs it, with no call site and no choice. That guarantee is what makes it the right home for configuration you cannot leave to chance, such as opening a connection or establishing initial state.",
+      "misconception": "The constructor is never called explicitly; object creation invokes it."
+    },
+    {
+      "type": "mcq",
+      "concept": "self",
+      "difficulty": "medium",
+      "question": "What is `self`, and how can you demonstrate it?",
+      "options": [
+        "A copy of the object, which is why changes made to it do not persist.",
+        "A reserved keyword that Python simply refuses to let you rename.",
+        "The current object, provable by comparing its id inside and outside.",
+        "The class itself, which is why it can reach the class's own methods."
+      ],
+      "answer": 2,
+      "explanation": "Printing the id of `self` inside a method and the id of the object outside gives the same address, so they are one object under two names. That is why attributes are written with a `self.` prefix and why every method takes it first: a method needs a handle on the object it is running for in order to reach that object's other members. The name is convention only, though everyone uses it.",
+      "misconception": "`self` is neither a copy nor the class; it is the very object the method was called on."
     },
     {
       "type": "scenario",
-      "scenario": "You want `print(fraction)` to show `3/4` instead of something like `<Fraction object at 0x...>`.",
-      "question": "Which magic method do you implement, and what should it return?",
+      "concept": "self",
+      "difficulty": "hard",
+      "scenario": "A developer defines a method inside a class with empty parentheses and no parameters, then calls it on an object. Python raises an error saying the method takes 0 positional arguments but 1 was given.",
+      "question": "Where did the extra argument come from?",
       "options": [
-        "`__print__`, returning the string.",
-        "`__repr__` only, which print never uses.",
-        "`__init__`, returning the string.",
-        "`__str__`, returning a readable string like \"3/4\"."
+        "The object was passed automatically, and the method should accept it.",
+        "The call site supplied an extra argument by mistake somewhere.",
+        "Python always passes the class name as a hidden first argument.",
+        "The constructor forwards its own arguments on to every other method."
+      ],
+      "answer": 0,
+      "explanation": "Calling a method through an object makes Python hand that object over as the first argument, so a definition that accepts none is one short. This error message is worth recognising on sight, because the count mismatch points straight at a missing `self` rather than at anything the caller did wrong.",
+      "misconception": "The hidden argument is the object, not the class, and it is always sent on an instance call."
+    },
+    {
+      "type": "mcq",
+      "concept": "method-vs-function",
+      "difficulty": "medium",
+      "question": "Using `len(L)` and `L.append(4)` as examples, what is the difference between a function and a method?",
+      "options": [
+        "A method is able to return a value, while a plain function cannot.",
+        "A function is always built in, while a method is always user-defined.",
+        "`len` sits outside any class, while `append` is defined inside one.",
+        "A function takes arguments, while a method never takes any at all."
+      ],
+      "answer": 2,
+      "explanation": "The dividing line is where the definition lives. Code written inside a class body is a method and is reached through an object, while code written outside any class is a plain function and is called on its own. Both can take arguments and return values, so the location is the whole distinction, and it is one worth stating precisely in an interview.",
+      "misconception": "The difference is structural, not about being built in or taking arguments."
+    },
+    {
+      "type": "mcq",
+      "concept": "instance-variables",
+      "difficulty": "medium",
+      "question": "Two objects are built from the same `Person` class, one with the name Aarav and one with Steve. What does this illustrate about instance variables?",
+      "options": [
+        "Instance variables are shared, so the second assignment overwrites the first.",
+        "One name holds a different value per object, so one blueprint makes many.",
+        "Instance variables must be declared in the class body, not the constructor.",
+        "Each object needs a class of its own in order to hold a different value."
+      ],
+      "answer": 1,
+      "explanation": "An attribute created through `self` in the constructor belongs to that particular object, so the same name carries per-object values. Without this a class could describe only one thing. It is also why two objects of a class never interfere by default, which is a property you have to deliberately give up when you want shared state.",
+      "misconception": "Instance variables are per object; nothing is shared between instances by default."
+    },
+    {
+      "type": "scenario",
+      "concept": "str-method",
+      "difficulty": "medium",
+      "scenario": "A developer builds a custom `Fraction` object and prints it, expecting something readable, but sees text containing the class name and a hexadecimal memory address.",
+      "question": "What is missing, and why does that default happen?",
+      "options": [
+        "The object has to be converted with `str()` before it is printed.",
+        "The attributes were never actually created inside the constructor body.",
+        "Printing a custom object requires an extra formatting argument.",
+        "The class has no `__str__`, so Python falls back to a generic form."
       ],
       "answer": 3,
-      "explanation": "`print` and `str()` call `__str__`, which should return a human-readable string. There is no `__print__`. `__repr__` is the unambiguous developer representation and is a sensible fallback, but `__str__` is what print prefers.",
-      "misconception": "Magic (dunder) methods hook into built-in operations. You implement `__str__`; you do not invent a `__print__`."
+      "explanation": "Printing an object asks it how it wishes to appear, and with nothing defined Python can only report the class and the address. Defining `__str__` to return a readable string fixes every place the object is displayed. Beyond neatness this matters for debugging and logging, because an object that prints as an address tells you nothing when something goes wrong at three in the morning.",
+      "misconception": "Calling `str()` changes nothing by itself; it is the method on the class that supplies the readable form."
+    },
+    {
+      "type": "mcq",
+      "concept": "operator-overloading",
+      "difficulty": "medium",
+      "question": "A `Fraction` class defines addition so that combining three quarters and one half returns a new fraction. Following the standard cross-multiplication, what is the result before any simplification?",
+      "options": [
+        "4 over 6",
+        "10 over 8",
+        "5 over 4",
+        "3 over 8"
+      ],
+      "answer": 1,
+      "explanation": "The numerator is the first numerator times the second denominator plus the second numerator times the first denominator, giving 3 times 2 plus 1 times 4, which is 10. The denominator is the product of the denominators, which is 8. The method returns a brand new `Fraction` rather than modifying either operand, which is the convention arithmetic operators should follow.",
+      "misconception": "An arithmetic method should build and return a new object, not mutate the operands."
+    },
+    {
+      "type": "mcq",
+      "concept": "operator-overloading",
+      "difficulty": "medium",
+      "question": "Adding two objects of a class with no addition behaviour defined raises an unsupported operand type error. What does defining the addition magic method change, and in what order are the operands bound?",
+      "options": [
+        "It converts both of the objects to plain numbers first, and then adds them.",
+        "It makes the plus sign concatenate the two objects' string forms instead.",
+        "It defines what plus means for the type, with the left operand as `self`.",
+        "It allows addition only between objects holding numeric attributes."
+      ],
+      "answer": 2,
+      "explanation": "Operators are not built into types; each type declares what they mean through the corresponding magic method. The left operand becomes the object whose method runs and the right arrives as the second parameter, which is why subtraction and division need their own methods and why their operand order matters. This mechanism is exactly how numerical libraries make array arithmetic read like ordinary maths.",
+      "misconception": "Python does not infer operator behaviour for custom types; the class has to define it."
+    },
+    {
+      "type": "mcq",
+      "concept": "oop-purpose",
+      "difficulty": "medium",
+      "question": "What is the central thing object-oriented programming gives a programmer?",
+      "options": [
+        "Faster execution than the equivalent procedural code would give.",
+        "The ability to build custom data types shaped for the problem at hand.",
+        "Automatic protection against every runtime error that could ever occur.",
+        "A way to avoid having to write any standalone functions at all."
+      ],
+      "answer": 1,
+      "explanation": "Procedural code builds everything from the generic types the language ships with, which strains as a program grows and the data drifts apart from the logic that acts on it. Designing your own types moves from generality to specificity and keeps the data and its behaviour bundled together. Speed is not the argument; organisation and expressiveness are.",
+      "misconception": "OOP is about how code is organised and modelled, not about raw performance."
+    },
+    {
+      "type": "mcq",
+      "concept": "constructor",
+      "difficulty": "easy",
+      "question": "Which statement about the constructor is true?",
+      "options": [
+        "A class may define several constructors, each with a different parameter list.",
+        "The constructor can take any name, as long as it is the first method defined.",
+        "A class has exactly one constructor, and it is always named `__init__`.",
+        "A class without a constructor is unable to create any objects at all."
+      ],
+      "answer": 2,
+      "explanation": "The name is fixed and there is one per class, unlike languages that allow several overloaded constructors. Taking only `self` makes it non-parameterized, while additional parameters make it parameterized and let each object be built with its own starting values. A class with no constructor at all is still perfectly usable; its objects simply begin with no instance attributes.",
+      "misconception": "Python has no constructor overloading; one class, one constructor."
     },
     {
       "type": "card",
-      "question": "Explain the difference between a class and an object, using a concrete analogy.",
-      "answer": "A class is a blueprint that defines what attributes and behaviors a kind of thing has. An object is a concrete instance built from that blueprint, with its own values. For example, a Car class defines that every car has a color and a speed and can accelerate; a specific red car doing 60 is one object. Many independent objects can be created from one class, each with its own state.",
-      "explanation": "The tell: the class is written once; objects are made many times with `ClassName(...)`, each holding its own instance attributes."
+      "concept": "self",
+      "difficulty": "hard",
+      "question": "Explain why `self` has to exist, starting from the rule about how a class's members are reached.",
+      "answer": "A class's members can only be accessed through an object of that class, which creates a problem inside the class itself: one method frequently needs a sibling method or an attribute, but it has no object to go through. `self` resolves it by being the current object, the very instance the method was called on, supplied automatically by Python when the method is invoked through an object. So a method reaches the rest of the class as `self.attribute` or `self.other_method()`.",
+      "explanation": "This also explains two things that otherwise look arbitrary: why every method lists it as the first parameter, and why omitting it produces an argument-count error, since the object is passed whether or not the definition expects it."
+    },
+    {
+      "type": "card",
+      "concept": "magic-methods",
+      "difficulty": "medium",
+      "question": "What is a magic method, and what do `__init__`, `__str__`, and `__add__` each hook into?",
+      "answer": "A magic method, also called a dunder method for its double underscores, is a specially named method that Python calls automatically in a particular situation rather than being invoked by name. `__init__` runs when an object is created, so it sets up initial attributes. `__str__` runs when the object is displayed, so it returns the readable form. `__add__` runs when the plus sign is applied, so it defines what addition means for the type.",
+      "explanation": "Taken together these are what turn a class from a container of values into a genuine data type that creates, prints, and computes like a built-in one. The same pattern extends through subtraction, multiplication, and division, and it is the mechanism behind the expressive interfaces of numerical libraries."
     }
   ]
 }

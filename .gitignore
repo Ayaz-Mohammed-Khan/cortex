@@ -28,6 +28,7 @@ __pycache__/
 .idea/
 .kiro/
 .obsidian/
+.agents/
 
 # generated content mirror (synced from CONTENT_ROOT by scripts/sync-content.ts)
 src/content/notes/

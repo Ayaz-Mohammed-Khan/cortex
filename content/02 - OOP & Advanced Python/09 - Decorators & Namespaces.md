@@ -122,7 +122,7 @@ def outer():
     return inner       # return the function itself, not its result
 
 fn = outer()           # outer() has now finished and returned
-fn()                   # prints 5 — b survived because inner still needs it
+fn()                   # prints 5, b survived because inner still needs it
 ```
 
 Even though `outer` has returned and would normally be gone from memory, `b` is kept alive because the returned `inner` still references it. In short: **a child function can access its parent's variables even after the parent has finished.** Hold on to this; it is the mechanism behind every decorator.
@@ -138,7 +138,7 @@ def func():
     print("hello")
 
 a = func          # store the function object in another name
-a()               # 'hello' — a now refers to the same function
+a()               # 'hello', a now refers to the same function
 ```
 
 ### A first decorator
@@ -174,7 +174,7 @@ Writing `a = my_decorator(hello)` then calling `a()` is indirect. Python gives y
 def hello():
     print("hello")
 
-hello()            # same output as before — the decorator is applied automatically
+hello()            # same output as before, the decorator is applied automatically
 ```
 
 `@my_decorator` means exactly `hello = my_decorator(hello)`. Now calling `hello()` always runs the wrapped version. This is the syntax you will see in real code.

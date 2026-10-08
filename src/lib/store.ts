@@ -45,7 +45,21 @@ export const STORE_CHANGE_EVENT = 'cortex:store-change';
 const LEGACY_PROGRESS_KEY = 'cortex:progress';
 
 /** Current schema version. Bump when {@link StoreDoc}'s shape changes. */
-export const SCHEMA_VERSION = 2 as const;
+export const SCHEMA_VERSION = 4 as const;
+
+/**
+ * In-memory cache of the parsed document.
+ *
+ * WHY: every facade (`progress`, `review`, `scratchpad`, recall cards, …) calls
+ * `load()` on each read, and surfaces read repeatedly within a single render.
+ * Re-parsing the JSON every time is wasteful and gets worse as the document
+ * grows with the note count. We parse once, keep the result here, and reuse it
+ * until a write (this tab) or a cross-tab `storage` event invalidates it. The
+ * cache is a private detail: callers see the same values, just faster.
+ *
+ * `null` means "not loaded / invalidated — parse from storage on next read".
+ */
+let cache: StoreDoc | null = null;
 
 /**
  * A spaced-repetition review item for one note (Phase 2). Scheduling fields
@@ -66,6 +80,32 @@ export interface ReviewItem {
   lapses: number;
   /** Epoch ms of the last review, or 0 if never reviewed. */
   lastReviewed: number;
+}
+
+/**
+ * A GRADED quiz attempt in progress for one note (Phase 3, "strict timer").
+ *
+ * The attempt is persisted so its clock is a real wall-clock deadline, not a
+ * UI countdown. The deadline is fixed the instant the attempt starts and lives
+ * here, independent of whether the dialog is open. Closing and reopening the
+ * dialog resumes the SAME attempt against the SAME deadline, and if `deadline`
+ * has already passed when the quiz is reopened, the attempt resolves as a
+ * timeout rather than handing back time. This is the "you cannot pause the
+ * clock by closing the quiz" rule. Flashcards practice is untimed and never
+ * creates an attempt. All times are epoch milliseconds.
+ */
+export interface QuizAttempt {
+  /** Epoch ms the attempt started (fixed; never moved). */
+  startedAt: number;
+  /** Epoch ms the attempt must finish by (fixed at start; never extended). */
+  deadline: number;
+  /**
+   * Per-question outcome in authored order: `true` correct, `false` wrong,
+   * `null` not yet answered. Length equals the note's question count.
+   */
+  answers: (boolean | null)[];
+  /** Index of the question the reader is currently on. */
+  index: number;
 }
 
 /**
@@ -92,11 +132,79 @@ export interface StoreDoc {
    * `@/lib/review` reads and updates these.
    */
   review: Record<string, ReviewItem>;
+  /**
+   * In-progress graded quiz attempts, keyed by note route. Added by Phase 3.
+   * An entry exists only while an attempt is live; it is cleared the moment the
+   * attempt resolves (submitted, timed out, or abandoned). At most one attempt
+   * per note.
+   */
+  attempts: Record<string, QuizAttempt>;
+  /**
+   * When each note was FIRST marked complete, keyed by note route, in epoch ms.
+   * Added by Phase 4 (Cumulative Recall). Stamped once by `@/lib/progress`'s
+   * `markDone` and never overwritten, so it anchors the weekly recall cycles
+   * and reports which topics fell inside a 30-day window.
+   *
+   * NOTE: legacy completions carried over from before this slice existed are
+   * routes present in `progress` but ABSENT here. That gap is intentional —
+   * such undated topics cannot be placed on a weekly timeline, so the recall
+   * scheduler surfaces them only in the monthly / all-topics sweeps.
+   */
+  completedAt: Record<string, number>;
+  /**
+   * The `cycleEnd` timestamp (epoch ms) of each weekly recall cycle the reader
+   * has already completed. Added by Phase 4. A cycle is identified by its end
+   * boundary, so a finished cycle is excluded from future "pending weekly"
+   * lists by recording that boundary here. Deduped on save.
+   */
+  recallWeeklyDone: number[];
+  /**
+   * Epoch ms of the last completed monthly (30-day) recall sweep, or `0` if the
+   * reader has never done one. Added by Phase 4. The scheduler offers a new
+   * monthly sweep only once this is `0` or at least 30 days in the past.
+   */
+  recallMonthlyDone: number;
 }
 
 /** A fresh, empty document at the current version. */
 function emptyDoc(): StoreDoc {
-  return { version: SCHEMA_VERSION, progress: [], scratchpad: {}, review: {} };
+  return {
+    version: SCHEMA_VERSION,
+    progress: [],
+    scratchpad: {},
+    review: {},
+    attempts: {},
+    completedAt: {},
+    recallWeeklyDone: [],
+    recallMonthlyDone: 0,
+  };
+}
+
+/**
+ * A structural copy of a document, so the in-memory cache can never be mutated
+ * by a caller holding a returned reference. Review items are plain data, so a
+ * shallow-per-slice copy is sufficient and cheap.
+ */
+function cloneDoc(doc: StoreDoc): StoreDoc {
+  const review: Record<string, ReviewItem> = {};
+  for (const [k, v] of Object.entries(doc.review)) review[k] = { ...v };
+  const attempts: Record<string, QuizAttempt> = {};
+  for (const [k, v] of Object.entries(doc.attempts)) attempts[k] = { ...v, answers: [...v.answers] };
+  return {
+    version: doc.version,
+    progress: [...doc.progress],
+    scratchpad: { ...doc.scratchpad },
+    review,
+    attempts,
+    completedAt: { ...doc.completedAt },
+    recallWeeklyDone: [...doc.recallWeeklyDone],
+    recallMonthlyDone: doc.recallMonthlyDone,
+  };
+}
+
+/** Invalidate the in-memory cache (next read re-parses from storage). */
+export function invalidateCache(): void {
+  cache = null;
 }
 
 /** Guard: are we in a browser with a usable `localStorage`? */
@@ -135,6 +243,27 @@ function num(v: unknown, fallback: number): number {
 }
 
 /**
+ * Coerce an unknown value into a Record<string,number>, keeping only entries
+ * whose value is a finite number. Used for the `completedAt` slice so a
+ * hand-edited or partial object still loads its usable timestamps.
+ */
+function toNumberRecord(v: unknown): Record<string, number> {
+  if (!isObject(v)) return {};
+  const out: Record<string, number> = {};
+  for (const [k, val] of Object.entries(v)) {
+    if (typeof val === 'number' && Number.isFinite(val)) out[k] = val;
+  }
+  return out;
+}
+
+/** Coerce an unknown value into a number[] of just its finite-number members. */
+function toNumberArray(v: unknown): number[] {
+  return Array.isArray(v)
+    ? v.filter((x): x is number => typeof x === 'number' && Number.isFinite(x))
+    : [];
+}
+
+/**
  * Coerce an unknown value into the review map, salvaging only well-formed
  * items. Each item's fields are read defensively with sane defaults, so a
  * partial or hand-edited entry still loads rather than dropping the whole slice.
@@ -152,6 +281,28 @@ function toReviewRecord(v: unknown): Record<string, ReviewItem> {
       lapses: num(raw.lapses, 0),
       lastReviewed: num(raw.lastReviewed, 0),
     };
+  }
+  return out;
+}
+
+/**
+ * Coerce an unknown value into the attempts map, salvaging only well-formed
+ * entries. An entry missing its timestamps is dropped, since a live attempt is
+ * meaningless without a deadline. `answers` is read defensively, mapping any
+ * non-boolean member to `null` (unanswered).
+ */
+function toAttemptRecord(v: unknown): Record<string, QuizAttempt> {
+  if (!isObject(v)) return {};
+  const out: Record<string, QuizAttempt> = {};
+  for (const [k, raw] of Object.entries(v)) {
+    if (!isObject(raw)) continue;
+    const startedAt = num(raw.startedAt, 0);
+    const deadline = num(raw.deadline, 0);
+    if (startedAt <= 0 || deadline <= 0) continue; // not a usable live attempt
+    const answers = Array.isArray(raw.answers)
+      ? raw.answers.map((a) => (typeof a === 'boolean' ? a : null))
+      : [];
+    out[k] = { startedAt, deadline, answers, index: num(raw.index, 0) };
   }
   return out;
 }
@@ -189,6 +340,10 @@ export function migrate(raw: unknown): StoreDoc {
     progress: toStringArray(raw.progress),
     scratchpad: toStringRecord(raw.scratchpad),
     review: toReviewRecord(raw.review),
+    attempts: toAttemptRecord(raw.attempts),
+    completedAt: toNumberRecord(raw.completedAt),
+    recallWeeklyDone: toNumberArray(raw.recallWeeklyDone),
+    recallMonthlyDone: num(raw.recallMonthlyDone, 0),
   };
   return doc;
 }
@@ -200,6 +355,8 @@ export function migrate(raw: unknown): StoreDoc {
  * readers keep their completed topics. Any failure yields a fresh empty doc.
  */
 export function load(): StoreDoc {
+  // Serve from the in-memory cache when warm (returns a copy, see cloneDoc).
+  if (cache !== null) return cloneDoc(cache);
   if (!hasStorage()) return emptyDoc();
   let raw: string | null = null;
   try {
@@ -212,14 +369,18 @@ export function load(): StoreDoc {
     const legacy = readLegacyProgress();
     const doc = emptyDoc();
     doc.progress = legacy;
-    if (legacy.length > 0) save(doc); // persist the upgrade once
+    if (legacy.length > 0) save(doc); // persist the upgrade once (also warms cache)
+    cache = cloneDoc(doc);
     return doc;
   }
+  let doc: StoreDoc;
   try {
-    return migrate(JSON.parse(raw) as unknown);
+    doc = migrate(JSON.parse(raw) as unknown);
   } catch {
     return emptyDoc();
   }
+  cache = cloneDoc(doc);
+  return doc;
 }
 
 /**
@@ -238,7 +399,14 @@ export function save(doc: StoreDoc): void {
       Object.entries(doc.scratchpad).filter(([, v]) => v.trim() !== ''),
     ),
     review: doc.review,
+    attempts: doc.attempts,
+    completedAt: doc.completedAt,
+    recallWeeklyDone: [...new Set(doc.recallWeeklyDone)],
+    recallMonthlyDone: doc.recallMonthlyDone,
   };
+  // Refresh the in-memory cache so subsequent reads in this tab are instant and
+  // consistent with what we just wrote, even if persistence below fails.
+  cache = cloneDoc(clean);
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
   } catch {
@@ -272,7 +440,12 @@ export function onStoreChange(listener: () => void): () => void {
   if (typeof window === 'undefined') return () => {};
   const sameTab = (): void => listener();
   const crossTab = (e: StorageEvent): void => {
-    if (e.key === STORAGE_KEY || e.key === null) listener();
+    if (e.key === STORAGE_KEY || e.key === null) {
+      // Another tab changed the document: drop our cache so the next read
+      // reflects their write, then notify.
+      invalidateCache();
+      listener();
+    }
   };
   window.addEventListener(STORE_CHANGE_EVENT, sameTab);
   window.addEventListener('storage', crossTab);

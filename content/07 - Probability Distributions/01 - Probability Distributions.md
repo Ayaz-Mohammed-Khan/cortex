@@ -46,7 +46,7 @@ Here `x` is one fixed number we solve for. A **random variable** is different. I
 
 | Type | Values it can take | Example |
 | :--- | :--- | :--- |
-| Discrete | only separate, countable values | die roll gives 1–6, never 1.5 |
+| Discrete | only separate, countable values | die roll gives 1 to 6, never 1.5 |
 | Continuous | any value in a range, including decimals | a student's CGPA can be 8.53271 |
 
 This split matters, because it decides which kind of distribution function we use later.
@@ -154,7 +154,7 @@ f(x) =
 $$
 
 > [!example] Simulating a die 10,000 times
-> Roll a die 10,000 times, store results, and count values. Each of 1–6 appears with probability close to $1/6 \approx 0.167$. Plotting the counts (divided by 10,000) gives a roughly flat bar chart, the PMF.
+> Roll a die 10,000 times, store results, and count values. Each of 1 to 6 appears with probability close to $1/6 \approx 0.167$. Plotting the counts (divided by 10,000) gives a roughly flat bar chart, the PMF.
 
 For the two-dice experiment the probabilities are unequal, so the PMF equation is written piecewise (1/36 for a sum of 2, 2/36 for a sum of 3, and so on).
 
@@ -234,7 +234,7 @@ Steps:
 5. Feed each `x` into the equation to get its probability density, then plot.
 
 > [!example] Normal data
-> Generate 1000 points from a normal distribution (population mean 50, sd 5). The **sample** mean/sd will be close but not exactly 50 and 5 (say 49.88 and ~5), because a sample is not the whole population. Fit a normal PDF with these sample estimates, generate points across the min–max range with `linspace`, compute density for each, and plot. In seaborn this is simply `sns.distplot(sample)`.
+> Generate 1000 points from a normal distribution (population mean 50, sd 5). The **sample** mean/sd will be close but not exactly 50 and 5 (say 49.88 and ~5), because a sample is not the whole population. Fit a normal PDF with these sample estimates, generate points across the min to max range with `linspace`, compute density for each, and plot. In seaborn this is simply `sns.distplot(sample)`.
 
 Why "parametric"? Because the whole result depends on estimating the parameters ($\mu$, $\sigma$). The closer your estimate is to the true population values, the better the fitted curve. Feed wrong parameters (mean 60, sd 12 on data centered at 50) and the curve collapses or misfits. More data means better parameter estimates and a better fit.
 

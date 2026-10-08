@@ -2,36 +2,156 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What happens if a class inherits from an abstract base class but does not implement all its abstract methods?",
+      "concept": "abstraction-concept",
+      "difficulty": "easy",
+      "question": "What does abstraction do, using the laptop analogy?",
       "options": [
-        "The code fails only if you call the missing method.",
-        "The subclass works, and calling the missing method returns None.",
-        "The abstract methods are inherited as empty functions.",
-        "Python refuses to instantiate the subclass, raising a TypeError at construction."
+        "It removes unnecessary features in order to make a whole class smaller.",
+        "It hides how something works and exposes only what you need to use it.",
+        "It prevents outside code from changing any of an object's data.",
+        "It allows one class to reuse the methods defined by another one."
+      ],
+      "answer": 1,
+      "explanation": "The pattern is always the same: the mechanism is hidden and the interface is what you touch. A laptop hides its circuitry behind a keyboard and screen, you place a call without understanding electromagnetic waves, and you use a well-designed class without knowing how its capabilities are built. Protecting data is encapsulation, and reusing another class's methods is inheritance, which are different pillars.",
+      "misconception": "Abstraction is about hiding implementation, not about deleting functionality."
+    },
+    {
+      "type": "mcq",
+      "concept": "abstract-vs-concrete",
+      "difficulty": "easy",
+      "question": "What is the difference between an abstract method and a concrete method?",
+      "options": [
+        "An abstract method is private, while a concrete method is always public.",
+        "An abstract method can only be called through the class, not an object.",
+        "An abstract method has no body, while a concrete method has a real one.",
+        "An abstract method returns nothing, while a concrete method returns a value."
+      ],
+      "answer": 2,
+      "explanation": "An abstract method states a requirement without fulfilling it, so its body is empty. A concrete method is the ordinary kind that actually does something. A class may hold both, which is the useful combination: shared behaviour supplied once as a concrete method, alongside requirements each child must satisfy for itself.",
+      "misconception": "The distinction is whether an implementation exists, not visibility or return type."
+    },
+    {
+      "type": "mcq",
+      "concept": "abstract-class-rules",
+      "difficulty": "medium",
+      "question": "What are the two consequences of a class being abstract?",
+      "options": [
+        "Its methods become private, and its children are unable to override them.",
+        "It cannot be inherited from, and it cannot be instantiated either.",
+        "It must contain only abstract methods, and it cannot define any attributes.",
+        "It cannot be instantiated, and a child must implement each abstract method."
       ],
       "answer": 3,
-      "explanation": "An abstract base class with unimplemented abstract methods cannot be instantiated, and neither can a subclass that leaves any of them unimplemented. The TypeError fires at construction time, which forces subclasses to honor the contract before use.",
-      "misconception": "The error is at instantiation, not when the method is first called. The abstract contract is checked up front."
+      "explanation": "An abstract class is an incomplete blueprint, so there is nothing coherent to build from it directly. Inheriting from it is not only allowed but the entire point, and the child becomes usable precisely when it has filled in every outstanding abstract method. A child that implements only some of them is still incomplete and stays abstract.",
+      "misconception": "An abstract class is designed to be inherited; what it forbids is being instantiated."
     },
     {
       "type": "scenario",
-      "scenario": "A payments module defines a base type requiring every provider to implement `charge()` and `refund()`, so no provider can ship half-finished.",
-      "question": "Which tool enforces this, and how?",
+      "concept": "abstract-class-rules",
+      "difficulty": "medium",
+      "scenario": "A parent class declares a required security method as abstract. A child class inherits from it, adds its own login method, but never implements security. Creating an object of the child fails.",
+      "question": "Why does the child fail to instantiate?",
       "options": [
-        "A regular base class with empty methods, which fully enforces the contract.",
-        "An abstract base class with `@abstractmethod` on `charge` and `refund`, so any provider missing one cannot be instantiated.",
-        "A set of module-level functions.",
-        "Encapsulation with underscores."
+        "Because the child must redeclare the method as abstract before using it.",
+        "Because it inherits an unimplemented method, so the child stays abstract.",
+        "Because a child cannot add methods of its own to an abstract parent.",
+        "Because the parent's concrete methods were never overridden anywhere."
       ],
       "answer": 1,
-      "explanation": "Marking `charge` and `refund` with `@abstractmethod` in an abstract base class (from the `abc` module) makes them mandatory: a subclass must implement both to be instantiable. Empty methods on a plain base class document intent but enforce nothing.",
-      "misconception": "Empty methods on a normal base class do not enforce anything. Abstraction needs the abc machinery to make the contract binding."
+      "explanation": "The outstanding requirement travels down with the inheritance, so the child remains incomplete until it supplies the method. Adding unrelated methods does nothing to satisfy it. Implementing the required method makes the child concrete and usable, at which point it also enjoys the parent's concrete methods as normal.",
+      "misconception": "Inheriting an abstract method does not discharge it; only implementing it does."
+    },
+    {
+      "type": "mcq",
+      "concept": "purpose-of-abstraction",
+      "difficulty": "medium",
+      "question": "What is the practical reason to make a method abstract in a top-level class?",
+      "options": [
+        "It documents the method without your having to write a docstring.",
+        "It improves performance by deferring the implementation until later.",
+        "It forces every class built on yours to provide that behaviour.",
+        "It allows the method to be called without an object of the class."
+      ],
+      "answer": 2,
+      "explanation": "An abstract method is a constraint the parent imposes on its children: inherit from me and you must supply this. A designer can therefore guarantee that every application built on a shared base implements security, rather than hoping each team remembers. Nobody can inherit the useful parts while skipping a required one. This is the mechanism behind plugin and extension points, where a framework defines the methods an implementation must offer.",
+      "misconception": "Abstraction enforces a contract; it is not a documentation or performance device."
+    },
+    {
+      "type": "mcq",
+      "concept": "abc-module",
+      "difficulty": "medium",
+      "question": "In Python, how do you make a class abstract and a method abstract?",
+      "options": [
+        "Mark the class with an `abstract` keyword and leave the method body empty.",
+        "Inherit the class from `ABC` and decorate the method with `@abstractmethod`.",
+        "Raise a NotImplementedError inside the method, which makes the class abstract.",
+        "Prefix the class name and the method name with double underscores."
+      ],
+      "answer": 1,
+      "explanation": "Abstract base classes come from the `abc` module: inheriting from `ABC` opts the class into the machinery, and the decorator marks which methods are unimplemented requirements. Python has no `abstract` keyword, and simply raising an error inside a method would postpone the failure to call time rather than preventing the object from being created at all.",
+      "misconception": "An empty body alone does not make a method abstract; the decorator does."
+    },
+    {
+      "type": "scenario",
+      "concept": "abc-module",
+      "difficulty": "hard",
+      "scenario": "A developer writes a child class that leaves an inherited abstract method unimplemented. The file imports and the class definition executes with no complaint. The failure appears later, in a different part of the program.",
+      "question": "Why did the error not surface at the class definition?",
+      "options": [
+        "Because the import suppressed the error and it was then re-raised later.",
+        "Because abstract method checks run only when a module is run directly.",
+        "Because the definition is legal; the check happens on instantiation.",
+        "Because Python validates abstract methods only when one is called."
+      ],
+      "answer": 2,
+      "explanation": "Defining an incomplete class is perfectly valid, since that is how you build an intermediate abstract class that a further child will complete. The rule enforced is that you cannot instantiate something incomplete, so the error arrives at the point of construction. Knowing this is useful when debugging, because the traceback points at the object creation rather than at the class that is actually missing the method.",
+      "misconception": "The check is on instantiation, not on definition or on calling the method."
+    },
+    {
+      "type": "mcq",
+      "concept": "abstract-vs-concrete",
+      "difficulty": "medium",
+      "question": "Can an abstract class contain ordinary methods with real bodies?",
+      "options": [
+        "Yes, and mixing them is the useful case for an abstract base class.",
+        "No, because every single method in an abstract class must be abstract.",
+        "Yes, but the concrete methods are not inherited by any of the children.",
+        "Only if each of those concrete methods is also marked as static."
+      ],
+      "answer": 0,
+      "explanation": "A class is abstract as soon as it has at least one abstract method, and it may hold any number of concrete ones alongside. That combination is what makes the pattern practical: a base can implement the common database access for everyone while still demanding that each child supply its own security. Children inherit the concrete methods exactly as they would from any parent.",
+      "misconception": "One abstract method is enough to make the class abstract; the rest may be fully implemented."
+    },
+    {
+      "type": "mcq",
+      "concept": "abstraction-vs-encapsulation",
+      "difficulty": "hard",
+      "question": "Encapsulation and abstraction are both described as hiding something. What is the actual difference?",
+      "options": [
+        "Encapsulation applies to methods, while abstraction applies to attributes.",
+        "They are the same pillar of design appearing under two different names.",
+        "Encapsulation hides data to protect it; abstraction hides mechanism.",
+        "Encapsulation is enforced by Python, while abstraction is a convention."
+      ],
+      "answer": 2,
+      "explanation": "The two differ in what is hidden and why. Encapsulation conceals state behind accessors so outside code cannot corrupt it, which is a question of integrity. Abstraction conceals mechanism behind an interface so a user need not understand it, which is a question of simplicity. A class commonly does both: private validated attributes, and public methods whose internals the caller never sees.",
+      "misconception": "Both hide things, but one protects data and the other simplifies use."
     },
     {
       "type": "card",
-      "question": "In your own words, what is abstraction in object-oriented design, and how does it differ from encapsulation?",
-      "answer": "Abstraction is exposing a simple, essential interface while hiding the complex implementation behind it, so callers work with what an object does, not how it does it. Encapsulation is bundling data with the methods that operate on it and controlling access to that data. Abstraction is about the interface and the contract; encapsulation is about protecting and grouping the internal state. They are complementary: an abstract base class defines the contract, and each implementation encapsulates its own state behind it.",
-      "explanation": "A quick way to keep them apart: abstraction hides complexity (what), encapsulation hides data (how it is stored and accessed)."
+      "concept": "purpose-of-abstraction",
+      "difficulty": "medium",
+      "question": "Explain how an abstract class acts as a contract, using a parent application class with a required security method as the example.",
+      "answer": "The parent declares security as an abstract method, which states that the behaviour must exist without saying how it is done, and it may also provide concrete methods such as database access that every child can use as given. Because the class is abstract it cannot be instantiated itself, and any child remains abstract until it implements security. The effect is a contract: anything built on this base necessarily provides security, so no team can inherit the convenient database features while quietly omitting the required one.",
+      "explanation": "Reading the parent tells you that the method must exist but not how it behaves, which is the point: a mobile, web, and desktop application can each satisfy the same requirement differently while the guarantee holds for all of them."
+    },
+    {
+      "type": "card",
+      "concept": "abstraction-concept",
+      "difficulty": "medium",
+      "question": "Describe how abstraction appears across a class hierarchy, using a bank application whose child apps need database access.",
+      "answer": "The parent application class owns the connection to the database and all the queries, and exposes that work as a capability its children can call. The web and mobile child classes inherit from it and use the database without knowing how the connection is established, configured, or pooled, because that mechanism lives inside the parent. The parent therefore exposes a capability while hiding its implementation, which is abstraction operating along the inheritance relationship.",
+      "explanation": "The practical pay-off is that the parent can change how it connects, swapping the driver or adding pooling, without any child needing to be touched, because the children depend only on the exposed capability rather than on how it works."
     }
   ]
 }

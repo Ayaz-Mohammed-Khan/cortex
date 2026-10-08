@@ -2,47 +2,230 @@
   "questions": [
     {
       "type": "mcq",
-      "question": "What is the key difference between a probability mass function (PMF) and a probability density function (PDF)?",
+      "concept": "random-variables",
+      "difficulty": "easy",
+      "question": "How does a random variable differ from an ordinary algebraic variable?",
       "options": [
-        "A PMF is for continuous variables and a PDF is for discrete ones.",
-        "They are the same function with different names.",
-        "A PMF gives the probability of each value for a discrete variable; a PDF gives density for a continuous variable, where probability is an area under the curve.",
-        "A PDF gives the probability of each exact value directly."
-      ],
-      "answer": 2,
-      "explanation": "For a discrete variable, the PMF assigns a real probability to each possible value, and those probabilities sum to 1. For a continuous variable, the PDF gives density, not probability, and you get a probability by integrating over an interval. The total area under a PDF is 1."
-    },
-    {
-      "type": "scenario",
-      "scenario": "A student asks for the probability that a continuous variable equals exactly 2.0, reading it off the PDF height at 2.0.",
-      "question": "What is the correct statement?",
-      "options": [
-        "The probability is 1 divided by the number of values.",
-        "The probability of any single exact value is zero for a continuous variable; probability comes from the area over an interval, not the PDF height.",
-        "The PDF height at 2.0 is that probability.",
-        "Continuous variables cannot have probabilities."
+        "A random variable is always continuous, whereas an algebraic one is discrete.",
+        "A random variable holds a set of possible outcomes, not one solved unknown.",
+        "A random variable cannot be written down at all, while an algebraic one can.",
+        "A random variable only ever takes probabilities themselves as its values."
       ],
       "answer": 1,
-      "explanation": "For a continuous distribution, probability is area under the PDF between two points, so a single point spans zero width and has probability zero. The PDF value at a point is a density, which can even exceed 1, not a probability.",
-      "misconception": "PDF height is not probability. Only the area under the curve over a range is a probability."
+      "explanation": "Solving an equation pins a variable to a single number. A random variable instead enumerates what could happen, with chance deciding which value appears on any given trial, which is why a coin toss coded as one and zero is written as a set. Conventionally a capital letter marks the random variable and a lower-case one marks a particular value it takes.",
+      "misconception": "A random variable holds possible outcomes, not a probability and not a single solved value."
     },
     {
       "type": "mcq",
-      "question": "What does the cumulative distribution function (CDF) at a value x represent?",
+      "concept": "random-variables",
+      "difficulty": "easy",
+      "question": "Which pair correctly classifies these random variables?",
       "options": [
-        "The density at x.",
-        "The probability that the variable is less than or equal to x.",
-        "The derivative of the PMF at x.",
-        "The probability that the variable equals x exactly."
+        "Both a die roll and a student's exact grade average are continuous variables.",
+        "A die roll is continuous as it has six values; a grade average is discrete.",
+        "A die roll is discrete with separated values; a grade average is continuous.",
+        "Both are discrete, since any measurement is recorded to a finite precision."
+      ],
+      "answer": 2,
+      "explanation": "A die never shows one and a half, so its outcomes are isolated and countable. A grade average could in principle be any value within its range, decimals included, which makes it continuous. The split matters because it decides which machinery applies: a mass function for discrete variables and a density function for continuous ones.",
+      "misconception": "How precisely a value is reported does not change whether the underlying quantity is continuous."
+    },
+    {
+      "type": "mcq",
+      "concept": "pmf-vs-pdf",
+      "difficulty": "medium",
+      "question": "Which function applies to which kind of random variable?",
+      "options": [
+        "The mass function applies to discrete variables and the density to continuous.",
+        "The mass function applies to continuous variables and the density to discrete.",
+        "Both apply to either kind, differing only in the way that they are plotted.",
+        "The mass function applies to samples and the density function to populations."
+      ],
+      "answer": 0,
+      "explanation": "A discrete variable has separated outcomes, so probability can be attached to each one as a mass, giving a bar graph with gaps. A continuous variable has infinitely many outcomes, so probability is spread as a density along a smooth curve. Both can be accumulated into a cumulative distribution function, which answers questions about a value or less.",
+      "misconception": "The choice follows from the variable's type, not from whether the data is a sample."
+    },
+    {
+      "type": "mcq",
+      "concept": "pmf-rules",
+      "difficulty": "medium",
+      "question": "What two conditions must any probability mass function satisfy?",
+      "options": [
+        "Each probability must be strictly positive, and the largest below one half.",
+        "Each probability must be non-negative, and all of them must sum to one.",
+        "The probabilities must all be equal, and there must be finitely many outcomes.",
+        "The probabilities must rise with the outcome value, finally arriving at one."
       ],
       "answer": 1,
-      "explanation": "The CDF accumulates probability up to x, so CDF(x) is P(X is at most x). It rises from 0 to 1 as x increases. For a continuous variable, the PDF is the derivative of the CDF, and the CDF is the integral of the PDF."
+      "explanation": "A negative probability is meaningless, and the outcomes are exhaustive, so their probabilities must account for all the certainty available, which is one. Note that equality is not required: rolling two dice and summing gives a mass function whose values range from one thirty-sixth up to six thirty-sixths. Monotonic increase is a property of the cumulative function, not the mass function.",
+      "misconception": "A mass function need not be uniform; it only needs to be non-negative and total one."
+    },
+    {
+      "type": "mcq",
+      "concept": "cdf",
+      "difficulty": "medium",
+      "question": "For a fair die, what question does the cumulative distribution function answer, and what is its value at four?",
+      "options": [
+        "The probability of exactly four, which is one sixth.",
+        "The probability of more than four, which is two sixths.",
+        "The probability of four or less, which is four sixths.",
+        "The probability of four or less, which is one sixth."
+      ],
+      "answer": 2,
+      "explanation": "The cumulative function accumulates probability up to and including the given value, so it adds the chances of one, two, three, and four, giving four sixths. Built this way it is simply the running total of the mass function, which is why its graph climbs in steps and finishes at one. This is the form you want whenever the question is about a threshold rather than an exact outcome.",
+      "misconception": "The cumulative function is about at most a value, not about exactly that value."
+    },
+    {
+      "type": "mcq",
+      "concept": "density-vs-probability",
+      "difficulty": "hard",
+      "question": "For a continuous variable, why does the vertical axis of its curve show probability density rather than probability?",
+      "options": [
+        "Because a probability simply cannot be plotted on a continuous horizontal scale.",
+        "Because the vertical axis is rescaled so that the curve's peak reaches exactly one.",
+        "Because any single exact value has essentially zero probability on its own.",
+        "Because density is the probability multiplied by the total number of observations."
+      ],
+      "answer": 2,
+      "explanation": "Asking for the chance that a measurement is exactly some value with infinite decimal places gives essentially zero, because that precise value almost never occurs. So no single point can hold a probability, and the height instead expresses how concentrated probability is near that point. Actual probability appears only once you consider an interval.",
+      "misconception": "A density value is not a probability, and heights on the curve can even exceed one."
+    },
+    {
+      "type": "mcq",
+      "concept": "density-vs-probability",
+      "difficulty": "medium",
+      "question": "How do you obtain an actual probability from a continuous density curve?",
+      "options": [
+        "Read off the height of the curve directly at the single value of interest.",
+        "Compute the area under the curve between two values by integrating it.",
+        "Multiply the curve's height at that point by the total number of observations.",
+        "Take the slope of the curve at the particular value that you are interested in."
+      ],
+      "answer": 1,
+      "explanation": "Probability for a continuous variable lives in intervals, and the area beneath the curve across an interval is exactly the chance of landing in it. This is why the total area is always one: it covers every possible outcome. Narrowing the interval approximates a point probability for practical purposes, which is how a near-point question is handled.",
+      "misconception": "Height gives density; area gives probability."
+    },
+    {
+      "type": "mcq",
+      "concept": "density-vs-probability",
+      "difficulty": "easy",
+      "question": "What is the total area under any probability density curve, and why?",
+      "options": [
+        "One, because the curve covers every outcome and all probability totals one.",
+        "The mean of the distribution, since the area is centred on its average value.",
+        "A quantity that varies with the spread of the particular distribution shown.",
+        "The number of observations in the sample from which the curve was drawn."
+      ],
+      "answer": 0,
+      "explanation": "Since area represents probability and the curve spans all the outcomes the variable can take, the enclosed area must account for all the probability there is. This constraint is what forces a wide, flat curve to be low and a narrow curve to be tall, since both must enclose the same total, and it is a quick sanity check on any claimed density.",
+      "misconception": "The total area is fixed at one regardless of the distribution's shape or spread."
+    },
+    {
+      "type": "mcq",
+      "concept": "density-estimation",
+      "difficulty": "medium",
+      "question": "What distinguishes parametric from non-parametric density estimation?",
+      "options": [
+        "Parametric methods need much more data, while non-parametric ones need little.",
+        "Parametric estimation applies to discrete data and non-parametric to continuous.",
+        "Parametric methods are always the more accurate, because they use a formula.",
+        "Parametric assumes a known distribution; non-parametric assumes no shape."
+      ],
+      "answer": 3,
+      "explanation": "The parametric route is to recognise the histogram's shape, pick the matching known distribution, estimate its parameters from the data, and use its formula. The non-parametric route makes no such commitment and builds the curve from the observations themselves, which handles any shape but costs more computation and needs more data to be reliable. The trade is an assumption against flexibility.",
+      "misconception": "Non-parametric methods need more data, not less, because they assume less."
+    },
+    {
+      "type": "mcq",
+      "concept": "kde",
+      "difficulty": "medium",
+      "question": "How does kernel density estimation build a curve from data?",
+      "options": [
+        "It fits one normal curve to the dataset from the sample mean and spread.",
+        "It centres a small kernel on each point and sums their heights everywhere.",
+        "It counts the points falling into each bin and then smooths the raw bars.",
+        "It repeatedly resamples the data and averages the many resulting histograms."
+      ],
+      "answer": 1,
+      "explanation": "Each observation contributes its own little curve, usually a normal one, so every point becomes the centre of a kernel. Summing those contributions at each position produces a smooth estimate that follows the data wherever it happens to be dense, with no assumption about overall shape. Fitting one curve to the whole dataset is the parametric alternative.",
+      "misconception": "The method sums one kernel per observation; it does not fit a single curve to everything."
+    },
+    {
+      "type": "scenario",
+      "concept": "kde",
+      "difficulty": "hard",
+      "scenario": "An analyst produces two density estimates of the same column. The first is jagged with many narrow spikes, the second is a single smooth mound that hides a second peak visible in the histogram.",
+      "question": "Which parameter is responsible, and what is each setting doing?",
+      "options": [
+        "The bandwidth: too small is spiky and over-sensitive, too large over-smooths.",
+        "The bin count, which must be matched to the data before a density is estimated.",
+        "The kernel shape, since only a non-normal kernel can ever reveal two peaks.",
+        "The sample size, which ought to be reduced to smooth the first estimate out."
+      ],
+      "answer": 0,
+      "explanation": "Bandwidth sets how far each point's influence spreads. Narrow kernels let individual observations assert themselves, so random fluctuation reads as structure. Wide kernels blend everything, so genuine features get flattened away. The tension is the familiar one between chasing noise and missing signal, and the only remedy is to try several values and compare against the raw data.",
+      "misconception": "Both failures come from one parameter, so neither is fixed by changing the kernel or the sample."
+    },
+    {
+      "type": "mcq",
+      "concept": "pdf-cdf-link",
+      "difficulty": "medium",
+      "question": "What is the mathematical relationship between a density function and its cumulative function?",
+      "options": [
+        "Each one is simply the reciprocal of the other at every value.",
+        "The cumulative function is the square of the density function.",
+        "Integrating the density gives the cumulative; differentiating reverses it.",
+        "They are unrelated and so have to be estimated quite separately."
+      ],
+      "answer": 2,
+      "explanation": "Since area under the density is probability, accumulating that area up to a point is precisely the probability of being at most that point, which is the cumulative function. Reversing the operation, the slope of the cumulative function at a point measures how fast probability is accruing there, which is the density. Either function therefore determines the other completely.",
+      "misconception": "The two are two views of one distribution, linked by integration and differentiation."
+    },
+    {
+      "type": "mcq",
+      "concept": "distribution-tables",
+      "difficulty": "medium",
+      "question": "Rolling two dice and summing gives 36 equally likely combinations. Which sum is most likely, and what is its probability?",
+      "options": [
+        "Seven, with a probability of six thirty-sixths.",
+        "Two or twelve, each with six thirty-sixths.",
+        "Six, with a probability of one sixth.",
+        "Every sum is equally likely at one eleventh."
+      ],
+      "answer": 0,
+      "explanation": "Although the 36 combinations are equally likely, the sums are not, because more combinations produce a middle total than an extreme one. Six different pairs add to seven, while only one produces two and one produces twelve. This is the clearest small example of why a distribution over a derived quantity need not be uniform even when the underlying outcomes are.",
+      "misconception": "Equally likely combinations do not imply equally likely sums."
+    },
+    {
+      "type": "mcq",
+      "concept": "why-distributions-matter",
+      "difficulty": "medium",
+      "question": "Why is it valuable to recognise that your data matches a well-studied distribution?",
+      "options": [
+        "It guarantees that the data is now free of any outliers and recording errors.",
+        "It lets the whole dataset be compressed down into its parameters for storage.",
+        "You inherit everything already proven about that distribution for your data.",
+        "It converts the data from continuous into discrete, for easier later analysis."
+      ],
+      "answer": 2,
+      "explanation": "A recognised shape comes with a body of established mathematics, so questions about probabilities, intervals, and the behaviour of sample means can be answered from known results rather than derived afresh. The curve's shape is also informative on its own, since where the data concentrates tells you about the underlying situation. This is why learning a new distribution means learning its graph and its parameters.",
+      "misconception": "Matching a distribution buys you theory, not data quality."
     },
     {
       "type": "card",
-      "question": "Why do data scientists care about estimating a distribution from data, for example with a kernel density estimate, rather than only looking at a histogram?",
-      "answer": "A histogram depends heavily on bin width and bin edges, so the same data can look very different, and it is a jagged, discontinuous view. A kernel density estimate produces a smooth, continuous estimate of the underlying PDF that does not jump with arbitrary bin choices. Knowing the distribution lets you reason about probabilities, detect skew and multimodality, choose appropriate models, and check assumptions like normality.",
-      "explanation": "The deeper point: many methods assume a distributional shape, so estimating the actual shape of your data tells you whether those assumptions hold."
+      "concept": "density-vs-probability",
+      "difficulty": "hard",
+      "question": "Explain, for a continuous random variable, why a single point has essentially zero probability, what the curve's height means instead, and where probability actually resides.",
+      "answer": "A continuous variable can take infinitely many values, so the chance of landing on one exact value with all its decimal places is essentially zero and no point can carry meaningful probability. The height of the curve therefore represents probability density, which describes how concentrated probability is in the neighbourhood of that point rather than at it. Probability itself resides in the area under the curve between two values, obtained by integrating the density across that interval, and the total area is one because it covers every possible outcome.",
+      "explanation": "A practical consequence is that a near-point question is answered by taking a very narrow interval around the value, which is why asking for the probability of a measurement being between 8 and 8.001 is sensible while asking for exactly 8 is not."
+    },
+    {
+      "type": "card",
+      "concept": "density-estimation",
+      "difficulty": "medium",
+      "question": "Outline the steps of parametric density estimation and explain what makes the result good or bad.",
+      "answer": "Plot a histogram of the data, judge which known distribution the shape resembles, estimate that distribution's parameters from the data, such as the sample mean and standard deviation for a normal shape, substitute them into the distribution's formula, and evaluate it across the range of values to produce the curve. The quality of the result rests entirely on the parameter estimates, so a sample whose mean and spread are close to the population's gives a good fit, while supplying parameters that do not match the data produces a curve that misfits badly. More data generally means better estimates and a better fit.",
+      "explanation": "The name reflects exactly this dependence: the whole output is determined by the estimated parameters, which is also the method's weakness, since a wrong choice of distribution family cannot be rescued by any parameter values."
     }
   ]
 }

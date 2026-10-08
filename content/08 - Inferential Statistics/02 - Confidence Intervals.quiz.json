@@ -1,45 +1,216 @@
 {
   "questions": [
     {
-      "type": "scenario",
-      "scenario": "A report states: the 95 percent confidence interval for mean session time is 24 to 32 minutes. A stakeholder concludes there is a 95 percent chance the true mean is between 24 and 32.",
-      "question": "Is that interpretation correct?",
+      "type": "mcq",
+      "concept": "interpreting-confidence",
+      "difficulty": "hard",
+      "question": "What does a 95 percent confidence level actually mean?",
       "options": [
-        "No, it should say a 95 percent chance the sample mean is in the range.",
-        "No. The true mean is a fixed unknown; 95 percent refers to the procedure, meaning 95 percent of intervals built this way across repeated samples would contain it.",
-        "Yes, that is exactly what a 95 percent confidence interval means.",
-        "Yes, but only if the data is normal."
+        "There is a 95 percent probability the population mean lies in this one interval.",
+        "On repetition, about 95 percent of such intervals would contain the parameter.",
+        "95 percent of the sample's observations lie somewhere inside the computed interval.",
+        "The sample mean is within 95 percent of the true population mean's value."
       ],
       "answer": 1,
-      "explanation": "In the frequentist view the parameter is fixed, so this specific interval either contains it or does not. The 95 percent describes the long-run success rate of the method, not the probability for one interval. The probability-about-this-interval reading is the Bayesian credible interval, a different object.",
-      "misconception": "A confidence level is a property of the procedure, not a probability about one computed interval. This is the classic interview trap."
+      "explanation": "The statement is about the long-run performance of the procedure, not about this one interval. The population mean is a fixed unknown number, so it does not have a probability of being anywhere; what varies from experiment to experiment is the interval. Roughly one interval in twenty will miss the parameter entirely, and you cannot tell from the data whether yours is one of them.",
+      "misconception": "The confidence level describes how often the method works, not the chance that a given interval is correct."
     },
     {
       "type": "mcq",
-      "question": "Holding the sample fixed, what happens to the width of a confidence interval as you raise the confidence level from 90 percent to 99 percent?",
+      "concept": "interpreting-confidence",
+      "difficulty": "hard",
+      "question": "Why is it wrong to say there is a 95 percent probability that the population mean falls within a computed interval?",
       "options": [
-        "The interval gets narrower.",
-        "The interval gets wider, because higher confidence requires covering more possibilities.",
-        "The width does not change.",
-        "The interval becomes a single point."
+        "Because the real probability of this is actually only 5 percent, not 95 percent.",
+        "Because any probability statement here requires a sample size of at least 30.",
+        "Because the mean is a fixed constant, so it has no probability of location.",
+        "Because the interval is itself random, so no probability can attach to it either."
+      ],
+      "answer": 2,
+      "explanation": "Randomness in this setup lives entirely in the sampling, and therefore in the interval, not in the parameter being estimated. Once the interval is computed it either contains the fixed mean or it does not, with no probability in between. This is why the confidence statement has to be phrased in terms of repeated application of the procedure.",
+      "misconception": "The parameter is fixed and the interval is random, which is the reverse of how the loose phrasing suggests."
+    },
+    {
+      "type": "mcq",
+      "concept": "ci-formula",
+      "difficulty": "easy",
+      "question": "What is the general structure of a confidence interval?",
+      "options": [
+        "The point estimate plus or minus a margin of error.",
+        "The population mean plus or minus the sample standard deviation.",
+        "The sample minimum to the sample maximum.",
+        "The point estimate multiplied by the confidence level."
+      ],
+      "answer": 0,
+      "explanation": "Everything else is detail about how the margin is computed. A point estimate of 25 with a margin of 4 gives an interval from 21 to 29. Note that the interval is always built around a population quantity using sample information, so it is a statement about a parameter rather than about the statistic you happened to observe.",
+      "misconception": "An interval estimates a population parameter; it does not describe the range of the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "critical-values",
+      "difficulty": "medium",
+      "question": "For a 95 percent confidence interval using the standard normal distribution, what is the critical value and why?",
+      "options": [
+        "1.645, because that is the value leaving 5 percent in the single upper tail.",
+        "2.576, because that is the value that would correspond to a 99 percent level.",
+        "0.95, because that value matches the stated confidence level of 95 percent.",
+        "1.96, because it leaves 2.5 percent in each tail, 5 percent outside."
+      ],
+      "answer": 3,
+      "explanation": "The interval is two-sided, so the five percent not covered is split equally between the tails, and the value cutting off 2.5 percent at each end is 1.96. The commonly used alternatives follow the same logic: 1.645 for 90 percent and 2.576 for 99 percent. Using the one-tailed value by mistake produces an interval that is too narrow for its stated confidence.",
+      "misconception": "The critical value is split across two tails, so a two-sided interval does not use the one-tailed cut-off."
+    },
+    {
+      "type": "mcq",
+      "concept": "z-vs-t",
+      "difficulty": "medium",
+      "question": "What determines whether you use the Z-procedure or the T-procedure?",
+      "options": [
+        "Whether the population standard deviation is known or has to be estimated.",
+        "Whether the sample size happens to be above or below one hundred observations.",
+        "Whether the chosen confidence level sits above or below the 95 percent mark.",
+        "Whether the data being analysed is of a categorical or a numerical kind."
+      ],
+      "answer": 0,
+      "explanation": "Knowing the population spread allows the normal-based Z-procedure. Not knowing it forces you to estimate it from the sample, which introduces additional uncertainty and requires the t-distribution instead. Since the population standard deviation is almost never known in practice, the T-procedure is the realistic default.",
+      "misconception": "The deciding factor is knowledge of the population spread, not the sample size."
+    },
+    {
+      "type": "mcq",
+      "concept": "z-vs-t",
+      "difficulty": "hard",
+      "question": "Why does replacing the population standard deviation with the sample standard deviation require a different distribution?",
+      "options": [
+        "Because the sample standard deviation always comes out smaller than the population's.",
+        "Because the sample standard deviation varies too, so the quantity is no longer normal.",
+        "Because the sample standard deviation simply cannot be computed for a small sample.",
+        "Because the normal distribution demands a known mean as well as a known spread."
       ],
       "answer": 1,
-      "explanation": "More confidence means you must cast a wider net to be more sure of capturing the parameter, so the interval widens. There is a trade-off: higher confidence costs precision. You buy a narrower interval at the same confidence by increasing the sample size.",
-      "misconception": "You cannot increase confidence and precision at once for free. Higher confidence widens the interval unless n grows."
+      "explanation": "With the population spread known, the only random quantity in the standardised expression is the sample mean, which the central limit theorem makes normal. Estimating the spread puts a second random quantity into the same expression, and the result has heavier tails than a normal, which is exactly what the t-distribution describes. Ignoring this is not a technicality: it produces intervals narrower than their stated confidence.",
+      "misconception": "The change is caused by extra uncertainty, not by any bias in the sample standard deviation."
+    },
+    {
+      "type": "mcq",
+      "concept": "t-distribution",
+      "difficulty": "medium",
+      "question": "Which set of properties describes the t-distribution?",
+      "options": [
+        "Thinner tails than the normal, two parameters, and diverging from it as n grows.",
+        "Identical to the normal but shifted sideways, with one parameter for the shift.",
+        "Fatter tails, one parameter of n minus one, converging to normal as n grows.",
+        "Bounded between minus one and one, with one parameter controlling its width."
+      ],
+      "answer": 2,
+      "explanation": "The heavier tails are the point: they allow for the extra uncertainty from estimating the spread, so intervals come out appropriately wider. Its single parameter, the degrees of freedom, is one less than the sample size, and as that grows the estimate of the spread becomes reliable and the distribution approaches the normal. It is a constructed distribution, published under a pen name, rather than something observed in nature.",
+      "misconception": "Fatter tails mean wider intervals, which is the correction being applied."
     },
     {
       "type": "scenario",
-      "scenario": "You are estimating a mean from a small sample (n equals 12) and the population standard deviation is unknown.",
-      "question": "Which procedure is appropriate, and why?",
+      "concept": "z-vs-t",
+      "difficulty": "hard",
+      "scenario": "An analyst does not know the population standard deviation but substitutes the sample value into the normal-based formula and reports 95 percent intervals. A simulation shows the intervals capture the true mean only about 92 percent of the time.",
+      "question": "What has gone wrong?",
       "options": [
-        "The z-procedure, because it always applies.",
-        "The t-procedure, because with unknown population standard deviation and a small sample the t-distribution accounts for the extra uncertainty from estimating the standard deviation.",
-        "No interval can be computed with n below 30.",
-        "The t-procedure, but only when the data is uniform."
+        "The confidence level ought to have been set at 92 percent to match the outcome.",
+        "The sample size is simply far too small for any interval at all to be valid.",
+        "The normal critical value ignores the estimation uncertainty, so intervals are too narrow.",
+        "The simulation itself is flawed, since stated and actual coverage must always agree."
+      ],
+      "answer": 2,
+      "explanation": "The reported confidence is a claim about coverage, and here the claim is false: the procedure delivers less than advertised because its critical value is too small for the uncertainty actually present. The t critical value is larger for the same level, widening the interval just enough to restore honest coverage. Relabelling the level would be describing the defect rather than fixing it.",
+      "misconception": "Stated confidence is only achieved when the procedure matches the assumptions; otherwise it overstates precision."
+    },
+    {
+      "type": "mcq",
+      "concept": "interval-width",
+      "difficulty": "medium",
+      "question": "Which change makes a confidence interval narrower?",
+      "options": [
+        "Raising the confidence level from 95 to 99 percent.",
+        "Increasing the sample size.",
+        "Increasing the population standard deviation.",
+        "Switching from the Z-procedure to the T-procedure."
       ],
       "answer": 1,
-      "explanation": "When the population standard deviation is unknown and estimated from a small sample, using the normal (z) understates uncertainty. The t-distribution has heavier tails that widen the interval to reflect the estimated standard deviation, converging to the normal as the sample grows.",
-      "misconception": "Unknown population standard deviation with a small sample calls for the t-distribution, not the z."
+      "explanation": "The sample size appears in the denominator through its square root, so more data tightens the interval, though with diminishing returns since quadrupling the sample only halves the margin. Raising the confidence level enlarges the critical value and widens the interval, a greater population spread widens it, and the t critical value exceeds the normal one, so that switch widens it too.",
+      "misconception": "Only sample size buys precision without cost; the other factors widen the interval."
+    },
+    {
+      "type": "mcq",
+      "concept": "interval-width",
+      "difficulty": "medium",
+      "question": "Why is a 100 percent confidence interval useless?",
+      "options": [
+        "Because it cannot be computed at all without first knowing the whole population.",
+        "Because achieving it would require gathering a genuinely infinite sample size.",
+        "Because it spans every possible value, so it is certainly right but says nothing.",
+        "Because any confidence level above 99 percent is mathematically invalid anyway."
+      ],
+      "answer": 2,
+      "explanation": "Certainty is purchased with width, and total certainty requires the entire range of possibilities. Predicting a cricket score between zero and two hundred is guaranteed right and completely uninformative, while a range of twenty-five to thirty-five at ninety-five percent tells you something worth knowing. Every confidence level is a deliberate choice on this trade-off between being right and being useful.",
+      "misconception": "Higher confidence is not strictly better; it is paid for in precision."
+    },
+    {
+      "type": "mcq",
+      "concept": "parameter-vs-statistic",
+      "difficulty": "easy",
+      "question": "What is the difference between a parameter and a statistic?",
+      "options": [
+        "A parameter summarises the population and is usually unknown; a statistic the sample.",
+        "A parameter summarises the sample, while a statistic summarises the whole population.",
+        "A parameter is always a mean, whereas a statistic may be any summary quantity at all.",
+        "They are the very same quantity, just described at two different sample sizes each."
+      ],
+      "answer": 0,
+      "explanation": "The whole purpose of inferential statistics follows from this asymmetry: the quantity you care about belongs to the population and cannot be observed, while the quantity you can compute belongs to the sample. Conventional notation keeps them apart, with Greek letters for parameters and Roman ones for statistics, so a formula tells you at a glance what is known and what is being estimated.",
+      "misconception": "Parameters are unknown targets; statistics are the known evidence used to estimate them."
+    },
+    {
+      "type": "mcq",
+      "concept": "point-estimate",
+      "difficulty": "easy",
+      "question": "Why is a point estimate considered insufficient on its own?",
+      "options": [
+        "Because a point estimate can only ever be computed from a reasonably large sample.",
+        "Because it is one number with no sense of its uncertainty, and will not be exact.",
+        "Because a point estimate is, as a matter of principle, always biased in some direction.",
+        "Because a point estimate applies only to categorical rather than numerical data."
+      ],
+      "answer": 1,
+      "explanation": "Reporting that the average age is twenty-eight implies a precision that the data cannot support, since another sample would produce a different number. The estimate is a reasonable best guess but carries no statement of how far off it might be. Attaching a range makes the uncertainty explicit, which is both more honest and more useful to whoever acts on it.",
+      "misconception": "A point estimate is not wrong, it is merely silent about its own reliability."
+    },
+    {
+      "type": "mcq",
+      "concept": "degrees-of-freedom",
+      "difficulty": "medium",
+      "question": "A 95 percent interval is built from a sample of 25 observations using the T-procedure. What degrees of freedom apply, and how does the critical value compare to the normal one?",
+      "options": [
+        "25 degrees of freedom, with a critical value smaller than 1.96.",
+        "24 degrees of freedom, with a critical value of about 2.06.",
+        "24 degrees of freedom, with a critical value of exactly 1.96.",
+        "5 degrees of freedom, being the square root of the sample size."
+      ],
+      "answer": 1,
+      "explanation": "Degrees of freedom are one less than the sample size, giving 24 here, and the corresponding critical value of roughly 2.06 exceeds the normal value of 1.96. The difference widens the interval a little, which correctly reflects the extra uncertainty from having estimated the spread. As the sample grows, the two critical values converge.",
+      "misconception": "The t critical value is larger than the normal one for small samples, not equal to it."
+    },
+    {
+      "type": "card",
+      "concept": "interpreting-confidence",
+      "difficulty": "hard",
+      "question": "Give the correct interpretation of a 95 percent confidence interval, explain why the common phrasing is wrong, and state the trade-off governing interval width.",
+      "answer": "The correct interpretation is that if the whole experiment were repeated many times, drawing a fresh sample and constructing a fresh interval each time, about 95 percent of those intervals would contain the true population parameter and about 5 percent would miss it. The common phrasing, that there is a 95 percent probability the parameter lies in this interval, is wrong because the parameter is a fixed constant with no probability distribution; the randomness belongs to the sampling and therefore to the interval. The governing trade-off is that a higher confidence level requires a larger critical value and so a wider interval, with total certainty requiring a range so wide it says nothing.",
+      "explanation": "The practical consequence is that confidence level is a reporting decision rather than a free improvement, and the only way to gain precision without giving up confidence is to reduce the standard error, which means more data or less variable measurement."
+    },
+    {
+      "type": "card",
+      "concept": "z-vs-t",
+      "difficulty": "medium",
+      "question": "Compare the Z-procedure and the T-procedure: when each applies, what each substitutes into the margin of error, and why the resulting intervals differ in width.",
+      "answer": "The Z-procedure applies when the population standard deviation is known, and its margin of error uses that known spread with a critical value from the standard normal distribution. The T-procedure applies when it is unknown, substituting the sample standard deviation and taking the critical value from the t-distribution with degrees of freedom one less than the sample size. The t interval is wider for the same confidence level because estimating the spread adds uncertainty, which the t-distribution's heavier tails account for, and the two converge as the sample size grows.",
+      "explanation": "Since the population spread is almost never known in practice, the t-procedure is the realistic default, and using the normal critical value with an estimated spread produces intervals that quietly deliver less coverage than they claim."
     }
   ]
 }

@@ -31,8 +31,32 @@ import { readFileSync } from 'node:fs';
  * `mcq` and `scenario` are auto-graded against `answer` (a zero-based index into
  * `options`). `card` is self-graded, so it has `answer` text instead of options.
  */
+/**
+ * Difficulty band for a question. Used, with {@link QuizQuestion.concept}, to
+ * sample a balanced subset for a graded attempt rather than drawing at random.
+ */
+export type QuizDifficulty = 'easy' | 'medium' | 'hard';
+
+/**
+ * Sampling metadata carried by every question. Both fields are optional so that
+ * older or hand-written quizzes stay valid, but the authored banks supply them:
+ *
+ *   - `concept`    a short tag naming the idea the question tests, so a sampled
+ *                  attempt can spread across concepts instead of clustering.
+ *   - `difficulty` the band, so an attempt can mix easy, medium, and hard.
+ *
+ * They are advisory: the loader passes them through untouched and the sampler
+ * uses them when present, so a quiz missing them simply samples uniformly.
+ */
+interface QuizSamplingMeta {
+  /** Short concept tag for stratified sampling. */
+  concept?: string;
+  /** Difficulty band for stratified sampling. */
+  difficulty?: QuizDifficulty;
+}
+
 export type QuizQuestion =
-  | {
+  | ({
       type: 'mcq' | 'scenario';
       /** For `scenario`: the situation that frames the stem. */
       scenario?: string;
@@ -46,8 +70,8 @@ export type QuizQuestion =
       explanation: string;
       /** Optional one-line misconception to drop, highlighted in the UI. */
       misconception?: string;
-    }
-  | {
+    } & QuizSamplingMeta)
+  | ({
       type: 'card';
       /** The situation that frames the prompt, if any. */
       scenario?: string;
@@ -57,7 +81,7 @@ export type QuizQuestion =
       answer: string;
       /** Optional extra note shown with the model answer. */
       explanation?: string;
-    };
+    } & QuizSamplingMeta);
 
 /** A note's quiz: an ordered list of questions, plus optional metadata. */
 export interface Quiz {
@@ -88,6 +112,19 @@ function parseQuestion(raw: unknown, index: number, errors: string[]): QuizQuest
   }
   const scenario = typeof raw.scenario === 'string' ? raw.scenario : undefined;
 
+  // Optional sampling metadata, passed through untouched when present. An
+  // unrecognised difficulty is dropped rather than rejected, so a typo degrades
+  // to uniform sampling for that question instead of failing the quiz.
+  const concept = typeof raw.concept === 'string' && raw.concept.trim() !== '' ? raw.concept : undefined;
+  const difficulty =
+    raw.difficulty === 'easy' || raw.difficulty === 'medium' || raw.difficulty === 'hard'
+      ? raw.difficulty
+      : undefined;
+  const meta: QuizSamplingMeta = {
+    ...(concept !== undefined ? { concept } : {}),
+    ...(difficulty !== undefined ? { difficulty } : {}),
+  };
+
   if (type === 'card') {
     if (typeof raw.answer !== 'string' || raw.answer.trim() === '') {
       errors.push(`card question ${index} is missing an "answer" string`);
@@ -99,6 +136,7 @@ function parseQuestion(raw: unknown, index: number, errors: string[]): QuizQuest
       answer: raw.answer,
       ...(scenario !== undefined ? { scenario } : {}),
       ...(typeof raw.explanation === 'string' ? { explanation: raw.explanation } : {}),
+      ...meta,
     };
   }
 
@@ -125,6 +163,7 @@ function parseQuestion(raw: unknown, index: number, errors: string[]): QuizQuest
       explanation: raw.explanation,
       ...(scenario !== undefined ? { scenario } : {}),
       ...(typeof raw.misconception === 'string' ? { misconception: raw.misconception } : {}),
+      ...meta,
     };
   }
 

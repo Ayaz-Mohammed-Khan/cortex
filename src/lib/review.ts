@@ -142,6 +142,25 @@ export function getReview(route: string): ReviewItem | undefined {
 }
 
 /**
+ * Whether the GRADED quiz for a note is currently locked, and until when.
+ *
+ * A failed attempt resets `reps` to 0 and sets a near-future `due` (the SM-2
+ * `again` cooldown). So the quiz is locked while an item exists, is not yet
+ * due, and sits in a failed state (`reps === 0`). A passed attempt has
+ * `reps >= 1`, so completing a note never locks it. A never-attempted note has
+ * no item and is unlocked. Flashcards practice is never gated by this.
+ */
+export function quizLock(
+  route: string,
+  now: number = nowMs(),
+): { locked: boolean; unlockAt: number } {
+  const item = getReview(route);
+  if (!item) return { locked: false, unlockAt: 0 };
+  const locked = item.reps === 0 && item.due > now;
+  return { locked, unlockAt: item.due };
+}
+
+/**
  * Record a completed quiz session for a note and (re)schedule it.
  *
  * If the note has no review item yet, one is created, so finishing a quiz for
