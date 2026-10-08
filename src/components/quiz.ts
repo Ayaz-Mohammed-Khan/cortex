@@ -29,6 +29,7 @@ import {
   secondsLeft as attemptSecondsLeft,
   isExpired,
 } from '@/lib/attempt';
+import { sampleQuizOrder, shuffle } from '@/lib/quiz-sample';
 import type { Quiz, QuizQuestion } from '@/lib/quiz';
 
 /** Is the current page open as part of a review session (`?review=1`)? */
@@ -44,6 +45,16 @@ function inReviewMode(): boolean {
 const PASS_RATIO = 2 / 3;
 
 /**
+ * Hard cap on the number of questions a single GRADED attempt draws from a
+ * note's bank. Banks now hold 10-17 questions; sampling a stratified subset
+ * (spread across concepts and difficulty, see `@/lib/quiz-sample`) keeps a
+ * sitting focused and makes repeat attempts vary instead of replaying the whole
+ * bank in authored order. A bank at or below the cap is used in full (just
+ * reshuffled). Flashcards practice is unaffected and always uses the whole bank.
+ */
+const MAX_GRADED_QUESTIONS = 10;
+
+/**
  * Per-question time budget (seconds) for the GRADED quiz, by question kind.
  * Tuned for a data-science prep test: an MCQ is a quick recall-and-eliminate,
  * a scenario needs reading and judgement, a self-grade card sits between. The
@@ -56,9 +67,9 @@ const SECONDS_PER_TYPE: Record<QuizQuestion['type'], number> = {
   card: 60,
 };
 
-/** Total time budget (seconds) for a quiz, from its question mix. */
-function quizSeconds(quiz: Quiz): number {
-  return quiz.questions.reduce((sum, q) => sum + (SECONDS_PER_TYPE[q.type] ?? 60), 0);
+/** Total time budget (seconds) for a set of questions, from their mix. */
+function questionsSeconds(questions: QuizQuestion[]): number {
+  return questions.reduce((sum, q) => sum + (SECONDS_PER_TYPE[q.type] ?? 60), 0);
 }
 
 /** Format a seconds count as M:SS for the countdown display. */
@@ -86,6 +97,15 @@ let state: QuizState | null = null;
 let index = 0;
 /** Per-question outcome: true = correct (or self-graded "got it"). */
 let outcomes: boolean[] = [];
+
+/**
+ * The questions for the CURRENT run, in presentation order. For a graded quiz
+ * this is the sampled, shuffled subset of the bank the attempt locked in; for
+ * flashcards it is the whole bank, reshuffled. All render/answer/score code
+ * reads this, never `state.quiz.questions` directly, so the run operates purely
+ * on the chosen set. Rebuilt every time a run starts or resumes.
+ */
+let activeQuestions: QuizQuestion[] = [];
 
 /**
  * The run mode, chosen from the banner:
@@ -181,9 +201,9 @@ function headHtml(sub: string, showTimer = false): string {
 
 function progressHtml(): string {
   if (!state) return '';
-  const total = state.quiz.questions.length;
-  const pct = Math.round((index / total) * 100);
-  const pills = state.quiz.questions
+  const total = activeQuestions.length;
+  const pct = total > 0 ? Math.round((index / total) * 100) : 0;
+  const pills = activeQuestions
     .map((_, k) => {
       const cls = k < index ? (outcomes[k] ? 'ok' : 'no') : '';
       return `<span class="quiz-pill ${cls}"></span>`;
@@ -201,12 +221,12 @@ function progressHtml(): string {
 function render(): void {
   const m = modal();
   if (!state || !m) return;
-  if (index >= state.quiz.questions.length) {
+  if (index >= activeQuestions.length) {
     renderScore(m);
     return;
   }
-  const q = state.quiz.questions[index]!;
-  const total = state.quiz.questions.length;
+  const q = activeQuestions[index]!;
+  const total = activeQuestions.length;
   const last = index === total - 1;
 
   const scenario =
@@ -281,9 +301,9 @@ function renderScore(m: HTMLElement): void {
   // (idempotent with the timeout path) means a finished quiz leaves no attempt
   // to resume, so reopening the dialog starts a new run under the lock rules.
   if (mode === 'quiz') clearAttempt(state.route);
-  const total = state.quiz.questions.length;
+  const total = activeQuestions.length;
   const correct = outcomes.filter(Boolean).length;
-  const pct = Math.round((correct / total) * 100);
+  const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   // Flashcards mode: practice only. No pass/fail, no completion, no review
   // scheduling — just a recall tally and the option to go again.
@@ -409,7 +429,7 @@ function persistAttempt(): void {
   if (!state || mode !== 'quiz' || deadline <= 0) return;
   updateAttempt(state.route, (a) => ({
     ...a,
-    answers: state!.quiz.questions.map((_, k) => outcomes[k] ?? null),
+    answers: activeQuestions.map((_, k) => outcomes[k] ?? null),
     index,
   }));
 }
@@ -423,18 +443,51 @@ function timeUp(): void {
   stopTimer();
   if (!state) return;
   clearAttempt(state.route);
-  index = state.quiz.questions.length;
+  index = activeQuestions.length;
   render();
 }
 
 /** Fisher–Yates shuffle in place (used to vary flashcard order). */
 function shuffleQuestions(): void {
   if (!state) return;
-  const qs = state.quiz.questions;
-  for (let i = qs.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [qs[i], qs[j]] = [qs[j]!, qs[i]!];
+  // Build the run's questions from a SHUFFLED COPY of the bank, never reorder
+  // the shared bank in place (that would permanently scramble it for every
+  // later run and for the recall sampler reading the same data).
+  activeQuestions = shuffle(state.quiz.questions, Math.random);
+}
+
+/**
+ * Resolve the bank positions a GRADED run should use.
+ *
+ *   - A resumed attempt WITH a stored order replays it, dropping any index that
+ *     no longer points into the bank (in case the note was re-authored since).
+ *   - A resumed attempt WITHOUT an order is one started before sampling existed
+ *     and left in flight across the deploy. Its `answers` cover the first
+ *     `answerCount` questions of the full bank in authored order, so rebuild
+ *     exactly that identity run; this keeps the stored answers and position
+ *     aligned instead of swapping in a fresh, mismatched sample.
+ *   - No attempt at all: sample a fresh stratified order.
+ *
+ * Always returns at least one index when the bank is non-empty, so a run is
+ * never empty.
+ */
+function resolveOrder(
+  stored: number[] | undefined,
+  answerCount: number | undefined,
+  bankLength: number,
+): number[] {
+  if (!state) return [];
+  if (stored && stored.length > 0) {
+    const valid = stored.filter((i) => Number.isInteger(i) && i >= 0 && i < bankLength);
+    if (valid.length > 0) return valid;
   }
+  // Legacy in-flight attempt (answers but no order): identity over the bank,
+  // trimmed to the recorded answer count so answers/index still line up.
+  if (stored === undefined && answerCount !== undefined && answerCount > 0) {
+    const n = Math.min(answerCount, bankLength);
+    return Array.from({ length: n }, (_, i) => i);
+  }
+  return sampleQuizOrder(state.quiz, MAX_GRADED_QUESTIONS, Math.random);
 }
 
 /**
@@ -465,12 +518,21 @@ function open(runMode: QuizMode): void {
   }
 
   // Graded quiz: resume a live attempt, or begin a new one.
-  const total = state.quiz.questions.length;
+  //
+  // A fresh attempt samples a stratified subset of the bank and locks that
+  // order in; a resumed attempt replays its stored order so the SAME questions
+  // return against the SAME deadline. The timer budget is computed from the
+  // sampled subset, not the whole bank, so it matches what the reader faces.
+  const bank = state.quiz.questions;
   const existing = getAttempt(state.route);
-  const attempt = existing ?? startAttempt(state.route, total, quizSeconds(state.quiz));
+  const order = resolveOrder(existing?.order, existing?.answers.length, bank.length);
+  activeQuestions = order.map((i) => bank[i]!);
+
+  const attempt =
+    existing ?? startAttempt(state.route, order, questionsSeconds(activeQuestions));
   deadline = attempt.deadline;
   outcomes = attempt.answers.map((a) => (a === null ? undefined : a)) as boolean[];
-  index = Math.min(Math.max(0, attempt.index), total);
+  index = Math.min(Math.max(0, attempt.index), activeQuestions.length);
 
   // The deadline is authoritative: if it has already passed, this attempt is
   // over the moment it is reopened. Resolve as a timeout instead of showing a
@@ -490,7 +552,7 @@ function open(runMode: QuizMode): void {
 function answerOption(optBtn: HTMLElement): void {
   const m = modal();
   if (!state || !m) return;
-  const q = state.quiz.questions[index]!;
+  const q = activeQuestions[index]!;
   if (q.type === 'card') return;
   if (outcomes[index] !== undefined) return; // already answered
 

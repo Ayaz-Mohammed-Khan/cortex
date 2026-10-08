@@ -40,16 +40,20 @@ function nowMs(): number {
 
 /**
  * Start a fresh attempt for a note and persist it. The deadline is fixed here,
- * `now + durationSec`, and never moved afterwards. Any previous attempt for the
+ * `now + durationSec`, and never moved afterwards. `order` is the sampled,
+ * shuffled bank positions this attempt will run (see `@/lib/quiz-sample`); it
+ * is stored so a reopened attempt replays the exact same questions, and its
+ * length determines the attempt's question count. Any previous attempt for the
  * route is overwritten. Returns the stored attempt.
  */
-export function startAttempt(route: string, questionCount: number, durationSec: number): QuizAttempt {
+export function startAttempt(route: string, order: number[], durationSec: number): QuizAttempt {
   const key = normalizeRoute(route);
   const now = nowMs();
   const attempt: QuizAttempt = {
     startedAt: now,
     deadline: now + durationSec * 1000,
-    answers: new Array<boolean | null>(questionCount).fill(null),
+    order: [...order],
+    answers: new Array<boolean | null>(order.length).fill(null),
     index: 0,
   };
   update((doc) => ({ ...doc, attempts: { ...doc.attempts, [key]: attempt } }));

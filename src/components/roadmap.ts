@@ -24,6 +24,7 @@
  */
 import { isDone, toggleDone, resetProgress, onChange } from '@/lib/progress';
 import { resetAllReviews } from '@/lib/review';
+import { exportJSON, importJSON, clearAll } from '@/lib/store';
 
 /** A syllabus bullet; `href` is set when it names a real section of the note. */
 interface Concept {
@@ -412,6 +413,69 @@ function restoreView(): void {
   setView(stored === 'detailed' ? 'detailed' : 'simple', false);
 }
 
+/* ---------------------------------------------------------------------------
+ * "Your data" bar — back up / restore / reset the whole local store.
+ *
+ * These wrap the store's export/import/clear primitives in a reader-facing UI.
+ * Export triggers a file download; import reads a chosen file and replaces the
+ * store (migrating any older or partial shape); every change propagates through
+ * the store's own notifications, so the meter, graph, review and recall cards
+ * all re-sync without this island touching them directly.
+ * --------------------------------------------------------------------------- */
+
+/** Show a one-line outcome in the data bar's live region. */
+function dataStatus(message: string): void {
+  const el = document.querySelector<HTMLElement>('[data-rm-data-status]');
+  if (!el) return;
+  el.hidden = false;
+  el.textContent = message;
+}
+
+/** Download the whole store as a timestamped JSON file. */
+function exportStore(): void {
+  try {
+    const blob = new Blob([exportJSON()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const stamp = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `cortex-progress-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    // Revoke on the next tick so the click's navigation has consumed the URL.
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+    dataStatus('Backup downloaded.');
+  } catch {
+    dataStatus('Could not create a backup in this browser.');
+  }
+}
+
+/** Read a chosen file and replace the store from it. */
+function importStoreFromFile(file: File): void {
+  const reader = new FileReader();
+  reader.onload = (): void => {
+    const text = typeof reader.result === 'string' ? reader.result : '';
+    // importJSON migrates and validates; it leaves the store untouched on a
+    // parse failure and returns false so we can report it.
+    if (importJSON(text)) {
+      dataStatus('Backup restored. Your progress is back.');
+    } else {
+      dataStatus('That file could not be read as a Cortex backup.');
+    }
+  };
+  reader.onerror = (): void => dataStatus('Could not read that file.');
+  reader.readAsText(file);
+}
+
+/** Change handler for the hidden Restore file input. */
+function onDataFileChange(event: Event): void {
+  const input = event.target as HTMLInputElement | null;
+  const file = input?.files?.[0];
+  if (file) importStoreFromFile(file);
+  if (input) input.value = ''; // allow re-selecting the same file later
+}
+
 function onClick(event: MouseEvent): void {
   const target = event.target as Element | null;
   if (!target) return;
@@ -446,6 +510,28 @@ function onClick(event: MouseEvent): void {
     ) {
       resetProgress(); // -> onChange -> graph, meter, any open modal all clear
       resetAllReviews(); // also drop the spaced-repetition schedule
+    }
+    return;
+  }
+
+  // "Your data" bar — back up, restore, reset the whole local store.
+  if (target.closest('[data-rm-data-export]')) {
+    exportStore();
+    return;
+  }
+  if (target.closest('[data-rm-data-import]')) {
+    // Delegate to the hidden file input; its change event does the import.
+    document.querySelector<HTMLInputElement>('[data-rm-data-file]')?.click();
+    return;
+  }
+  if (target.closest('[data-rm-data-reset]')) {
+    if (
+      window.confirm(
+        'Erase ALL your data in this browser? This removes every completed topic, your review schedule, recall history, and all your note scratchpads. This cannot be undone.',
+      )
+    ) {
+      clearAll(); // one write wipes every slice; onChange re-syncs all surfaces
+      dataStatus('All local data erased.');
     }
     return;
   }
@@ -604,6 +690,11 @@ function bind(): void {
   restoreView();
   const dlg = dialog();
   dlg?.addEventListener('click', onDialogClick);
+  // Restore file input: remove-then-add so a re-bind on page-load never stacks
+  // duplicate change handlers on the same element.
+  const fileInput = document.querySelector<HTMLInputElement>('[data-rm-data-file]');
+  fileInput?.removeEventListener('change', onDataFileChange);
+  fileInput?.addEventListener('change', onDataFileChange);
   // Arm the scroll reveal once the pane state is settled. If the detailed pane
   // is hidden now, arming still tags it; when the user switches to detailed the
   // elements are in their start state and the first `check()` reveals what fits.
