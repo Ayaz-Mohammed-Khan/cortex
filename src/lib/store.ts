@@ -100,11 +100,24 @@ export interface QuizAttempt {
   /** Epoch ms the attempt must finish by (fixed at start; never extended). */
   deadline: number;
   /**
-   * Per-question outcome in authored order: `true` correct, `false` wrong,
-   * `null` not yet answered. Length equals the note's question count.
+   * The sampled, shuffled POSITIONS into the note's full question bank that
+   * this attempt runs, fixed when the attempt starts. A graded attempt samples
+   * a stratified subset of the bank (see `@/lib/quiz-sample`) so repeat
+   * sittings vary; persisting the chosen order here is what lets a closed-and-
+   * reopened attempt replay the EXACT same questions against the same deadline.
+   * `answers` and `index` below are positions into THIS order, not the bank.
+   *
+   * Optional for backward compatibility: an attempt saved before sampling
+   * existed has no `order`, and the island falls back to the full bank in
+   * authored order (length then equals the bank size, as it did before).
+   */
+  order?: number[];
+  /**
+   * Per-question outcome in `order` position: `true` correct, `false` wrong,
+   * `null` not yet answered. Length equals the attempt's question count.
    */
   answers: (boolean | null)[];
-  /** Index of the question the reader is currently on. */
+  /** Index (into `order`) of the question the reader is currently on. */
   index: number;
 }
 
@@ -189,7 +202,9 @@ function cloneDoc(doc: StoreDoc): StoreDoc {
   const review: Record<string, ReviewItem> = {};
   for (const [k, v] of Object.entries(doc.review)) review[k] = { ...v };
   const attempts: Record<string, QuizAttempt> = {};
-  for (const [k, v] of Object.entries(doc.attempts)) attempts[k] = { ...v, answers: [...v.answers] };
+  for (const [k, v] of Object.entries(doc.attempts)) {
+    attempts[k] = { ...v, answers: [...v.answers], ...(v.order ? { order: [...v.order] } : {}) };
+  }
   return {
     version: doc.version,
     progress: [...doc.progress],
@@ -302,7 +317,17 @@ function toAttemptRecord(v: unknown): Record<string, QuizAttempt> {
     const answers = Array.isArray(raw.answers)
       ? raw.answers.map((a) => (typeof a === 'boolean' ? a : null))
       : [];
-    out[k] = { startedAt, deadline, answers, index: num(raw.index, 0) };
+    // `order` is the sampled bank positions; salvage only finite integers.
+    const order = Array.isArray(raw.order)
+      ? raw.order.filter((n): n is number => typeof n === 'number' && Number.isInteger(n))
+      : undefined;
+    out[k] = {
+      startedAt,
+      deadline,
+      answers,
+      index: num(raw.index, 0),
+      ...(order ? { order } : {}),
+    };
   }
   return out;
 }
