@@ -26,7 +26,6 @@ import {
   getAttempt,
   updateAttempt,
   clearAttempt,
-  secondsLeft as attemptSecondsLeft,
   isExpired,
 } from '@/lib/attempt';
 import { sampleQuizOrder, shuffle } from '@/lib/quiz-sample';
@@ -336,7 +335,7 @@ function renderScore(m: HTMLElement): void {
       `<div class="quiz-score-msg">${esc(fcMsg)}</div>` +
       '</div></div>' +
       '<div class="quiz-foot">' +
-      '<span class="quiz-count">Practice only — not graded</span>' +
+      '<span class="quiz-count">Practice only, not graded</span>' +
       '<button type="button" class="quiz-btn quiz-btn-ghost" data-quiz-retry>Shuffle &amp; restart</button>' +
       '<button type="button" class="quiz-btn quiz-btn-primary" data-quiz-close>Done</button>' +
       '</div>';
@@ -363,7 +362,7 @@ function renderScore(m: HTMLElement): void {
   // flashcards for practice in the meantime.
   const msg = passed
     ? `Strong recall. The note is marked complete. ${nextMsg}`
-    : `You scored ${correct} of ${total} (need ${passMark}). This topic is scheduled for review — your next attempt opens ${formatDue(nextItem.due)}. Use Flashcards to practise until then.`;
+    : `You scored ${correct} of ${total} (need ${passMark}). This topic is scheduled for review, so your next attempt opens ${formatDue(nextItem.due)}. Use Flashcards to practise until then.`;
 
   // In a review session, the primary action continues to the next due note
   // (or finishes the session) rather than just closing the dialog.
@@ -377,7 +376,7 @@ function renderScore(m: HTMLElement): void {
   const countLabel = review
     ? remaining.length > 0
       ? `${remaining.length} more to review`
-      : 'Last one — nice work'
+      : 'Last one, nice work'
     : passed
       ? 'Quiz complete'
       : 'Locked until review';
@@ -743,11 +742,12 @@ function syncBanner(): void {
       const when = new Date(unlockAt);
       hint.hidden = false;
       hint.textContent = `Quiz locked after a miss. Your next attempt opens ${formatDue(unlockAt)} (${when.toLocaleString()}). Keep practising with Flashcards.`;
-    } else if (resuming) {
-      hint.hidden = false;
-      hint.textContent = `A timed attempt is in progress, the clock keeps running while this is closed. Reopen to resume with ${clock(attemptSecondsLeft(live!))} left.`;
     } else {
+      // No resume hint: the "Resume quiz" button label already conveys that a
+      // run is in progress, and a running-clock countdown on the banner reads
+      // as a glitch rather than a feature.
       hint.hidden = true;
+      hint.textContent = '';
     }
   }
 }

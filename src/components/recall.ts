@@ -362,7 +362,7 @@ function renderScore(m: HTMLElement): void {
   const kindLabel = session.kind === 'weekly' ? 'Weekly recall' : 'Monthly sweep';
   const msg =
     correct === total
-      ? 'Everything still coheres — the whole window recalled from memory.'
+      ? 'Everything still coheres. The whole window recalled from memory.'
       : `${correct} of ${total} recalled across the window. Revisit the shaky topics while it is fresh.`;
 
   // Per-topic breakdown: correct / total grouped by the question's source note,
@@ -406,7 +406,7 @@ function renderScore(m: HTMLElement): void {
     breakdown +
     '</div>' +
     '<div class="quiz-foot">' +
-    '<span class="quiz-count">Recall only — nothing is graded</span>' +
+    '<span class="quiz-count">Recall only, nothing is graded</span>' +
     '<button type="button" class="quiz-btn quiz-btn-primary" data-recall-close>Done</button>' +
     '</div>';
 }
