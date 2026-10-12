@@ -1,576 +1,321 @@
 ---
 /**
- * Landing page (site root `/`): a visual, syllabus-grade learning ROADMAP.
+ * Landing page (site root `/`): the marketing / feature showcase.
  *
- * Inspired by roadmap.sh / neetcode topic graphs: a central "spine" of
- * main-track topics (studied top-to-bottom) with sub-topics branching off. It
- * is a single hand-authored, fully static inline SVG (same convention as the
- * site logo) so there are no runtime deps and it themes + scales cleanly.
+ * This is the front door. It introduces Cortex and shows what the site does
+ * through hand-authored SVG mocks that echo the REAL interface (same palette
+ * tokens, same card shapes), then sends the reader into the interactive
+ * `/roadmap` or straight to the notes. The roadmap graph itself now lives at
+ * `/roadmap` (`src/pages/roadmap.astro`); this page links to it.
  *
- * Every node is CLICKABLE and opens a modal (native <dialog>, same pattern as
- * the search dialog) listing the concrete concepts to learn for that topic,
- * turning the map into an actual syllabus guide. When the topic already has
- * notes, the modal also shows a "Read notes" link.
+ * Why SVG mocks rather than screenshots: screenshots go stale, carry a reader's
+ * personal state, and do not theme. These inline SVGs are static, tiny, theme
+ * through the same CSS custom properties as the live UI, and never drift from
+ * the build. They are illustrative, not pixel-perfect captures.
  *
- * The track list and concept lists are declared in `src/data/roadmap.ts`.
- * Main-track nodes are subject areas (roughly two weeks of study each); branch
- * nodes are individual lessons; the modal concept list is that lesson's syllabus.
- *
- * Node positions and connector paths are COMPUTED in the frontmatter from the
- * declared `spine` data, so the layout stays maintainable: edit the syllabus
- * data, not pixel coordinates. Reuses the shared Layout; `prerender = true`.
+ * Uses the shared Layout with `chrome="landing"` (no note tree, controls in the
+ * header). `prerender = true`; the only data it needs is a few real counts.
  */
-import { loadSite, renderNote } from '@/lib/content';
 import Layout from '@/components/Layout.astro';
 import SeoHead from '@/components/SeoHead.astro';
-import { MIN_HEADING_DEPTH } from '@/lib/toc';
-import { matchTopicPrepared, preparePool } from '@/lib/syllabus/match';
-import type { Candidate, PreparedPool } from '@/lib/syllabus/match';
-import { spine, phases, conceptLabel } from '@/data/roadmap';
-import type { Concept, Difficulty, Step, Tier, Topic } from '@/data/roadmap';
-import { prerequisitesFor } from '@/data/prerequisites';
-import type { CategoryNode, TreeNode } from '@/lib/ingest/types';
-import type { Quiz } from '@/lib/quiz';
+import { loadSite } from '@/lib/content';
+import { spine, phases } from '@/data/roadmap';
 
 export const prerender = true;
 
 const site = await loadSite();
 const siteBase = Astro.site?.href;
 
-/**
- * Two Display_Name (lowercased) -> route indexes built from the published
- * content tree, at ANY depth:
- *
- *   - `noteRoutes`     a single note page, e.g. "ANOVA" -> /notes/.../anova
- *   - `categoryRoutes` a folder listing page, e.g. "Statistics & Probability"
- *
- * Notes win over categories when resolving a roadmap node (see `routeFor`), so
- * a leaf topic deep-links straight to its note rather than dumping the reader
- * on the parent folder. Because lookup falls back to the node's own label, a
- * roadmap node lights up automatically as soon as a note with a matching
- * Display_Name is added: no edit to this file required.
- */
-const categoryRoutes = new Map<string, string>();
-const noteRoutes = new Map<string, string>();
-/** Reverse lookup, for naming a note when all we hold is its route. */
-const noteNameByRoute = new Map<string, string>();
+// Real headline numbers, derived from the syllabus data and the content model
+// so the copy never drifts from what actually ships.
+const trackCount = spine.length;
+const phaseCount = phases.length;
+// How many published notes actually exist to read (computed once by the content
+// loader; see `publishedNoteRoutes` in `src/lib/content.ts`).
+const noteCount = site.publishedNoteRoutes.length;
 
-function indexTree(nodes: readonly TreeNode[]): void {
-  for (const node of nodes) {
-    const key = node.displayName.trim().toLowerCase();
-    if (node.kind === 'category') {
-      if (!categoryRoutes.has(key)) categoryRoutes.set(key, node.route);
-      indexTree(node.children);
-    } else {
-      if (!noteRoutes.has(key)) noteRoutes.set(key, node.route);
-      noteNameByRoute.set(node.route, node.displayName);
-    }
-  }
-}
-indexTree(site.tree.children);
-
-/** One linkable section inside a note: its heading text and `route#anchor`. */
-interface SectionLink {
-  text: string;
-  href: string;
-  /** Heading depth, so the modal can visually subordinate nested sections. */
-  depth: number;
-}
-
-/**
- * Per-note section indexes, built by RENDERING each note so the anchors are the
- * real `rehype-slug` ids the note page emits. Deriving them by hand here would
- * risk drifting out of sync with what the note page actually publishes.
- *
- * Only notes are rendered (a dozen files today). If the note count grows into
- * the hundreds this loop becomes the homepage's build cost, at which point the
- * heading data is better threaded through `loadSite()` once.
- */
-const sectionsByRoute = new Map<string, SectionLink[]>();
-
-for (const data of site.byRoute.values()) {
-  if (data.kind !== 'note') continue;
-  const rendered = await renderNote(data.entry);
-  const sections: SectionLink[] = [];
-  for (const heading of rendered.headings) {
-    // Skip the note title (depth 1); it is the page itself, not a section.
-    if (heading.depth < MIN_HEADING_DEPTH) continue;
-    sections.push({
-      text: heading.text,
-      href: `${data.route}#${heading.slug}`,
-      depth: heading.depth,
-    });
-  }
-  sectionsByRoute.set(data.route, sections);
-}
-
-/**
- * Match pools, normalized once each rather than once per bullet.
- *
- *   - by note route     the note's own headings.
- *   - by category route every heading of every note beneath it, merged. This is
- *     what lets a main-track node (which links to the folder, not to one note)
- *     still deep-link its bullets into whichever note covers them.
- */
-/** Headings of one note as matcher candidates, tagged with the note they are in. */
-function candidatesFor(route: string, title: string): Candidate<string>[] {
-  return (sectionsByRoute.get(route) ?? []).map((s) => ({
-    text: s.text,
-    ref: s.href,
-    group: route,
-    groupTitle: title,
-    depth: s.depth,
-  }));
-}
-
-const poolByRoute = new Map<string, PreparedPool<string>>();
-const poolByCategory = new Map<string, PreparedPool<string>>();
-
-function collectCategoryCandidates(node: CategoryNode): Candidate<string>[] {
-  const acc: Candidate<string>[] = [];
-  for (const child of node.children) {
-    if (child.kind === 'category') {
-      acc.push(...collectCategoryCandidates(child));
-      continue;
-    }
-    const own = candidatesFor(child.route, child.displayName);
-    poolByRoute.set(child.route, preparePool(own));
-    acc.push(...own);
-  }
-  poolByCategory.set(node.route, preparePool(acc));
-  return acc;
-}
-collectCategoryCandidates(site.tree);
-
-
-// The syllabus itself lives in `src/data/roadmap.ts` so the audit script can
-// read the same declaration this page renders. See that file for provenance.
-
-/** What a resolved roadmap link points at, so the modal can label its CTA. */
-type LinkKind = 'note' | 'category';
-interface Target {
-  href: string | null;
-  linkKind: LinkKind | null;
-}
-
-/** Roadmap labels whose `match` could not be resolved, reported during build. */
-const unresolved: string[] = [];
-
-/**
- * Resolve a topic to the page it should open. `match` overrides the label when
- * the roadmap wording differs from the content's Display_Name (e.g. "Chi-square
- * Test" -> the "Chi-Square Tests" note).
- *
- * `preferCategory` is set for MAIN TRACKS, and exists because the content folders
- * are deliberately named after the tracks: a folder and a note can share a name
- * ("Descriptive Statistics" is both). A track represents the whole area, so it
- * must open the folder; a branch represents one note, so it must open the note.
- * Without this the track would silently link to the first of its own notes.
- */
-function targetFor(t: { label: string; match?: string }, preferCategory = false): Target {
-  const key = (t.match ?? t.label).trim().toLowerCase();
-  const note = noteRoutes.get(key);
-  const category = categoryRoutes.get(key);
-
-  const first = preferCategory ? category : note;
-  const second = preferCategory ? note : category;
-  const firstKind: LinkKind = preferCategory ? 'category' : 'note';
-  const secondKind: LinkKind = preferCategory ? 'note' : 'category';
-
-  if (first) return { href: first, linkKind: firstKind };
-  if (second) return { href: second, linkKind: secondKind };
-  // An explicit `match` that resolves to nothing is a typo or a renamed note,
-  // not an intentional "no notes yet" node, so surface it.
-  if (t.match) unresolved.push(`${t.label} -> ${t.match}`);
-  return { href: null, linkKind: null };
-}
-
-// ---- Layout geometry (SVG user units; viewBox scales it responsively) ------
-const W = 1000;
-const SPINE_X = W / 2;
-const TOP = 40;
-const BOTTOM_PAD = 40;
-const SPINE_W = 250;
-const SPINE_H = 50;
-const SUB_W = 250;
-const SUB_H = 36;
-const SUB_GAP_Y = 46;
-const SIDE_OFFSET = 285;
-// Clear vertical space left between one step's branch block and the next one's.
-const MIN_STEP_GAP = 52;
-
-/**
- * Vertical half-height a step occupies: its own box, or its tallest branch
- * column, whichever is larger. Steps are then spaced by these half-heights so
- * branch lists never collide however long the syllabus grows.
- */
-function halfHeightOf(step: Step): number {
-  const branches = Math.max(step.left?.length ?? 0, step.right?.length ?? 0);
-  const branchHalf = branches > 0 ? ((branches - 1) * SUB_GAP_Y) / 2 + SUB_H / 2 : 0;
-  return Math.max(SPINE_H / 2, branchHalf);
-}
-
-/** Each step paired with the spine y-coordinate it was assigned. */
-interface StepLayout {
-  step: Step;
-  y: number;
-}
-
-const stepLayouts: StepLayout[] = [];
-let cursor = TOP;
-for (const step of spine) {
-  const half = halfHeightOf(step);
-  cursor += half;
-  stepLayouts.push({ step, y: cursor });
-  cursor += half + MIN_STEP_GAP;
-}
-const H = cursor - MIN_STEP_GAP + BOTTOM_PAD;
-
-// The axon trunk runs between the CENTERS of the first and last track cells, so
-// it never pokes out past the top of the first cell or the bottom of the last
-// (those stubs looked like loose ends). The cells are opaque and drawn on top,
-// so the trunk simply disappears under them at each end.
-const trunkTop = stepLayouts[0]?.y ?? TOP;
-const trunkBottom = stepLayouts[stepLayouts.length - 1]?.y ?? TOP;
-
-// A gently CURVY trunk: it passes through SPINE_X at every track (so each cell
-// still sits on the fibre) but bows a little to alternating sides in the gaps
-// between tracks, so the axon meanders like a real nerve instead of a ruler.
-// Signal train timing. TRUNK_DUR is how long ONE spark takes to travel the
-// whole trunk (slow = calm). TRUNK_INTERVAL is how often a new spark is
-// released, so DUR/INTERVAL sparks ride the fibre at once (a periodic stream).
-const TRUNK_DUR = 16; // seconds, one spark top -> bottom (slower)
-const TRUNK_INTERVAL = 2; // seconds between spark releases
-const TRUNK_SPARKS = Math.round(TRUNK_DUR / TRUNK_INTERVAL); // sparks visible at once
-const TRUNK_BOW = 26; // px of horizontal sway at each mid-gap
-const trunkPath = (() => {
-  const ys = stepLayouts.map((s) => s.y);
-  if (ys.length === 0) return `M ${SPINE_X} ${trunkTop} L ${SPINE_X} ${trunkBottom}`;
-  let d = `M ${SPINE_X} ${trunkTop} L ${SPINE_X} ${ys[0]}`;
-  for (let i = 0; i < ys.length - 1; i++) {
-    const y0 = ys[i]!;
-    const y1 = ys[i + 1]!;
-    const midY = (y0 + y1) / 2;
-    const bowX = SPINE_X + (i % 2 === 0 ? TRUNK_BOW : -TRUNK_BOW);
-    // Cubic that leaves cell i vertically, bows out at the mid-gap, and re-enters
-    // cell i+1 vertically, keeping both endpoints exactly on SPINE_X.
-    d += ` C ${bowX} ${y0 + (midY - y0) * 0.5}, ${bowX} ${y1 - (y1 - midY) * 0.5}, ${SPINE_X} ${y1}`;
-  }
-  d += ` L ${SPINE_X} ${trunkBottom}`;
-  return d;
-})();
-
-interface PlacedNode {
+/** A feature shown in the showcase grid: copy on one side, SVG mock the other. */
+interface Feature {
   id: string;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-  label: string;
-  href: string | null;
-  linkKind: LinkKind | null;
-  main: boolean;
-  /** 'core' (default) or 'advanced'; drives the deferrable-topic marker. */
-  tier: Tier;
-  /** Optional material difficulty; drives the colour stripe + modal badge. */
-  difficulty?: Difficulty;
-  /** Optional prerequisite labels (linked in the modal where resolvable). */
-  prerequisites?: string[];
-  /** Zero-based index of the track this node belongs to (scroll-reveal group). */
-  track: number;
-  /** Reveal order within the track: 0 = main cell, 1..n = sub-topics (stagger). */
-  revealIndex: number;
-  concepts: Concept[];
-}
-interface Connector {
-  /** Stable id so a signal spark can follow this dendrite via <mpath>. */
-  id?: string;
-  d: string;
-  dashed: boolean;
-  /** Branch (dendrite) connectors carry their terminal point, where a synaptic
-   *  bouton is drawn; `live` says the target topic has a note (bright bouton). */
-  bouton?: { x: number; y: number; live: boolean };
-  /** Seconds into the trunk's loop when the trunk signal reaches this branch's
-   *  track, so the branch spark fires as the trunk pulse passes (a cascade). */
-  beginAt?: number;
-  /** Scroll-reveal grouping: which track, and the stagger order (matches its
-   *  sub-topic) so the dendrite draws in with its cell. */
-  track?: number;
-  revealIndex?: number;
+  eyebrow: string;
+  title: string;
+  body: string;
 }
 
-const nodes: PlacedNode[] = [];
-const connectors: Connector[] = [];
-/** Main-track node id -> the notes that track covers, for its jump list. */
-const notesByTrack = new Map<string, SectionLink[]>();
-/** Main-track node id -> `{ advanced, total }` over its sub-topics. */
-const advancedRatioByTrack = new Map<string, { advanced: number; total: number }>();
-let idc = 0;
+// The feature list drives the showcase sections; each `id` maps to an inline
+// SVG mock rendered below (a small switch keeps the markup readable).
+const features: Feature[] = [
+  {
+    id: 'roadmap',
+    eyebrow: 'Start here',
+    title: 'A roadmap, not a reading list',
+    body: 'The whole data-science journey as one branching map, from Python foundations to deployment. Switch between a simple phase overview and a detailed topic graph, and click any node to see exactly what to learn.',
+  },
+  {
+    id: 'notes',
+    eyebrow: 'The source of truth',
+    title: 'Notes that link themselves',
+    body: 'Every topic is a focused note with math, callouts, and diagrams. Wikilinks connect related ideas and backlinks appear automatically, so the material reads as a connected web rather than isolated pages.',
+  },
+  {
+    id: 'quiz',
+    eyebrow: 'Prove it',
+    title: 'Timed quizzes that test judgement',
+    body: 'Each note carries a bank of questions. A graded attempt samples a fresh, timed subset every sitting, so you cannot pass by memorising an order. Clear two-thirds to mark the topic complete.',
+  },
+  {
+    id: 'review',
+    eyebrow: 'Keep it',
+    title: 'Spaced repetition, built in',
+    body: 'Pass a quiz and the topic enters a review schedule that stretches out as you keep getting it right and snaps back when you slip. The home for a quick daily pass that stops what you learned from fading.',
+  },
+  {
+    id: 'recall',
+    eyebrow: 'Connect it',
+    title: 'Weekly and monthly recall',
+    body: 'At the end of a study window, recall across everything you covered at once, not one note at a time. Fall behind and the prompt escalates, so the habit holds instead of quietly lapsing.',
+  },
+  {
+    id: 'progress',
+    eyebrow: 'See it',
+    title: 'Progress you own',
+    body: 'Completions, streaks, review schedule, and recall history live in your browser, with no account to create. Back it all up to a file and restore it on any device, any time.',
+  },
+];
 
-stepLayouts.forEach(({ step, y }, trackIndex) => {
-  const stepNode: PlacedNode = {
-    id: `n${idc++}`,
-    x: SPINE_X,
-    y,
-    w: SPINE_W,
-    h: SPINE_H,
-    label: step.label,
-    ...targetFor(step, true),
-    main: true,
-    tier: step.tier ?? 'core',
-    difficulty: step.difficulty,
-    // Prerequisites come from the single source of truth, resolved by the
-    // track name (preferTrack: a track and a note can share a Display_Name).
-    prerequisites: prerequisitesFor(step.label, true),
-    track: trackIndex,
-    revealIndex: 0, // main cell reveals first in its track
-    concepts: step.concepts,
-  };
-  nodes.push(stepNode);
-
-  // No per-step spine segment here: the continuous axon trunk (drawn once in
-  // the SVG, behind the cells) is the spine now, so the old segments would just
-  // double the line and show through the gaps between cells.
-
-  // Reveal order within this track: main cell is 0, sub-topics follow (1..n)
-  // in placement order (left column then right), so they cascade after the main
-  // cell when the signal reaches the track.
-  let subReveal = 1;
-  const place = (topics: Topic[], side: -1 | 1) => {
-    const colX = SPINE_X + side * SIDE_OFFSET;
-    const totalH = (topics.length - 1) * SUB_GAP_Y;
-    const startY = y - totalH / 2;
-    topics.forEach((t, j) => {
-      const ty = startY + j * SUB_GAP_Y;
-      nodes.push({
-        id: `n${idc++}`,
-        x: colX,
-        y: ty,
-        w: SUB_W,
-        h: SUB_H,
-        label: t.label,
-        ...targetFor(t),
-        main: false,
-        tier: t.tier ?? 'core',
-        difficulty: t.difficulty,
-        // Prerequisites come from the single source of truth, keyed by the
-        // topic's link target (its note Display_Name) just like targetFor.
-        prerequisites: prerequisitesFor(t.match ?? t.label),
-        track: trackIndex,
-        revealIndex: subReveal++,
-        concepts: t.concepts,
-      });
-      const spineEdge = SPINE_X + side * (SPINE_W / 2);
-      const subEdge = colX - side * (SUB_W / 2);
-      const midX = (spineEdge + subEdge) / 2;
-      // A trunk spark reaches this track at time f*TRUNK_DUR after its release.
-      // Sparks release every TRUNK_INTERVAL, so the branch fires on that same
-      // interval, phase-offset to the moment a spark actually arrives.
-      const span = trunkBottom - trunkTop || 1;
-      const arrival = TRUNK_DUR * ((y - trunkTop) / span);
-      const beginAt = ((arrival % TRUNK_INTERVAL) + TRUNK_INTERVAL) % TRUNK_INTERVAL;
-      connectors.push({
-        id: `e${idc}`,
-        d: `M ${spineEdge} ${y} C ${midX} ${y}, ${midX} ${ty}, ${subEdge} ${ty}`,
-        dashed: false,
-        // The dendrite terminates in a synaptic bouton at the topic's edge; it
-        // glows when the topic has a note (resolved href), else it stays dim.
-        bouton: { x: subEdge, y: ty, live: targetFor(t).href !== null },
-        beginAt,
-        track: trackIndex,
-        revealIndex: subReveal - 1, // matches the sub-topic just pushed above
-      });
-    });
-  };
-  if (step.left) place(step.left, -1);
-  if (step.right) place(step.right, 1);
-
-  /**
-   * The track's own notes, taken from the notes its SUB-TOPICS resolve to.
-   *
-   * The category cannot supply this: three of these tracks share one folder, so
-   * listing the folder's contents would show each track the other two's notes.
-   * The sub-topics are the accurate statement of what this track covers.
-   */
-  const trackNotes: SectionLink[] = [];
-  const seenNote = new Set<string>();
-  for (const topic of [...(step.left ?? []), ...(step.right ?? [])]) {
-    const { href, linkKind } = targetFor(topic);
-    if (linkKind !== 'note' || href === null || seenNote.has(href)) continue;
-    seenNote.add(href);
-    trackNotes.push({ text: noteNameByRoute.get(href) ?? topic.label, href, depth: 2 });
-  }
-  notesByTrack.set(stepNode.id, trackNotes);
-
-  const branches = [...(step.left ?? []), ...(step.right ?? [])];
-  advancedRatioByTrack.set(stepNode.id, {
-    advanced: branches.filter((t) => t.tier === 'advanced').length,
-    total: branches.length,
-  });
-});
-
-// ---- Simple view (phase bands) --------------------------------------------
-/**
- * The same tracks as the detailed view, grouped into the journey's phases and
- * rendered as PLAIN HTML rather than SVG. HTML is what makes this view actually
- * responsive: track chips reflow with `flex-wrap`, phase bands stack, and text
- * never clips because the browser measures it. The detailed view stays SVG
- * (its spine geometry needs absolute positioning); this one does not.
+/* ---------------------------------------------------------------------------
+ * SVG mocks of the real UI.
  *
- * Chips REUSE the detailed view's node ids, so a click opens the same modal
- * from the same payload with nothing extra to maintain.
- */
-const mainNodes = nodes.filter((n) => n.main);
-const nodeByLabel = new Map(mainNodes.map((n) => [n.label, n]));
+ * These are plain SVG strings injected with `set:html`. They are illustrative,
+ * not screenshots: each uses the palette TOKENS (`var(--accent-*)` etc.) so it
+ * themes with the page, and mirrors the shape of the live surface it previews.
+ * All text is baked in (not interactive) so there is no client cost.
+ *
+ * A shared 440x300 viewBox keeps every card the same aspect ratio. Colours come
+ * from CSS custom properties, which inline SVG honours for fill/stroke, so a
+ * single mock looks right in both light and dark themes.
+ * --------------------------------------------------------------------------- */
 
-interface PhaseBand {
-  name: string;
-  hue: string;
-  tracks: PlacedNode[];
+const VB = 'viewBox="0 0 440 300" role="img" preserveAspectRatio="xMidYMid meet"';
+
+/** A rounded panel background filling the mock, matching a card surface. */
+function panel(): string {
+  return `<rect x="0" y="0" width="440" height="300" rx="14" fill="var(--gray-50, #f9fafb)"/>`;
 }
 
-// Resolve each phase's track labels to their placed nodes, and prove the
-// grouping matches the spine: every track in exactly one phase, no unknowns,
-// none left over. A drift here would silently drop a track from the overview.
-const seenInPhase = new Set<string>();
-const phaseBands: PhaseBand[] = phases.map((p) => ({
-  name: p.name,
-  hue: p.hue,
-  tracks: p.tracks.map((label) => {
-    const node = nodeByLabel.get(label);
-    if (!node) throw new Error(`[roadmap] phase "${p.name}" names unknown track "${label}"`);
-    if (seenInPhase.has(label)) throw new Error(`[roadmap] track "${label}" is in two phases`);
-    seenInPhase.add(label);
-    return node;
-  }),
-}));
-const ungrouped = mainNodes.filter((n) => !seenInPhase.has(n.label));
-if (ungrouped.length > 0) {
-  throw new Error(`[roadmap] ${ungrouped.length} track(s) missing from phases: ` +
-    ungrouped.map((n) => n.label).join(', '));
+/** The hero mock: the roadmap spine with nodes and a floating quiz chip. */
+function heroMock(): string {
+  const node = (x: number, y: number, done: boolean): string =>
+    `<circle cx="${x}" cy="${y}" r="13" fill="${done ? 'var(--success-light, #16a34a)' : 'var(--accent-500, #8b5cf6)'}"/>` +
+    (done
+      ? `<path d="M${x - 5} ${y} l3.5 3.5 L${x + 6} ${y - 5}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
+      : `<circle cx="${x}" cy="${y}" r="4.5" fill="#fff" fill-opacity="0.85"/>`);
+  return `<svg ${VB} aria-label="A branching learning roadmap with a quiz card" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <!-- spine -->
+    <path d="M70 40 V 260" stroke="var(--accent-300, #c4b5fd)" stroke-width="6" stroke-linecap="round"/>
+    <!-- branches -->
+    <path d="M70 70 C 130 70, 150 70, 200 70" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <path d="M70 130 C 130 130, 150 130, 200 130" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <path d="M70 190 C 130 190, 150 190, 200 190" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <!-- spine nodes -->
+    ${node(70, 40, true)}
+    ${node(70, 100, true)}
+    ${node(70, 160, false)}
+    ${node(70, 220, false)}
+    <!-- branch leaf nodes + labels -->
+    ${node(200, 70, true)}
+    ${node(200, 130, false)}
+    ${node(200, 190, false)}
+    <rect x="222" y="60" width="92" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="222" y="120" width="78" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="222" y="180" width="86" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <!-- floating quiz chip -->
+    <g>
+      <rect x="248" y="150" width="172" height="118" rx="12" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5" filter="drop-shadow(0 6px 14px rgba(0,0,0,0.12))"/>
+      <rect x="262" y="164" width="80" height="10" rx="5" fill="var(--accent-500, #8b5cf6)"/>
+      <rect x="262" y="186" width="144" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>
+      <rect x="262" y="202" width="120" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>
+      <rect x="262" y="224" width="144" height="26" rx="7" fill="var(--accent-100, #ede9fe)" stroke="var(--accent-400, #a78bfa)" stroke-width="1.5"/>
+      <circle cx="276" cy="237" r="6" fill="none" stroke="var(--accent-500, #8b5cf6)" stroke-width="2"/>
+      <rect x="290" y="233" width="90" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
+    </g>
+  </svg>`;
 }
 
-// Fail loudly-but-safely: a stale `match` yields a dead node, which is easy to
-// miss in a graph this size, so name the offenders in the build log.
-if (unresolved.length > 0) {
-  console.warn(
-    `[roadmap] ${unresolved.length} topic(s) have a "match" that resolves to no note or category:\n  ` +
-      [...new Set(unresolved)].join('\n  '),
-  );
+/** The per-feature mock, keyed by feature id. */
+function featureMock(id: string): string {
+  switch (id) {
+    case 'roadmap':
+      return heroMock();
+    case 'notes':
+      return notesMock();
+    case 'quiz':
+      return quizMock();
+    case 'review':
+      return reviewMock();
+    case 'recall':
+      return recallMock();
+    case 'progress':
+      return progressMock();
+    default:
+      return `<svg ${VB} xmlns="http://www.w3.org/2000/svg">${panel()}</svg>`;
+  }
 }
 
-// Measured after the build so the reach of the matcher is reported, not assumed.
-let linkableBullets = 0;
-let deepLinked = 0;
-/** Declared `at` overrides that matched nothing: stale, so surfaced. */
-const deadAnchors: string[] = [];
-
-// Data the client island reads to populate the modal (keyed by node id). A
-// concept carries an `href` only when the matcher placed it in a real section.
-const nodeData = Object.fromEntries(
-  nodes.map((n) => {
-    // A note-linked node searches its own note; a category-linked node searches
-    // every note in that category, and must win unambiguously to avoid landing
-    // on the wrong document.
-    const pool =
-      n.linkKind === 'note'
-        ? poolByRoute.get(n.href!)
-        : n.linkKind === 'category'
-          ? poolByCategory.get(n.href!)
-          : undefined;
-    const requireUnique = n.linkKind === 'category';
-
-    const concepts = n.concepts.map((c) => {
-      const text = conceptLabel(c);
-      if (!pool) return { text };
-      linkableBullets++;
-
-      // An explicit `at` is an author override for the rare case the matcher
-      // gets wrong; otherwise the bullet's own wording is matched.
-      const query = typeof c === 'string' ? text : c.at;
-      const hit = matchTopicPrepared(query, pool, { requireUnique });
-
-      if (!hit) {
-        if (typeof c !== 'string') deadAnchors.push(`${n.label}: "${c.label}" -> at "${c.at}"`);
-        return { text };
-      }
-      deepLinked++;
-      return { text, href: hit.ref };
-    });
-
-    return [
-      n.id,
-      {
-        label: n.label,
-        href: n.href,
-        linkKind: n.linkKind,
-        tier: n.tier,
-        /** Material difficulty (beginner/intermediate/advanced), if set. */
-        difficulty: n.difficulty,
-        /** Prerequisite labels resolved to routes where a note/category matches. */
-        prerequisites: (n.prerequisites ?? []).map((label) => {
-          const key = label.trim().toLowerCase();
-          return { label, href: noteRoutes.get(key) ?? categoryRoutes.get(key) ?? null };
-        }),
-        /**
-         * For a main track: how many of its sub-topics are deferrable, out of how
-         * many. A track is never itself "advanced", so this is the useful signal
-         * at track level: "12 sub-topics, 5 of which can wait".
-         */
-        advanced: n.main ? advancedRatioByTrack.get(n.id) : undefined,
-        concepts,
-        /**
-         * The overview list is only the notes a TRACK covers. A note-level node
-         * carries nothing here: its concept bullets already deep-link into the
-         * note's sections, so a separate "jump to a section" outline is
-         * redundant. Only a main track (a category listing) shows its notes.
-         */
-        sections:
-          n.main && n.linkKind === 'category' ? (notesByTrack.get(n.id) ?? []) : [],
-      },
-    ];
-  }),
-);
-
-if (deadAnchors.length > 0) {
-  console.warn(
-    `[roadmap] ${deadAnchors.length} concept(s) declare an "at" override that matches nothing:\n  ` +
-      deadAnchors.join('\n  '),
-  );
+/** A note page: heading, prose lines, a highlighted wikilink, a backlinks box. */
+function notesMock(): string {
+  const line = (x: number, y: number, w: number): string =>
+    `<rect x="${x}" y="${y}" width="${w}" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>`;
+  return `<svg ${VB} aria-label="A note page with a wikilink and a backlinks panel" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <rect x="26" y="28" width="200" height="18" rx="6" fill="var(--gray-800, #1f2937)"/>
+    <rect x="26" y="56" width="120" height="11" rx="5" fill="var(--accent-500, #8b5cf6)"/>
+    ${line(26, 86, 300)}
+    ${line(26, 104, 280)}
+    <!-- inline wikilink -->
+    <rect x="150" y="120" width="96" height="12" rx="4" fill="var(--accent-100, #ede9fe)"/>
+    <rect x="150" y="122" width="96" height="9" rx="4.5" fill="var(--accent-600, #7c3aed)"/>
+    ${line(26, 122, 118)}
+    ${line(252, 122, 74)}
+    ${line(26, 140, 290)}
+    ${line(26, 158, 240)}
+    <!-- callout block -->
+    <rect x="26" y="182" width="300" height="46" rx="8" fill="var(--accent-50, #f5f3ff)" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
+    <rect x="26" y="182" width="4" height="46" rx="2" fill="var(--accent-500, #8b5cf6)"/>
+    ${line(42, 196, 120)}
+    ${line(42, 212, 250)}
+    <!-- backlinks panel -->
+    <rect x="26" y="244" width="388" height="40" rx="8" fill="var(--gray-100, #f3f4f6)"/>
+    <rect x="40" y="256" width="90" height="9" rx="4.5" fill="var(--gray-500, #6b7280)"/>
+    <rect x="40" y="270" width="150" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
+    <rect x="206" y="270" width="120" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
+    <!-- right rail (toc) -->
+    <rect x="348" y="86" width="66" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
+    <rect x="348" y="102" width="54" height="7" rx="3.5" fill="var(--accent-400, #a78bfa)"/>
+    <rect x="348" y="118" width="60" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
+    <rect x="348" y="134" width="48" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
+  </svg>`;
 }
 
-const pct = linkableBullets > 0 ? Math.round((deepLinked / linkableBullets) * 100) : 0;
-console.log(
-  `[roadmap] ${nodes.length} nodes, ${nodes.filter((n) => n.href).length} linked ` +
-    `(${nodes.filter((n) => n.linkKind === 'note').length} to a note). ` +
-    `${deepLinked}/${linkableBullets} bullets auto-linked to a heading (${pct}%). ` +
-    `Run \`npm run audit:syllabus\` for the mapping report.`,
-);
-
-const availableSteps = nodes.filter((n) => n.main && n.href).length;
-const totalSteps = nodes.filter((n) => n.main).length;
-
-// Completable topics = DISTINCT note routes reachable from the graph's leaf
-// nodes (a few nodes share one note, so dedupe to match how progress is keyed).
-// This is the denominator of the progress meter.
-const completableRoutes = new Set(
-  nodes.filter((n) => n.linkKind === 'note' && n.href).map((n) => n.href as string),
-);
-const totalNotes = completableRoutes.size;
-
-// Route -> display label for every note-linked node, so the spaced-repetition
-// "Review due" card (Phase 2) can show topic names and deep-link to each note's
-// quiz. Keyed by route to match the review slice in the store.
-const noteLabelByRoute: Record<string, string> = {};
-for (const n of nodes) {
-  if (n.linkKind === 'note' && n.href) noteLabelByRoute[n.href] = n.label;
+/** The quiz modal: header with timer, a question stem, four options, progress. */
+function quizMock(): string {
+  const opt = (y: number, letter: string, w: number, picked: boolean): string =>
+    `<rect x="40" y="${y}" width="360" height="34" rx="8" fill="${picked ? 'var(--accent-100, #ede9fe)' : 'var(--gray-100, #f3f4f6)'}" stroke="${picked ? 'var(--accent-400, #a78bfa)' : 'var(--gray-200, #e5e7eb)'}" stroke-width="1.5"/>` +
+    `<circle cx="58" cy="${y + 17}" r="9" fill="none" stroke="${picked ? 'var(--accent-500, #8b5cf6)' : 'var(--gray-400, #9ca3af)'}" stroke-width="1.6"/>` +
+    `<text x="58" y="${y + 21}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="${picked ? 'var(--accent-600, #7c3aed)' : 'var(--gray-500, #6b7280)'}">${letter}</text>` +
+    `<rect x="78" y="${y + 12}" width="${w}" height="9" rx="4.5" fill="var(--gray-400, #9ca3af)"/>`;
+  return `<svg ${VB} aria-label="A timed quiz with four answer options" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <!-- header -->
+    <rect x="0" y="0" width="440" height="46" rx="14" fill="var(--gray-100, #f3f4f6)"/>
+    <rect x="0" y="32" width="440" height="14" fill="var(--gray-100, #f3f4f6)"/>
+    <rect x="20" y="14" width="26" height="20" rx="6" fill="var(--accent-100, #ede9fe)"/>
+    <path d="M28 24 l3 3 l7 -7" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="56" y="17" width="96" height="14" rx="5" fill="var(--gray-700, #374151)"/>
+    <!-- timer pill -->
+    <rect x="336" y="13" width="58" height="22" rx="11" fill="var(--accent-500, #8b5cf6)"/>
+    <text x="365" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">4:30</text>
+    <!-- progress pills -->
+    <rect x="20" y="60" width="300" height="6" rx="3" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="20" y="60" width="120" height="6" rx="3" fill="var(--accent-500, #8b5cf6)"/>
+    <!-- question stem -->
+    <rect x="40" y="82" width="300" height="11" rx="5" fill="var(--gray-700, #374151)"/>
+    <rect x="40" y="100" width="220" height="11" rx="5" fill="var(--gray-700, #374151)"/>
+    <!-- options -->
+    ${opt(126, 'A', 300, false)}
+    ${opt(166, 'B', 260, true)}
+    ${opt(206, 'C', 290, false)}
+    ${opt(246, 'D', 240, false)}
+  </svg>`;
 }
 
-// Every note's quiz, keyed by route, for the Cumulative Recall island. Recall
-// builds a cross-note session on the client, so the whole bank must ship with
-// the page (the review card only needs labels; recall needs the questions).
-// Routes here are the same route keys the recall scheduler normalizes against.
-const recallBanks: Record<string, Quiz> = Object.fromEntries([...site.quizzes]);
+/** The "Review due today" card: icon, count, topic chips, start button. */
+function reviewMock(): string {
+  const chip = (x: number, w: number): string =>
+    `<rect x="${x}" y="210" width="${w}" height="26" rx="13" fill="var(--accent-100, #ede9fe)"/>` +
+    `<rect x="${x + 14}" y="220" width="${w - 28}" height="7" rx="3.5" fill="var(--accent-600, #7c3aed)"/>`;
+  return `<svg ${VB} aria-label="A spaced-repetition review-due card" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <rect x="24" y="40" width="392" height="150" rx="14" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
+    <!-- clock icon -->
+    <circle cx="62" cy="80" r="18" fill="var(--accent-100, #ede9fe)"/>
+    <circle cx="62" cy="80" r="10" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2"/>
+    <path d="M62 80 V 73 M62 80 l5 3" stroke="var(--accent-600, #7c3aed)" stroke-width="2" stroke-linecap="round"/>
+    <!-- count headline -->
+    <rect x="94" y="66" width="200" height="13" rx="6" fill="var(--gray-800, #1f2937)"/>
+    <rect x="94" y="88" width="260" height="9" rx="4.5" fill="var(--gray-400, #9ca3af)"/>
+    <!-- start button -->
+    <rect x="300" y="62" width="96" height="34" rx="8" fill="var(--accent-600, #7c3aed)"/>
+    <text x="348" y="84" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">Review</text>
+    <!-- divider -->
+    <rect x="24" y="128" width="392" height="1.5" fill="var(--accent-100, #ede9fe)"/>
+    <!-- due topic chips -->
+    ${chip(40, 110)}
+    ${chip(162, 92)}
+    ${chip(266, 128)}
+    <!-- schedule note -->
+    <rect x="40" y="252" width="300" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
+    <rect x="40" y="268" width="220" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
+  </svg>`;
+}
+
+/** The cumulative-recall card: weekly + monthly sections with counts. */
+function recallMock(): string {
+  const section = (y: number, label: string, w: number): string =>
+    `<rect x="40" y="${y}" width="360" height="48" rx="10" fill="var(--gray-100, #f3f4f6)"/>` +
+    `<rect x="56" y="${y + 13}" width="${w}" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>` +
+    `<rect x="56" y="${y + 29}" width="${w + 40}" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>` +
+    `<rect x="300" y="${y + 10}" width="84" height="28" rx="8" fill="var(--accent-600, #7c3aed)"/>` +
+    `<text x="342" y="${y + 28}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">${label}</text>`;
+  return `<svg ${VB} aria-label="A cumulative-recall card with weekly and monthly sessions" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <rect x="24" y="30" width="392" height="238" rx="14" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
+    <!-- layers icon -->
+    <path d="M50 62 l16 -8 l16 8 l-16 8 Z" fill="var(--accent-500, #8b5cf6)"/>
+    <path d="M50 72 l16 8 l16 -8" fill="none" stroke="var(--accent-400, #a78bfa)" stroke-width="2.4" stroke-linejoin="round"/>
+    <rect x="94" y="52" width="150" height="12" rx="6" fill="var(--gray-800, #1f2937)"/>
+    <rect x="94" y="72" width="280" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
+    <!-- lagging / priority chip -->
+    <rect x="94" y="90" width="150" height="18" rx="9" fill="color-mix(in srgb, #f59e0b 18%, transparent)"/>
+    <rect x="106" y="96" width="126" height="7" rx="3.5" fill="#b45309"/>
+    ${section(126, 'Weekly', 92)}
+    ${section(190, 'Monthly', 104)}
+  </svg>`;
+}
+
+/** The progress meter + roadmap ticks + data backup chips. */
+function progressMock(): string {
+  const tick = (x: number, y: number): string =>
+    `<circle cx="${x}" cy="${y}" r="11" fill="var(--success-light, #16a34a)"/>` +
+    `<path d="M${x - 4.5} ${y} l3 3 L${x + 5} ${y - 4.5}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+  return `<svg ${VB} aria-label="A completion meter, roadmap ticks, and data backup controls" xmlns="http://www.w3.org/2000/svg">
+    ${panel()}
+    <!-- meter card -->
+    <rect x="24" y="34" width="392" height="70" rx="12" fill="var(--gray-100, #f3f4f6)"/>
+    <rect x="40" y="50" width="150" height="11" rx="5" fill="var(--gray-800, #1f2937)"/>
+    <rect x="40" y="68" width="90" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
+    <rect x="40" y="84" width="360" height="10" rx="5" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="40" y="84" width="236" height="10" rx="5" fill="var(--accent-500, #8b5cf6)"/>
+    <!-- a row of completed topic ticks -->
+    ${tick(48, 148)}
+    ${tick(96, 148)}
+    ${tick(144, 148)}
+    <circle cx="192" cy="148" r="11" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
+    <circle cx="240" cy="148" r="11" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
+    <rect x="60" y="144" width="100" height="8" rx="4" fill="var(--gray-300, #d1d5db)" opacity="0"/>
+    <!-- "Your data" bar -->
+    <rect x="24" y="190" width="392" height="80" rx="12" fill="var(--gray-100, #f3f4f6)"/>
+    <rect x="40" y="206" width="120" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>
+    <rect x="40" y="224" width="300" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>
+    <rect x="40" y="242" width="80" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
+    <rect x="54" y="250" width="52" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
+    <rect x="130" y="242" width="80" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
+    <rect x="144" y="250" width="52" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
+    <rect x="220" y="242" width="70" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
+    <rect x="234" y="250" width="42" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
+  </svg>`;
+}
 ---
 
 <Layout
@@ -582,1324 +327,225 @@ const recallBanks: Record<string, Quiz> = Object.fromEntries([...site.quizzes]);
 >
   <SeoHead
     slot="head"
-    displayName="Cortex: Learning Roadmap"
+    displayName="Cortex: Learn Data Science, and Remember It"
     route="/"
     site={siteBase}
-    description="A visual, syllabus-grade data-science learning roadmap. Click any topic to see the concepts to learn, and jump into the notes."
+    description="A personal, structured data-science learning site: a visual roadmap, interlinked notes, timed quizzes, spaced repetition, and cumulative recall. You write Markdown, the site does the rest."
   />
 
-  {/* ---- Hero ---- */}
-  <section class="px-4 pb-6 pt-2 sm:px-0 sm:pb-8">
-    <span class="inline-flex items-center rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-700 dark:bg-accent-500/15 dark:text-accent-300">
-      Learning roadmap
-    </span>
-    <h1 class="mt-4 text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-gray-50">
-      Cortex
-    </h1>
-    <p class="mt-4 max-w-2xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
-      A personal, structured data-science syllabus. Follow the map from Python
-      foundations to deployment. Start with the <strong class="font-semibold text-gray-900 dark:text-gray-100">simple view</strong> for
-      the shape of it, switch to detailed for every sub-topic, and <strong class="font-semibold text-gray-900 dark:text-gray-100">click any topic</strong> to
-      see exactly what to learn and jump straight into the notes.
-    </p>
+  {/* ===================== Hero ===================== */}
+  <section class="relative overflow-hidden px-4 pb-10 pt-6 sm:px-0 sm:pt-10">
+    <div class="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
+      <div>
+        <span class="inline-flex items-center gap-1.5 rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-700 dark:bg-accent-500/15 dark:text-accent-300">
+          <span class="h-1.5 w-1.5 rounded-full bg-accent-500"></span>
+          Data-science learning, done properly
+        </span>
+        <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-gray-50">
+          Learn it once.<br />
+          <span class="text-accent-600 dark:text-accent-400">Actually remember it.</span>
+        </h1>
+        <p class="mt-5 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
+          Cortex is a structured data-science syllabus that goes further than notes: a visual roadmap, interlinked lessons, timed quizzes, and spaced repetition that brings a topic back right before you would forget it.
+        </p>
+        <div class="mt-7 flex flex-wrap items-center gap-3">
+          <a
+            href="/roadmap"
+            class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+          >
+            Explore the roadmap
+            <span aria-hidden="true">→</span>
+          </a>
+          <a
+            href="/notes"
+            class="inline-flex items-center gap-2 rounded-lg border-[1.75px] border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-colors hover:border-accent-400 hover:text-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:border-white/15 dark:text-gray-200 dark:hover:text-accent-200 dark:focus-visible:ring-offset-gray-950"
+          >
+            Browse the notes
+          </a>
+        </div>
+        <dl class="mt-9 flex flex-wrap gap-x-8 gap-y-3">
+          <div>
+            <dt class="text-2xl font-extrabold text-gray-900 dark:text-gray-50">{noteCount}</dt>
+            <dd class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Interlinked notes</dd>
+          </div>
+          <div>
+            <dt class="text-2xl font-extrabold text-gray-900 dark:text-gray-50">{trackCount}</dt>
+            <dd class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Topic tracks</dd>
+          </div>
+          <div>
+            <dt class="text-2xl font-extrabold text-gray-900 dark:text-gray-50">{phaseCount}</dt>
+            <dd class="text-xs font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">Learning phases</dd>
+          </div>
+        </dl>
+      </div>
 
-    <div class="mt-6 flex flex-wrap items-center gap-3">
-      <a
-        href="/notes"
-        class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
-      >
-        Browse all notes
-        <span aria-hidden="true">→</span>
-      </a>
-      <span class="rounded-full border border-gray-200 px-3 py-1.5 text-sm text-gray-500 dark:border-white/10 dark:text-gray-400">
-        <strong class="font-semibold text-gray-700 dark:text-gray-200">{availableSteps}</strong> of {totalSteps} core topics have notes
-      </span>
+      {/* Hero mock: a composite of the roadmap graph behind a quiz card. */}
+      <div class="relative mx-auto w-full max-w-lg lg:mx-0">
+        <div class="lp-card overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-gray-900">
+          <Fragment set:html={heroMock()} />
+        </div>
+      </div>
     </div>
   </section>
 
-  {/* ---- Roadmap graph ---- */}
-  <section class="roadmap border-t border-gray-200 px-4 pb-10 pt-6 sm:px-0 sm:pt-8 dark:border-white/10">
-    {/*
-      Controls row: the view toggle sits FIRST, right under the topic count, so
-      the two most-used controls stay together. The hint follows it, wrapping to
-      its own line on a phone (where a toggle + a full sentence cannot share a
-      row) and sitting inline on wider screens.
-    */}
-    <div class="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-      <div
-        class="inline-flex shrink-0 self-start rounded-lg border border-gray-200 bg-gray-50 p-1 dark:border-white/10 dark:bg-white/5"
-        role="group"
-        aria-label="Roadmap detail level"
-      >
-        <button
-          type="button"
-          data-rm-view="simple"
-          aria-pressed="true"
-          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600"
-        >
-          Simple
-        </button>
-        <button
-          type="button"
-          data-rm-view="detailed"
-          aria-pressed="false"
-          class="rm-view-btn rounded-md px-3 py-1.5 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600"
-        >
-          Detailed
-        </button>
-      </div>
-      <p class="text-sm text-gray-500 dark:text-gray-400" data-rm-view-hint>
-        {totalSteps} core topics at a glance. Switch to detailed for every sub-topic.
+  {/* ===================== Principle strip ===================== */}
+  <section class="border-y border-gray-200 bg-gray-50/60 px-4 py-5 sm:px-6 dark:border-white/10 dark:bg-white/5">
+    <p class="mx-auto max-w-3xl text-center text-sm text-gray-600 sm:text-base dark:text-gray-300">
+      The guiding idea: <strong class="font-semibold text-gray-900 dark:text-gray-100">you write Markdown, and the site does the rest.</strong> Notes become a browsable knowledge base, a syllabus-grade roadmap, and a spaced-repetition study system, with no CMS and no build to babysit.
+    </p>
+  </section>
+
+  {/* ===================== Feature showcase ===================== */}
+  <section class="px-4 py-12 sm:px-0 sm:py-16">
+    <div class="mx-auto mb-10 max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-50">
+        Everything you need to learn and retain
+      </h2>
+      <p class="mt-3 text-gray-600 dark:text-gray-300">
+        Six parts working together, from first read to long-term recall.
       </p>
     </div>
 
-    {/*
-      Spaced-repetition "Review due" card (Phase 2). Hidden until the island
-      finds at least one review due now. It lists the due topics and starts a
-      review session — opening each note's quiz in turn via `?review=1`. The
-      route -> label map is emitted below for the island to render names.
-    */}
-    <div
-      data-rm-review
-      hidden
-      class="mb-5 overflow-hidden rounded-xl border border-accent-500/30 bg-accent-500/5 dark:border-accent-400/25 dark:bg-accent-400/5"
-    >
-      <div class="flex flex-col gap-3 px-4 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <div class="flex items-start gap-3">
-          <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/15 text-accent-600 dark:text-accent-300" aria-hidden="true">
-            <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 2v6h6" /><path d="M3 8a9 9 0 1 0 2.5-5.5L3 8" /><path d="M12 8v4l3 2" />
-            </svg>
-          </span>
-          <div>
-            <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-              <span data-rm-review-count>0</span> <span data-rm-review-noun>topics</span> due for review
-            </p>
-            <p class="text-xs text-gray-500 dark:text-gray-400">
-              A quick recall pass keeps what you've learned from fading.
-            </p>
-          </div>
-        </div>
-        <a
-          data-rm-review-start
-          href="#"
-          class="shrink-0 self-start rounded-lg bg-accent-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:focus-visible:ring-offset-gray-900"
-        >
-          Start review →
-        </a>
-      </div>
-      {/* The island fills this with the due topic chips. */}
-      <ul data-rm-review-list class="flex flex-wrap gap-1.5 border-t border-accent-500/15 px-4 py-2.5 dark:border-accent-400/15"></ul>
-    </div>
-
-    {/*
-      Cumulative-recall card (`recall.ts`). Hidden until the island finds a
-      pending weekly cycle or monthly sweep. Where the review card above
-      resurfaces single shaky notes, this one pulls an interleaved set across
-      ALL the topics covered in a study window and runs an UNTIMED cross-note
-      session. When two or more weeklies stack up the island adds
-      `.recall-lagging` / `data-recall-lagging` to flip the card into the amber
-      PRIORITY state and fills the lagging message. The route -> label map and
-      the per-note quiz banks are emitted at the foot of the page.
-    */}
-    <div
-      data-recall-card
-      hidden
-      class="recall-card mb-5 overflow-hidden rounded-xl border border-accent-500/30 bg-accent-500/5 dark:border-accent-400/25 dark:bg-accent-400/5"
-    >
-      <div class="flex items-start gap-3 px-4 py-3.5">
-        <span class="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-500/15 text-accent-600 dark:text-accent-300" aria-hidden="true">
-          {/* "layers" glyph: recall stacks many topics into one pass. */}
-          <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2 2 7l10 5 10-5-10-5Z" /><path d="m2 17 10 5 10-5" /><path d="m2 12 10 5 10-5" />
-          </svg>
-        </span>
-        <div class="min-w-0">
-          <p class="text-sm font-semibold text-gray-800 dark:text-gray-100">Cumulative recall</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            Recall across everything you covered in a window, not one note at a time.
-          </p>
-          {/*
-            Priority nudge for a lagging reader. Hidden unless two or more
-            weekly cycles are pending; the island fills the text and the card
-            turns amber via `.recall-lagging`.
-          */}
-          <p
-            data-recall-lagging-msg
-            hidden
-            role="status"
-            class="recall-lagging-msg mt-1.5 text-xs font-semibold"
-          ></p>
-        </div>
-      </div>
-
-      {/* Weekly cycle: the oldest pending 7-day window. */}
-      <div
-        data-recall-weekly
-        hidden
-        class="flex flex-col gap-2 border-t border-accent-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 dark:border-accent-400/15"
-      >
-        <div class="min-w-0">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Weekly recall</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            <span data-recall-weekly-topics>0 topics</span> ·
-            <span data-recall-weekly-est>~0 questions</span>
-          </p>
-        </div>
-        <button
-          type="button"
-          data-recall-weekly-start
-          class="shrink-0 self-start rounded-lg bg-accent-600 px-4 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:focus-visible:ring-offset-gray-900"
-        >
-          Start weekly recall →
-        </button>
-      </div>
-
-      {/* Monthly sweep: the rolling 30-day window. */}
-      <div
-        data-recall-monthly
-        hidden
-        class="flex flex-col gap-2 border-t border-accent-500/15 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 dark:border-accent-400/15"
-      >
-        <div class="min-w-0">
-          <p class="text-sm font-medium text-gray-700 dark:text-gray-200">Monthly sweep</p>
-          <p class="text-xs text-gray-500 dark:text-gray-400">
-            <span data-recall-monthly-topics>0 topics</span> ·
-            <span data-recall-monthly-est>~0 questions</span>
-          </p>
-        </div>
-        <button
-          type="button"
-          data-recall-monthly-start
-          class="shrink-0 self-start rounded-lg border-[1.75px] border-accent-500/50 px-4 py-2 text-center text-sm font-semibold text-accent-700 transition-colors hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:self-auto dark:border-accent-400/40 dark:text-accent-200 dark:focus-visible:ring-offset-gray-900"
-        >
-          Start monthly sweep →
-        </button>
-      </div>
-    </div>
-
-    {/*
-      Progress meter. Fills to done/total, where total is the number of distinct
-      notes the graph links to. The island updates the fill width, the label,
-      and the reset affordance live from the shared progress store. Hidden until
-      the reader has completed at least one topic, so a brand-new visitor is not
-      shown an empty 0% bar; the island reveals it on the first completion.
-    */}
-    <div
-      data-rm-meter-wrap
-      data-total={totalNotes}
-      hidden
-      class="mb-5 flex flex-col gap-3 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 dark:border-white/10 dark:bg-white/5"
-    >
-      {/* Top row on mobile: label on the left, Reset aligned right so it never
-          orphans below the bar. On desktop (sm+) this row's children sit inline
-          with the bar via the parent's sm:flex-row. */}
-      <div class="flex items-center justify-between gap-3 sm:contents">
-        <div class="min-w-0 shrink-0 sm:order-1">
-          <div class="text-sm font-semibold text-gray-800 dark:text-gray-100">
-            <span data-rm-meter-count>0 of {totalNotes}</span> topics done
-          </div>
-          <div class="text-xs text-gray-500 dark:text-gray-400">
-            <span data-rm-meter-pct>0%</span> of the roadmap complete
-          </div>
-        </div>
-        <button
-          type="button"
-          data-rm-meter-reset
-          class="shrink-0 text-xs font-semibold text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-gray-700 sm:order-3 dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-gray-200"
-        >
-          Reset
-        </button>
-      </div>
-      <div
-        class="relative h-2.5 w-full shrink-0 overflow-hidden rounded-full bg-accent-500/15 sm:order-2 sm:h-2.5 sm:min-w-0 sm:flex-1"
-        role="progressbar"
-        aria-label="Roadmap completion"
-        aria-valuemin="0"
-        aria-valuemax={totalNotes}
-        aria-valuenow="0"
-        data-rm-meter-track
-      >
+    <div class="flex flex-col gap-14 sm:gap-20">
+      {features.map((f, i) => (
         <div
-          data-rm-meter-fill
-          class="rm-meter-fill h-full w-0 rounded-full"
-          style="background: linear-gradient(90deg, var(--accent-600), var(--success-light))"
-        ></div>
-      </div>
-    </div>
-
-    {/*
-      "Your data" bar. All of a reader's state — completions, the spaced-
-      repetition schedule, cumulative-recall history, and per-note scratchpads —
-      lives only in THIS browser (no account, no server). This row is the escape
-      hatch: Back up downloads the whole store as a JSON file, Restore loads one
-      back (on a new browser or after clearing data), and Reset wipes everything
-      after a confirm. Always visible (unlike the meter), since Restore is most
-      useful on a fresh browser with nothing completed yet. Driven by the roadmap
-      island's delegated handlers; the hidden file input backs Restore. The live
-      region announces the outcome for screen-reader users.
-    */}
-    <div
-      data-rm-databar
-      class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-3 text-xs dark:border-white/10 dark:bg-white/5"
-    >
-      <span class="flex items-center gap-1.5 font-semibold text-gray-700 dark:text-gray-200">
-        <svg class="h-4 w-4 text-gray-400 dark:text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M21 8v13H3V8" /><path d="M1 3h22v5H1z" /><path d="M10 12h4" />
-        </svg>
-        Your data
-      </span>
-      <span class="min-w-0 flex-1 text-gray-500 dark:text-gray-400">
-        Progress, reviews, recall, and notes live only in this browser.
-      </span>
-      <div class="flex shrink-0 flex-wrap items-center gap-2">
-        <button
-          type="button"
-          data-rm-data-export
-          class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-700 transition-colors hover:border-accent-400 hover:text-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:border-white/15 dark:bg-gray-900 dark:text-gray-200 dark:hover:text-accent-200 dark:focus-visible:ring-offset-gray-900"
+          class:list={[
+            'grid items-center gap-8 lg:grid-cols-2 lg:gap-12',
+            i % 2 === 1 && 'lg:[&>*:first-child]:order-2',
+          ]}
         >
-          Back up
-        </button>
-        <button
-          type="button"
-          data-rm-data-import
-          class="rounded-lg border border-gray-300 bg-white px-3 py-1.5 font-semibold text-gray-700 transition-colors hover:border-accent-400 hover:text-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:border-white/15 dark:bg-gray-900 dark:text-gray-200 dark:hover:text-accent-200 dark:focus-visible:ring-offset-gray-900"
-        >
-          Restore
-        </button>
-        <button
-          type="button"
-          data-rm-data-reset
-          class="rounded-lg px-3 py-1.5 font-semibold text-gray-500 underline decoration-gray-300 underline-offset-2 transition-colors hover:text-red-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 dark:text-gray-400 dark:decoration-gray-600 dark:hover:text-red-400 dark:focus-visible:ring-offset-gray-900"
-        >
-          Reset all
-        </button>
-      </div>
-      {/* Hidden file input the Restore button triggers. */}
-      <input data-rm-data-file type="file" accept="application/json,.json" class="hidden" aria-hidden="true" tabindex="-1" />
-      {/* Outcome announcement (import/reset result). */}
-      <span data-rm-data-status role="status" aria-live="polite" class="basis-full text-gray-500 dark:text-gray-400" hidden></span>
-    </div>
-
-    {/* Legend: below the toggle, wrapping freely. */}
-    <div class="mb-6 flex flex-wrap items-center gap-x-3 gap-y-2">
-      {/*
-        "Notes available" = a FILLED node. Its colour differs by view: each
-        phase's own hue in the simple view, the site accent in the detailed spine.
-        So the swatch matches the ACTIVE view — the island shows a swatch
-        carrying ALL SIX phase hues (in phase order) with the simple view, and
-        the accent one with the detailed view, via the data-rm-*-only tagging.
-        A wider pill makes every band of colour legible.
-      */}
-      <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
-        <span data-rm-simple-only class="h-2.5 w-6 rounded-full" style="background: linear-gradient(90deg, #8b5cf6 0 16.6%, #0ea5e9 16.6% 33.3%, #14b8a6 33.3% 50%, #c2842a 50% 66.6%, #c25585 66.6% 83.3%, #3f9e6a 83.3% 100%)" aria-hidden="true"></span>
-        <span data-rm-detailed-only hidden class="h-2.5 w-2.5 rounded-full bg-accent-600" aria-hidden="true"></span>
-        Notes available
-      </span>
-      <span class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300">
-        <span class="h-2.5 w-2.5 rounded-full border border-dashed border-gray-400 dark:border-gray-500" aria-hidden="true"></span>
-        Coming soon
-      </span>
-      {/*
-        Difficulty legend: the coloured nucleus dot inside each cell. It only
-        exists in the DETAILED view (the simple view has no per-node nucleus),
-        so these three are `data-rm-detailed-only` and the island hides them in
-        the simple view. Hues match the nucleus + note-page badge + modal.
-      */}
-      <span
-        data-rm-detailed-only
-        hidden
-        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
-      >
-        <span class="h-2.5 w-2.5 rounded-full" style="background:#10b981" aria-hidden="true"></span>
-        Beginner
-      </span>
-      <span
-        data-rm-detailed-only
-        hidden
-        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
-      >
-        <span class="h-2.5 w-2.5 rounded-full" style="background:#3b82f6" aria-hidden="true"></span>
-        Intermediate
-      </span>
-      <span
-        data-rm-detailed-only
-        hidden
-        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
-      >
-        <span class="h-2.5 w-2.5 rounded-full" style="background:#ec4899" aria-hidden="true"></span>
-        Advanced
-      </span>
-      {/*
-        Tier legend. The amber notch only appears in the DETAILED view (the
-        simple view lists whole tracks, so per-sub-topic tiering has nowhere to
-        show), so these two items are tagged `data-rm-detailed-only` and the
-        island hides them while the simple view is active.
-      */}
-      <span
-        data-rm-detailed-only
-        hidden
-        class="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-white/5 dark:text-gray-300"
-      >
-        <span class="h-3.5 w-5 rounded-sm border border-dashed border-amber-600 dark:border-amber-400" aria-hidden="true"></span>
-        Optional (safe to skip)
-      </span>
-      <span
-        data-rm-detailed-only
-        hidden
-        class="w-full text-xs text-gray-500 sm:w-auto dark:text-gray-400"
-      >
-        Unmarked topics are core: fundamentals every data scientist should know.
-      </span>
-    </div>
-
-    {/*
-      Simple view: phase bands (plain HTML so it reflows). Each band is one
-      stage of the journey; its track chips wrap across as many rows as the
-      width allows, so this is one column on a phone and up to three across on a
-      wide screen with no clipping and no fixed geometry.
-    */}
-    <div
-      data-rm-pane="simple"
-      role="group"
-      aria-label={`Data-science learning roadmap, simple view: ${totalSteps} core topics in ${phaseBands.length} phases.`}
-    >
-      <ol class="flex flex-col gap-3">
-        {
-          phaseBands.map((band, bi) => (
-            <li
-              class="rm-band relative overflow-hidden rounded-xl px-3 py-3 sm:px-4"
-              style={`--phase-hue: ${band.hue}`}
-            >
-              <div class="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
-                <p class="rm-band-name flex shrink-0 items-baseline gap-2 sm:w-40 sm:flex-col sm:gap-0.5">
-                  <span class="text-[0.7rem] font-bold uppercase tracking-wider">{band.name}</span>
-                  <span class="text-[0.65rem] font-medium text-gray-400 dark:text-gray-500">
-                    {`Phase ${bi + 1}`}
-                  </span>
-                </p>
-                <ul class="flex flex-1 flex-wrap gap-2">
-                  {band.tracks.map((n) => (
-                    <li>
-                      <button
-                        type="button"
-                        class={`rm-chip ${n.href ? 'rm-avail' : 'rm-soon'}`}
-                        aria-label={`${n.label}: view concepts`}
-                        data-rm-node={n.id}
-                      >
-                        <span>{n.label}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </div>
-
-    {/*
-      Detailed view: the full spine. It is a wide fixed-ratio graph, so on a
-      phone we let it scroll HORIZONTALLY inside its own box (with a readable
-      min-width) rather than shrinking every label to an illegible size. The
-      simple view above is the phone-friendly default; this is the opt-in.
-    */}
-    <div data-rm-pane="detailed" hidden>
-    <div class="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:overflow-visible sm:px-0">
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      class="h-auto w-full min-w-[680px] sm:min-w-0"
-      role="group"
-      aria-label="Data-science learning roadmap. Select a topic to see its concepts."
-      font-family="var(--font-sans)"
-    >
-      {/*
-        Axon trunk: one continuous fibre down the spine (a myelinated sheath +
-        bright inner core), drawn UNDER the cells so opaque cell bodies paint
-        over it. It is the ONLY spine line (the old per-step segments were
-        removed) and carries the firing signal + nodes of Ranvier so the whole
-        path reads as one nerve.
-      */}
-      <path id="rm-axon" class="rm-trunk" d={trunkPath} />
-      <path class="rm-trunk-core" d={trunkPath} />
-      {/* Nodes of Ranvier: myelin gaps banding the trunk between tracks. */}
-      {
-        stepLayouts.slice(0, -1).map((s, i) => {
-          const nextY = stepLayouts[i + 1]!.y;
-          const midY = (s.y + SPINE_H / 2 + (nextY - SPINE_H / 2)) / 2;
-          return <line class="rm-ranvier" x1={SPINE_X - 6} y1={midY} x2={SPINE_X + 6} y2={midY} />;
-        })
-      }
-      {/* Action potentials: a periodic TRAIN. A new spark is released every
-          TRUNK_INTERVAL seconds and takes TRUNK_DUR to reach the bottom, so a
-          steady stream of sparks rides the fibre one after another. */}
-      {
-        Array.from({ length: TRUNK_SPARKS }).map((_, k) => (
-          <circle
-            class={`rm-signal rm-signal-gated${k % 2 === 0 ? '' : ' rm-signal-trail'}`}
-            // NO cx/cy: animateMotion supplies ABSOLUTE coordinates from the
-            // trunk path. Adding a cx/cy here would OFFSET the path (the browser
-            // adds them), which is what pushed the spark far to the right. The
-            // resting-frame speck is hidden by the gating opacity instead.
-            r={k % 2 === 0 ? 3 : 2.4}
-            data-rm-track="0"
-          >
-            <animateMotion
-              dur={`${TRUNK_DUR}s`}
-              begin={`-${k * TRUNK_INTERVAL}s`}
-              repeatCount="indefinite"
-              path={trunkPath}
-            />
-          </circle>
-        ))
-      }
-
-      {
-        connectors.map((c) => (
-          <>
-            <path
-              id={c.id}
-              d={c.d}
-              fill="none"
-              class={`${c.dashed ? 'rm-edge rm-edge-dashed' : 'rm-edge'} rm-reveal`}
-              stroke-width="2"
-              stroke-dasharray={c.dashed ? '5 5' : undefined}
-              data-rm-track={c.track}
-              style={c.revealIndex !== undefined ? `--ri:${c.revealIndex}` : undefined}
-            />
-            {/* Synaptic bouton at the dendrite terminal (branch connectors only). */}
-            {c.bouton && (
-              <circle
-                cx={c.bouton.x}
-                cy={c.bouton.y}
-                r="3"
-                class={`${c.bouton.live ? 'rm-bouton rm-bouton-live' : 'rm-bouton'} rm-reveal`}
-                data-rm-track={c.track}
-                style={c.revealIndex !== undefined ? `--ri:${c.revealIndex}` : undefined}
-              />
+          {/* Copy */}
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400">
+              {f.eyebrow}
+            </span>
+            <h3 class="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
+              {f.title}
+            </h3>
+            <p class="mt-3 max-w-md leading-relaxed text-gray-600 dark:text-gray-300">
+              {f.body}
+            </p>
+            {f.id === 'roadmap' && (
+              <a href="/roadmap" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300 dark:hover:text-accent-200">
+                Open the roadmap <span aria-hidden="true">→</span>
+              </a>
             )}
-            {/* A synaptic spark fires down each LIVE dendrite the moment the
-                trunk pulse reaches its track (begin = beginAt), then travels the
-                branch quickly and rests at the bouton until the next pass. Same
-                6s cycle as the trunk, so it reads as the trunk triggering it.
-                Coming-soon branches (no note yet) carry no signal. */}
-            {c.id && c.bouton?.live && (
-              <circle
-                class="rm-signal rm-signal-branch rm-signal-gated"
-                // NO cx/cy: the inline `path` gives ABSOLUTE coordinates, so a
-                // cx/cy would offset the whole path (pushing the spark off the
-                // dendrite). The resting-frame speck is hidden by the gating.
-                r="2"
-                data-rm-track={c.track}
-              >
-                {/*
-                  Path `d` DIRECTLY on animateMotion (not <mpath>): keyPoints are
-                  unreliable via <mpath>. The spark travels the branch
-                  (trunk -> bouton) in the first half, then rests at the bouton,
-                  exactly along the visible dendrite line.
-                */}
-                <animateMotion
-                  dur={`${TRUNK_INTERVAL}s`}
-                  begin={`${c.beginAt ?? 0}s`}
-                  repeatCount="indefinite"
-                  path={c.d}
-                  keyPoints="0;1;1"
-                  keyTimes="0;0.5;1"
-                  calcMode="linear"
-                />
-              </circle>
+            {f.id === 'notes' && (
+              <a href="/notes" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300 dark:hover:text-accent-200">
+                Browse the notes <span aria-hidden="true">→</span>
+              </a>
             )}
-          </>
-        ))
-      }
-      {
-        nodes.map((n) => {
-          const x = n.x - n.w / 2;
-          const y = n.y - n.h / 2;
-          const state = n.href ? 'rm-avail' : 'rm-soon';
-          const kind = n.main ? 'rm-node-main' : 'rm-node-sub';
-          const adv = n.tier === 'advanced';
-          return (
-            /*
-              The tier is spoken in `aria-label`, not just coloured. Colour alone
-              would make this indicator invisible to a screen reader and
-              unreliable for colour-blind readers.
-            */
-            <g
-              class={`rm-node ${kind} ${state} ${adv ? 'rm-adv' : ''} rm-reveal`}
-              role="button"
-              tabindex="0"
-              aria-label={`${n.label}${adv ? ', optional' : ''}: view concepts`}
-              data-rm-node={n.id}
-              data-rm-track={n.track}
-              style={`--ri:${n.revealIndex}`}
-            >
-              {/* Cell body (soma). Fully rounded so it reads as a neuron, not a
-                  box. Optional cells get the dashed amber membrane via `.rm-adv`. */}
-              <rect x={x} y={y} width={n.w} height={n.h} rx={n.h / 2} class="rm-rect" />
-              {/*
-                Completion badge (option A5): a green check overlapping the
-                top-right corner, shown only once the reader marks this topic's
-                note done. Rendered for every cell with a note but hidden until
-                the island flips `.rm-done` on the node (from the progress
-                store); keeps the cell colour otherwise untouched.
-              */}
-              {n.href && n.linkKind === 'note' && (
-                <g class="rm-done-badge" aria-hidden="true">
-                  <circle cx={x + n.w - 3} cy={y + 3} r="8.5" class="rm-done-badge-bg" />
-                  <path
-                    d={`M ${x + n.w - 6.6} ${y + 3} l 2.4 2.4 L ${x + n.w + 1} ${y - 1}`}
-                    class="rm-done-badge-tick"
-                  />
-                </g>
-              )}
-              {/*
-                Difficulty nucleus: a coloured dot (green/blue/pink) with a soft
-                halo, set just inside the cell's INNER edge (the side facing the
-                spine). It is the difficulty axis, separate from the optional
-                membrane. Purely visual; the modal speaks the level in words.
-              */}
-              {n.difficulty && (
-                <g class={`rm-nucleus rm-nucleus-${n.difficulty}`}>
-                  <circle cx={n.x < SPINE_X ? x + n.w - 15 : x + 15} cy={n.y} r="8" class="rm-nucleus-halo" />
-                  <circle cx={n.x < SPINE_X ? x + n.w - 15 : x + 15} cy={n.y} r="4" class="rm-nucleus-dot" />
-                </g>
-              )}
-              {/*
-                Optional (safe to skip) is shown by the DASHED AMBER MEMBRANE on
-                the cell outline (see `.rm-adv .rm-rect`), a single cue reading
-                "not fully wired in". The accessible name also says "optional",
-                so it is never colour-only.
-              */}
-              <text
-                x={n.difficulty ? (n.x < SPINE_X ? n.x - 8 : n.x + 8) : n.x}
-                y={n.y}
-                class={n.main ? 'rm-label rm-label-main' : 'rm-label'}
-                text-anchor="middle"
-                dominant-baseline="central"
-              >
-                {n.label}
-              </text>
-            </g>
-          );
-        })
-      }
-    </svg>
-    </div>
+          </div>
+          {/* SVG mock */}
+          <div class="lp-card rounded-2xl border border-gray-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-gray-900">
+            <Fragment set:html={featureMock(f.id)} />
+          </div>
+        </div>
+      ))}
     </div>
   </section>
 
-  {/* ---- Topic concept modal (populated by the island) ---- */}
-  <dialog
-    data-rm-dialog
-    aria-labelledby="rm-modal-title"
-    class="mx-auto mt-[6vh] w-[calc(100%-1.5rem)] max-w-[520px] overflow-hidden rounded-2xl border border-gray-200 bg-white p-0 text-left shadow-2xl backdrop:bg-gray-900/50 backdrop:backdrop-blur-sm sm:mt-[10vh] sm:w-[calc(100%-2rem)] dark:border-white/10 dark:bg-gray-900"
-  >
-    <div class="flex items-start justify-between gap-4 border-b border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
-      <div class="min-w-0">
-        <p class="text-[0.7rem] font-semibold uppercase tracking-wider text-accent-700 dark:text-accent-300">
-          Topic syllabus
-        </p>
-        <h2 id="rm-modal-title" data-rm-title class="mt-0.5 break-words text-xl font-bold text-gray-900 dark:text-gray-100"></h2>
-        <div class="mt-1.5 flex flex-wrap items-center gap-2">
-          <span
-            data-rm-difficulty
-            hidden
-            class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
-          >
+  {/* ===================== How it works ===================== */}
+  <section class="border-t border-gray-200 px-4 py-12 sm:px-0 sm:py-16 dark:border-white/10">
+    <div class="mx-auto mb-10 max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-50">
+        How a topic moves through Cortex
+      </h2>
+      <p class="mt-3 text-gray-600 dark:text-gray-300">
+        One loop, from first encounter to durable memory.
+      </p>
+    </div>
+    <ol class="mx-auto grid max-w-4xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {[
+        { n: '1', t: 'Read', d: 'Follow the roadmap into a focused, interlinked note.' },
+        { n: '2', t: 'Test', d: 'Take the timed quiz; clear two-thirds to complete it.' },
+        { n: '3', t: 'Review', d: 'Spaced repetition brings it back on a widening schedule.' },
+        { n: '4', t: 'Recall', d: 'Weekly and monthly sessions interleave everything you covered.' },
+      ].map((s) => (
+        <li class="relative rounded-xl border border-gray-200 bg-gray-50/60 p-5 dark:border-white/10 dark:bg-white/5">
+          <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white">
+            {s.n}
           </span>
-          <span
-            data-rm-tier
-            hidden
-            class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[0.7rem] font-semibold"
-          >
-          </span>
-        </div>
-      </div>
-      <button
-        type="button"
-        data-rm-close
-        aria-label="Close"
-        class="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-xs font-semibold uppercase leading-none tracking-wide text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 dark:hover:bg-gray-800"
-      >
-        {/* X icon is the obvious click target for a mouse or touch at any size;
-            the "Esc" text stays alongside it as the keyboard hint. */}
-        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
-          <path d="M5 5l10 10M15 5L5 15" />
-        </svg>
-        <span>Esc</span>
-      </button>
-    </div>
+          <h3 class="mt-3 font-semibold text-gray-900 dark:text-gray-100">{s.t}</h3>
+          <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{s.d}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
 
-    {/* Scrolls independently so a long syllabus never pushes the CTA off-screen. */}
-    <div class="max-h-[58vh] overflow-y-auto">
-      {/* Prerequisites callout (option 3A): populated by the island. */}
-      <div
-        data-rm-prereq-wrap
-        hidden
-        class="mx-4 mt-4 flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2.5 sm:mx-5 dark:border-blue-500/25 dark:bg-blue-500/10"
-      >
-        <svg class="mt-0.5 h-4 w-4 shrink-0 text-blue-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M12 2v6M8 6l4-4 4 4" />
-          <rect x="4" y="10" width="16" height="10" rx="2" />
-        </svg>
-        <p class="text-sm text-gray-600 dark:text-gray-300">
-          <span class="font-semibold text-gray-700 dark:text-gray-200">Learn first:</span>{' '}
-          <span data-rm-prereq></span>
-        </p>
-      </div>
-
-      <div class="px-4 py-4 sm:px-5">
-        <p class="mb-3 text-sm text-gray-500 dark:text-gray-400">Concepts to learn:</p>
-        {/*
-          CSS multi-column, NOT a 2-column grid. A grid lays bullets out in ROWS,
-          so a bullet that wraps to two lines stretches its whole row and leaves
-          a gap opposite it. Columns flow independently: each one is packed on
-          its own, and a wrap on the left cannot move anything on the right.
-          Reading order stays sensible too, down the first column then the second.
-        */}
-        <ul data-rm-concepts class="sm:columns-2 sm:gap-x-8"></ul>
-      </div>
-
-      {/* Real headings of the linked note, so any section is one click away. */}
-      {/* Main-track overview: the notes in this area, or one note's outline. */}
-      <div data-rm-sections-wrap class="hidden border-t border-gray-100 px-4 py-4 sm:px-5 dark:border-white/5">
-        <p data-rm-sections-label class="mb-3 text-sm text-gray-500 dark:text-gray-400"></p>
-        <ul data-rm-sections class="flex flex-col gap-1"></ul>
+  {/* ===================== Final CTA ===================== */}
+  <section class="px-4 pb-16 sm:px-0">
+    <div class="lp-cta relative overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 px-6 py-10 text-center sm:px-10 dark:border-accent-500/25 dark:bg-accent-500/10">
+      <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
+        Start at the beginning of the map
+      </h2>
+      <p class="mx-auto mt-3 max-w-xl text-gray-600 dark:text-gray-300">
+        Open the roadmap, pick a track, and read your first note. Your progress saves itself as you go.
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a
+          href="/roadmap"
+          class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+        >
+          Explore the roadmap
+          <span aria-hidden="true">→</span>
+        </a>
+        <a
+          href="/notes"
+          class="inline-flex items-center gap-2 rounded-lg border-[1.75px] border-accent-500 px-6 py-2.5 text-sm font-semibold text-accent-700 transition-colors hover:bg-accent-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:border-accent-400 dark:text-accent-200 dark:focus-visible:ring-offset-gray-950"
+        >
+          Browse all notes
+        </a>
       </div>
     </div>
-
-    <div data-rm-footer class="hidden items-center gap-2.5 border-t border-gray-100 px-4 py-4 sm:flex-wrap sm:px-5 dark:border-white/5">
-      <a
-        data-rm-link
-        href="#"
-        class="inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg bg-accent-600 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 sm:flex-none sm:px-4 dark:focus-visible:ring-offset-gray-900"
-      >
-        <span data-rm-link-text class="truncate">Read the notes</span>
-        <span aria-hidden="true">→</span>
-      </a>
-      {/*
-        Progress toggle (option B1). Ghost outline by default; the island flips
-        it to a solid green "Completed" when this topic's route is done, reading
-        the same store as the note page and the graph badge. Hidden for topics
-        with no note (nothing to complete).
-      */}
-      <button
-        type="button"
-        data-rm-done
-        aria-pressed="false"
-        class="rm-done-btn inline-flex min-w-0 flex-1 items-center justify-center gap-2 rounded-lg border-[1.75px] px-3 py-2 text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 sm:flex-none sm:px-4 dark:focus-visible:ring-offset-gray-900"
-      >
-        <span data-rm-done-icon aria-hidden="true" class="inline-flex h-[17px] w-[17px] shrink-0 items-center justify-center rounded-full border-2 border-current"></span>
-        <span data-rm-done-text class="truncate">Mark done</span>
-      </button>
-    </div>
-  </dialog>
-
-  {/*
-    Cumulative-recall session dialog. A native <dialog> (same accessible
-    pattern as the roadmap/quiz modals: Esc closes, backdrop click closes, focus
-    is trapped). The island fills `[data-recall-modal]`. The shell classes are
-    GLOBAL in global.css (unlike the note page's scoped quiz shell), reusing the
-    global `.quiz-*` stepper internals.
-  */}
-  <dialog data-recall-dialog class="recall-dialog">
-    <div class="recall-shell">
-      <div data-recall-modal class="recall-modal"></div>
-    </div>
-  </dialog>
-
-  {/* Node syllabus data for the island. */}
-  <script type="application/json" data-rm-data set:html={JSON.stringify(nodeData)} />
-  {/* Route -> note label map for the spaced-repetition review card. */}
-  <script type="application/json" data-rm-review-labels set:html={JSON.stringify(noteLabelByRoute)} />
-  {/* Every note's quiz, keyed by route, for the Cumulative Recall island. */}
-  <script type="application/json" data-recall-banks set:html={JSON.stringify(recallBanks)} />
-  <script>
-    import '@/components/roadmap';
-    import '@/components/review-due';
-    import '@/components/recall';
-  </script>
+  </section>
 </Layout>
 
+{/*
+  ===========================================================================
+  SVG mocks. Hand-authored, static, and themed through the same palette tokens
+  as the live UI (`--accent-*`, `--gray-*`, `--success-*`). Each echoes a real
+  surface so the landing page previews the product honestly without shipping a
+  stale screenshot. Rendered via `set:html` from the helpers below.
+  ===========================================================================
+*/}
+<script is:inline>
+  // (No client JS — the mocks are static SVG injected at build time.)
+</script>
+
 <style>
-  .roadmap {
-    overflow-x: auto;
+  /* Subtle lift on the mock cards; respects reduced motion. */
+  .lp-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
-
-  /* ============================================================
-     DETAILED VIEW - "Neural Pathway"
-     The spine is a myelinated axon carrying a firing signal; branch
-     connectors are dendrites ending in synaptic boutons; each track/topic
-     is a neuron cell body with a difficulty nucleus. Optional cells wear a
-     dashed amber membrane. Palettes are hand-tuned for light and dark.
-     ============================================================ */
-
-  /* --- Axon trunk (the spine) --- */
-  /* The main trunk reads like a VESSEL: the inner core keeps the strand colour
-     (same as the side trunks), and the outer wall (sheath) is a DARKER teal so
-     the sides give the trunk depth and volume. */
-  .rm-trunk {
-    fill: none;
-    /* Light theme: a saturated mid-teal wall. The old secondary-800 read as a
-       near-black cord against the pale violet canvas; secondary-600 keeps the
-       vessel depth without the heaviness. */
-    stroke: var(--secondary-600);
-    stroke-width: 6.5;
-    stroke-linecap: round;
-  }
-  .rm-trunk-core {
-    fill: none;
-    /* inner core: a bright highlight so the vessel still reads as rounded, now
-       with real contrast against the softer wall above. */
-    stroke: var(--secondary-200);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    opacity: 0.9;
-  }
-  .rm-ranvier {
-    /* Myelin-gap band between tracks. In light mode it is hidden: the trunk
-       bows sideways in the gaps, so a band drawn at the spine centre floats off
-       the fibre and reads as a stray box against the pale canvas. Dark mode
-       keeps it (its near-black band blends into the canvas as a clean break). */
-    stroke: transparent;
-    stroke-width: 7.5;
-    stroke-linecap: butt;
-  }
-  :global([data-theme='dark']) .rm-trunk {
-    /* darker teal wall, deep against the near-black canvas */
-    stroke: var(--secondary-700);
-  }
-  :global([data-theme='dark']) .rm-trunk-core {
-    /* inner core: same strand colour as the side trunks (dark theme) */
-    stroke: var(--secondary-400);
-  }
-  :global([data-theme='dark']) .rm-ranvier {
-    stroke: #0b0d17;
-  }
-
-  /* --- Action potential travelling the trunk --- */
-  /* Light mode: a bright accent spark so it stands out AGAINST the accent core
-     as it moves (using the core colour made it invisible). A subtle ring makes
-     the pulse legible on the pale sheath. */
-  /* Light theme: a solid accent spark, bright against the pale trunk. */
-  .rm-signal {
-    /* Light theme: a bright violet pulse with a soft accent glow, so it reads
-       as a travelling spark against the teal trunk instead of a flat speck. */
-    fill: var(--accent-500);
-    stroke: #ffffff;
-    stroke-width: 0.75;
-    filter: drop-shadow(0 0 3px color-mix(in srgb, var(--accent-500) 70%, transparent));
-  }
-  .rm-signal-trail {
-    opacity: 0.5;
-  }
-  :global([data-theme='dark']) .rm-signal {
-    fill: #ffffff;
-    stroke: none;
-    stroke-width: 0;
-    filter: none;
-  }
-
-  /* --- Dendrite connectors ---
-     Edges use the SECONDARY hue: in a rich theme (e.g. midnight) the connective
-     tissue reads as a second voice against the primary nodes/spark; in a
-     single-accent palette secondary mirrors the accent, so it looks unchanged. */
-  .rm-edge {
-    /* Light theme: a mid-teal tendril, a touch lighter than the trunk wall so
-       the branches read as finer connective tissue, not competing cords. */
-    stroke: var(--secondary-500);
-  }
-  .rm-edge-dashed {
-    stroke: var(--secondary-300);
-  }
-  :global([data-theme='dark']) .rm-edge {
-    stroke: var(--secondary-400);
-  }
-  :global([data-theme='dark']) .rm-edge-dashed {
-    stroke: var(--secondary-700);
-  }
-
-  /* --- Synaptic boutons at dendrite terminals ---
-     Boutons sit at the end of the edges, so they follow the SECONDARY hue too,
-     keeping the edge/terminal system one visual voice. */
-  .rm-bouton {
-    /* dormant terminal, faint secondary (topic has no note yet) */
-    fill: color-mix(in srgb, var(--secondary-300) 55%, white);
-  }
-  .rm-bouton-live {
-    fill: var(--secondary-600); /* active synapse (topic has a note) */
-  }
-  :global([data-theme='dark']) .rm-bouton {
-    fill: color-mix(in srgb, var(--secondary-400) 30%, #1a1a2e);
-  }
-  :global([data-theme='dark']) .rm-bouton-live {
-    fill: var(--secondary-500);
-  }
-
-  /* --- Scroll reveal (fade + rise), triggered as the signal reaches a track ---
-     Elements start hidden; when the island adds `.rm-track-in` to the SVG for a
-     track, that track's nodes/edges/boutons fade + rise into place. The main
-     cell (--ri:0) goes first, sub-topics cascade by their --ri index, so it
-     reads as the axon signal branching into the dendrites. */
-  .rm-reveal {
-    opacity: 0;
-    transform: translateY(12px);
-    transition:
-      opacity 0.5s ease,
-      transform 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
-    transition-delay: calc(var(--ri, 0) * 0.09s);
-  }
-  .rm-edge.rm-reveal {
-    transform: none; /* lines just fade; translating a path looks wrong */
-  }
-  /* Revealed: the SVG carries rm-track-in-<n>, matched per element's track. */
-  :global(svg.rm-anim-ready) .rm-reveal.rm-shown {
-    opacity: 1;
-    transform: none;
-  }
-  /* Signals are gated the same way but by OPACITY ONLY (their motion is SMIL
-     animateMotion, so a CSS transform would fight it). A track's sparks stay
-     hidden until that track reveals, then fade in with it. */
-  :global(svg.rm-anim-ready) .rm-signal-gated {
-    opacity: 0;
-    transition: opacity 0.5s ease;
-  }
-  :global(svg.rm-anim-ready) .rm-signal-gated.rm-shown {
-    opacity: 1;
-  }
-  /* Before the island arms (or with JS off / reduced motion), show everything
-     so the graph is never stuck invisible. */
-  :global(svg:not(.rm-anim-ready)) .rm-reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
-  }
-
-  /* --- Cell body (node) base --- */
-  .rm-node {
-    cursor: pointer;
-  }
-  .rm-node:focus {
-    outline: none;
-  }
-  .rm-node .rm-rect {
-    transition: filter 0.15s ease, stroke 0.15s ease, stroke-width 0.12s ease;
-  }
-  .rm-label {
-    font-size: 14px;
-    fill: #1f2937;
-    pointer-events: none;
-  }
-  .rm-label-main {
-    font-size: 15px;
-    font-weight: 600;
-  }
-
-  /* --- Completion badge (A5): green corner check on a done cell ---
-     Hidden by default; the island adds `.rm-done` to a node whose note the
-     reader has completed, which reveals the badge. Green reads as "done" across
-     both themes, distinct from the accent/difficulty hues. */
-  .rm-done-badge {
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
-    transform: scale(0.6);
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  .rm-node.rm-done .rm-done-badge {
-    opacity: 1;
-    transform: scale(1);
-  }
-  .rm-done-badge-bg {
-    /* themed via --success-light (dark override below) so the badge matches
-       the "done" green used by the modal and note-page buttons. A slim ring
-       keeps the badge crisp when the SVG is scaled down on narrow screens. */
-    fill: var(--success-light);
-    stroke: #ffffff;
-    stroke-width: 1.75;
-  }
-  .rm-done-badge-tick {
-    fill: none;
-    stroke: #ffffff;
-    stroke-width: 1.9;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  :global([data-theme='dark']) .rm-done-badge-bg {
-    fill: var(--success-dark);
-    stroke: #0b0d17;
-  }
-  :global([data-theme='dark']) .rm-done-badge-tick {
-    stroke: #042f1f;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .rm-done-badge {
-      transition: none;
-      transform: scale(1);
+  @media (hover: hover) {
+    .lp-card:hover {
+      transform: translateY(-3px);
     }
   }
-
-  /* Progress meter fill: a gradient bar that eases to its new width, with a
-     soft sheen sweeping across it. Reduced motion drops the sweep. */
-  .rm-meter-fill {
-    position: relative;
-    transition: width 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+  @media (prefers-reduced-motion: reduce) {
+    .lp-card {
+      transition: none;
+    }
+    .lp-card:hover {
+      transform: none;
+    }
   }
-  .rm-meter-fill::after {
+  /* The mock SVGs scale to their card width. */
+  .lp-card :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .lp-cta::before {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: inherit;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
-    animation: rm-meter-sweep 2.4s linear infinite;
-  }
-  @keyframes rm-meter-sweep {
-    from { transform: translateX(-100%); }
-    to { transform: translateX(100%); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .rm-meter-fill {
-      transition: none;
-    }
-    .rm-meter-fill::after {
-      animation: none;
-    }
-  }
-
-  /* Modal "Mark done" button (B1). Colour comes from the shared `--success-*`
-     semantic tokens so the done green follows the active palette in both themes,
-     matching the note page's "Mark as complete" control. Base is a ghost
-     outline; the island adds `.rm-done-on` to flip it to a solid themed fill. */
-  .rm-done-btn {
-    border-color: var(--success-light);
-    color: var(--success-light);
-    --tw-ring-color: var(--success-light);
-  }
-  .rm-done-btn:not(.rm-done-on):hover {
-    background-color: color-mix(in srgb, var(--success-light) 10%, transparent);
-  }
-  :global([data-rm-done].rm-done-on) {
-    /* Deepened a touch so WHITE text clears WCAG AA (~5:1) on the fill. */
-    background-color: color-mix(in srgb, var(--success-light) 78%, black);
-    border-color: color-mix(in srgb, var(--success-light) 78%, black);
-    color: #ffffff;
-  }
-  :global([data-rm-done].rm-done-on:hover) {
-    background-color: color-mix(in srgb, var(--success-light) 68%, black);
-    border-color: color-mix(in srgb, var(--success-light) 68%, black);
-  }
-  :global([data-theme='dark']) .rm-done-btn {
-    border-color: var(--success-dark);
-    color: var(--success-dark);
-    --tw-ring-color: var(--success-dark);
-  }
-  :global([data-theme='dark']) .rm-done-btn:not(.rm-done-on):hover {
-    background-color: color-mix(in srgb, var(--success-dark) 15%, transparent);
-  }
-  :global([data-theme='dark'] [data-rm-done].rm-done-on) {
-    /* A deeper green fill so WHITE label text reads legibly (matching the
-       accent "Read notes" button); the bright --success-dark alone is too light
-       for white text. ~50% mix clears WCAG AA (6:1) and still reads green. */
-    background-color: color-mix(in srgb, var(--success-dark) 50%, black);
-    border-color: color-mix(in srgb, var(--success-dark) 50%, black);
-    color: #ffffff;
-  }
-  :global([data-theme='dark'] [data-rm-done].rm-done-on:hover) {
-    background-color: color-mix(in srgb, var(--success-dark) 42%, black);
-    border-color: color-mix(in srgb, var(--success-dark) 42%, black);
-  }
-
-  /* --- Difficulty nucleus (green/blue/pink dot + halo) --- */
-  .rm-nucleus {
+    background: radial-gradient(
+      ellipse at top,
+      color-mix(in srgb, var(--accent-500) 10%, transparent),
+      transparent 60%
+    );
     pointer-events: none;
-  }
-  .rm-nucleus-halo {
-    fill: currentColor;
-    opacity: 0.22;
-  }
-  .rm-nucleus-dot {
-    fill: currentColor;
-  }
-  .rm-nucleus-beginner {
-    color: #10b981; /* emerald */
-  }
-  .rm-nucleus-intermediate {
-    color: #3b82f6; /* blue */
-  }
-  .rm-nucleus-advanced {
-    color: #ec4899; /* pink */
-  }
-  /* ---- Simple view: phase bands (HTML) ---- */
-  /* Each band tints itself with its phase hue via the --phase-hue custom prop,
-     set inline per band, so one rule styles all six. */
-  .rm-band {
-    background: color-mix(in srgb, var(--phase-hue) 7%, transparent);
-  }
-  /* A colour rail down the leading edge marks the phase without a heavy border. */
-  .rm-band::before {
-    content: '';
-    position: absolute;
-    inset: 0 auto 0 0;
-    width: 4px;
-    border-radius: 4px;
-    background: var(--phase-hue);
-  }
-  .rm-band-name span:first-child {
-    color: var(--phase-hue);
-  }
-
-  /* Track chip. A chip with notes fills with its PHASE hue (inherited via
-     --phase-hue from the band), so a completed track visibly belongs to its
-     stage — green under "Ship it", teal under "Statistics". A chip without
-     notes is a dashed outline, matching the detailed view's "coming soon". */
-  .rm-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    border-radius: 8px;
-    padding: 7px 13px;
-    font-size: 13.5px;
-    font-weight: 600;
-    line-height: 1.2;
-    cursor: pointer;
-    transition: filter 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
-  }
-  .rm-chip:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--phase-hue, var(--accent-600));
-  }
-  .rm-chip.rm-avail {
-    /* Lightened one notch so the fill reads as a bright, distinct phase colour
-       on the dark canvas rather than a heavy block: mix ~15% white into the
-       hue, with the pure hue as the border so the edge stays crisp. White text
-       still clears WCAG AA on every phase at this lightness. */
-    background: color-mix(in srgb, var(--phase-hue, var(--accent-600)) 85%, white);
-    border: 1px solid var(--phase-hue, var(--accent-600));
-    color: #ffffff;
-  }
-  .rm-chip.rm-avail:hover {
-    filter: brightness(1.06);
-  }
-  .rm-chip.rm-soon {
-    background: transparent;
-    /* slate-400, darker than the old slate-300 so the dashed outline is
-       actually visible on the white light-mode canvas. Dark mode overrides. */
-    border: 1.5px dashed #94a3b8;
-    color: #475569;
-  }
-  .rm-chip.rm-soon:hover {
-    border-color: var(--phase-hue, var(--accent-400));
-  }
-  :global([data-theme='dark']) .rm-chip.rm-soon {
-    border-color: #475569;
-    color: #cbd5e1;
-    background: rgba(255, 255, 255, 0.02);
-  }
-
-  /*
-   * Optional (safe-to-skip) topics in the DETAILED (SVG) view are shown by the
-   * dashed amber MEMBRANE on the node outline (`.rm-adv .rm-rect` below), a
-   * single cue meaning "not fully wired in". The old separate amber notch was
-   * removed so nothing competes with the difficulty stripe. The simple view
-   * omits this (it only lists tracks; per-sub-topic tiering belongs in detail).
-   */
-
-  /* Modal difficulty badge (island-added, so :global). Own green/blue/pink
-     axis, matching the note-page badge and the node stripe. */
-  :global(.rm-diff-badge.rm-diff-beginner) {
-    background: #d1fae5;
-    color: #047857;
-  }
-  :global([data-theme='dark'] .rm-diff-badge.rm-diff-beginner) {
-    background: rgba(16, 185, 129, 0.15);
-    color: #6ee7b7;
-  }
-  :global(.rm-diff-badge.rm-diff-intermediate) {
-    background: #dbeafe;
-    color: #1d4ed8;
-  }
-  :global([data-theme='dark'] .rm-diff-badge.rm-diff-intermediate) {
-    background: rgba(59, 130, 246, 0.15);
-    color: #93c5fd;
-  }
-  :global(.rm-diff-badge.rm-diff-advanced) {
-    background: #fce7f3;
-    color: #be185d;
-  }
-  :global([data-theme='dark'] .rm-diff-badge.rm-diff-advanced) {
-    background: rgba(236, 72, 153, 0.15);
-    color: #f9a8d4;
-  }
-
-  /* Modal tier pill. Added by the island, so these need :global. */
-  :global([data-rm-tier].rm-tier-adv) {
-    background: #fef3c7; /* amber-100 */
-    color: #92400e; /* amber-800 */
-  }
-  :global([data-theme='dark'] [data-rm-tier].rm-tier-adv) {
-    background: rgba(251, 191, 36, 0.14);
-    color: #fcd34d; /* amber-300 */
-  }
-  :global([data-rm-tier].rm-tier-core) {
-    background: #f3f4f6; /* gray-100 */
-    color: #4b5563; /* gray-600 */
-  }
-  :global([data-theme='dark'] [data-rm-tier].rm-tier-core) {
-    background: rgba(255, 255, 255, 0.06);
-    color: #9ca3af; /* gray-400 */
-  }
-
-  /* View switch */
-  .rm-view-btn {
-    color: #4b5563;
-  }
-  .rm-view-btn[aria-pressed='true'] {
-    background: #ffffff;
-    color: var(--accent-700);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
-  }
-  :global([data-theme='dark']) .rm-view-btn {
-    color: #9ca3af;
-  }
-  :global([data-theme='dark']) .rm-view-btn[aria-pressed='true'] {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--accent-200);
-    box-shadow: none;
-  }
-
-  /* Available cell (has notes): a living soma. Solid accent membrane, deep
-     accent body. White label clears AA on this fill. */
-  /* Available cell, LIGHT theme: a soft accent tint with a crisp accent border
-     and dark accent text - clean on a white canvas (the old heavy fill read as
-     near-black). Dark theme keeps its filled body via the override below. */
-  .rm-avail .rm-rect {
-    /* a clearly darker accent tint so completed stands apart from the near-white "soon" cells */
-    fill: color-mix(in srgb, var(--accent-300) 80%, white);
-    stroke: var(--accent-700);
-    stroke-width: 1.5;
-  }
-  .rm-avail .rm-label {
-    /* deep accent, high contrast on the tinted fill */
-    fill: color-mix(in srgb, var(--accent-900) 88%, black);
-  }
-  /* Hover: obvious lift. An accent glow + brighter, thicker membrane so the cell
-     clearly reacts. Filter-based (no transform) so the node never shifts. */
-  .rm-node.rm-avail:hover .rm-rect {
-    fill: color-mix(in srgb, var(--accent-400) 75%, white); /* deepens a clear step past the resting fill on hover */
-    stroke: var(--accent-800);
-    stroke-width: 2.5;
-    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--accent-600) 50%, transparent));
-  }
-
-  /* Dormant cell (no notes yet): OPAQUE body so the trunk/edges never show
-     through it, with an ACCENT-TINTED dashed membrane so it still belongs to the
-     theme instead of reading as a dull grey box. */
-  .rm-soon .rm-rect {
-    fill: color-mix(in srgb, var(--accent-100) 45%, white);
-    stroke: var(--accent-400);
-    stroke-width: 1.5;
-    stroke-dasharray: 4 4;
-  }
-  .rm-soon .rm-label {
-    fill: color-mix(in srgb, var(--accent-900) 55%, var(--gray-500));
-  }
-  /* Hover on a dormant cell: it lights up toward the accent with a soft glow so it
-     still feels clickable even without notes yet. */
-  .rm-node.rm-soon:hover .rm-rect {
-    fill: color-mix(in srgb, var(--accent-100) 70%, white);
-    stroke: var(--accent-600);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--accent-600) 45%, transparent));
-  }
-
-  /* Focus ring for keyboard users. */
-  .rm-node:focus-visible .rm-rect {
-    stroke: var(--accent-900);
-    stroke-width: 3;
-  }
-
-  :global([data-theme='dark']) .rm-avail .rm-rect {
-    /* richer, brighter accent body so completed cells pop */
-    fill: color-mix(in srgb, var(--accent-600) 78%, black);
-    stroke: var(--accent-400);
-  }
-  :global([data-theme='dark']) .rm-avail .rm-label {
-    fill: #ffffff; /* crisp white label on the filled accent body */
-  }
-  :global([data-theme='dark']) .rm-soon .rm-rect {
-    /* Opaque (a touch above the canvas) so the trunk and dendrites never bleed
-       through, with a brighter accent dashed membrane so a dormant cell still
-       reads as part of the theme rather than a dull grey outline. */
-    fill: color-mix(in srgb, var(--accent-900) 45%, #0b0d17);
-    stroke: color-mix(in srgb, var(--accent-400) 70%, var(--accent-700));
-  }
-  :global([data-theme='dark']) .rm-soon .rm-label {
-    fill: color-mix(in srgb, var(--accent-200) 70%, var(--gray-400));
-  }
-  :global([data-theme='dark']) .rm-label {
-    fill: #e5e7eb;
-  }
-  :global([data-theme='dark']) .rm-node:focus-visible .rm-rect {
-    stroke: var(--accent-200);
-  }
-  /* Dark-mode hover glows: brighter membrane + accent halo so the reaction is
-     unmistakable against the dark canvas. */
-  :global([data-theme='dark']) .rm-node.rm-avail:hover .rm-rect {
-    /* Lighten by a CONTROLLED step to a richer accent (not the runaway
-       brightness filter, which washed the cell out to near-white). Keep the
-       glow for the lift; the white label stays legible on this fill. */
-    fill: color-mix(in srgb, var(--accent-500) 85%, black);
-    stroke: var(--accent-300);
-    stroke-width: 2.5;
-    filter: drop-shadow(0 0 9px color-mix(in srgb, var(--accent-400) 70%, transparent));
-  }
-  :global([data-theme='dark']) .rm-node.rm-soon:hover .rm-rect {
-    fill: color-mix(in srgb, var(--accent-900) 55%, #0b0d17);
-    stroke: var(--accent-400);
-    stroke-width: 2;
-    filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent-400) 50%, transparent));
-  }
-
-  /*
-   * Optional (safe-to-skip) cell: DASHED AMBER MEMBRANE. Placed AFTER the
-   * avail/soon rules so it wins the stroke on equal specificity; the FILL
-   * (accent when done, pale when not) is untouched, so a cell shows its
-   * completion state and its optional status at once. The focus ring (later +
-   * thicker) still overrides. Reads as "not fully wired in".
-   */
-  .rm-adv .rm-rect {
-    stroke: #d97706; /* amber-600 */
-    stroke-width: 2;
-    stroke-dasharray: 5 4;
-  }
-  .rm-adv.rm-soon .rm-rect {
-    stroke: #d8ab63; /* dimmer amber for a not-yet-written optional topic */
-  }
-  :global([data-theme='dark']) .rm-adv .rm-rect {
-    stroke: #fbbf24; /* amber-400 */
-    stroke-width: 2;
-    stroke-dasharray: 5 4;
-  }
-  :global([data-theme='dark']) .rm-adv.rm-soon .rm-rect {
-    stroke: #b98a2e;
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .rm-node .rm-rect {
-      transition: none;
-    }
-    /* Freeze the action potential for readers who opt out of motion. */
-    .rm-signal {
-      display: none;
-    }
-    /* No scroll-reveal motion: show every node immediately. */
-    .rm-reveal {
-      opacity: 1 !important;
-      transform: none !important;
-      transition: none !important;
-    }
   }
 </style>

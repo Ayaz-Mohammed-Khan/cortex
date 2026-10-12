@@ -230,7 +230,7 @@ function audit(): Report {
     const asCategory = byCategoryName.get(key) ?? null;
     report.bullets += node.concepts.length;
 
-    // Must mirror `targetFor(..., preferCategory)` in `src/pages/index.astro`:
+    // Must mirror `targetFor(..., preferCategory)` in `src/pages/roadmap.astro`:
     // the content folders are named after the tracks, so a folder and a note can
     // share a name. A track searches the whole folder; a branch searches its note.
     // Diverging here would make the report describe a site that is not built.

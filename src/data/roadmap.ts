@@ -4,7 +4,7 @@
  * Lives in `src/data/` rather than inside the landing page so the same
  * declaration can feed both consumers:
  *
- *   - `src/pages/index.astro`      draws the graph and resolves the links.
+ *   - `src/pages/roadmap.astro`    draws the graph and resolves the links.
  *   - `scripts/audit-syllabus.ts`  reports mapping coverage and gaps.
  *
  * A standalone script cannot reach into an Astro component's frontmatter, so

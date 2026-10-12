@@ -163,9 +163,8 @@ const isLanding = chrome === 'landing';
         }
 
         {/*
-          The wordmark goes HOME. It used to point at the notes index because
-          there was no home page; now there is one, and the roadmap is the
-          natural root of the site.
+          The wordmark goes HOME, to the landing page at `/`. The interactive
+          roadmap lives at `/roadmap`; the header exposes it as its own link.
         */}
         <a
           href="/"
@@ -226,6 +225,13 @@ const isLanding = chrome === 'landing';
                 still lives in the page footer. The full field + text link +
                 GitHub icon return at `sm+` where the width exists.
               */}
+              <a
+                href="/roadmap"
+                aria-current={currentRoute === '/roadmap' ? 'page' : undefined}
+                class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex aria-[current]:text-accent-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50 dark:aria-[current]:text-accent-300"
+              >
+                Roadmap
+              </a>
               <a
                 href={notesLanding}
                 class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
@@ -352,13 +358,14 @@ const isLanding = chrome === 'landing';
       >
         {/*
           Header block: a way back to the roadmap, then the Search field and the
-          Section switcher. The home link is first because the roadmap is the
-          site's root: without it, a reader who lands on a note deep-linked from
-          elsewhere has no route to the overview except the wordmark.
+          Section switcher. The roadmap link is first because it is the overview
+          of the whole syllabus: without it, a reader who lands on a note
+          deep-linked from elsewhere has no route to the map except the wordmark
+          (which now goes to the marketing landing page at `/`).
         */}
         <div class="flex flex-col gap-2 px-4 pb-3 pt-4 lg:px-5">
           <a
-            href="/"
+            href="/roadmap"
             class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
           >
             <svg
