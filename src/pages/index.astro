@@ -2,16 +2,18 @@
 /**
  * Landing page (site root `/`): the marketing / feature showcase.
  *
- * This is the front door. It introduces Cortex and shows what the site does
- * through hand-authored SVG mocks that echo the REAL interface (same palette
- * tokens, same card shapes), then sends the reader into the interactive
- * `/roadmap` or straight to the notes. The roadmap graph itself now lives at
- * `/roadmap` (`src/pages/roadmap.astro`); this page links to it.
+ * The front door. It sells Cortex by SHOWING it: every feature is paired with a
+ * hand-authored SVG mock that reproduces the REAL interface (same palette
+ * tokens, same card shapes, same letter markers / score ring / timer pill as
+ * the live components), and the mocks ANIMATE on view so the page feels like
+ * the product in motion rather than a flat brochure. CTAs lead into the
+ * interactive roadmap (`/roadmap`) and the notes.
  *
- * Why SVG mocks rather than screenshots: screenshots go stale, carry a reader's
- * personal state, and do not theme. These inline SVGs are static, tiny, theme
- * through the same CSS custom properties as the live UI, and never drift from
- * the build. They are illustrative, not pixel-perfect captures.
+ * Why SVG mocks over screenshots: they are tiny, static, theme through the same
+ * CSS custom properties as the live UI, carry no personal state, and never go
+ * stale against the build. All animation is CSS-driven and gated behind
+ * `prefers-reduced-motion`, so there is no client JS beyond a tiny scroll-reveal
+ * observer that also no-ops under reduced motion.
  *
  * Uses the shared Layout with `chrome="landing"` (no note tree, controls in the
  * header). `prerender = true`; the only data it needs is a few real counts.
@@ -30,290 +32,412 @@ const siteBase = Astro.site?.href;
 // so the copy never drifts from what actually ships.
 const trackCount = spine.length;
 const phaseCount = phases.length;
-// How many published notes actually exist to read (computed once by the content
-// loader; see `publishedNoteRoutes` in `src/lib/content.ts`).
 const noteCount = site.publishedNoteRoutes.length;
 
-/** A feature shown in the showcase grid: copy on one side, SVG mock the other. */
+/** A headline feature: copy on one side, an animated SVG mock on the other. */
 interface Feature {
   id: string;
   eyebrow: string;
   title: string;
   body: string;
+  /** Optional pills calling out the quirks of this feature. */
+  tags?: string[];
+  /** Optional in-copy link. */
+  link?: { href: string; text: string };
 }
 
-// The feature list drives the showcase sections; each `id` maps to an inline
-// SVG mock rendered below (a small switch keeps the markup readable).
 const features: Feature[] = [
   {
     id: 'roadmap',
     eyebrow: 'Start here',
     title: 'A roadmap, not a reading list',
-    body: 'The whole data-science journey as one branching map, from Python foundations to deployment. Switch between a simple phase overview and a detailed topic graph, and click any node to see exactly what to learn.',
+    body: 'The whole data-science journey as one branching map, from Python foundations to deployment. Flip between a simple phase overview and a detailed topic graph, and click any node to see exactly what to learn and jump into the notes.',
+    tags: ['6 phases', 'Simple + detailed views', 'Click for the syllabus'],
+    link: { href: '/roadmap', text: 'Open the roadmap' },
   },
   {
     id: 'notes',
     eyebrow: 'The source of truth',
     title: 'Notes that link themselves',
-    body: 'Every topic is a focused note with math, callouts, and diagrams. Wikilinks connect related ideas and backlinks appear automatically, so the material reads as a connected web rather than isolated pages.',
+    body: 'Every topic is a focused note with KaTeX math, callouts, and diagrams. Wikilinks connect related ideas and backlinks appear automatically, so the material reads as a connected web, with a live table of contents down the side.',
+    tags: ['Wikilinks', 'Automatic backlinks', 'Math & callouts'],
+    link: { href: '/notes', text: 'Browse the notes' },
   },
   {
     id: 'quiz',
     eyebrow: 'Prove it',
     title: 'Timed quizzes that test judgement',
-    body: 'Each note carries a bank of questions. A graded attempt samples a fresh, timed subset every sitting, so you cannot pass by memorising an order. Clear two-thirds to mark the topic complete.',
+    body: 'Each note carries a bank of questions. A graded attempt samples a fresh, timed subset every sitting, so you cannot pass by memorising an order. Clear two-thirds to complete the topic; miss it and the quiz locks until its review is due.',
+    tags: ['Strict wall-clock timer', 'Fresh sample each time', 'Locks on a miss'],
   },
   {
     id: 'review',
     eyebrow: 'Keep it',
     title: 'Spaced repetition, built in',
-    body: 'Pass a quiz and the topic enters a review schedule that stretches out as you keep getting it right and snaps back when you slip. The home for a quick daily pass that stops what you learned from fading.',
+    body: 'Pass a quiz and the topic enters a review schedule that stretches out as you keep getting it right and snaps back when you slip. A daily "review due" pass stops what you learned from quietly fading away.',
+    tags: ['SM-2 scheduling', 'Widening intervals', 'Daily review queue'],
   },
   {
     id: 'recall',
     eyebrow: 'Connect it',
     title: 'Weekly and monthly recall',
-    body: 'At the end of a study window, recall across everything you covered at once, not one note at a time. Fall behind and the prompt escalates, so the habit holds instead of quietly lapsing.',
+    body: 'At the end of a study window, recall across everything you covered at once, interleaved, not one note at a time. Fall behind and the card turns amber and escalates, so the habit holds instead of silently lapsing.',
+    tags: ['Interleaved across topics', 'Weekly + monthly', 'Escalates if you lag'],
   },
   {
     id: 'progress',
-    eyebrow: 'See it',
-    title: 'Progress you own',
-    body: 'Completions, streaks, review schedule, and recall history live in your browser, with no account to create. Back it all up to a file and restore it on any device, any time.',
+    eyebrow: 'Own it',
+    title: 'Progress that stays yours',
+    body: 'Completions, review schedule, recall history, and your scratchpad notes live in your browser, with no account to create and nothing uploaded. Back it all up to a single file and restore it on any device, any time.',
+    tags: ['No account', 'Local-first', 'Export & restore'],
   },
 ];
 
-/* ---------------------------------------------------------------------------
- * SVG mocks of the real UI.
- *
- * These are plain SVG strings injected with `set:html`. They are illustrative,
- * not screenshots: each uses the palette TOKENS (`var(--accent-*)` etc.) so it
- * themes with the page, and mirrors the shape of the live surface it previews.
- * All text is baked in (not interactive) so there is no client cost.
- *
- * A shared 440x300 viewBox keeps every card the same aspect ratio. Colours come
- * from CSS custom properties, which inline SVG honours for fill/stroke, so a
- * single mock looks right in both light and dark themes.
- * --------------------------------------------------------------------------- */
-
-const VB = 'viewBox="0 0 440 300" role="img" preserveAspectRatio="xMidYMid meet"';
-
-/** A rounded panel background filling the mock, matching a card surface. */
-function panel(): string {
-  return `<rect x="0" y="0" width="440" height="300" rx="14" fill="var(--gray-50, #f9fafb)"/>`;
+/** A compact "and more" feature: icon glyph + short copy. */
+interface Extra {
+  id: string;
+  title: string;
+  body: string;
+  icon: string; // inline SVG path(s), drawn in a 24x24 viewBox
 }
 
-/** The hero mock: the roadmap spine with nodes and a floating quiz chip. */
-function heroMock(): string {
-  const node = (x: number, y: number, done: boolean): string =>
-    `<circle cx="${x}" cy="${y}" r="13" fill="${done ? 'var(--success-light, #16a34a)' : 'var(--accent-500, #8b5cf6)'}"/>` +
-    (done
-      ? `<path d="M${x - 5} ${y} l3.5 3.5 L${x + 6} ${y - 5}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`
-      : `<circle cx="${x}" cy="${y}" r="4.5" fill="#fff" fill-opacity="0.85"/>`);
-  return `<svg ${VB} aria-label="A branching learning roadmap with a quiz card" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <!-- spine -->
-    <path d="M70 40 V 260" stroke="var(--accent-300, #c4b5fd)" stroke-width="6" stroke-linecap="round"/>
-    <!-- branches -->
-    <path d="M70 70 C 130 70, 150 70, 200 70" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
-    <path d="M70 130 C 130 130, 150 130, 200 130" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
-    <path d="M70 190 C 130 190, 150 190, 200 190" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
-    <!-- spine nodes -->
-    ${node(70, 40, true)}
-    ${node(70, 100, true)}
-    ${node(70, 160, false)}
-    ${node(70, 220, false)}
-    <!-- branch leaf nodes + labels -->
-    ${node(200, 70, true)}
-    ${node(200, 130, false)}
-    ${node(200, 190, false)}
-    <rect x="222" y="60" width="92" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
-    <rect x="222" y="120" width="78" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
-    <rect x="222" y="180" width="86" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
-    <!-- floating quiz chip -->
-    <g>
-      <rect x="248" y="150" width="172" height="118" rx="12" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5" filter="drop-shadow(0 6px 14px rgba(0,0,0,0.12))"/>
-      <rect x="262" y="164" width="80" height="10" rx="5" fill="var(--accent-500, #8b5cf6)"/>
-      <rect x="262" y="186" width="144" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>
-      <rect x="262" y="202" width="120" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>
-      <rect x="262" y="224" width="144" height="26" rx="7" fill="var(--accent-100, #ede9fe)" stroke="var(--accent-400, #a78bfa)" stroke-width="1.5"/>
-      <circle cx="276" cy="237" r="6" fill="none" stroke="var(--accent-500, #8b5cf6)" stroke-width="2"/>
-      <rect x="290" y="233" width="90" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
-    </g>
+const extras: Extra[] = [
+  {
+    id: 'flashcards',
+    title: 'Flashcards mode',
+    body: 'Flip the same question bank into untimed recall practice: hide the options, answer from memory, grade yourself.',
+    icon: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M20 9v9a2 2 0 0 1-2 2H8" opacity="0.5"/>',
+  },
+  {
+    id: 'search',
+    title: 'Instant full-text search',
+    body: 'Press Ctrl or Cmd + K anywhere to search every note in milliseconds, powered by a prebuilt Pagefind index.',
+    icon: '<circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>',
+  },
+  {
+    id: 'prereqs',
+    title: 'Prerequisites, wired in',
+    body: 'Each topic knows what to learn first. The roadmap and notes read one shared map, so the order never contradicts itself.',
+    icon: '<path d="M5 6h14"/><path d="M5 12h9"/><path d="M5 18h5"/><circle cx="18" cy="16" r="3"/>',
+  },
+  {
+    id: 'scratchpad',
+    title: 'Per-note scratchpad',
+    body: 'A private notepad on every page. Writing a topic in your own words is a small act of recall; it autosaves, locally.',
+    icon: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
+  },
+  {
+    id: 'theme',
+    title: 'Dark and light',
+    body: 'Follows your system by default, remembers an explicit choice, and swaps with no flash of the wrong theme on load.',
+    icon: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4 12H2M22 12h-2M5 5l1.5 1.5M17.5 17.5 19 19M5 19l1.5-1.5M17.5 6.5 19 5"/>',
+  },
+  {
+    id: 'markdown',
+    title: 'Write Markdown, commit, done',
+    body: 'Add a note, commit, push. The site rebuilds and it is live in a minute or two. No CMS, no database, no build to babysit.',
+    icon: '<path d="M4 4h16v16H4z" opacity="0.4"/><path d="M7 15V9l3 3 3-3v6"/><path d="M17 9v4m0 0 2-2m-2 2-2-2" transform="translate(0.5 0)"/>',
+  },
+];
+
+/* ===========================================================================
+ * SVG mocks of the real UI.
+ *
+ * Each helper returns an SVG string injected with `set:html`. They reproduce
+ * the live surface: the quiz mock uses the same letter-marker option rows and
+ * conic score ring, the review/recall cards use the same icons and chips, and
+ * every colour is a palette TOKEN so the mock themes with the page. Animation
+ * is added via CSS classes on SVG elements (see the page `<style>`), all gated
+ * behind `prefers-reduced-motion`.
+ *
+ * Shared 460x320 viewBox; `lp-mock-*` classes are the animation hooks.
+ * =========================================================================== */
+
+const VB = 'viewBox="0 0 460 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet"';
+
+/** The full-bleed card surface behind every mock. */
+function surface(): string {
+  return `<rect x="0" y="0" width="460" height="320" rx="16" fill="var(--gray-50, #f9fafb)"/>`;
+}
+
+/** A faithful window header: brand dot-icon, title, and a close affordance. */
+function winHeader(title: string, extra = ''): string {
+  return (
+    `<rect x="0" y="0" width="460" height="52" rx="16" fill="var(--gray-100, #f3f4f6)"/>` +
+    `<rect x="0" y="36" width="460" height="16" fill="var(--gray-100, #f3f4f6)"/>` +
+    `<rect x="20" y="15" width="24" height="22" rx="7" fill="var(--accent-100, #ede9fe)"/>` +
+    `<path d="M27 26 l3 3 l7 -7" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>` +
+    `<text x="54" y="31" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--gray-700, #374151)">${title}</text>` +
+    extra +
+    `<text x="432" y="31" text-anchor="middle" font-family="system-ui, sans-serif" font-size="13" fill="var(--gray-400, #9ca3af)">&#215;</text>`
+  );
+}
+
+/** ROADMAP: real phase bands (true names + hues) with track chips. */
+function roadmapMock(): string {
+  const bands = phases.slice(0, 4).map((p, i) => {
+    const y = 70 + i * 58;
+    const chips = p.tracks
+      .slice(0, 3)
+      // Chips occupy the right of the band; the label column owns x=36..160.
+      .map((t, j) => {
+        const cx = 168 + j * 94;
+        const w = Math.min(80, 40 + t.length * 2.6);
+        const avail = i < 2; // first two phases "have notes" (filled)
+        return (
+          `<g class="lp-chip" style="--d:${(i * 3 + j) * 0.12}s">` +
+          `<rect x="${cx}" y="${y - 13}" width="${w}" height="26" rx="13" fill="${avail ? 'color-mix(in srgb, ' + p.hue + ' 16%, white)' : 'var(--gray-100, #f3f4f6)'}" stroke="${avail ? p.hue : 'var(--gray-300, #d1d5db)'}" stroke-width="1.5" ${avail ? '' : 'stroke-dasharray="3 3"'}/>` +
+          `<rect x="${cx + 13}" y="${y - 4}" width="${w - 26}" height="7" rx="3.5" fill="${avail ? p.hue : 'var(--gray-400, #9ca3af)'}"/>` +
+          `</g>`
+        );
+      })
+      .join('');
+    // Shorten the one long phase name so it never collides with the chips.
+    const shortName = p.name.length > 16 ? 'Core ML' : p.name;
+    return (
+      `<g class="lp-band" style="--d:${i * 0.1}s">` +
+      `<rect x="20" y="${y - 24}" width="420" height="48" rx="11" fill="color-mix(in srgb, ${p.hue} 7%, transparent)"/>` +
+      `<rect x="20" y="${y - 24}" width="4" height="48" rx="2" fill="${p.hue}"/>` +
+      `<text x="36" y="${y - 2}" font-family="system-ui, sans-serif" font-size="9.5" font-weight="700" letter-spacing="0.4" fill="${p.hue}">${shortName.toUpperCase()}</text>` +
+      `<text x="36" y="${y + 12}" font-family="system-ui, sans-serif" font-size="8.5" fill="var(--gray-400, #9ca3af)">Phase ${i + 1}</text>` +
+      chips +
+      `</g>`
+    );
+  });
+  return `<svg ${VB} role="img" aria-label="The learning roadmap: phase bands with topic chips">
+    ${surface()}
+    ${winHeader('Learning roadmap')}
+    ${bands.join('')}
   </svg>`;
 }
 
-/** The per-feature mock, keyed by feature id. */
+/** NOTES: heading, prose, an inline wikilink, a callout, a backlinks panel, TOC. */
+function notesMock(): string {
+  const line = (x: number, y: number, w: number, c = 'var(--gray-300, #d1d5db)'): string =>
+    `<rect x="${x}" y="${y}" width="${w}" height="8" rx="4" fill="${c}"/>`;
+  return `<svg ${VB} role="img" aria-label="A note with an inline wikilink and a backlinks panel">
+    ${surface()}
+    ${winHeader('Strings')}
+    <!-- body -->
+    <rect x="26" y="72" width="150" height="7" rx="3.5" fill="var(--accent-500, #8b5cf6)"/>
+    ${line(26, 94, 290)}
+    ${line(26, 112, 268)}
+    <!-- inline wikilink: pill, animates a subtle glow -->
+    <g class="lp-wikilink">
+      <rect x="150" y="128" width="92" height="13" rx="4" fill="var(--accent-100, #ede9fe)"/>
+      ${line(26, 130, 118)}
+      ${line(156, 131, 80, 'var(--accent-600, #7c3aed)')}
+      ${line(250, 130, 66)}
+    </g>
+    ${line(26, 150, 300)}
+    <!-- callout -->
+    <rect x="26" y="172" width="300" height="44" rx="8" fill="var(--accent-50, #f5f3ff)" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
+    <rect x="26" y="172" width="4" height="44" rx="2" fill="var(--accent-500, #8b5cf6)"/>
+    ${line(42, 185, 110, 'var(--accent-400, #a78bfa)')}
+    ${line(42, 201, 250)}
+    <!-- backlinks panel: links slide in -->
+    <rect x="26" y="232" width="300" height="60" rx="8" fill="var(--gray-100, #f3f4f6)"/>
+    ${line(40, 246, 96, 'var(--gray-500, #6b7280)')}
+    <g class="lp-backlink" style="--d:0.1s">${line(40, 264, 150, 'var(--accent-500, #8b5cf6)')}</g>
+    <g class="lp-backlink" style="--d:0.25s">${line(40, 278, 120, 'var(--accent-500, #8b5cf6)')}</g>
+    <g class="lp-backlink" style="--d:0.4s">${line(206, 264, 108, 'var(--accent-500, #8b5cf6)')}</g>
+    <!-- TOC rail with an active item -->
+    <rect x="350" y="72" width="86" height="220" rx="10" fill="var(--gray-100, #f3f4f6)"/>
+    ${line(366, 92, 60)}
+    <g class="lp-toc-active"><rect x="360" y="106" width="4" height="10" rx="2" fill="var(--accent-500, #8b5cf6)"/>${line(372, 108, 54, 'var(--accent-500, #8b5cf6)')}</g>
+    ${line(366, 128, 48)}
+    ${line(366, 148, 56)}
+    ${line(366, 168, 44)}
+  </svg>`;
+}
+
+/** QUIZ: the real modal — timer pill (pulses low), progress bar, letter options. */
+function quizMock(): string {
+  const timer =
+    `<g class="lp-timer"><rect x="356" y="14" width="58" height="24" rx="12" fill="var(--accent-500, #8b5cf6)"/>` +
+    `<text x="385" y="30" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12.5" font-weight="700" fill="#fff" font-variant-numeric="tabular-nums">1:12</text></g>`;
+  const option = (y: number, letter: string, w: number, state: 'idle' | 'picked'): string => {
+    const picked = state === 'picked';
+    return (
+      `<g class="${picked ? 'lp-opt-picked' : 'lp-opt'}">` +
+      `<rect x="40" y="${y}" width="380" height="36" rx="9" fill="${picked ? 'var(--accent-50, #f5f3ff)' : '#fff'}" stroke="${picked ? 'var(--accent-500, #8b5cf6)' : 'var(--gray-200, #e5e7eb)'}" stroke-width="1.5"/>` +
+      `<circle cx="60" cy="${y + 18}" r="10" fill="${picked ? 'var(--accent-600, #7c3aed)' : 'none'}" stroke="${picked ? 'var(--accent-600, #7c3aed)' : 'var(--gray-400, #9ca3af)'}" stroke-width="2"/>` +
+      `<text x="60" y="${y + 22}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="${picked ? '#fff' : 'var(--gray-500, #6b7280)'}">${letter}</text>` +
+      `<rect x="80" y="${y + 13}" width="${w}" height="9" rx="4.5" fill="var(--gray-400, #9ca3af)"/>` +
+      `</g>`
+    );
+  };
+  return `<svg ${VB} role="img" aria-label="A timed quiz with four options and a countdown">
+    ${surface()}
+    ${winHeader('Test yourself', timer)}
+    <!-- progress bar (fills on reveal) + pills -->
+    <rect x="40" y="66" width="300" height="6" rx="3" fill="var(--gray-200, #e5e7eb)"/>
+    <rect class="lp-progress" x="40" y="66" width="300" height="6" rx="3" fill="var(--accent-500, #8b5cf6)"/>
+    <g fill="var(--accent-500, #8b5cf6)">
+      <circle cx="356" cy="69" r="3.5"/><circle cx="368" cy="69" r="3.5"/>
+      <circle cx="380" cy="69" r="3.5" fill="var(--gray-300, #d1d5db)"/><circle cx="392" cy="69" r="3.5" fill="var(--gray-300, #d1d5db)"/>
+      <circle cx="404" cy="69" r="3.5" fill="var(--gray-300, #d1d5db)"/>
+    </g>
+    <!-- question stem -->
+    <rect x="40" y="88" width="320" height="10" rx="5" fill="var(--gray-700, #374151)"/>
+    <rect x="40" y="106" width="230" height="10" rx="5" fill="var(--gray-700, #374151)"/>
+    <!-- options; B is briefly picked -->
+    ${option(132, 'A', 300, 'idle')}
+    ${option(176, 'B', 250, 'picked')}
+    ${option(220, 'C', 290, 'idle')}
+    ${option(264, 'D', 230, 'idle')}
+  </svg>`;
+}
+
+/** REVIEW: the real "review due" card — clock icon, count, chips, start button. */
+function reviewMock(): string {
+  const chip = (x: number, w: number, i: number): string =>
+    `<g class="lp-reveal-chip" style="--d:${0.15 + i * 0.1}s">` +
+    `<rect x="${x}" y="250" width="${w}" height="26" rx="13" fill="var(--accent-100, #ede9fe)"/>` +
+    `<rect x="${x + 14}" y="259" width="${w - 28}" height="7" rx="3.5" fill="var(--accent-600, #7c3aed)"/></g>`;
+  return `<svg ${VB} role="img" aria-label="A spaced-repetition review-due card">
+    ${surface()}
+    ${winHeader('Roadmap')}
+    <rect x="26" y="78" width="408" height="170" rx="14" fill="color-mix(in srgb, var(--accent-500, #8b5cf6) 5%, white)" stroke="color-mix(in srgb, var(--accent-500, #8b5cf6) 30%, transparent)" stroke-width="1.5"/>
+    <!-- animated clock -->
+    <g class="lp-clock">
+      <circle cx="66" cy="120" r="19" fill="color-mix(in srgb, var(--accent-500, #8b5cf6) 15%, transparent)"/>
+      <circle cx="66" cy="120" r="11" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2.2"/>
+      <line class="lp-clock-hand" x1="66" y1="120" x2="66" y2="112" stroke="var(--accent-600, #7c3aed)" stroke-width="2.2" stroke-linecap="round"/>
+    </g>
+    <text x="98" y="109" font-family="system-ui, sans-serif" font-size="15" font-weight="700" fill="var(--gray-800, #1f2937)">5 topics due for review</text>
+    <rect x="98" y="122" width="196" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
+    <rect x="98" y="138" width="150" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
+    <!-- start button: pinned to the lower-right of the card, clear of the text column -->
+    <g class="lp-btn"><rect x="306" y="162" width="112" height="36" rx="9" fill="var(--accent-600, #7c3aed)"/>
+    <text x="362" y="185" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">Start review &#8594;</text></g>
+    <!-- divider + chips -->
+    <rect x="26" y="222" width="408" height="1.5" fill="color-mix(in srgb, var(--accent-500, #8b5cf6) 15%, transparent)"/>
+    ${chip(40, 118, 0)}
+    ${chip(170, 96, 1)}
+    ${chip(278, 130, 2)}
+  </svg>`;
+}
+
+/** RECALL: weekly + monthly sections, with the amber "lagging" priority banner. */
+function recallMock(): string {
+  const section = (y: number, label: string, w: number, i: number): string =>
+    `<g class="lp-reveal-row" style="--d:${0.2 + i * 0.12}s">` +
+    `<rect x="40" y="${y}" width="380" height="50" rx="10" fill="var(--gray-100, #f3f4f6)"/>` +
+    `<rect x="56" y="${y + 13}" width="${w}" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>` +
+    `<rect x="56" y="${y + 30}" width="${w + 44}" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>` +
+    `<rect x="318" y="${y + 11}" width="86" height="28" rx="8" fill="var(--accent-600, #7c3aed)"/>` +
+    `<text x="361" y="${y + 29}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">${label}</text></g>`;
+  return `<svg ${VB} role="img" aria-label="A cumulative-recall card with weekly and monthly sessions">
+    ${surface()}
+    ${winHeader('Roadmap')}
+    <rect x="26" y="70" width="408" height="222" rx="14" fill="color-mix(in srgb, var(--accent-500, #8b5cf6) 5%, white)" stroke="color-mix(in srgb, var(--accent-500, #8b5cf6) 30%, transparent)" stroke-width="1.5"/>
+    <!-- layers icon -->
+    <path d="M50 100 l16 -8 l16 8 l-16 8 Z" fill="var(--accent-500, #8b5cf6)"/>
+    <path d="M50 110 l16 8 l16 -8" fill="none" stroke="var(--accent-400, #a78bfa)" stroke-width="2.4" stroke-linejoin="round"/>
+    <text x="94" y="94" font-family="system-ui, sans-serif" font-size="14" font-weight="700" fill="var(--gray-800, #1f2937)">Cumulative recall</text>
+    <rect x="94" y="104" width="300" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>
+    <!-- amber lagging / priority banner (pulses) -->
+    <g class="lp-lagging">
+      <rect x="40" y="122" width="380" height="24" rx="8" fill="color-mix(in srgb, #f59e0b 16%, transparent)"/>
+      <circle cx="56" cy="134" r="3.5" fill="#b45309"/>
+      <rect x="68" y="130" width="200" height="7" rx="3.5" fill="#b45309"/>
+    </g>
+    ${section(160, 'Weekly', 92, 0)}
+    ${section(222, 'Monthly', 104, 1)}
+  </svg>`;
+}
+
+/** PROGRESS: completion meter (fills), a row of topic ticks, the data bar. */
+function progressMock(): string {
+  const tick = (x: number, i: number): string =>
+    `<g class="lp-tick" style="--d:${0.2 + i * 0.12}s"><circle cx="${x}" cy="166" r="12" fill="var(--success-light, #16a34a)"/>` +
+    `<path d="M${x - 5} 166 l3.5 3.5 L${x + 6} 161" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+  const dataBtn = (x: number, w: number, label: string): string =>
+    `<rect x="${x}" y="258" width="${w}" height="24" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>` +
+    `<text x="${x + w / 2}" y="274" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="600" fill="var(--gray-600, #4b5563)">${label}</text>`;
+  return `<svg ${VB} role="img" aria-label="A completion meter, topic ticks, and data backup controls">
+    ${surface()}
+    ${winHeader('Your progress')}
+    <!-- meter card -->
+    <rect x="26" y="72" width="408" height="72" rx="12" fill="var(--gray-100, #f3f4f6)"/>
+    <text x="42" y="98" font-family="system-ui, sans-serif" font-size="13" font-weight="700" fill="var(--gray-800, #1f2937)">18 of 30 topics done</text>
+    <rect x="42" y="108" width="110" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>
+    <rect x="42" y="124" width="376" height="10" rx="5" fill="var(--gray-200, #e5e7eb)"/>
+    <rect class="lp-meter" x="42" y="124" width="376" height="10" rx="5" fill="url(#lp-meter-grad)"/>
+    <defs><linearGradient id="lp-meter-grad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="var(--accent-600, #7c3aed)"/><stop offset="1" stop-color="var(--success-light, #16a34a)"/>
+    </linearGradient></defs>
+    <!-- a row of completed ticks + two pending -->
+    ${tick(50, 0)}${tick(100, 1)}${tick(150, 2)}
+    <circle cx="200" cy="166" r="12" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
+    <circle cx="250" cy="166" r="12" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
+    <!-- "Your data" bar -->
+    <rect x="26" y="200" width="408" height="92" rx="12" fill="var(--gray-100, #f3f4f6)"/>
+    <text x="42" y="226" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="var(--gray-700, #374151)">Your data</text>
+    <rect x="42" y="236" width="300" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>
+    ${dataBtn(42, 72, 'Back up')}
+    ${dataBtn(124, 72, 'Restore')}
+    ${dataBtn(206, 66, 'Reset')}
+  </svg>`;
+}
+
 function featureMock(id: string): string {
   switch (id) {
-    case 'roadmap':
-      return heroMock();
-    case 'notes':
-      return notesMock();
-    case 'quiz':
-      return quizMock();
-    case 'review':
-      return reviewMock();
-    case 'recall':
-      return recallMock();
-    case 'progress':
-      return progressMock();
-    default:
-      return `<svg ${VB} xmlns="http://www.w3.org/2000/svg">${panel()}</svg>`;
+    case 'roadmap': return roadmapMock();
+    case 'notes': return notesMock();
+    case 'quiz': return quizMock();
+    case 'review': return reviewMock();
+    case 'recall': return recallMock();
+    case 'progress': return progressMock();
+    default: return `<svg ${VB}>${surface()}</svg>`;
   }
 }
 
-/** A note page: heading, prose lines, a highlighted wikilink, a backlinks box. */
-function notesMock(): string {
-  const line = (x: number, y: number, w: number): string =>
-    `<rect x="${x}" y="${y}" width="${w}" height="9" rx="4.5" fill="var(--gray-300, #d1d5db)"/>`;
-  return `<svg ${VB} aria-label="A note page with a wikilink and a backlinks panel" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <rect x="26" y="28" width="200" height="18" rx="6" fill="var(--gray-800, #1f2937)"/>
-    <rect x="26" y="56" width="120" height="11" rx="5" fill="var(--accent-500, #8b5cf6)"/>
-    ${line(26, 86, 300)}
-    ${line(26, 104, 280)}
-    <!-- inline wikilink -->
-    <rect x="150" y="120" width="96" height="12" rx="4" fill="var(--accent-100, #ede9fe)"/>
-    <rect x="150" y="122" width="96" height="9" rx="4.5" fill="var(--accent-600, #7c3aed)"/>
-    ${line(26, 122, 118)}
-    ${line(252, 122, 74)}
-    ${line(26, 140, 290)}
-    ${line(26, 158, 240)}
-    <!-- callout block -->
-    <rect x="26" y="182" width="300" height="46" rx="8" fill="var(--accent-50, #f5f3ff)" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
-    <rect x="26" y="182" width="4" height="46" rx="2" fill="var(--accent-500, #8b5cf6)"/>
-    ${line(42, 196, 120)}
-    ${line(42, 212, 250)}
-    <!-- backlinks panel -->
-    <rect x="26" y="244" width="388" height="40" rx="8" fill="var(--gray-100, #f3f4f6)"/>
-    <rect x="40" y="256" width="90" height="9" rx="4.5" fill="var(--gray-500, #6b7280)"/>
-    <rect x="40" y="270" width="150" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
-    <rect x="206" y="270" width="120" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/>
-    <!-- right rail (toc) -->
-    <rect x="348" y="86" width="66" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
-    <rect x="348" y="102" width="54" height="7" rx="3.5" fill="var(--accent-400, #a78bfa)"/>
-    <rect x="348" y="118" width="60" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
-    <rect x="348" y="134" width="48" height="7" rx="3.5" fill="var(--gray-300, #d1d5db)"/>
-  </svg>`;
-}
-
-/** The quiz modal: header with timer, a question stem, four options, progress. */
-function quizMock(): string {
-  const opt = (y: number, letter: string, w: number, picked: boolean): string =>
-    `<rect x="40" y="${y}" width="360" height="34" rx="8" fill="${picked ? 'var(--accent-100, #ede9fe)' : 'var(--gray-100, #f3f4f6)'}" stroke="${picked ? 'var(--accent-400, #a78bfa)' : 'var(--gray-200, #e5e7eb)'}" stroke-width="1.5"/>` +
-    `<circle cx="58" cy="${y + 17}" r="9" fill="none" stroke="${picked ? 'var(--accent-500, #8b5cf6)' : 'var(--gray-400, #9ca3af)'}" stroke-width="1.6"/>` +
-    `<text x="58" y="${y + 21}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10" font-weight="700" fill="${picked ? 'var(--accent-600, #7c3aed)' : 'var(--gray-500, #6b7280)'}">${letter}</text>` +
-    `<rect x="78" y="${y + 12}" width="${w}" height="9" rx="4.5" fill="var(--gray-400, #9ca3af)"/>`;
-  return `<svg ${VB} aria-label="A timed quiz with four answer options" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <!-- header -->
-    <rect x="0" y="0" width="440" height="46" rx="14" fill="var(--gray-100, #f3f4f6)"/>
-    <rect x="0" y="32" width="440" height="14" fill="var(--gray-100, #f3f4f6)"/>
-    <rect x="20" y="14" width="26" height="20" rx="6" fill="var(--accent-100, #ede9fe)"/>
-    <path d="M28 24 l3 3 l7 -7" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="56" y="17" width="96" height="14" rx="5" fill="var(--gray-700, #374151)"/>
-    <!-- timer pill -->
-    <rect x="336" y="13" width="58" height="22" rx="11" fill="var(--accent-500, #8b5cf6)"/>
-    <text x="365" y="28" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">4:30</text>
-    <!-- progress pills -->
-    <rect x="20" y="60" width="300" height="6" rx="3" fill="var(--gray-200, #e5e7eb)"/>
-    <rect x="20" y="60" width="120" height="6" rx="3" fill="var(--accent-500, #8b5cf6)"/>
-    <!-- question stem -->
-    <rect x="40" y="82" width="300" height="11" rx="5" fill="var(--gray-700, #374151)"/>
-    <rect x="40" y="100" width="220" height="11" rx="5" fill="var(--gray-700, #374151)"/>
-    <!-- options -->
-    ${opt(126, 'A', 300, false)}
-    ${opt(166, 'B', 260, true)}
-    ${opt(206, 'C', 290, false)}
-    ${opt(246, 'D', 240, false)}
-  </svg>`;
-}
-
-/** The "Review due today" card: icon, count, topic chips, start button. */
-function reviewMock(): string {
-  const chip = (x: number, w: number): string =>
-    `<rect x="${x}" y="210" width="${w}" height="26" rx="13" fill="var(--accent-100, #ede9fe)"/>` +
-    `<rect x="${x + 14}" y="220" width="${w - 28}" height="7" rx="3.5" fill="var(--accent-600, #7c3aed)"/>`;
-  return `<svg ${VB} aria-label="A spaced-repetition review-due card" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <rect x="24" y="40" width="392" height="150" rx="14" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
-    <!-- clock icon -->
-    <circle cx="62" cy="80" r="18" fill="var(--accent-100, #ede9fe)"/>
-    <circle cx="62" cy="80" r="10" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2"/>
-    <path d="M62 80 V 73 M62 80 l5 3" stroke="var(--accent-600, #7c3aed)" stroke-width="2" stroke-linecap="round"/>
-    <!-- count headline -->
-    <rect x="94" y="66" width="200" height="13" rx="6" fill="var(--gray-800, #1f2937)"/>
-    <rect x="94" y="88" width="260" height="9" rx="4.5" fill="var(--gray-400, #9ca3af)"/>
-    <!-- start button -->
-    <rect x="300" y="62" width="96" height="34" rx="8" fill="var(--accent-600, #7c3aed)"/>
-    <text x="348" y="84" text-anchor="middle" font-family="system-ui, sans-serif" font-size="12" font-weight="700" fill="#fff">Review</text>
-    <!-- divider -->
-    <rect x="24" y="128" width="392" height="1.5" fill="var(--accent-100, #ede9fe)"/>
-    <!-- due topic chips -->
-    ${chip(40, 110)}
-    ${chip(162, 92)}
-    ${chip(266, 128)}
-    <!-- schedule note -->
-    <rect x="40" y="252" width="300" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
-    <rect x="40" y="268" width="220" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
-  </svg>`;
-}
-
-/** The cumulative-recall card: weekly + monthly sections with counts. */
-function recallMock(): string {
-  const section = (y: number, label: string, w: number): string =>
-    `<rect x="40" y="${y}" width="360" height="48" rx="10" fill="var(--gray-100, #f3f4f6)"/>` +
-    `<rect x="56" y="${y + 13}" width="${w}" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>` +
-    `<rect x="56" y="${y + 29}" width="${w + 40}" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>` +
-    `<rect x="300" y="${y + 10}" width="84" height="28" rx="8" fill="var(--accent-600, #7c3aed)"/>` +
-    `<text x="342" y="${y + 28}" text-anchor="middle" font-family="system-ui, sans-serif" font-size="11" font-weight="700" fill="#fff">${label}</text>`;
-  return `<svg ${VB} aria-label="A cumulative-recall card with weekly and monthly sessions" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <rect x="24" y="30" width="392" height="238" rx="14" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5"/>
-    <!-- layers icon -->
-    <path d="M50 62 l16 -8 l16 8 l-16 8 Z" fill="var(--accent-500, #8b5cf6)"/>
-    <path d="M50 72 l16 8 l16 -8" fill="none" stroke="var(--accent-400, #a78bfa)" stroke-width="2.4" stroke-linejoin="round"/>
-    <rect x="94" y="52" width="150" height="12" rx="6" fill="var(--gray-800, #1f2937)"/>
-    <rect x="94" y="72" width="280" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
-    <!-- lagging / priority chip -->
-    <rect x="94" y="90" width="150" height="18" rx="9" fill="color-mix(in srgb, #f59e0b 18%, transparent)"/>
-    <rect x="106" y="96" width="126" height="7" rx="3.5" fill="#b45309"/>
-    ${section(126, 'Weekly', 92)}
-    ${section(190, 'Monthly', 104)}
-  </svg>`;
-}
-
-/** The progress meter + roadmap ticks + data backup chips. */
-function progressMock(): string {
-  const tick = (x: number, y: number): string =>
-    `<circle cx="${x}" cy="${y}" r="11" fill="var(--success-light, #16a34a)"/>` +
-    `<path d="M${x - 4.5} ${y} l3 3 L${x + 5} ${y - 4.5}" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-  return `<svg ${VB} aria-label="A completion meter, roadmap ticks, and data backup controls" xmlns="http://www.w3.org/2000/svg">
-    ${panel()}
-    <!-- meter card -->
-    <rect x="24" y="34" width="392" height="70" rx="12" fill="var(--gray-100, #f3f4f6)"/>
-    <rect x="40" y="50" width="150" height="11" rx="5" fill="var(--gray-800, #1f2937)"/>
-    <rect x="40" y="68" width="90" height="8" rx="4" fill="var(--gray-400, #9ca3af)"/>
-    <rect x="40" y="84" width="360" height="10" rx="5" fill="var(--gray-200, #e5e7eb)"/>
-    <rect x="40" y="84" width="236" height="10" rx="5" fill="var(--accent-500, #8b5cf6)"/>
-    <!-- a row of completed topic ticks -->
-    ${tick(48, 148)}
-    ${tick(96, 148)}
-    ${tick(144, 148)}
-    <circle cx="192" cy="148" r="11" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
-    <circle cx="240" cy="148" r="11" fill="none" stroke="var(--gray-400, #9ca3af)" stroke-width="2"/>
-    <rect x="60" y="144" width="100" height="8" rx="4" fill="var(--gray-300, #d1d5db)" opacity="0"/>
-    <!-- "Your data" bar -->
-    <rect x="24" y="190" width="392" height="80" rx="12" fill="var(--gray-100, #f3f4f6)"/>
-    <rect x="40" y="206" width="120" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>
-    <rect x="40" y="224" width="300" height="7" rx="3.5" fill="var(--gray-400, #9ca3af)"/>
-    <rect x="40" y="242" width="80" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
-    <rect x="54" y="250" width="52" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
-    <rect x="130" y="242" width="80" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
-    <rect x="144" y="250" width="52" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
-    <rect x="220" y="242" width="70" height="22" rx="7" fill="#fff" stroke="var(--gray-300, #d1d5db)" stroke-width="1.5"/>
-    <rect x="234" y="250" width="42" height="7" rx="3.5" fill="var(--gray-600, #4b5563)"/>
+/** The hero's composite mock: roadmap behind a floating quiz card. */
+function heroMock(): string {
+  const node = (x: number, y: number, done: boolean, d: number): string =>
+    `<g class="lp-hero-node" style="--d:${d}s">` +
+    `<circle cx="${x}" cy="${y}" r="13" fill="${done ? 'var(--success-light, #16a34a)' : 'var(--accent-500, #8b5cf6)'}"/>` +
+    (done
+      ? `<path d="M${x - 5} ${y} l3.5 3.5 L${x + 6} ${y - 5}" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>`
+      : `<circle cx="${x}" cy="${y}" r="4.5" fill="#fff" fill-opacity="0.9"/>`) +
+    `</g>`;
+  return `<svg ${VB} role="img" aria-label="The roadmap with a quiz card, animating in">
+    ${surface()}
+    <!-- spine with a travelling signal spark -->
+    <path d="M64 44 V 276" stroke="var(--accent-300, #c4b5fd)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M64 74 C 120 74, 150 74, 200 74" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <path d="M64 140 C 120 140, 150 140, 200 140" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <path d="M64 206 C 120 206, 150 206, 200 206" stroke="var(--accent-200, #ddd6fe)" stroke-width="4" fill="none"/>
+    <circle class="lp-signal" r="4.5" fill="var(--accent-500, #8b5cf6)">
+      <animateMotion dur="3.2s" repeatCount="indefinite" path="M64 44 V 276" keyPoints="0;1" keyTimes="0;1" calcMode="linear"/>
+    </circle>
+    ${node(64, 44, true, 0.0)}
+    ${node(64, 104, true, 0.12)}
+    ${node(64, 170, false, 0.24)}
+    ${node(64, 236, false, 0.36)}
+    ${node(200, 74, true, 0.18)}
+    ${node(200, 140, false, 0.3)}
+    ${node(200, 206, false, 0.42)}
+    <rect x="222" y="64" width="92" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="222" y="130" width="78" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <rect x="222" y="196" width="86" height="20" rx="6" fill="var(--gray-200, #e5e7eb)"/>
+    <!-- floating quiz card -->
+    <g class="lp-hero-card">
+      <rect x="236" y="150" width="196" height="140" rx="14" fill="#fff" stroke="var(--accent-200, #ddd6fe)" stroke-width="1.5" filter="drop-shadow(0 10px 22px rgba(0,0,0,0.14))"/>
+      <rect x="252" y="166" width="24" height="22" rx="7" fill="var(--accent-100, #ede9fe)"/>
+      <path d="M258 177 l3 3 l7 -7" fill="none" stroke="var(--accent-600, #7c3aed)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect x="286" y="170" width="64" height="9" rx="4.5" fill="var(--gray-700, #374151)"/>
+      <g class="lp-hero-timer"><rect x="372" y="166" width="46" height="20" rx="10" fill="var(--accent-500, #8b5cf6)"/>
+      <text x="395" y="180" text-anchor="middle" font-family="system-ui, sans-serif" font-size="10.5" font-weight="700" fill="#fff">0:45</text></g>
+      <rect x="252" y="200" width="166" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
+      <rect x="252" y="216" width="130" height="8" rx="4" fill="var(--gray-300, #d1d5db)"/>
+      <g class="lp-hero-opt"><rect x="252" y="236" width="166" height="26" rx="7" fill="var(--accent-50, #f5f3ff)" stroke="var(--accent-400, #a78bfa)" stroke-width="1.5"/>
+      <circle cx="267" cy="249" r="7" fill="var(--accent-600, #7c3aed)"/>
+      <rect x="282" y="245" width="110" height="8" rx="4" fill="var(--accent-500, #8b5cf6)"/></g>
+      <rect x="252" y="270" width="166" height="12" rx="6" fill="var(--gray-100, #f3f4f6)"/>
+    </g>
   </svg>`;
 }
 ---
@@ -334,16 +458,19 @@ function progressMock(): string {
   />
 
   {/* ===================== Hero ===================== */}
-  <section class="relative overflow-hidden px-4 pb-10 pt-6 sm:px-0 sm:pt-10">
-    <div class="grid items-center gap-10 lg:grid-cols-[1.1fr_1fr]">
-      <div>
+  <section class="lp-hero relative overflow-hidden px-4 pb-10 pt-6 sm:px-0 sm:pt-12">
+    <div class="grid items-center gap-10 lg:grid-cols-[1.05fr_1fr]">
+      <div class="lp-reveal">
         <span class="inline-flex items-center gap-1.5 rounded-full bg-accent-100 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-accent-700 dark:bg-accent-500/15 dark:text-accent-300">
-          <span class="h-1.5 w-1.5 rounded-full bg-accent-500"></span>
+          <span class="lp-ping relative flex h-1.5 w-1.5">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-accent-500 opacity-75"></span>
+            <span class="relative inline-flex h-1.5 w-1.5 rounded-full bg-accent-500"></span>
+          </span>
           Data-science learning, done properly
         </span>
         <h1 class="mt-5 text-4xl font-extrabold leading-[1.05] tracking-tight text-gray-900 sm:text-5xl lg:text-6xl dark:text-gray-50">
-          Learn it once.<br />
-          <span class="text-accent-600 dark:text-accent-400">Actually remember it.</span>
+          Structured to learn.<br />
+          <span class="text-accent-600 dark:text-accent-400">Engineered to remember.</span>
         </h1>
         <p class="mt-5 max-w-xl text-base leading-relaxed text-gray-600 sm:text-lg dark:text-gray-300">
           Cortex is a structured data-science syllabus that goes further than notes: a visual roadmap, interlinked lessons, timed quizzes, and spaced repetition that brings a topic back right before you would forget it.
@@ -351,10 +478,10 @@ function progressMock(): string {
         <div class="mt-7 flex flex-wrap items-center gap-3">
           <a
             href="/roadmap"
-            class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+            class="lp-cta-btn inline-flex items-center gap-2 rounded-lg bg-accent-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
           >
             Explore the roadmap
-            <span aria-hidden="true">→</span>
+            <span class="lp-arrow" aria-hidden="true">&#8594;</span>
           </a>
           <a
             href="/notes"
@@ -379,9 +506,8 @@ function progressMock(): string {
         </dl>
       </div>
 
-      {/* Hero mock: a composite of the roadmap graph behind a quiz card. */}
-      <div class="relative mx-auto w-full max-w-lg lg:mx-0">
-        <div class="lp-card overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-gray-900">
+      <div class="lp-reveal lp-hero-art relative mx-auto w-full max-w-lg lg:mx-0" style="--d:0.1s">
+        <div class="lp-card lp-animate overflow-hidden rounded-2xl border border-gray-200 bg-white p-3 shadow-xl dark:border-white/10 dark:bg-gray-900">
           <Fragment set:html={heroMock()} />
         </div>
       </div>
@@ -391,55 +517,84 @@ function progressMock(): string {
   {/* ===================== Principle strip ===================== */}
   <section class="border-y border-gray-200 bg-gray-50/60 px-4 py-5 sm:px-6 dark:border-white/10 dark:bg-white/5">
     <p class="mx-auto max-w-3xl text-center text-sm text-gray-600 sm:text-base dark:text-gray-300">
-      The guiding idea: <strong class="font-semibold text-gray-900 dark:text-gray-100">you write Markdown, and the site does the rest.</strong> Notes become a browsable knowledge base, a syllabus-grade roadmap, and a spaced-repetition study system, with no CMS and no build to babysit.
+      The guiding idea: <strong class="font-semibold text-gray-900 dark:text-gray-100">a structured curriculum you actually retain.</strong> Topics build in a deliberate order along a visual roadmap, then timed quizzes, spaced repetition, and cumulative recall bring each concept back right before you would forget it, so it sticks.
     </p>
   </section>
 
-  {/* ===================== Feature showcase ===================== */}
+  {/* ===================== Headline feature showcase ===================== */}
   <section class="px-4 py-12 sm:px-0 sm:py-16">
-    <div class="mx-auto mb-10 max-w-2xl text-center">
+    <div class="lp-reveal mx-auto mb-12 max-w-2xl text-center">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-50">
         Everything you need to learn and retain
       </h2>
       <p class="mt-3 text-gray-600 dark:text-gray-300">
-        Six parts working together, from first read to long-term recall.
+        Six parts working together, from the first read to long-term recall.
       </p>
     </div>
 
-    <div class="flex flex-col gap-14 sm:gap-20">
+    <div class="flex flex-col gap-16 sm:gap-24">
       {features.map((f, i) => (
         <div
           class:list={[
-            'grid items-center gap-8 lg:grid-cols-2 lg:gap-12',
-            i % 2 === 1 && 'lg:[&>*:first-child]:order-2',
+            'lp-feature grid items-center gap-8 lg:grid-cols-2 lg:gap-14',
+            i % 2 === 1 && 'lg:[&>.lp-feature-copy]:order-2',
           ]}
         >
-          {/* Copy */}
-          <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400">
+          <div class="lp-feature-copy lp-reveal">
+            <span class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-accent-600 dark:text-accent-400">
+              <span class="h-px w-6 bg-accent-400"></span>
               {f.eyebrow}
             </span>
-            <h3 class="mt-2 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
+            <h3 class="mt-3 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
               {f.title}
             </h3>
             <p class="mt-3 max-w-md leading-relaxed text-gray-600 dark:text-gray-300">
               {f.body}
             </p>
-            {f.id === 'roadmap' && (
-              <a href="/roadmap" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300 dark:hover:text-accent-200">
-                Open the roadmap <span aria-hidden="true">→</span>
-              </a>
+            {f.tags && (
+              <ul class="mt-5 flex flex-wrap gap-2">
+                {f.tags.map((t) => (
+                  <li class="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-xs font-medium text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                    <svg class="h-3 w-3 text-accent-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5" /></svg>
+                    {t}
+                  </li>
+                ))}
+              </ul>
             )}
-            {f.id === 'notes' && (
-              <a href="/notes" class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300 dark:hover:text-accent-200">
-                Browse the notes <span aria-hidden="true">→</span>
+            {f.link && (
+              <a href={f.link.href} class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800 dark:text-accent-300 dark:hover:text-accent-200">
+                {f.link.text} <span aria-hidden="true">&#8594;</span>
               </a>
             )}
           </div>
-          {/* SVG mock */}
-          <div class="lp-card rounded-2xl border border-gray-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-gray-900">
-            <Fragment set:html={featureMock(f.id)} />
+          <div class="lp-reveal lp-feature-art" style="--d:0.08s">
+            <div class="lp-card lp-animate rounded-2xl border border-gray-200 bg-white p-3 shadow-lg dark:border-white/10 dark:bg-gray-900">
+              <Fragment set:html={featureMock(f.id)} />
+            </div>
           </div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  {/* ===================== "And more" quirks grid ===================== */}
+  <section class="border-t border-gray-200 px-4 py-12 sm:px-0 sm:py-16 dark:border-white/10">
+    <div class="lp-reveal mx-auto mb-10 max-w-2xl text-center">
+      <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-50">
+        And the details that make it stick
+      </h2>
+      <p class="mt-3 text-gray-600 dark:text-gray-300">
+        The small, deliberate touches you feel on every page.
+      </p>
+    </div>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {extras.map((e, i) => (
+        <div class="lp-reveal lp-extra group rounded-xl border border-gray-200 bg-white p-5 transition-colors hover:border-accent-300 dark:border-white/10 dark:bg-gray-900 dark:hover:border-accent-500/40" style={`--d:${(i % 3) * 0.07}s`}>
+          <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-accent-100 text-accent-600 transition-transform group-hover:scale-110 dark:bg-accent-500/15 dark:text-accent-300">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={e.icon} />
+          </span>
+          <h3 class="mt-4 font-semibold text-gray-900 dark:text-gray-100">{e.title}</h3>
+          <p class="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-gray-400">{e.body}</p>
         </div>
       ))}
     </div>
@@ -447,7 +602,7 @@ function progressMock(): string {
 
   {/* ===================== How it works ===================== */}
   <section class="border-t border-gray-200 px-4 py-12 sm:px-0 sm:py-16 dark:border-white/10">
-    <div class="mx-auto mb-10 max-w-2xl text-center">
+    <div class="lp-reveal mx-auto mb-10 max-w-2xl text-center">
       <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl dark:text-gray-50">
         How a topic moves through Cortex
       </h2>
@@ -461,13 +616,16 @@ function progressMock(): string {
         { n: '2', t: 'Test', d: 'Take the timed quiz; clear two-thirds to complete it.' },
         { n: '3', t: 'Review', d: 'Spaced repetition brings it back on a widening schedule.' },
         { n: '4', t: 'Recall', d: 'Weekly and monthly sessions interleave everything you covered.' },
-      ].map((s) => (
-        <li class="relative rounded-xl border border-gray-200 bg-gray-50/60 p-5 dark:border-white/10 dark:bg-white/5">
+      ].map((s, i) => (
+        <li class="lp-reveal lp-step relative rounded-xl border border-gray-200 bg-gray-50/60 p-5 dark:border-white/10 dark:bg-white/5" style={`--d:${i * 0.09}s`}>
           <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-accent-600 text-sm font-bold text-white">
             {s.n}
           </span>
           <h3 class="mt-3 font-semibold text-gray-900 dark:text-gray-100">{s.t}</h3>
           <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">{s.d}</p>
+          {i < 3 && (
+            <span class="absolute right-[-10px] top-1/2 hidden -translate-y-1/2 text-accent-400 lg:block" aria-hidden="true">&#8594;</span>
+          )}
         </li>
       ))}
     </ol>
@@ -475,20 +633,20 @@ function progressMock(): string {
 
   {/* ===================== Final CTA ===================== */}
   <section class="px-4 pb-16 sm:px-0">
-    <div class="lp-cta relative overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 px-6 py-10 text-center sm:px-10 dark:border-accent-500/25 dark:bg-accent-500/10">
-      <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
+    <div class="lp-reveal lp-cta relative overflow-hidden rounded-2xl border border-accent-200 bg-accent-50 px-6 py-12 text-center sm:px-10 dark:border-accent-500/25 dark:bg-accent-500/10">
+      <h2 class="relative text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50">
         Start at the beginning of the map
       </h2>
-      <p class="mx-auto mt-3 max-w-xl text-gray-600 dark:text-gray-300">
-        Open the roadmap, pick a track, and read your first note. Your progress saves itself as you go.
+      <p class="relative mx-auto mt-3 max-w-xl text-gray-600 dark:text-gray-300">
+        Open the roadmap, pick a track, and read your first note. Your progress saves itself as you go, right in your browser.
       </p>
-      <div class="mt-6 flex flex-wrap justify-center gap-3">
+      <div class="relative mt-7 flex flex-wrap justify-center gap-3">
         <a
           href="/roadmap"
-          class="inline-flex items-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+          class="lp-cta-btn inline-flex items-center gap-2 rounded-lg bg-accent-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-accent-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
         >
           Explore the roadmap
-          <span aria-hidden="true">→</span>
+          <span class="lp-arrow" aria-hidden="true">&#8594;</span>
         </a>
         <a
           href="/notes"
@@ -502,50 +660,175 @@ function progressMock(): string {
 </Layout>
 
 {/*
-  ===========================================================================
-  SVG mocks. Hand-authored, static, and themed through the same palette tokens
-  as the live UI (`--accent-*`, `--gray-*`, `--success-*`). Each echoes a real
-  surface so the landing page previews the product honestly without shipping a
-  stale screenshot. Rendered via `set:html` from the helpers below.
-  ===========================================================================
+  Scroll-reveal: add `.is-in` to each `.lp-reveal` as it enters the viewport, so
+  sections rise + fade in once. Progressive enhancement — with no JS (or reduced
+  motion) the CSS shows everything immediately. One shared observer, cheap.
 */}
-<script is:inline>
-  // (No client JS — the mocks are static SVG injected at build time.)
+<script>
+  function armReveal(): void {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('.lp-reveal'));
+    if (els.length === 0) return;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    if (reduce || !('IntersectionObserver' in window)) {
+      for (const el of els) el.classList.add('is-in');
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        }
+      },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.12 },
+    );
+    for (const el of els) io.observe(el);
+  }
+  // Run on first load and after every View Transition swap.
+  document.addEventListener('astro:page-load', armReveal);
 </script>
 
 <style>
-  /* Subtle lift on the mock cards; respects reduced motion. */
+  /* ===== Scroll reveal ===== */
+  .lp-reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition-delay: var(--d, 0s);
+  }
+  .lp-reveal.is-in {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* ===== Mock cards ===== */
   .lp-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
   }
-  @media (hover: hover) {
-    .lp-card:hover {
-      transform: translateY(-3px);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .lp-card {
-      transition: none;
-    }
-    .lp-card:hover {
-      transform: none;
-    }
-  }
-  /* The mock SVGs scale to their card width. */
   .lp-card :global(svg) {
     display: block;
     width: 100%;
     height: auto;
   }
+  @media (hover: hover) {
+    .lp-feature-art:hover .lp-card,
+    .lp-hero-art:hover .lp-card {
+      transform: translateY(-4px);
+      box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  /* ===== Hero accent + CTA arrow ===== */
+  .lp-ping span:first-child {
+    animation: lp-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+  @keyframes lp-ping {
+    75%, 100% { transform: scale(2.4); opacity: 0; }
+  }
+  .lp-cta-btn .lp-arrow {
+    transition: transform 0.2s ease;
+  }
+  .lp-cta-btn:hover .lp-arrow {
+    transform: translateX(3px);
+  }
   .lp-cta::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(
-      ellipse at top,
-      color-mix(in srgb, var(--accent-500) 10%, transparent),
-      transparent 60%
-    );
+    background: radial-gradient(ellipse at top, color-mix(in srgb, var(--accent-500) 12%, transparent), transparent 60%);
     pointer-events: none;
+  }
+
+  /* ===========================================================
+     In-mock animations. Each only runs once its card has scrolled
+     in (`.is-in` on the enclosing `.lp-reveal`), so the motion lands
+     with attention on it, and never runs under reduced motion.
+     =========================================================== */
+
+  /* Hero: nodes pop in, the quiz card lifts, its timer + option settle. */
+  .lp-hero-node { opacity: 0; transform: scale(0.4); transform-origin: center; transform-box: fill-box; }
+  .is-in .lp-hero-node { animation: lp-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; animation-delay: var(--d); }
+  .lp-hero-card { opacity: 0; transform: translateY(16px); transform-box: fill-box; }
+  .is-in .lp-hero-card { animation: lp-rise 0.6s ease forwards 0.5s; }
+  .lp-hero-timer { transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-hero-timer { animation: lp-pulse 1.6s ease-in-out infinite 1.1s; }
+  .lp-hero-opt { opacity: 0; transform-box: fill-box; }
+  .is-in .lp-hero-opt { animation: lp-fade 0.4s ease forwards 0.9s; }
+  .lp-signal { opacity: 0; }
+  .is-in .lp-signal { opacity: 1; }
+
+  @keyframes lp-pop { to { opacity: 1; transform: scale(1); } }
+  @keyframes lp-rise { to { opacity: 1; transform: none; } }
+  @keyframes lp-fade { to { opacity: 1; } }
+  @keyframes lp-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  /* Roadmap mock: bands slide in, chips pop. */
+  .lp-band { opacity: 0; transform: translateX(-14px); transform-box: fill-box; }
+  .is-in .lp-band { animation: lp-slide-x 0.5s ease forwards; animation-delay: var(--d); }
+  .lp-chip { opacity: 0; transform: scale(0.6); transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-chip { animation: lp-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; animation-delay: calc(0.2s + var(--d)); }
+  @keyframes lp-slide-x { to { opacity: 1; transform: none; } }
+
+  /* Notes mock: wikilink glows, backlinks slide in, TOC active bar grows. */
+  .lp-wikilink { transform-box: fill-box; }
+  .is-in .lp-wikilink rect:first-child { animation: lp-glow 2.4s ease-in-out infinite 0.6s; }
+  @keyframes lp-glow { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
+  .lp-backlink { opacity: 0; transform: translateX(-10px); transform-box: fill-box; }
+  .is-in .lp-backlink { animation: lp-slide-x 0.45s ease forwards; animation-delay: var(--d); }
+  .lp-toc-active { transform-box: fill-box; transform-origin: left center; }
+  .is-in .lp-toc-active { animation: lp-fade 0.5s ease forwards 0.3s; opacity: 0; }
+
+  /* Quiz mock: progress bar fills, timer pulses urgent, picked option pops. */
+  .lp-progress { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); }
+  .is-in .lp-progress { animation: lp-fill 1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards 0.3s; }
+  @keyframes lp-fill { to { transform: scaleX(1); } }
+  .lp-timer { transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-timer { animation: lp-pulse 1.4s ease-in-out infinite 0.8s; }
+  .lp-opt-picked { transform-box: fill-box; transform-origin: center; opacity: 0.5; }
+  .is-in .lp-opt-picked { animation: lp-pick 0.5s ease forwards 1s; }
+  @keyframes lp-pick { 0% { opacity: 0.5; transform: scale(0.99); } 60% { transform: scale(1.015); } 100% { opacity: 1; transform: none; } }
+
+  /* Review mock: clock hand sweeps, chips reveal, button pulses once. */
+  .lp-clock-hand { transform-box: fill-box; transform-origin: 66px 120px; }
+  .is-in .lp-clock-hand { animation: lp-spin 4s linear infinite; }
+  @keyframes lp-spin { to { transform: rotate(360deg); } }
+  .lp-reveal-chip { opacity: 0; transform: translateY(8px); transform-box: fill-box; }
+  .is-in .lp-reveal-chip { animation: lp-rise 0.45s ease forwards; animation-delay: var(--d); }
+  .lp-btn { transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-btn { animation: lp-pulse 1.8s ease-in-out 3; animation-delay: 0.6s; }
+
+  /* Recall mock: amber banner pulses, rows reveal. */
+  .lp-lagging { transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-lagging { animation: lp-pulse-soft 2s ease-in-out infinite 0.5s; }
+  @keyframes lp-pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+  .lp-reveal-row { opacity: 0; transform: translateY(10px); transform-box: fill-box; }
+  .is-in .lp-reveal-row { animation: lp-rise 0.5s ease forwards; animation-delay: var(--d); }
+
+  /* Progress mock: meter fills, ticks pop in sequence. */
+  .lp-meter { transform-box: fill-box; transform-origin: left center; transform: scaleX(0); }
+  .is-in .lp-meter { animation: lp-fill 1.1s cubic-bezier(0.22, 0.61, 0.36, 1) forwards 0.3s; }
+  .lp-tick { opacity: 0; transform: scale(0.3); transform-box: fill-box; transform-origin: center; }
+  .is-in .lp-tick { animation: lp-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; animation-delay: var(--d); }
+
+  /* Reduced motion: no scroll-reveal, no in-mock motion. Everything just shows. */
+  @media (prefers-reduced-motion: reduce) {
+    .lp-reveal, .lp-reveal.is-in { opacity: 1; transform: none; transition: none; }
+    .lp-card { transition: none; }
+    .lp-ping span:first-child { animation: none; }
+    .lp-hero-node, .lp-hero-card, .lp-hero-opt, .lp-chip, .lp-band, .lp-backlink,
+    .lp-toc-active, .lp-progress, .lp-opt-picked, .lp-reveal-chip, .lp-reveal-row,
+    .lp-tick, .lp-meter {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
+    .is-in .lp-hero-timer, .is-in .lp-timer, .is-in .lp-lagging, .is-in .lp-btn,
+    .is-in .lp-clock-hand, .is-in .lp-wikilink rect:first-child {
+      animation: none !important;
+    }
+    .lp-signal :global(animateMotion) { display: none; }
+    .lp-signal { display: none; }
   }
 </style>
