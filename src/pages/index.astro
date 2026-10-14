@@ -718,6 +718,18 @@ function heroMock(): string {
       transform: translateY(-4px);
       box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.25);
     }
+    /* Dark theme: the neutral drop shadow is invisible on the dark page, so the
+       hover reads as nothing. Swap it for an accent BACKLIGHT — a soft violet
+       glow around the lifted card — so the hover is as legible in dark mode as
+       the grey shadow is in light mode. A faint accent border lift reinforces
+       it. */
+    :global([data-theme='dark']) .lp-feature-art:hover .lp-card,
+    :global([data-theme='dark']) .lp-hero-art:hover .lp-card {
+      box-shadow:
+        0 0 0 1px color-mix(in srgb, var(--accent-500) 40%, transparent),
+        0 18px 50px -10px color-mix(in srgb, var(--accent-500) 55%, transparent),
+        0 0 60px -8px color-mix(in srgb, var(--accent-500) 35%, transparent);
+    }
   }
 
   /* ===== Hero accent + CTA arrow ===== */
