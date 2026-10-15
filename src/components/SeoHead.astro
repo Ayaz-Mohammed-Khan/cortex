@@ -40,12 +40,16 @@ const SITE_NAME = "Cortex";
 /** Upper bound for the composed `<title>` so long note names don't overflow. */
 const TITLE_SUFFIX_MAX_LENGTH = 65;
 /**
- * Social share preview image (Open Graph / Twitter). A 1200x630 PNG in
- * `public/`, so it is served at the site root. We emit an ABSOLUTE URL when the
- * site base is known (most crawlers reject a relative og:image); otherwise we
- * fall back to the root-relative path.
+ * Social share preview image (Open Graph / Twitter). A 1200x630 JPG in
+ * `public/`, so it is served at the site root. JPG (not PNG) because
+ * LinkedIn's post composer validates and re-encodes the image and is far more
+ * reliable with JPEG — a PNG that the Post Inspector accepts can still fail to
+ * render in the composer. We emit an ABSOLUTE URL when the site base is known
+ * (most crawlers reject a relative og:image); otherwise we fall back to the
+ * root-relative path.
  */
-const OG_IMAGE_PATH = "/og-image.png";
+const OG_IMAGE_PATH = "/og-image.jpg";
+const OG_IMAGE_TYPE = "image/jpeg";
 
 // `title` still comes from the property-tested `pageTitle` (≤60 chars); we only
 // add the site-name suffix HERE, in the component layer, and drop it when the
@@ -75,9 +79,11 @@ const ogImage = site ? canonicalUrl(site, OG_IMAGE_PATH) : OG_IMAGE_PATH;
 <meta property="og:url" content={canonical} />
 <meta property="og:site_name" content={SITE_NAME} />
 <meta property="og:image" content={ogImage} />
+<meta property="og:image:secure_url" content={ogImage} />
+<meta property="og:image:type" content={OG_IMAGE_TYPE} />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="Cortex — structured to learn, engineered to remember" />
+<meta property="og:image:alt" content="Cortex: structured to learn, engineered to remember" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content={title} />
 <meta name="twitter:description" content={metaDesc} />
