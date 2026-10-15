@@ -70,11 +70,13 @@ export default defineConfig({
     defaultStrategy: 'hover',
   },
 
-  // Absolute base URL of the deployed site. Used for canonical URLs (Req 10.3)
-  // and the generated sitemap (Req 10.2). This is the live Cloudflare Pages
-  // origin; update it here (then commit + push) if the site ever moves to a
-  // custom domain.
-  site: 'https://cortex-5om.pages.dev',
+  // Absolute base URL of the deployed site. Used for canonical URLs (Req 10.3),
+  // the generated sitemap (Req 10.2), and absolute og:image URLs. Defaults to
+  // the live Cloudflare Pages origin; override with the SITE_URL env var to
+  // build for a preview/tunnel origin (handy for validating social-share
+  // unfurls before pushing). Update the default here if the site ever moves to
+  // a custom domain.
+  site: process.env.SITE_URL || 'https://cortex-5om.pages.dev',
 
   // The site root `/` is a dedicated landing page (src/pages/index.astro) that
   // presents the learning roadmap and links into the notes. (Previously `/`
