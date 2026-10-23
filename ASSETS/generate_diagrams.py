@@ -62,6 +62,7 @@ _INFERENTIAL = _track("Inferential Statistics", "08")
 _MATHS_ML = _track("Maths & ML Foundations", "09")
 _PYTHON = _track("Python Foundations", "01")
 _OOP = _track("OOP & Advanced Python", "02")
+_REGRESSION = _track("Regression & Regularization", "09")
 
 # Which track ASSETS/ folder each image belongs in. The statistics images are
 # split across the three Cortex statistics tracks to match where each note lives.
@@ -126,6 +127,8 @@ IMAGE_FOLDERS = {
     "reference_variables.png": _OOP,
     "encapsulation_capsule.png": _OOP,
     "inheritance_types.png": _OOP,
+    # Regression & Regularization
+    "linear_regression_line.png": _REGRESSION,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -2338,6 +2341,27 @@ def inheritance_types():
     save(fig, "inheritance_types.png")
 
 
+# ============================================================ Regression & Regularization
+def linear_regression_line():
+    # CGPA (input) vs salary package in LPA (output): roughly linear scatter
+    # with a best-fit line drawn through it, mirroring the running example.
+    cgpa = np.array([5.1, 5.6, 6.0, 6.3, 6.66, 6.9, 7.1, 7.4, 7.8,
+                     8.1, 8.4, 8.6, 8.9, 9.1, 9.4])
+    package = np.array([2.1, 2.5, 2.9, 2.8, 3.01, 3.4, 3.6, 4.1, 4.3,
+                        4.9, 5.0, 5.6, 6.0, 5.9, 6.7])
+    m, b = np.polyfit(cgpa, package, 1)
+    xs = np.linspace(cgpa.min() - 0.2, cgpa.max() + 0.2, 100)
+
+    fig, ax = plt.subplots(figsize=(7, 4.2))
+    ax.scatter(cgpa, package, color=BLUE, s=45, zorder=3, label="students")
+    ax.plot(xs, m * xs + b, color=RED, lw=2.2, label="best-fit line")
+    ax.set_title("Linear regression fits a best-fit line to the CGPA vs package data")
+    ax.set_xlabel("CGPA (input)")
+    ax.set_ylabel("package in LPA (output)")
+    ax.legend(loc="upper left")
+    save(fig, "linear_regression_line.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2421,4 +2445,6 @@ if __name__ == "__main__":
     reference_variables()
     encapsulation_capsule()
     inheritance_types()
+    # regression & regularization
+    linear_regression_line()
     print("\nAll diagrams generated.")

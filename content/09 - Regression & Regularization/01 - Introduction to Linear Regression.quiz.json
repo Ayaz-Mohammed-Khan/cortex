@@ -1,0 +1,202 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "supervised-regression",
+      "difficulty": "easy",
+      "question": "What makes linear regression a supervised learning algorithm?",
+      "options": [
+        "It learns from labelled examples that carry both the inputs and the known outputs.",
+        "It groups unlabelled data points into clusters that share similar characteristics.",
+        "It starts from no data and improves by collecting rewards for good actions.",
+        "It reduces the number of input columns before any prediction is attempted."
+      ],
+      "answer": 0,
+      "explanation": "Supervised learning means the training data pairs each input with its known output, and the algorithm learns the relationship between them. Clustering unlabelled points is unsupervised learning, learning from rewards is reinforcement learning, and reducing columns is dimensionality reduction. Linear regression fits the supervised definition because every training row has both a CGPA and the package that goes with it.",
+      "misconception": "Supervised learning needs known outputs in the training data, not just inputs."
+    },
+    {
+      "type": "mcq",
+      "concept": "continuous-target",
+      "difficulty": "easy",
+      "question": "Predicting a student's salary package from their CGPA is a regression problem for what reason?",
+      "options": [
+        "The package is predicted from more than one input column at the same time.",
+        "The CGPA input is a number rather than a category such as a course name.",
+        "The output being predicted, the package, is a continuous number rather than a category.",
+        "The data points do not fall exactly on a single straight line when plotted."
+      ],
+      "answer": 2,
+      "explanation": "What decides regression versus classification is the output column, not the input. The package is a continuous number, so predicting it is regression; predicting a category such as placed or not placed would be classification. The number of inputs and the scatter of the points change the model's form but never change whether the task is regression.",
+      "misconception": "The output column decides regression or classification, not the inputs or the data shape."
+    },
+    {
+      "type": "mcq",
+      "concept": "continuous-target",
+      "difficulty": "medium",
+      "question": "Which of these supervised problems is a regression task rather than a classification task?",
+      "options": [
+        "Reading an email and deciding whether it belongs in the spam folder or the inbox.",
+        "Looking at the weather and stating whether it will rain today or stay dry.",
+        "Checking an image and reporting whether a dog is present in the picture or not.",
+        "Estimating the selling price of a house from its size, location, and room count."
+      ],
+      "answer": 3,
+      "explanation": "A house price is a continuous number, so estimating it is regression. The spam decision, the rain decision, and the dog-present decision all produce a category, which makes them classification. The reliable test is to ask what the output holds: a number points to regression, and a label points to classification.",
+      "misconception": "A task is regression only when its output is a number, regardless of how it is framed."
+    },
+    {
+      "type": "mcq",
+      "concept": "simple-vs-multiple",
+      "difficulty": "medium",
+      "question": "In the line equation `y = m x + b` fitted by simple linear regression, what do `m` and `b` represent?",
+      "options": [
+        "`m` is the y-intercept where the line starts, and `b` is the slope of the line.",
+        "`m` is the slope, how fast the output rises with the input, and `b` is the y-intercept.",
+        "`m` is the number of input columns, and `b` is the count of training examples used.",
+        "`m` is the prediction error at each point, and `b` is the average of all the outputs."
+      ],
+      "answer": 1,
+      "explanation": "The slope `m` says how steeply the predicted package climbs as CGPA climbs, and the intercept `b` is the value of the output where the line crosses the vertical axis. Learning the model means finding these two numbers so the line sits best among the points. They are not counts of columns or rows, and neither one is the error term.",
+      "misconception": "The slope controls the line's steepness and the intercept fixes where it crosses the axis."
+    },
+    {
+      "type": "mcq",
+      "concept": "lr-types",
+      "difficulty": "medium",
+      "question": "A model predicts a student's package from four inputs: CGPA, gender, class 12 marks, and number of projects. Which form of linear regression is this?",
+      "options": [
+        "Simple linear regression, since there is still only one continuous output being predicted.",
+        "Polynomial linear regression, because several inputs always bend the fitted relationship.",
+        "Multiple linear regression, because the output is predicted from more than one input column.",
+        "Regularization, since combining several inputs requires shrinking the fitted coefficients."
+      ],
+      "answer": 2,
+      "explanation": "The number of input columns is what separates simple from multiple linear regression, and four inputs make this multiple linear regression. Simple regression uses exactly one input. Polynomial regression is about curved rather than straight relationships, not about input count, and regularization is a separate family of techniques for improving how a model generalizes.",
+      "misconception": "Multiple linear regression is defined by having several inputs, not by curvature or shrinkage."
+    },
+    {
+      "type": "mcq",
+      "concept": "lr-types",
+      "difficulty": "medium",
+      "question": "When is polynomial linear regression the right choice over simple or multiple linear regression?",
+      "options": [
+        "When the data has many input columns that need to be reduced to a smaller set first.",
+        "When the output is a category such as placed or not placed rather than a number.",
+        "When the training data is very large and will not fit into memory in one piece.",
+        "When the relationship in the data is curved rather than following a straight line."
+      ],
+      "answer": 3,
+      "explanation": "A straight line cannot track data that bends, so polynomial linear regression extends the model to follow curved relationships. Reducing columns is dimensionality reduction, a categorical output means classification, and a dataset too large for memory is a training-strategy concern rather than a reason to add curvature. Polynomial regression is chosen specifically for the shape of the relationship.",
+      "misconception": "Polynomial regression addresses curved relationships, not data size or output type."
+    },
+    {
+      "type": "mcq",
+      "concept": "algorithm-landscape",
+      "difficulty": "medium",
+      "question": "Where does regularization sit in relation to the three main forms of linear regression?",
+      "options": [
+        "It is a further set of techniques that adjust a linear model so it generalizes better.",
+        "It is a fourth standalone input type that replaces simple, multiple, and polynomial fits.",
+        "It is the unsupervised version of linear regression used when outputs are unavailable.",
+        "It is the step that converts a regression problem into a classification problem instead."
+      ],
+      "answer": 0,
+      "explanation": "Regularization is not a rival model but a set of techniques applied on top of a linear model so it generalizes to new data rather than memorizing the training set. It does not replace the three forms, it does not work without outputs, and it does not turn regression into classification. The ridge, lasso, and elasticnet methods are the regularization members covered later.",
+      "misconception": "Regularization improves an existing linear model rather than replacing it or changing the task."
+    },
+    {
+      "type": "mcq",
+      "concept": "supervised-regression",
+      "difficulty": "hard",
+      "question": "Why is the scatter of CGPA against package only roughly linear instead of forming a perfect straight line?",
+      "options": [
+        "Because the CGPA values were recorded with rounding mistakes that distort every point.",
+        "Because unmeasurable real-world factors, called stochastic errors, scatter the points.",
+        "Because a line equation can never approximate data that trends upward as this does.",
+        "Because the package column is categorical and categories cannot sit on a straight line."
+      ],
+      "answer": 1,
+      "explanation": "Real outcomes are shaped by influences you cannot put a number on, such as how an interview went or which company a student joined, and these stochastic errors push points off any clean line. The CGPA is not a recording mistake, a line does approximate upward-trending data well, and the package is a continuous number, not a category. The scatter is the signature of randomness in the world, not a flaw in the method.",
+      "misconception": "The scatter comes from unmeasurable real-world factors, not from measurement mistakes."
+    },
+    {
+      "type": "scenario",
+      "concept": "algorithm-landscape",
+      "difficulty": "hard",
+      "scenario": "A teammate has a labelled dataset and wants to predict a numeric outcome from a single input column, and asks which algorithm from the supervised family to reach for first.",
+      "question": "What is the most appropriate recommendation?",
+      "options": [
+        "A clustering algorithm, because grouping the rows will reveal the numeric outcome directly.",
+        "Simple linear regression, because the task is supervised, continuous, and has one input.",
+        "A classification algorithm, because every supervised prediction reduces to picking a class.",
+        "Reinforcement learning, because the model should learn the outcome by trial and error."
+      ],
+      "answer": 1,
+      "explanation": "The task is supervised with a continuous output and a single input, which is exactly the setting simple linear regression was built for. Clustering is unsupervised and predicts no outcome, classification predicts categories rather than numbers, and reinforcement learning applies when there is no labelled data to learn from. Starting with the simplest fitting model that matches the problem shape is the sound first move.",
+      "misconception": "A continuous single-input supervised task calls for simple linear regression, not clustering or classification."
+    },
+    {
+      "type": "scenario",
+      "concept": "continuous-target",
+      "difficulty": "hard",
+      "scenario": "Without any model, someone is asked to guess the package for a student with a 7.5 CGPA, and they give the same vague range they would give any student.",
+      "question": "What does fitting a linear regression model add over this guess?",
+      "options": [
+        "It removes the stochastic errors from the data so every future prediction is exact.",
+        "It guarantees the predicted package will match the student's eventual real package.",
+        "It gives each CGPA its own grounded prediction learned from the pattern in the data.",
+        "It converts the continuous package into a small set of fixed salary categories."
+      ],
+      "answer": 2,
+      "explanation": "The fitted line maps every CGPA to a specific predicted package drawn from the relationship in the training data, so a weak and a strong student no longer receive the same vague guess. It cannot erase stochastic errors or promise an exact match, since those random factors remain, and it keeps the package continuous rather than bucketing it into categories. Its value is a grounded, input-specific estimate.",
+      "misconception": "A fitted model gives input-specific predictions but does not make them error-free or exact."
+    },
+    {
+      "type": "mcq",
+      "concept": "simple-vs-multiple",
+      "difficulty": "medium",
+      "question": "Why is the fitted result of simple linear regression a line, while multiple linear regression produces a flat surface?",
+      "options": [
+        "Because simple regression rounds its predictions while multiple regression keeps decimals.",
+        "Because a single input gives a line in two dimensions, and several inputs give a surface.",
+        "Because simple regression is supervised while multiple regression is unsupervised learning.",
+        "Because multiple regression predicts categories, which need a surface rather than a line."
+      ],
+      "answer": 1,
+      "explanation": "With one input and one output, the fit lives in a two-dimensional plane and is a line. Adding more inputs raises the dimension, so the fit becomes a flat plane or hyperplane across those inputs. Both methods are supervised and both predict a continuous number, and neither difference comes from rounding, so the dimensionality of the inputs is what changes the shape.",
+      "misconception": "More input columns raise the dimension of the fit, turning a line into a surface."
+    },
+    {
+      "type": "mcq",
+      "concept": "simple-vs-multiple",
+      "difficulty": "medium",
+      "question": "Once a simple linear regression line has been fitted, how is a prediction made for a new CGPA value?",
+      "options": [
+        "Search the training data for the row whose CGPA is closest and copy its package.",
+        "Average the packages of all the training students and report that single number.",
+        "Substitute the new CGPA as the input into `m x + b` and compute the resulting output.",
+        "Refit the entire line from scratch each time a new CGPA needs a prediction."
+      ],
+      "answer": 2,
+      "explanation": "The learned slope and intercept define the line, so prediction is just evaluating `m x + b` at the new CGPA to read off the package. There is no need to look up the nearest training row, which would ignore the fitted relationship, no need to fall back on a plain average, and no need to refit, since the line is already learned. Evaluating the equation is the whole act of predicting.",
+      "misconception": "Prediction evaluates the fitted equation at the new input rather than searching or refitting."
+    },
+    {
+      "type": "card",
+      "concept": "supervised-regression",
+      "difficulty": "medium",
+      "question": "Explain why a straight line is a reasonable model for the CGPA versus package data, given that the points do not fall exactly on a line.",
+      "answer": "The points trend upward together, so a straight-line relationship captures the real pattern that higher CGPA tends to bring a higher package. They miss a perfect line only because stochastic errors, unmeasurable factors such as interview performance or the paying company, scatter each point a little. Since no line can pass through every point once randomness is present, the sensible goal is the best-fit line that sits as close as possible to all the points at once and makes the smallest total error. That line models the systematic relationship while accepting the random part it cannot explain.",
+      "explanation": "This is the core intuition of regression: separate the signal, the trend a line can capture, from the noise, the stochastic scatter it cannot, and fit the line to the signal."
+    },
+    {
+      "type": "card",
+      "concept": "lr-types",
+      "difficulty": "medium",
+      "question": "Name the three forms of linear regression and state what distinguishes each one.",
+      "answer": "Simple linear regression uses exactly one input column and one output, fitting a line in two dimensions, such as predicting package from CGPA alone. Multiple linear regression uses two or more input columns, fitting a flat plane or hyperplane, such as predicting package from CGPA, gender, class 12 marks, and project count. Polynomial linear regression is used when the relationship is curved rather than straight, extending the model to bend and follow the data. Beyond these three sits regularization, a set of techniques that adjust a linear model so it generalizes better.",
+      "explanation": "The first split is by number of inputs, simple versus multiple, and the second is by shape of the relationship, straight versus curved, which is polynomial."
+    }
+  ]
+}
