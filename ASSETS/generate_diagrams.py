@@ -129,6 +129,7 @@ IMAGE_FOLDERS = {
     "inheritance_types.png": _OOP,
     # Regression & Regularization
     "linear_regression_line.png": _REGRESSION,
+    "residuals_vertical.png": _REGRESSION,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -2362,6 +2363,38 @@ def linear_regression_line():
     save(fig, "linear_regression_line.png")
 
 
+def residuals_vertical():
+    # A residual is the vertical gap between a data point and the best-fit line.
+    # Scatter the CGPA vs package points, draw the best-fit line, and drop a
+    # labelled vertical segment from each point to the line so the quantity the
+    # error function sums is visible.
+    cgpa = np.array([5.1, 5.6, 6.0, 6.66, 7.1, 7.8, 8.4, 8.9, 9.4])
+    package = np.array([2.1, 2.9, 2.6, 3.01, 3.9, 4.3, 5.4, 6.0, 6.3])
+    m, b = np.polyfit(cgpa, package, 1)
+    fitted = m * cgpa + b
+    xs = np.linspace(cgpa.min() - 0.2, cgpa.max() + 0.2, 100)
+
+    fig, ax = plt.subplots(figsize=(7, 4.4))
+    ax.plot(xs, m * xs + b, color=RED, lw=2.2, zorder=2, label="best-fit line")
+    # residual segments: grey where the point sits above the line, same colour
+    # below, each annotated once to avoid legend clutter.
+    for i, (x, y, yhat) in enumerate(zip(cgpa, package, fitted)):
+        ax.plot([x, x], [y, yhat], color=GREY, lw=1.6, ls="--", zorder=1,
+                label="residual" if i == 0 else None)
+    ax.scatter(cgpa, package, color=BLUE, s=48, zorder=3, label="actual package")
+    # label one residual with a clearly visible gap so the meaning is obvious
+    j = 3
+    ax.annotate("residual\n(actual minus predicted)",
+                xy=(cgpa[j], (package[j] + fitted[j]) / 2),
+                xytext=(cgpa[j] - 1.6, package[j] + 1.1), fontsize=9,
+                arrowprops=dict(arrowstyle="->", color="black"))
+    ax.set_title("A residual is the vertical gap from a point to the best-fit line")
+    ax.set_xlabel("CGPA (input)")
+    ax.set_ylabel("package in LPA (output)")
+    ax.legend(loc="upper left")
+    save(fig, "residuals_vertical.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2447,4 +2480,5 @@ if __name__ == "__main__":
     inheritance_types()
     # regression & regularization
     linear_regression_line()
+    residuals_vertical()
     print("\nAll diagrams generated.")

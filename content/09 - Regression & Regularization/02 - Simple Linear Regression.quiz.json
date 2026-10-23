@@ -1,0 +1,219 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "best-fit-line",
+      "difficulty": "easy",
+      "question": "In simple linear regression, what makes a line the best-fit line?",
+      "options": [
+        "It passes exactly through the first and the last data point in the set.",
+        "It comes as close as possible to every data point at once, minimizing total error.",
+        "It passes through the single data point that sits highest on the output axis.",
+        "It splits the data so that half the points lie above it and half lie below it."
+      ],
+      "answer": 1,
+      "explanation": "A perfect line through every point is impossible once the data is only roughly linear, so the best-fit line is the one line that sits closest to all the points together, making the smallest total error. It does not have to touch any particular point, nor does it balance the count of points above and below, since a single far point can pull it without changing that count.",
+      "misconception": "Best fit is about minimizing total error, not touching chosen points or balancing counts."
+    },
+    {
+      "type": "mcq",
+      "concept": "slope-intercept",
+      "difficulty": "easy",
+      "question": "In the line `y = mx + b`, what do the slope `m` and the intercept `b` represent?",
+      "options": [
+        "`m` is where the line meets the vertical axis, and `b` is how fast the line tilts upward.",
+        "`m` is the average of all the outputs, and `b` is the average of all the inputs seen.",
+        "`m` is how much `y` rises per unit rise in `x`, and `b` is the value of `y` when `x` is zero.",
+        "`m` is the largest output in the data, and `b` is the smallest output in the data set."
+      ],
+      "answer": 2,
+      "explanation": "The slope `m` sets how steeply the line tilts, giving the rise in the predicted output for each one-unit rise in the input, while the intercept `b` is where the line crosses the vertical axis, the prediction when the input is zero. The first option swaps the two roles, and the others confuse the parameters with summary statistics of the data.",
+      "misconception": "The slope controls tilt and the intercept sets the crossing point; they are not data averages."
+    },
+    {
+      "type": "mcq",
+      "concept": "residual",
+      "difficulty": "medium",
+      "question": "What exactly is a residual for a single data point?",
+      "options": [
+        "The shortest straight-line distance from the point measured at a right angle to the line.",
+        "The horizontal distance between the point and where the line reaches the same output value.",
+        "The gap between this point's output and the output of the next point along the input axis.",
+        "The vertical distance from the point to the line, the actual output minus the predicted output."
+      ],
+      "answer": 3,
+      "explanation": "A residual is measured straight up or down because the input is treated as fixed and only the output is predicted, so it equals the actual output minus the predicted output. It is not the perpendicular distance, which would also move along the input, and it has nothing to do with neighbouring points. A point above the line gives a positive residual and one below gives a negative residual.",
+      "misconception": "Residuals are vertical, not perpendicular, because only the output is being predicted."
+    },
+    {
+      "type": "mcq",
+      "concept": "squared-error",
+      "difficulty": "medium",
+      "question": "Why does the error function square each residual before adding them, rather than adding the residuals directly?",
+      "options": [
+        "Because squaring keeps the final error small enough to fit inside standard computer memory.",
+        "Because raw residuals cancel out, since points above and below the line have opposite signs.",
+        "Because squaring converts every residual into a whole number that is easier to add together.",
+        "Because the data points must first be sorted, and squaring is how the sorting order is set."
+      ],
+      "answer": 1,
+      "explanation": "Residuals above the line are positive and those below are negative, so adding them raw lets a badly wrong line score near zero as the signs cancel. Squaring makes every term positive so nothing cancels, and it also weights large misses more heavily. Squaring does not round values to whole numbers, has nothing to do with sorting, and is not a memory trick.",
+      "misconception": "Squaring exists to stop signed residuals from cancelling, not for storage or rounding."
+    },
+    {
+      "type": "mcq",
+      "concept": "squared-error",
+      "difficulty": "hard",
+      "question": "Beyond stopping residuals from cancelling, why is squaring preferred over taking absolute values of the residuals?",
+      "options": [
+        "Squaring makes the error always smaller than the absolute-value version for the same line.",
+        "Squaring is smooth and differentiable everywhere, and it penalizes large errors more heavily.",
+        "The absolute value cannot be computed for negative residuals, so it is undefined for them.",
+        "Squaring guarantees the best-fit line will pass exactly through at least one data point."
+      ],
+      "answer": 1,
+      "explanation": "The squared error is smooth everywhere, so it can be differentiated to find the minimum directly, whereas the absolute value has a sharp corner at zero that is not differentiable. Squaring also makes a residual twice as large contribute four times as much, pushing the line to avoid big misses. The absolute value is perfectly defined for negatives, and neither choice forces the line through a point.",
+      "misconception": "Differentiability and heavier penalty on big errors are the reasons, not any claim about the corner."
+    },
+    {
+      "type": "scenario",
+      "concept": "squared-error",
+      "difficulty": "hard",
+      "scenario": "A colleague has one extreme outlier in their data and wants the fitted line to be dragged toward it as little as possible, so they ask whether to keep the squared error or switch to summing absolute residuals.",
+      "question": "What should you tell them about how the two objectives treat that outlier?",
+      "options": [
+        "The squared error ignores outliers completely, so it is the safer choice for this situation.",
+        "Both objectives treat every residual identically, so the choice makes no difference at all here.",
+        "The squared error reacts more strongly to the outlier, so absolute residuals pull toward it less.",
+        "Absolute residuals react more strongly to the outlier than the squared error does to it here."
+      ],
+      "answer": 2,
+      "explanation": "Squaring makes a large residual contribute disproportionately, so a single far outlier dominates the squared error and drags the line toward itself. Summing absolute residuals grows only in proportion to the gap, so it is less swayed by one extreme point. The squared error does not ignore outliers; it does the opposite, which is exactly why it is sensitive to them.",
+      "misconception": "The squared penalty amplifies outliers; it does not ignore them or treat them like any other point."
+    },
+    {
+      "type": "mcq",
+      "concept": "ols-derivation",
+      "difficulty": "medium",
+      "question": "The error function `E` depends on the slope and intercept. How does ordinary least squares locate the pair that minimizes it?",
+      "options": [
+        "By taking the partial derivative of `E` with respect to each parameter and setting both to zero.",
+        "By trying every possible slope and intercept in turn and keeping whichever pair scores the lowest.",
+        "By setting the slope equal to the ratio of the largest output over the largest input in the data.",
+        "By picking the slope and intercept of the line through the first and last points when sorted by input."
+      ],
+      "answer": 0,
+      "explanation": "A smooth error surface is flat at its minimum, so the slope in each direction is zero there. With two parameters you take the partial derivative with respect to each, set both to zero, and solve the resulting pair of equations for the two unknowns. That is an exact calculation, not a brute-force search over every candidate line, and it does not reduce to a ratio of extremes or a line through two chosen points.",
+      "misconception": "The minimum is found by zeroing both partial derivatives, not by searching or by shortcuts on extremes."
+    },
+    {
+      "type": "mcq",
+      "concept": "ols-derivation",
+      "difficulty": "medium",
+      "question": "The ordinary least squares intercept formula is `b` equals the mean of `y` minus the slope times the mean of `x`. What does this imply about the best-fit line?",
+      "options": [
+        "That the line must have a slope equal to one whenever the two means happen to be equal.",
+        "That the line always passes through the point formed by the mean of `x` and the mean of `y`.",
+        "That the line always passes through the origin where both the input and the output are zero.",
+        "That the intercept is always larger in value than the slope of the same fitted best-fit line."
+      ],
+      "answer": 1,
+      "explanation": "Rearranging the intercept formula gives the mean of `y` equals the slope times the mean of `x` plus the intercept, which is exactly the line equation evaluated at the point of averages. So the best-fit line always passes through the point formed by the two means. It does not generally pass through the origin, and no fixed relationship holds between the size of the slope and the intercept.",
+      "misconception": "The line is pinned to the point of averages, not to the origin."
+    },
+    {
+      "type": "mcq",
+      "concept": "ols-derivation",
+      "difficulty": "hard",
+      "question": "In the ordinary least squares slope formula, what do the numerator and the denominator measure?",
+      "options": [
+        "The numerator is the count of points above the line, and the denominator the count below it.",
+        "The numerator is the sum of all outputs, and the denominator is the sum of all the inputs seen.",
+        "The numerator measures how input and output vary together, the denominator how input varies alone.",
+        "The numerator is the largest residual in the data, and the denominator is the smallest residual seen."
+      ],
+      "answer": 2,
+      "explanation": "The numerator sums the product of each input's deviation from its mean with the matching output's deviation from its mean, which captures how the two move together. The denominator sums the squared input deviations, which captures how the input spreads on its own. Dividing one by the other gives the slope. The other options describe counts or sums that play no part in the formula.",
+      "misconception": "The slope is co-variation of input and output over the spread of the input, not a count or a raw sum."
+    },
+    {
+      "type": "mcq",
+      "concept": "closed-form-vs-iterative",
+      "difficulty": "medium",
+      "question": "What does it mean that ordinary least squares is a closed-form solution?",
+      "options": [
+        "The answer comes from a direct formula you evaluate once, like solving a quadratic equation.",
+        "The answer is reached by repeatedly improving a guess until the error stops getting smaller.",
+        "The solution only works when the data set has been closed off and no new points can be added.",
+        "The solution is kept hidden inside the library and cannot be written out as an explicit formula."
+      ],
+      "answer": 0,
+      "explanation": "A closed-form solution is an explicit formula built from a finite number of standard operations, so you substitute the data and read off the answer in one step, the same way the quadratic formula solves a quadratic. That contrasts with an approximation method that iterates toward the answer. The term is about the form of the solution, not about locking the data or hiding the formula.",
+      "misconception": "Closed form means a direct formula, as opposed to an iterative approximation."
+    },
+    {
+      "type": "scenario",
+      "concept": "closed-form-vs-iterative",
+      "difficulty": "hard",
+      "scenario": "A teammate has read many tutorials that solve linear regression with gradient descent and asks why this note derives a direct formula instead, and when each approach is the right tool.",
+      "question": "How should you explain the choice between the two?",
+      "options": [
+        "Gradient descent is always wrong for regression, so the closed-form formula should replace it.",
+        "The two give different best-fit lines, so you should run both and average the slopes they report.",
+        "The direct formula is exact and simple for few inputs, while the iterative method scales to many.",
+        "The direct formula only works on sorted data, so gradient descent is needed whenever data is unsorted."
+      ],
+      "answer": 2,
+      "explanation": "Both methods target the same minimum of the same error, so they aim at the same best-fit line rather than different ones. The closed-form formula is exact and efficient when the number of inputs is small, but it becomes expensive in very high dimensions, where the iterative method is the practical choice. Gradient descent is not wrong, and neither method depends on the data being sorted.",
+      "misconception": "They converge on the same line; the split is about dimensionality, not correctness or sorting."
+    },
+    {
+      "type": "scenario",
+      "concept": "worked-example",
+      "difficulty": "medium",
+      "scenario": "You have fitted a simple linear model and found a slope of 2 and an intercept of 1 for a model predicting output from input.",
+      "question": "What output does the model predict for an input of 4, and what does the intercept tell you?",
+      "options": [
+        "It predicts 6, and the intercept means the output rises by one unit for every unit of input.",
+        "It predicts 8, and the intercept means the predicted output equals zero whenever the input is zero.",
+        "It predicts 9, and the intercept means the predicted output is one when the input is zero.",
+        "It predicts 2, and the intercept means the input must always be at least one to get a prediction."
+      ],
+      "answer": 2,
+      "explanation": "Substituting into the line gives two times four plus one, which is nine. The intercept of one is the value of the output when the input is zero, so the prediction at zero input is one rather than zero. The slope of two, not the intercept, is what sets the per-unit rise, and nothing in the model restricts how small an input may be.",
+      "misconception": "The intercept is the prediction at zero input; the slope governs the per-unit change."
+    },
+    {
+      "type": "scenario",
+      "concept": "worked-example",
+      "difficulty": "hard",
+      "scenario": "For the three points (1, 2), (2, 3), and (3, 5), you have computed the mean of the inputs as 2 and need the slope by hand.",
+      "question": "Working through ordinary least squares, what slope do you get?",
+      "options": [
+        "A slope of 1.0, since the output rises by roughly one unit across each step of the input.",
+        "A slope of 3.0, which is the sum of the input-output co-variation terms before any division.",
+        "A slope of 0.5, taken as half the denominator since the input deviations are symmetric here.",
+        "A slope of 1.5, from a numerator of 3 over a denominator of 2 using deviations from the means."
+      ],
+      "answer": 3,
+      "explanation": "The input deviations are minus one, zero, and one, and the output deviations are about minus 1.33, minus 0.33, and 1.67. Their products sum to 3 for the numerator, while the squared input deviations sum to 2 for the denominator, giving a slope of 1.5. The value 3 is the numerator alone before dividing, and the other options drop or halve the denominator incorrectly.",
+      "misconception": "The slope is the co-variation sum divided by the input variation, not the numerator on its own."
+    },
+    {
+      "type": "card",
+      "concept": "squared-error",
+      "difficulty": "medium",
+      "question": "In your own words, state the ordinary least squares objective for simple linear regression.",
+      "answer": "Find the slope and intercept of the single line that make the sum of squared residuals as small as possible. A residual is the vertical distance from each data point to the line, the actual output minus the predicted output. Squaring each residual before summing stops positive and negative gaps from cancelling, penalizes large misses more heavily, and keeps the objective smooth enough to differentiate. The best-fit line is the one pair of slope and intercept that minimizes this total squared error.",
+      "explanation": "Stating the objective as minimizing a sum of squared vertical gaps, rather than as a formula, is what connects the geometry of the residual picture to the two closed-form equations derived from it."
+    },
+    {
+      "type": "card",
+      "concept": "ols-derivation",
+      "difficulty": "hard",
+      "question": "Why does taking absolute values of the residuals block the closed-form derivation, while squaring allows it?",
+      "answer": "The closed-form solution comes from differentiating the error function and setting the derivative to zero to locate the minimum. The squared residual is a smooth curve that can be differentiated at every point, so this step works and yields explicit formulas for the slope and intercept. The absolute value has a sharp corner at zero where it has no single well-defined derivative, so the same step fails there. Squaring also has the side benefit of penalizing large errors more, but differentiability is what makes the direct formula possible.",
+      "explanation": "This is why ordinary least squares is built on squared error specifically: the method depends on a derivative existing everywhere, which the absolute value does not provide."
+    }
+  ]
+}
