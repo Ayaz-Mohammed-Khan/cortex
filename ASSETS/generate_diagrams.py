@@ -130,6 +130,7 @@ IMAGE_FOLDERS = {
     # Regression & Regularization
     "linear_regression_line.png": _REGRESSION,
     "residuals_vertical.png": _REGRESSION,
+    "mlr_plane.png": _REGRESSION,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -2395,6 +2396,46 @@ def residuals_vertical():
     save(fig, "residuals_vertical.png")
 
 
+def mlr_plane():
+    # Multiple linear regression with two inputs fits a flat plane through a 3D
+    # scatter, the direct extension of the simple-regression line. Two inputs
+    # (CGPA and an aptitude score) predict the package; the fitted plane is the
+    # surface y = b0 + b1*x1 + b2*x2.
+    rng = np.random.default_rng(7)
+    n = 40
+    cgpa = rng.uniform(5.0, 9.5, n)
+    aptitude = rng.uniform(40, 95, n)
+    # true linear relationship plus a little noise so the points straddle the plane
+    package = 0.55 * cgpa + 0.04 * aptitude - 1.2 + rng.normal(0, 0.35, n)
+
+    # fit the plane by least squares on a design matrix with a column of ones
+    X = np.column_stack([np.ones(n), cgpa, aptitude])
+    beta, *_ = np.linalg.lstsq(X, package, rcond=None)
+
+    gx = np.linspace(cgpa.min(), cgpa.max(), 12)
+    gy = np.linspace(aptitude.min(), aptitude.max(), 12)
+    gx, gy = np.meshgrid(gx, gy)
+    gz = beta[0] + beta[1] * gx + beta[2] * gy
+
+    fig = plt.figure(figsize=(7.5, 5.6))
+    ax = fig.add_subplot(111, projection="3d")
+    ax.plot_surface(gx, gy, gz, color=ORANGE, alpha=0.4, linewidth=0,
+                    antialiased=True)
+    above = package >= (beta[0] + beta[1] * cgpa + beta[2] * aptitude)
+    ax.scatter(cgpa[above], aptitude[above], package[above], color=BLUE, s=28,
+               depthshade=True, label="points above the plane")
+    ax.scatter(cgpa[~above], aptitude[~above], package[~above], color=GREEN, s=28,
+               depthshade=True, label="points below the plane")
+    ax.set_xlabel("CGPA (input 1)", labelpad=8)
+    ax.set_ylabel("aptitude score (input 2)", labelpad=8)
+    ax.set_zlabel("package in LPA (output)", labelpad=6)
+    ax.set_title("Two inputs: the best fit is a plane, not a line")
+    ax.view_init(elev=18, azim=-60)
+    ax.legend(loc="upper left", fontsize=8)
+    fig.tight_layout()
+    save(fig, "mlr_plane.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2481,4 +2522,5 @@ if __name__ == "__main__":
     # regression & regularization
     linear_regression_line()
     residuals_vertical()
+    mlr_plane()
     print("\nAll diagrams generated.")

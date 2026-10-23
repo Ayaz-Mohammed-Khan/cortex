@@ -1,0 +1,226 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "multiple-features",
+      "difficulty": "easy",
+      "question": "What distinguishes multiple linear regression from simple linear regression?",
+      "options": [
+        "It predicts several output columns at once instead of a single output value.",
+        "It uses two or more input columns to predict one continuous output, rather than a single input.",
+        "It allows the output to be a category, whereas simple regression predicts a number.",
+        "It fits a curved surface to the data, whereas simple regression is restricted to a straight line."
+      ],
+      "answer": 1,
+      "explanation": "The move from simple to multiple regression is about the inputs, not the output. The output stays a single continuous value per row, and what grows is the number of input columns the model accounts for. It does not predict multiple outputs, does not switch to categorical outputs, and its surface stays flat rather than curved.",
+      "misconception": "The output stays one number; it is the count of input columns that increases."
+    },
+    {
+      "type": "mcq",
+      "concept": "beta-coefficients",
+      "difficulty": "medium",
+      "question": "In the model with prediction equal to beta-0 plus beta-1 times x-1 plus beta-2 times x-2, what does the coefficient beta-1 represent?",
+      "options": [
+        "The change in the predicted output for a one-unit rise in x-1, with the other inputs held fixed.",
+        "The average value that the input x-1 happens to take across all of the rows in the training data.",
+        "The output the model predicts when every single input column in the model is set equal to zero.",
+        "The total share of the output's overall variation that the input x-1 manages to explain on its own."
+      ],
+      "answer": 0,
+      "explanation": "Each coefficient is the weight on its input: it says how much the prediction moves per one-unit change in that input while the other inputs are held constant. It is not the input's average, which is a property of the data rather than the model. The prediction at all-zero inputs is the intercept beta-0, and the share of variation explained is a separate quantity reported by metrics such as R2.",
+      "misconception": "A coefficient measures sensitivity to its input, not the input's average or its explained variance."
+    },
+    {
+      "type": "mcq",
+      "concept": "intercept-term",
+      "difficulty": "easy",
+      "question": "What does the intercept term beta-0 represent in a multiple linear regression model?",
+      "options": [
+        "The steepest of all the input coefficients, setting the overall tilt of the fitted surface.",
+        "The average of the predictions the model makes across every row of the training data.",
+        "The predicted output when all of the input columns are equal to zero.",
+        "The sum of the input coefficients beta-1 through beta-n added together."
+      ],
+      "answer": 2,
+      "explanation": "The intercept is the model's prediction when every input is zero, the direct generalization of the y-intercept b from the simple-regression line. It is not a coefficient on any input, so it is not the steepest weight or a sum of the weights, and it is not the mean of the predictions, which depends on the data the model is applied to.",
+      "misconception": "The intercept is the baseline prediction at zero inputs, not a slope or an average."
+    },
+    {
+      "type": "mcq",
+      "concept": "plane-hyperplane",
+      "difficulty": "medium",
+      "question": "A multiple linear regression model uses two input columns to predict one output. What shape does the fitted model take?",
+      "options": [
+        "A curved surface that bends to pass through as many of the points as it can.",
+        "A pair of straight lines, one fitted separately to each of the two input columns.",
+        "A single straight line drawn through the combined range of both input columns.",
+        "A flat plane tilted through the three-dimensional cloud of data points."
+      ],
+      "answer": 3,
+      "explanation": "Two inputs and one output span three dimensions, and the linear model fits a flat plane tilted through that cloud, the direct step up from a line in two dimensions. The surface stays flat rather than curved because the model is linear, it is one surface rather than two separate lines, and a single line cannot span two input axes.",
+      "misconception": "With two inputs the fit is a flat plane, not a curve or a line."
+    },
+    {
+      "type": "mcq",
+      "concept": "plane-hyperplane",
+      "difficulty": "medium",
+      "question": "What is a hyperplane in the context of multiple linear regression?",
+      "options": [
+        "A flat surface in four or more dimensions, the model fitted when there are three or more inputs.",
+        "A curved surface that appears only once a regression model is given enough input columns.",
+        "The single input that carries the largest coefficient and therefore dominates the prediction.",
+        "The boundary beyond which a linear model can no longer be fitted to the data at all."
+      ],
+      "answer": 0,
+      "explanation": "A hyperplane is the general name for a flat surface in a space of more than three dimensions, which is what the model becomes once there are three or more inputs. It stays flat because the model is linear, so it is never curved. It is not a single input and not a limit on fitting; it is simply the shape of the fit in higher dimensions.",
+      "misconception": "A hyperplane is a flat higher-dimensional surface, the natural extension of the plane."
+    },
+    {
+      "type": "scenario",
+      "concept": "plane-hyperplane",
+      "difficulty": "hard",
+      "scenario": "A learner says that because a multiple regression with five inputs cannot be drawn, its fitted surface must be curved and complicated.",
+      "question": "How would you correct them?",
+      "options": [
+        "They are right that it curves, since adding inputs always introduces bends into the surface.",
+        "The surface is still perfectly flat; it is a hyperplane, and only its dimension, not its shape, has grown.",
+        "The surface becomes a set of separate planes, one for each pairing of the five input columns.",
+        "The model can no longer be called linear once it passes three inputs, so the surface is undefined."
+      ],
+      "answer": 1,
+      "explanation": "Being unable to visualize a surface does not make it curved. With five inputs the model fits a flat five-dimensional hyperplane, and flatness is exactly what keeps the model linear no matter how many inputs there are. It is one surface, not many, and it remains a linear model well past three inputs.",
+      "misconception": "High dimension does not imply curvature; the hyperplane stays flat and linear."
+    },
+    {
+      "type": "mcq",
+      "concept": "matrix-formulation",
+      "difficulty": "medium",
+      "question": "In the matrix form of multiple linear regression, the prediction vector equals X times beta. What do X and beta hold?",
+      "options": [
+        "X holds the output values and beta holds the residuals left after fitting the model.",
+        "X holds the coefficients and beta holds the input values for one row of the data.",
+        "X is the design matrix of input rows and beta is the column of coefficients.",
+        "X holds the squared errors and beta holds the mean of each input column."
+      ],
+      "answer": 2,
+      "explanation": "The design matrix X stacks the inputs for every row, with a leading column of ones, and beta is the column vector of coefficients including the intercept. Their product X times beta gives every prediction at once. The outputs sit in a separate vector y, residuals and squared errors are computed after fitting, and the roles of X and beta are not the other way around.",
+      "misconception": "X carries the inputs and beta the coefficients; outputs and residuals are separate."
+    },
+    {
+      "type": "mcq",
+      "concept": "design-matrix",
+      "difficulty": "medium",
+      "question": "Why does the design matrix X include a leading column of ones?",
+      "options": [
+        "To normalize the inputs so that every column contributes on the same numeric scale.",
+        "To let the intercept beta-0 enter the product X times beta as a free constant term.",
+        "To count the number of rows in the dataset for use in the error calculation.",
+        "To mark which rows should be used for training and which for testing the model."
+      ],
+      "answer": 1,
+      "explanation": "The column of ones multiplies the intercept beta-0, so it carries a free constant term into the product X times beta. Without it the fitted surface would be forced through the origin. It does not normalize inputs, it does not count rows, and it has nothing to do with the train and test split, all of which are separate concerns.",
+      "misconception": "The ones column exists to carry the intercept, not to scale or label data."
+    },
+    {
+      "type": "scenario",
+      "concept": "design-matrix",
+      "difficulty": "hard",
+      "scenario": "An engineer builds a design matrix from the input columns but forgets to prepend the column of ones, then fits the model.",
+      "question": "What is the most likely consequence?",
+      "options": [
+        "The fit fails outright, because the normal equations cannot run without a ones column present.",
+        "Nothing changes, since the intercept is computed separately and added back after the fit.",
+        "The model has no free intercept, so its surface is forced to pass through the origin.",
+        "Every coefficient doubles, because the missing column is silently replaced by its average."
+      ],
+      "answer": 2,
+      "explanation": "Dropping the ones column removes the free intercept term, which forces the fitted surface through the origin and usually worsens the fit when the true relationship has a nonzero baseline. The arithmetic still runs, so it does not fail; the intercept is not recovered separately; and coefficients are not simply doubled.",
+      "misconception": "Omitting the ones column suppresses the intercept rather than crashing or self-correcting."
+    },
+    {
+      "type": "mcq",
+      "concept": "matrix-formulation",
+      "difficulty": "hard",
+      "question": "What do the normal equations, beta equals the inverse of X-transpose times X, all multiplied by X-transpose times y, provide?",
+      "options": [
+        "An iterative update rule that improves the coefficients by one small step on each pass.",
+        "A closed-form solution returning every coefficient, intercept included, in one computation.",
+        "The residuals that are still left over once the best-fit surface has been drawn through the data.",
+        "A measure of how much of the output's total variance the fitted model manages to explain overall."
+      ],
+      "answer": 1,
+      "explanation": "The normal equations are a closed-form solution: they compute the full coefficient vector, the intercept and all input weights together, directly in one shot. They are not an iterative update, which is the alternative used when inputs are very numerous. They return coefficients rather than residuals, and they are not a goodness-of-fit score.",
+      "misconception": "The normal equations solve for all coefficients directly, not iteratively."
+    },
+    {
+      "type": "mcq",
+      "concept": "mlr-error",
+      "difficulty": "medium",
+      "question": "How is the error function of multiple linear regression defined?",
+      "options": [
+        "As the sum of the residuals themselves, each taken with its own sign, across all the rows.",
+        "As the largest single residual found among all of the rows in the dataset.",
+        "As the sum of the squared residuals, the actual output minus the predicted output, over all rows.",
+        "As the average of the input coefficients weighted by how large each input column is."
+      ],
+      "answer": 2,
+      "explanation": "The error is the sum of squared residuals, identical in form to the simple-regression case, where each residual is the actual output minus the prediction for that row. Summing raw signed residuals lets positive and negative gaps cancel, a single largest residual ignores the rest, and the error has nothing to do with averaging the coefficients.",
+      "misconception": "The error squares and sums every residual; it does not use signed sums or a single worst case."
+    },
+    {
+      "type": "mcq",
+      "concept": "mlr-error",
+      "difficulty": "medium",
+      "question": "Why is the residual squared before being summed in the error function?",
+      "options": [
+        "Because squaring converts the squared output units back into the original units of the target column.",
+        "Because squaring keeps every term positive so opposite residuals cannot cancel out to zero.",
+        "Because squaring is what forces the fitted surface to stay a flat hyperplane rather than curving.",
+        "Because squaring guarantees that the number of coefficients always equals the number of input columns."
+      ],
+      "answer": 1,
+      "explanation": "Squaring makes every residual positive, so a point above the surface cannot cancel one below it, and it weights large errors more heavily because a residual twice as big contributes four times as much. Squaring does not restore units, in fact it squares them; it does not control the surface's flatness, which comes from linearity; and it has no bearing on the coefficient count.",
+      "misconception": "Squaring stops cancellation and punishes big errors, not anything about units or shape."
+    },
+    {
+      "type": "scenario",
+      "concept": "multiple-features",
+      "difficulty": "medium",
+      "scenario": "A team predicts salary from experience alone with simple regression, then adds education level and an aptitude score as extra input columns.",
+      "question": "Which description of the new model is correct?",
+      "options": [
+        "It is now three separate simple regressions whose individual predictions are averaged together.",
+        "It is a single multiple linear regression giving each input its own coefficient in one combined model.",
+        "It must drop the original experience input, since a model can weigh only the newest columns.",
+        "It can no longer use a closed-form solution and must be fitted by trial and error instead."
+      ],
+      "answer": 1,
+      "explanation": "Adding inputs turns the model into one multiple linear regression that assigns a separate coefficient to each input and combines them in a single weighted sum. It is not several averaged models, it keeps the original experience column alongside the new ones, and it still has a closed-form solution through the normal equations.",
+      "misconception": "Extra inputs join one combined model; they do not spawn separate averaged regressions."
+    },
+    {
+      "type": "scenario",
+      "concept": "matrix-formulation",
+      "difficulty": "hard",
+      "scenario": "A model has hundreds of thousands of input columns, and computing the inverse in the normal equations is slow and numerically unstable.",
+      "question": "What is the practical alternative, and does it change the target answer?",
+      "options": [
+        "Use an iterative method that steps the coefficients toward the minimum, reaching the same answer.",
+        "Drop most of the input columns at random until the matrix inverse becomes cheap enough to compute.",
+        "Switch to predicting a category rather than a number, so that no matrix inverse is ever required at all.",
+        "Fit a curved surface instead of a flat one, since curvature removes the need to invert any matrix here."
+      ],
+      "answer": 0,
+      "explanation": "When inverting X-transpose times X is too costly, an iterative method that nudges the coefficients downhill toward the minimum is the practical route, and it converges on the same least-squares answer the normal equations define. Dropping inputs at random changes the problem, switching to classification changes the task entirely, and fitting a curve abandons the linear model.",
+      "misconception": "The iterative method targets the same minimum; it is a cheaper route, not a different answer."
+    },
+    {
+      "type": "card",
+      "concept": "beta-coefficients",
+      "difficulty": "medium",
+      "question": "Explain how multiple linear regression generalizes the simple linear regression line.",
+      "answer": "Simple linear regression fits a line, written as the intercept plus a slope times one input. Multiple linear regression keeps that exact structure but gives every input its own coefficient and adds the terms together, so the prediction is the intercept plus the first coefficient times the first input, plus the second coefficient times the second input, and so on. The simple-regression slope and intercept are just the two-coefficient case. Geometrically the line becomes a plane with two inputs and a flat hyperplane with more, and the error function and the least-squares way of finding the coefficients carry over unchanged. In matrix form the whole model is the product of a design matrix with a column of ones and a vector of coefficients.",
+      "explanation": "The single idea to hold onto is that nothing about the method changes; only the number of inputs grows, which raises the dimension of the flat surface being fitted."
+    }
+  ]
+}
