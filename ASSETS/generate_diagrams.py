@@ -131,6 +131,8 @@ IMAGE_FOLDERS = {
     "linear_regression_line.png": _REGRESSION,
     "residuals_vertical.png": _REGRESSION,
     "mlr_plane.png": _REGRESSION,
+    "mae_vs_mse_outlier.png": _REGRESSION,
+    "r2_variance_explained.png": _REGRESSION,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -2436,6 +2438,101 @@ def mlr_plane():
     save(fig, "mlr_plane.png")
 
 
+def mae_vs_mse_outlier():
+    # One outlier moves the mean squared error far more than the mean absolute
+    # error. Two panels share the same points and best-fit line; the left panel
+    # annotates the residual as itself (what MAE sums), the right annotates it
+    # squared (what MSE sums), so the far larger squared term is visible.
+    cgpa = np.array([5.2, 5.9, 6.4, 6.9, 7.3, 7.8, 8.2, 8.7, 9.2])
+    package = np.array([2.2, 2.7, 3.1, 3.5, 3.9, 4.4, 4.8, 5.3, 5.9])
+    # make the last point an outlier high above the trend
+    package_out = package.copy()
+    package_out[-1] = 9.1
+    m, b = np.polyfit(cgpa[:-1], package_out[:-1], 1)
+    fitted = m * cgpa + b
+    resid = package_out - fitted
+    xs = np.linspace(cgpa.min() - 0.2, cgpa.max() + 0.2, 100)
+    out = len(cgpa) - 1
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharex=True, sharey=True)
+    for ax in axes:
+        ax.plot(xs, m * xs + b, color=RED, lw=2.0, zorder=2, label="best-fit line")
+        ax.scatter(cgpa[:-1], package_out[:-1], color=BLUE, s=40, zorder=3,
+                   label="typical points")
+        ax.scatter([cgpa[out]], [package_out[out]], color=PURPLE, s=90, zorder=4,
+                   marker="D", label="outlier")
+        ax.set_xlabel("CGPA (input)")
+
+    # left: MAE sums the plain residual (its length)
+    axes[0].plot([cgpa[out], cgpa[out]], [fitted[out], package_out[out]],
+                 color=GREY, lw=2.0, ls="--", zorder=1)
+    axes[0].annotate(f"residual = {resid[out]:.1f}\nMAE counts this length",
+                     xy=(cgpa[out], (fitted[out] + package_out[out]) / 2),
+                     xytext=(cgpa[out] - 3.0, package_out[out] - 0.4), fontsize=9,
+                     arrowprops=dict(arrowstyle="->", color="black"))
+    axes[0].set_title("MAE: the outlier adds its plain gap")
+    axes[0].set_ylabel("package in LPA (output)")
+
+    # right: MSE squares the residual, drawn as a square on the gap
+    side = resid[out]
+    square = plt.Rectangle((cgpa[out], fitted[out]), width=side * 0.45,
+                           height=side, color=PURPLE, alpha=0.25, zorder=1)
+    axes[1].add_patch(square)
+    axes[1].annotate(f"squared = {side**2:.0f}\nMSE counts this area",
+                     xy=(cgpa[out] + side * 0.22, fitted[out] + side / 2),
+                     xytext=(cgpa[out] - 3.4, fitted[out] - 0.3), fontsize=9,
+                     arrowprops=dict(arrowstyle="->", color="black"))
+    axes[1].set_title("MSE: the same outlier adds its gap squared")
+
+    axes[0].legend(loc="upper left", fontsize=8)
+    fig.suptitle("One outlier barely shifts MAE but blows up MSE", y=1.02,
+                 fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "mae_vs_mse_outlier.png")
+
+
+def r2_variance_explained():
+    # R2 is the variance the fitted line explains relative to a mean baseline.
+    # Left panel: the mean line (the best you can do with no input), with every
+    # point's gap to the mean. Right panel: the fitted line, with the smaller
+    # remaining gaps. The shrinkage from left to right is what R2 measures.
+    rng = np.random.default_rng(3)
+    cgpa = np.linspace(5.2, 9.3, 14)
+    package = 0.9 * cgpa - 2.0 + rng.normal(0, 0.45, cgpa.size)
+    mean_y = package.mean()
+    m, b = np.polyfit(cgpa, package, 1)
+    fitted = m * cgpa + b
+    xs = np.linspace(cgpa.min() - 0.2, cgpa.max() + 0.2, 100)
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharex=True, sharey=True)
+
+    # left: mean baseline and the variance it leaves (SST)
+    axes[0].axhline(mean_y, color=GREY, lw=2.0, zorder=2, label="mean baseline")
+    for i, (x, y) in enumerate(zip(cgpa, package)):
+        axes[0].plot([x, x], [y, mean_y], color=ORANGE, lw=1.4, ls="--", zorder=1,
+                     label="gap to the mean" if i == 0 else None)
+    axes[0].scatter(cgpa, package, color=BLUE, s=42, zorder=3, label="actual package")
+    axes[0].set_title("Mean baseline: total variance to explain")
+    axes[0].set_xlabel("CGPA (input)")
+    axes[0].set_ylabel("package in LPA (output)")
+    axes[0].legend(loc="upper left", fontsize=8)
+
+    # right: fitted line and the variance it leaves (SSR), much smaller
+    axes[1].plot(xs, m * xs + b, color=RED, lw=2.0, zorder=2, label="fitted line")
+    for i, (x, y, yhat) in enumerate(zip(cgpa, package, fitted)):
+        axes[1].plot([x, x], [y, yhat], color=GREEN, lw=1.4, ls="--", zorder=1,
+                     label="gap to the fit" if i == 0 else None)
+    axes[1].scatter(cgpa, package, color=BLUE, s=42, zorder=3, label="actual package")
+    axes[1].set_title("Fitted line: the variance it leaves is smaller")
+    axes[1].set_xlabel("CGPA (input)")
+    axes[1].legend(loc="upper left", fontsize=8)
+
+    fig.suptitle("R2 is how much of the mean-baseline variance the fit removes",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "r2_variance_explained.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2523,4 +2620,6 @@ if __name__ == "__main__":
     linear_regression_line()
     residuals_vertical()
     mlr_plane()
+    mae_vs_mse_outlier()
+    r2_variance_explained()
     print("\nAll diagrams generated.")

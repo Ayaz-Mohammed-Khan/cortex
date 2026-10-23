@@ -1,0 +1,235 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "mae",
+      "difficulty": "easy",
+      "question": "What does mean absolute error (MAE) compute from a model's residuals?",
+      "options": [
+        "The average of the absolute residuals, so overshoots and undershoots both count as error.",
+        "The average of the squared residuals, so that larger misses are punished more heavily.",
+        "The square root of the averaged squared residuals, taken so the score is restored to the target units.",
+        "The ratio of the model's error to the error left by always guessing the mean output."
+      ],
+      "answer": 0,
+      "explanation": "MAE takes each residual, drops its sign with an absolute value so positive and negative gaps cannot cancel, and averages them. Squaring the residuals describes MSE, taking the root of that describes RMSE, and comparing against the mean baseline describes R2. Only the plain absolute average is MAE.",
+      "misconception": "MAE uses the absolute value, not a square, so it does not inflate large errors."
+    },
+    {
+      "type": "mcq",
+      "concept": "outlier-sensitivity",
+      "difficulty": "medium",
+      "question": "Why does one extreme outlier shift mean squared error (MSE) far more than it shifts MAE?",
+      "options": [
+        "Because MSE divides by a smaller count, so each individual residual weighs more in the average.",
+        "Because MSE squares each residual, so a far-off point contributes its distance squared rather than its distance.",
+        "Because MSE drops the sign of residuals while MAE keeps it, letting the outlier accumulate unopposed.",
+        "Because MSE is measured in the target's own units while MAE is instead measured in the squared units of that same target."
+      ],
+      "answer": 1,
+      "explanation": "Squaring is what makes MSE overreact: a residual of 3 adds 9 to the sum but a residual of 6 adds 36, so a single large miss dominates. MAE adds only the plain distance, so no one point can swamp it. Both metrics divide by the same count and both drop the sign, and it is MSE, not MAE, that carries squared units.",
+      "misconception": "The squaring, not the averaging or the sign handling, is what makes MSE outlier-sensitive."
+    },
+    {
+      "type": "scenario",
+      "concept": "metric-selection",
+      "difficulty": "medium",
+      "scenario": "A delivery-time model is trained on data where a handful of rows are known to be corrupted logging errors, producing a few absurd target values that nobody wants the model to chase.",
+      "question": "Which error metric best reflects everyday performance here?",
+      "options": [
+        "Mean squared error, because squaring the corrupted rows forces the model to take them seriously.",
+        "Root mean squared error, because it reports in the target units while still weighting the corrupted rows heavily.",
+        "Mean absolute error, because it is robust to the corrupted rows and will not be dominated by their huge residuals.",
+        "Adjusted R2, because it penalizes the extra input columns that the corrupted rows tend to introduce into the data."
+      ],
+      "answer": 2,
+      "explanation": "The corrupted rows are noise, not signal, so you want a metric that does not let them dominate. MAE adds only each row's plain distance, so a few absurd residuals cannot swamp the score. MSE and RMSE both square the residuals first, which amplifies exactly the rows you want to ignore, and adjusted R2 is about counting columns, not handling outliers.",
+      "misconception": "When large errors are noise you want to shrug off, the outlier-robust metric is the right choice."
+    },
+    {
+      "type": "mcq",
+      "concept": "mae",
+      "difficulty": "medium",
+      "question": "Why is MAE considered awkward to use as the quantity an optimizer minimizes?",
+      "options": [
+        "Because its value comes out in the squared units of the target, which optimizers cannot interpret directly.",
+        "Because it is robust to outliers, so the optimizer never receives a strong enough signal to adjust the fit.",
+        "Because it compares the model to a mean baseline, and that baseline keeps moving during fitting.",
+        "Because the absolute value has a sharp corner at zero, so its graph is not differentiable there."
+      ],
+      "answer": 3,
+      "explanation": "Optimizers that follow a smooth slope need a differentiable function, and the absolute value has a non-differentiable corner at zero. That is the main reason a squared metric is usually preferred as the loss. MAE reports in the target's own units, not squared units, its robustness is a strength rather than a flaw, and it is R2, not MAE, that references a mean baseline.",
+      "misconception": "MAE's problem for optimization is the corner at zero, not its units or its robustness."
+    },
+    {
+      "type": "mcq",
+      "concept": "mse",
+      "difficulty": "easy",
+      "question": "A package is measured in lakhs per annum (LPA). What are the units of the mean squared error of a model predicting it?",
+      "options": [
+        "LPA, the same units as the target, since averaging does not change units.",
+        "LPA squared, because each residual is squared before the values are averaged.",
+        "Unitless, because squaring and averaging together cancel the original units out.",
+        "The square root of LPA, because the metric partially undoes the target's scale."
+      ],
+      "answer": 1,
+      "explanation": "MSE squares each residual before averaging, and squaring a quantity in LPA produces LPA squared. That is precisely why MSE is hard to read directly and why RMSE takes the square root to get back to LPA. Averaging never changes units, and nothing in the formula makes the result unitless or a square root of the units.",
+      "misconception": "Squaring the residuals squares the units too, which is what makes raw MSE hard to interpret."
+    },
+    {
+      "type": "mcq",
+      "concept": "rmse",
+      "difficulty": "medium",
+      "question": "What does taking the square root of MSE to form RMSE achieve, and what does it fail to fix?",
+      "options": [
+        "It restores the target's units for easy reading but leaves RMSE just as sensitive to outliers as MSE.",
+        "It removes the sensitivity to outliers but leaves RMSE stuck in the squared units that MSE reports in.",
+        "It makes the metric differentiable for optimization but discards the comparison to a mean baseline.",
+        "It converts the metric into a variance-explained ratio but loses the connection to the target's scale."
+      ],
+      "answer": 0,
+      "explanation": "The root undoes the squaring of the units, so RMSE lands back in the target's scale and reads like MAE. It does not undo the extra weight the squaring already gave large residuals, so RMSE is still not robust to outliers. MSE is already differentiable, RMSE is not a ratio, and it never involved a mean baseline to lose.",
+      "misconception": "The square root fixes the units but not the outlier sensitivity baked in by squaring."
+    },
+    {
+      "type": "mcq",
+      "concept": "r2-variance-explained",
+      "difficulty": "medium",
+      "question": "A regression model reports an R2 of 0.80. What does that number say?",
+      "options": [
+        "The model's predictions land within 80 percent of the actual values on average across all of the data.",
+        "The model classifies 80 percent of the rows correctly, with the rest falling on the wrong side.",
+        "The inputs account for 80 percent of the variation in the output, leaving 20 percent unexplained.",
+        "The model is 80 percent likely to beat a mean baseline on a fresh, unseen sample of the data."
+      ],
+      "answer": 2,
+      "explanation": "R2 is read as the fraction of the output's variance that the inputs explain, so 0.80 means the inputs account for 80 percent of the variation and the remaining 20 percent comes from factors outside the model. It is not an average percentage error, regression does not classify rows, and R2 is a property of the fit on the data, not a probability of beating a baseline next time.",
+      "misconception": "R2 measures variance explained, not an average error or a classification rate."
+    },
+    {
+      "type": "scenario",
+      "concept": "r2-baseline",
+      "difficulty": "hard",
+      "scenario": "An analyst fits a straight line to data that actually follows a strong curve, then reports a negative R2 and asks whether that is even possible.",
+      "question": "How should you explain the negative value?",
+      "options": [
+        "It is a reporting bug, since R2 is defined as a squared quantity and so it can never drop below a value of zero.",
+        "It means the straight line predicts worse than always guessing the mean, which a poor model choice can cause.",
+        "It means the model explains a negative share of variance, so the inputs actively destroy information.",
+        "It means the data was not scaled before fitting, and standardizing the columns will push R2 back above zero."
+      ],
+      "answer": 1,
+      "explanation": "R2 is one minus the ratio of the model's squared error to the mean baseline's squared error. When a straight line is forced through strongly curved data, its squared error can exceed the baseline's, making the ratio larger than one and R2 negative. It is a genuine signal that the line predicts worse than simply guessing the mean, not a bug, not a claim about destroying information, and not something scaling fixes.",
+      "misconception": "A negative R2 is real and means the model underperforms the mean baseline."
+    },
+    {
+      "type": "scenario",
+      "concept": "adjusted-r2",
+      "difficulty": "hard",
+      "scenario": "A colleague adds the interview-day temperature as a new input column and is pleased that R2 rose slightly, taking it as proof the feature helped.",
+      "question": "What should you point out?",
+      "options": [
+        "That R2 can only ever rise or hold when a column is added, so its increase is no evidence the temperature helped.",
+        "That R2 should have fallen for an irrelevant column, so the rise means the data pipeline is leaking the target.",
+        "That R2 rising proves the temperature is relevant, and the only open question is how large its coefficient is.",
+        "That temperature cannot change R2 at all, so the reported increase must come from a change in the row count."
+      ],
+      "answer": 0,
+      "explanation": "Adding any column gives the fit more freedom, so the squared residuals can only shrink or stay put, which means R2 can only rise or hold even for a useless feature. The rise is therefore no evidence the temperature helped; adjusted R2, which penalizes the column count, is the metric that would reveal an irrelevant feature by falling. R2 does not fall for junk columns, and the increase is expected rather than a leak or a row-count artifact.",
+      "misconception": "R2 never decreasing when a column is added means its increase cannot vouch for a feature."
+    },
+    {
+      "type": "mcq",
+      "concept": "adjusted-r2",
+      "difficulty": "hard",
+      "question": "In the adjusted R2 formula, how does adding a genuinely useful input column end up raising the score?",
+      "options": [
+        "The column count stays fixed, so only the improved R2 term moves and the adjusted score tracks it exactly.",
+        "The denominator grows with the extra column, which alone is enough to lift the whole adjusted score.",
+        "R2 jumps enough that the shrinking error term outpaces the smaller denominator, so the adjusted score rises.",
+        "The penalty for extra columns is removed once a column proves relevant, leaving the raw R2 as the result."
+      ],
+      "answer": 2,
+      "explanation": "Adding any column raises the column count, which shrinks the denominator and would push the adjusted score down on its own. A relevant column also makes R2 jump, and that jump shrinks the one-minus-R2 term faster than the smaller denominator inflates the fraction, so the net effect is a rise. The column count does change, the denominator actually shrinks rather than grows, and the penalty is never switched off.",
+      "misconception": "A useful column wins because the R2 gain outweighs the column-count penalty, not because the penalty disappears."
+    },
+    {
+      "type": "scenario",
+      "concept": "metric-selection",
+      "difficulty": "medium",
+      "scenario": "You are comparing two regression models for the same target, one with three input columns and one with seven, and must decide which generalizes better rather than which fits the training data hardest.",
+      "question": "Which single number is the fairest to compare across the two models?",
+      "options": [
+        "Plain R2, because the higher value directly identifies the model that captured the most variance.",
+        "Adjusted R2, because it penalizes the extra columns and so will not automatically favor the larger model.",
+        "Mean squared error, because its squared units make the differences between the two models stand out clearly.",
+        "Mean absolute error, because its robustness to outliers removes the effect of model size on the score."
+      ],
+      "answer": 1,
+      "explanation": "Plain R2 can only rise with more columns, so it structurally favors the seven-column model regardless of whether the extra features help. Adjusted R2 penalizes the column count, so it will reward the larger model only if the extra columns earn their place, which is what you want when comparing models of different sizes. MSE and MAE measure error magnitude and say nothing about whether extra columns are justified.",
+      "misconception": "Comparing models with different numbers of inputs calls for adjusted R2, not plain R2."
+    },
+    {
+      "type": "mcq",
+      "concept": "mse",
+      "difficulty": "medium",
+      "question": "Why is MSE, rather than MAE, the metric typically used as the loss function during fitting?",
+      "options": [
+        "Because MSE reports in the target's units, which the optimizer needs to size its update steps.",
+        "Because MSE is robust to outliers, giving the optimizer a stable signal that MAE cannot provide.",
+        "Because MSE compares the model to a mean baseline, which gives fitting a fixed target to beat.",
+        "Because MSE is differentiable everywhere, so it has a well-defined slope the optimizer can follow."
+      ],
+      "answer": 3,
+      "explanation": "Fitting follows the slope of the loss downhill, so it needs a function that is smooth everywhere, and the squared function has no corner. MAE's absolute value has a non-differentiable corner at zero, which is why the smooth MSE is preferred for optimization. MSE is actually in squared units, it is the outlier-sensitive one rather than robust, and it is R2, not MSE, that references a mean baseline.",
+      "misconception": "MSE is chosen as a loss because it is smooth and differentiable, not because of units or robustness."
+    },
+    {
+      "type": "scenario",
+      "concept": "metric-selection",
+      "difficulty": "easy",
+      "scenario": "After training, you report your model's typical error to a non-technical stakeholder who needs a number in the same units as the target, such as lakhs per annum.",
+      "question": "Which metric communicates this most directly?",
+      "options": [
+        "Mean squared error, since its single value already summarizes every residual at once.",
+        "Root mean squared error, since the square root puts it back into the target's own units.",
+        "R2 score, since a value near one is the clearest signal of a strong, trustworthy model.",
+        "Adjusted R2, since it accounts for how many columns the model used to reach the number."
+      ],
+      "answer": 1,
+      "explanation": "RMSE takes the square root of MSE, which undoes the squared units and returns a number in the target's own scale, so it reads as a typical error in lakhs per annum. MSE is in squared units and has no direct real-world meaning, while R2 and adjusted R2 are unitless ratios about variance explained rather than a size of error in the target's units.",
+      "misconception": "Reporting a typical error in the target's units calls for RMSE or MAE, not a squared or ratio metric."
+    },
+    {
+      "type": "mcq",
+      "concept": "r2-baseline",
+      "difficulty": "medium",
+      "question": "In the R2 formula, what plays the role of the baseline that the fitted model is measured against?",
+      "options": [
+        "A model that always predicts the mean of the actual outputs, ignoring the inputs entirely.",
+        "A model that always predicts zero, so that every actual output becomes its own residual.",
+        "A model that memorizes the training rows and returns each exact output it has already seen.",
+        "A second regression line fitted to the residuals left over by the first regression line."
+      ],
+      "answer": 0,
+      "explanation": "The denominator of R2 is the total sum of squares, the error left by always guessing the mean of the outputs, which is the best you can do with no input columns. R2 then measures how much better the fitted model does than that mean baseline. The baseline is not a zero predictor, not a memorizing model, and not a second line fitted to residuals.",
+      "misconception": "The R2 baseline is the mean of the outputs, the best input-free guess."
+    },
+    {
+      "type": "card",
+      "concept": "r2-variance-explained",
+      "difficulty": "medium",
+      "question": "Explain the R2 score as variance explained, including what a value of 0 and a value near 1 mean.",
+      "answer": "R2 is one minus the ratio of the fitted model's squared error to the squared error left by a mean baseline that always predicts the average output. That ratio is the fraction of the baseline's error the model still has left, so one minus it is the fraction of error the model removed, which reads as the proportion of the output's variance that the inputs explain. A value near 1 means the model explains almost all the variation, a strong fit. A value of 0 means the model's squared error equals the baseline's, so it does no better than always guessing the mean and the inputs explain none of the variance.",
+      "explanation": "Because the comparison is against the mean baseline rather than against perfection, R2 can even go negative when a model predicts worse than the mean, which flags a badly chosen model."
+    },
+    {
+      "type": "card",
+      "concept": "adjusted-r2",
+      "difficulty": "hard",
+      "question": "Explain why adjusted R2 can fall even in a situation where plain R2 rises.",
+      "answer": "Plain R2 can only rise or stay the same when a column is added, because more inputs give the fit more freedom and the squared residuals can only shrink. Adjusted R2 adds a penalty tied to the number of input columns: as the column count rises, the denominator of its formula shrinks, which inflates the fraction that is subtracted from one. When the new column is irrelevant, R2 barely moves, so that inflated fraction wins and the adjusted score drops. Only when the new column is relevant does R2 jump enough to outweigh the penalty and lift the adjusted score. So a useless column can make R2 tick up while adjusted R2 falls.",
+      "explanation": "This is exactly why adjusted R2 is the metric to trust when comparing models that use different numbers of inputs: it refuses to reward columns that do not earn their place."
+    }
+  ]
+}
