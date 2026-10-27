@@ -1,0 +1,179 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "container-for-numbers",
+      "difficulty": "easy",
+      "question": "In the context of machine learning, what is a tensor?",
+      "options": [
+        "A machine-learning algorithm that predicts an output from a table of input features.",
+        "A container for numbers, a data structure that holds numbers in a regular arrangement.",
+        "A rule that converts text into numbers before a model can read the text as input.",
+        "A visualization that shows how data points are spread across a coordinate space."
+      ],
+      "answer": 1,
+      "explanation": "A tensor is just a data structure for storing numbers in a fixed arrangement, which is why libraries like scikit-learn and TensorFlow build everything on it. It is not an algorithm, not an encoding rule, and not a plot; those are separate things a tensor might feed into or come from.",
+      "misconception": "A tensor stores data; it does not make predictions or transform text on its own."
+    },
+    {
+      "type": "mcq",
+      "concept": "0d-1d-2d",
+      "difficulty": "easy",
+      "question": "A scalar, a vector, and a matrix correspond to which tensor dimensions?",
+      "options": [
+        "A scalar is a 1D tensor, a vector is a 2D tensor, and a matrix is a 3D tensor.",
+        "A scalar is a 2D tensor, a vector is a 1D tensor, and a matrix is a 0D tensor.",
+        "A scalar is a 0D tensor, a vector is a 1D tensor, and a matrix is a 2D tensor.",
+        "A scalar, a vector, and a matrix are all 1D tensors that differ only in length."
+      ],
+      "answer": 2,
+      "explanation": "A single number has no axes, so a scalar is a 0D tensor; a list of numbers has one axis, so a vector is a 1D tensor; a grid of rows and columns has two axes, so a matrix is a 2D tensor. The other options shuffle these counts or wrongly collapse all three into one dimension.",
+      "misconception": "Dimension counts axes: zero for a scalar, one for a vector, two for a matrix."
+    },
+    {
+      "type": "mcq",
+      "concept": "nd-stacking",
+      "difficulty": "medium",
+      "question": "What is the general rule for building a tensor of one higher dimension?",
+      "options": [
+        "Take several copies of the current tensor and stack them along a new axis.",
+        "Add one more number to the end of the existing list of numbers in the tensor.",
+        "Multiply every number already stored in the tensor by the new dimension count.",
+        "Append a new row to the bottom of the matrix so it grows taller each time."
+      ],
+      "answer": 0,
+      "explanation": "Each dimension is built by stacking copies of the dimension below: scalars stack into a vector, vectors stack into a matrix, matrices stack into a 3D tensor, and so on. Appending a single number or a single row grows the same tensor within its current rank, and multiplying values changes magnitudes, not rank.",
+      "misconception": "Climbing a dimension means stacking along a new axis, not lengthening the current one."
+    },
+    {
+      "type": "mcq",
+      "concept": "rank-axes-shape",
+      "difficulty": "medium",
+      "question": "How do rank, axes, and shape differ for a single tensor?",
+      "options": [
+        "Rank is the largest number stored, axes are the smallest, and shape is their difference.",
+        "Rank is the number of dimensions, axes are the directions it extends, and shape counts items per axis.",
+        "Rank and shape both give the total item count, while axes name the data type of each entry.",
+        "Rank is the number of rows, axes is the number of columns, and shape is rows times columns."
+      ],
+      "answer": 1,
+      "explanation": "Rank is how many dimensions the tensor has and equals its number of axes, axes are the directions along which it extends, and shape is the tuple counting items along each axis. The other options confuse these structural properties with stored values, data types, or a rows-by-columns view that only fits a matrix.",
+      "misconception": "Rank, axes, and shape are structural facts about dimensions, not about the values inside."
+    },
+    {
+      "type": "mcq",
+      "concept": "shape-computation",
+      "difficulty": "medium",
+      "question": "A 3D tensor is made of three matrices, each with 2 rows and 4 columns. What are its shape and total item count?",
+      "options": [
+        "Shape is `(2, 4, 3)` with 9 items, since you add the three axis sizes together.",
+        "Shape is `(3, 4, 2)` with 12 items, since only the first two axes are multiplied.",
+        "Shape is `(4, 2, 3)` with 24 items, ordering the axes from largest to smallest.",
+        "Shape is `(3, 2, 4)` with 24 items, the product of the three axis sizes."
+      ],
+      "answer": 3,
+      "explanation": "The first axis counts the three matrices, the second counts the 2 rows, and the third counts the 4 columns, so the shape is `(3, 2, 4)`. The number of stored items is the product of the shape, 3 times 2 times 4, which is 24. The item count is never a sum, and shape order follows the stacking order rather than size.",
+      "misconception": "Total items is the product of all axis sizes, and shape follows stacking order."
+    },
+    {
+      "type": "mcq",
+      "concept": "tensor-vs-vector-dimension",
+      "difficulty": "hard",
+      "question": "A dataset row holds 50 input features as one list of numbers. Which description is correct?",
+      "options": [
+        "It is a 1D tensor and a 50-dimensional vector, because it has one axis but 50 components.",
+        "It is a 50D tensor, because every feature adds one more dimension to the tensor itself.",
+        "It is a 2D tensor, since 50 features need both a row axis and a column axis to hold them.",
+        "It is a 50-dimensional tensor and a 1-dimensional vector, the reverse of the usual naming."
+      ],
+      "answer": 0,
+      "explanation": "The row is stored along a single axis, so it is a 1D tensor regardless of how many numbers it holds. The count of numbers, 50, is the vector's dimension, which places it in a 50-dimensional coordinate space. Confusing the two is the most common tensor mistake: the tensor's dimension counts axes, the vector's dimension counts components.",
+      "misconception": "A long feature list is still a 1D tensor; its length is the vector dimension, not the tensor dimension."
+    },
+    {
+      "type": "card",
+      "concept": "tensor-vs-vector-dimension",
+      "difficulty": "hard",
+      "question": "Explain why a 50-feature data row is a 1D tensor but a 50-dimensional vector.",
+      "answer": "The tensor's dimension is its number of axes, and a single list of numbers extends along just one axis, so it is a 1D tensor no matter how long it is. The vector's dimension is its number of components, so 50 features make it a 50-dimensional vector living in a 50-dimensional coordinate space. The two senses of dimension answer different questions: how many axes the container has, versus how many numbers the vector holds.",
+      "explanation": "Keeping these separate prevents the classic error of calling a long feature row a high-dimensional tensor."
+    },
+    {
+      "type": "mcq",
+      "concept": "1d-5d-examples",
+      "difficulty": "medium",
+      "question": "A single color image is usually represented as which kind of tensor, and why?",
+      "options": [
+        "A 1D tensor, because all its pixel values are flattened into one long list of numbers.",
+        "A 2D tensor, because an image is a flat grid of pixels with rows and columns only.",
+        "A 3D tensor, because it stacks the red, green, and blue channel grids along a channel axis.",
+        "A 4D tensor, because every image already includes a batch axis before any stacking."
+      ],
+      "answer": 2,
+      "explanation": "A color image stacks three 2D pixel grids, one per color channel, so a single image is a 3D tensor with shape like channels by height by width. It becomes a 4D tensor only once images are grouped into a batch. A grayscale image flattened to a list would lose its grid structure, which models need.",
+      "misconception": "One color image is 3D; the fourth dimension appears only when images are batched."
+    },
+    {
+      "type": "scenario",
+      "concept": "1d-5d-examples",
+      "difficulty": "hard",
+      "scenario": "You are shaping data for a model that reads short videos, where each video is a sequence of color-image frames and you train on many videos at once.",
+      "question": "What is the dimensionality of the tensor holding a batch of videos?",
+      "options": [
+        "3D, since a video is just a stack of grayscale frames with no color or batch axis.",
+        "4D, since a single video is already a stack of color images and batching adds nothing.",
+        "5D, since a color image is 3D, a video stacks frames to 4D, and a batch adds a fifth axis.",
+        "2D, since each video can be flattened into a table of frames by pixels before training."
+      ],
+      "answer": 2,
+      "explanation": "A color image is a 3D tensor (channels, height, width), stacking frames over time makes one video a 4D tensor, and stacking several videos into a batch adds a fifth axis, giving a 5D tensor. Flattening or dropping the color and batch axes would destroy structure the model relies on, which is why the full 5D shape is used.",
+      "misconception": "Each stacking step adds exactly one axis: image to video to batch climbs from 3D to 5D."
+    },
+    {
+      "type": "mcq",
+      "concept": "container-for-numbers",
+      "difficulty": "easy",
+      "question": "In NumPy, which attribute tells you a tensor's dimension directly?",
+      "options": [
+        "The `size` attribute, which returns how many individual numbers the tensor stores in total.",
+        "The `shape` attribute, which returns the count of items along the first axis only.",
+        "The `dtype` attribute, which returns the kind of number stored in each entry.",
+        "The `ndim` attribute, which returns the number of dimensions of the tensor."
+      ],
+      "answer": 3,
+      "explanation": "The `ndim` attribute reports the number of dimensions, so a scalar reads 0, a vector reads 1, and a matrix reads 2. The `size` attribute counts all stored numbers, `shape` gives the full tuple of per-axis counts rather than a single axis, and `dtype` describes the entry type, not the dimensionality.",
+      "misconception": "Read dimensionality from `ndim`; `shape` and `size` describe extent and count, not rank."
+    },
+    {
+      "type": "mcq",
+      "concept": "nd-stacking",
+      "difficulty": "medium",
+      "question": "How is a 2D tabular dataset of 10,000 students and 3 features related to the tensors inside it?",
+      "options": [
+        "It is a 2D tensor of shape (10000, 3), a stack of 10,000 feature vectors that are each 1D tensors.",
+        "It is a 3D tensor, because each of the 3 features forms its own separate matrix of values.",
+        "It is a collection of 10,000 separate 2D tensors, one for each student in the dataset.",
+        "It is a 1D tensor of length 10,000, since every student is counted as a single entry."
+      ],
+      "answer": 0,
+      "explanation": "Each student's 3 features form a 1D tensor (a feature vector), and stacking 10,000 of them along a sample axis gives a 2D tensor of shape (10000, 3). It is not 3D, because features are columns within the same matrix, and it is not a bag of separate matrices or a flat list, since each student carries several numbers.",
+      "misconception": "A table is one 2D tensor built by stacking the rows' 1D feature vectors."
+    },
+    {
+      "type": "scenario",
+      "concept": "shape-computation",
+      "difficulty": "hard",
+      "scenario": "A colleague stores ten years of a stock's two daily prices, recording both prices once per day for 365 days each year.",
+      "question": "What tensor best represents the full ten-year record, and what is its shape?",
+      "options": [
+        "A 2D tensor of shape (365, 2), because the yearly tables are averaged into one table.",
+        "A 3D tensor of shape (10, 365, 2), a stack of ten yearly tables of 365 days by 2 prices.",
+        "A 1D tensor of length 7300, because all the recorded prices are concatenated into one list.",
+        "A 4D tensor of shape (10, 365, 2, 1), adding a channel axis the way color images do."
+      ],
+      "answer": 1,
+      "explanation": "One year is a 2D tensor of shape (365, 2), days by prices, and stacking ten such years along a time axis gives a 3D tensor of shape (10, 365, 2). Averaging would discard the per-year structure, flattening would lose the day and price axes, and no channel axis belongs here since prices are not color channels.",
+      "misconception": "Stacking yearly 2D tables along a new axis produces a 3D tensor, preserving every axis."
+    }
+  ]
+}

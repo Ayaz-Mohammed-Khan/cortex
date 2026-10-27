@@ -1,0 +1,232 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "basis-vectors",
+      "difficulty": "easy",
+      "question": "What are the defining features of the 2D basis vectors i-hat and j-hat?",
+      "options": [
+        "They each have magnitude 1, point along the x and y axes, and are independent of each other.",
+        "They each have magnitude 2, point diagonally across the grid, and always stay parallel.",
+        "They each have any length, point in the same direction, and sum to the zero vector.",
+        "They each pass through the origin at a 45-degree angle and have equal but opposite signs."
+      ],
+      "answer": 0,
+      "explanation": "i-hat and j-hat are unit vectors, each of magnitude 1, lying along the x and y axes respectively, and they are independent, so neither can be built from the other. They are not length 2, not parallel or identical, and not diagonal; those features would stop them from serving as axis-aligned basis vectors.",
+      "misconception": "Basis vectors are independent unit vectors along the axes, not diagonal or parallel ones."
+    },
+    {
+      "type": "mcq",
+      "concept": "basis-vectors",
+      "difficulty": "medium",
+      "question": "What does it mean that the vector (2, 3) is a linear combination of i-hat and j-hat?",
+      "options": [
+        "It is the dot product of i-hat with j-hat, scaled by the numbers 2 and 3.",
+        "It is i-hat scaled by 2 added to j-hat scaled by 3, so 2 i-hat plus 3 j-hat.",
+        "It is the larger of i-hat times 2 and j-hat times 3, whichever has greater length.",
+        "It is i-hat and j-hat concatenated, forming a longer four-component vector."
+      ],
+      "answer": 1,
+      "explanation": "A linear combination scales each basis vector by a number and adds the results, so (2, 3) is 2 times i-hat plus 3 times j-hat, meaning 2 units along x and 3 along y. It is not a dot product, not a maximum of scaled vectors, and not a concatenation, all of which produce different objects.",
+      "misconception": "A linear combination scales and adds basis vectors; it is not a dot product or concatenation."
+    },
+    {
+      "type": "mcq",
+      "concept": "linear-transformation",
+      "difficulty": "medium",
+      "question": "Reading a matrix as a linear transformation, what do its columns represent?",
+      "options": [
+        "The eigenvalues of the matrix, one stored in each column for later decomposition.",
+        "The lengths of the grid lines before and after the transformation is applied.",
+        "The positions where the basis vectors land after the transformation is applied.",
+        "The coordinates of the origin, which the transformation shifts to a new location."
+      ],
+      "answer": 2,
+      "explanation": "The columns of a transformation matrix are the landing spots of the basis vectors: the first column is where i-hat goes and the second where j-hat goes. Since every vector is a combination of the basis vectors, those columns fully determine the transformation. They are not eigenvalues, grid-line lengths, or an origin shift, since the origin always stays fixed.",
+      "misconception": "A matrix's columns say where the basis vectors land, not where the origin moves."
+    },
+    {
+      "type": "mcq",
+      "concept": "linear-transformation",
+      "difficulty": "easy",
+      "question": "What stays unchanged whenever a matrix is applied as a linear transformation?",
+      "options": [
+        "The length of every vector, which a linear transformation always preserves exactly.",
+        "The origin stays fixed, and grid lines remain straight and evenly spaced.",
+        "The angle between every pair of vectors, which never changes under any matrix.",
+        "The number of dimensions, which stays the same even for non-square matrices."
+      ],
+      "answer": 1,
+      "explanation": "A linear transformation keeps the origin fixed and keeps grid lines straight and evenly spaced, though it may stretch, shrink, or rotate the grid. Lengths and angles can change, and non-square matrices do change the number of dimensions, so only the origin and the straight even grid lines are guaranteed.",
+      "misconception": "Linear transformations fix the origin and keep grid lines straight, but can alter lengths and angles."
+    },
+    {
+      "type": "mcq",
+      "concept": "transformation-3d",
+      "difficulty": "medium",
+      "question": "For a 3 by 3 transformation matrix, how do you find where k-hat lands?",
+      "options": [
+        "Multiply the matrix by (0, 0, 1), which reads off the third column of the matrix.",
+        "Multiply the matrix by (1, 1, 1), which sums all three columns of the matrix.",
+        "Take the determinant of the matrix, which gives k-hat's new coordinates directly.",
+        "Transpose the matrix first, then read its bottom row as k-hat's new position."
+      ],
+      "answer": 0,
+      "explanation": "In 3D the columns of the matrix are the landing spots of i-hat, j-hat, and k-hat, so multiplying by (0, 0, 1) selects the third column, which is where k-hat goes. Summing columns, taking a determinant, or transposing do not single out k-hat's image.",
+      "misconception": "k-hat lands at the third column, found by multiplying the matrix by (0, 0, 1)."
+    },
+    {
+      "type": "mcq",
+      "concept": "composition",
+      "difficulty": "medium",
+      "question": "Geometrically, what does the matrix product AB mean when applied to space?",
+      "options": [
+        "Apply A first, then B, reading the product from left to right as written.",
+        "Apply B first, then A, composing the two transformations from right to left.",
+        "Apply A and B at the same time, averaging the two resulting grids together.",
+        "Apply only A, since B is absorbed into A once the two matrices are multiplied."
+      ],
+      "answer": 1,
+      "explanation": "The product AB composes two transformations, applying the rightmost matrix B first and then A, which matches how a vector multiplies on the right in A B x. The result equals applying the single matrix AB directly. It is not left to right, not simultaneous, and B is not discarded.",
+      "misconception": "AB applies B first then A; multiplication composes right to left."
+    },
+    {
+      "type": "mcq",
+      "concept": "commutative-test",
+      "difficulty": "medium",
+      "question": "Why is matrix multiplication generally not commutative, in geometric terms?",
+      "options": [
+        "Because swapping the order swaps which transformation acts first, giving a different final grid.",
+        "Because one of the two matrices always collapses space, so only one order is ever defined.",
+        "Because the determinant changes sign when the order changes, flipping the result each time.",
+        "Because the origin moves to a new place depending on which matrix is applied first."
+      ],
+      "answer": 0,
+      "explanation": "Applying A then B carries the grid through different intermediate states than applying B then A, so the two usually end in different final grids; swapping order swaps which transformation acts first. Both orders can be defined, the determinant does not flip with order, and the origin stays fixed throughout.",
+      "misconception": "Non-commutativity comes from order changing the intermediate path, not from collapse or origin shifts."
+    },
+    {
+      "type": "mcq",
+      "concept": "determinant-area",
+      "difficulty": "medium",
+      "question": "What does the determinant of a 2D transformation matrix measure?",
+      "options": [
+        "The angle by which the grid rotates, measured in degrees from the x axis.",
+        "The length that i-hat gains or loses, ignoring what happens to j-hat.",
+        "The factor by which areas scale: the transformed area divided by the original area.",
+        "The number of grid lines that cross the origin after the transformation is applied."
+      ],
+      "answer": 2,
+      "explanation": "The determinant is the area scaling factor in 2D (volume in 3D): it is the transformed area divided by the original, so a determinant of 2 doubles areas. It is not a rotation angle, not the change in a single basis vector, and not a count of grid lines.",
+      "misconception": "The determinant scales area or volume; it is not a rotation angle or a single-vector change."
+    },
+    {
+      "type": "mcq",
+      "concept": "negative-determinant",
+      "difficulty": "hard",
+      "question": "A transformation has a negative determinant. What does the sign tell you?",
+      "options": [
+        "The transformation shrank every area to less than its original size.",
+        "The transformation flipped space, reversing its orientation like turning a sheet over.",
+        "The transformation is invalid, since areas and volumes can never be negative.",
+        "The transformation moved the origin into the negative region of the grid."
+      ],
+      "answer": 1,
+      "explanation": "A negative determinant records that space was flipped, reversing orientation so that i-hat and j-hat swap their left-right relationship, like flipping a sheet of paper over. The area scale is the absolute value, so size is read separately from the sign; a negative determinant is perfectly valid and does not move the fixed origin.",
+      "misconception": "A negative determinant means orientation reversed, not shrinking or an invalid transform."
+    },
+    {
+      "type": "scenario",
+      "concept": "zero-determinant-singular",
+      "difficulty": "hard",
+      "scenario": "A 2 by 2 matrix has determinant zero, and you apply it to the whole 2D plane.",
+      "question": "What happens to the plane, and what does this say about the matrix?",
+      "options": [
+        "The plane rotates a full turn and returns unchanged, so the matrix is the identity.",
+        "The plane doubles in area, so the matrix is non-singular and freely invertible.",
+        "The plane stays fixed except for the origin, so the matrix only shifts a single point.",
+        "The plane collapses onto a line, so the matrix is singular and has no inverse."
+      ],
+      "answer": 3,
+      "explanation": "A zero determinant means the transformation squishes the 2D plane onto a line, a lower dimension, so every area drops to zero. That collapse is exactly what makes the matrix singular and non-invertible, because the flattening cannot be undone. It is not the identity, not an area-doubling map, and it affects the whole plane, not one point.",
+      "misconception": "A zero determinant collapses space to a lower dimension, marking a singular, non-invertible matrix."
+    },
+    {
+      "type": "card",
+      "concept": "zero-determinant-singular",
+      "difficulty": "hard",
+      "question": "Explain geometrically what a zero determinant does to space and why that leaves the matrix with no inverse.",
+      "answer": "A zero determinant means the transformation collapses space onto a lower dimension, for example squishing a 2D plane down onto a single line, so any area is flattened to zero. When a whole direction is collapsed, many different input vectors get mapped onto the same output point on the line. Given only an output point, you cannot tell which input produced it, because the information about the collapsed direction is gone. Since the mapping is no longer one-to-one, there is no transformation that could send each output back to a unique input, so no inverse exists. This is the geometric reason a singular matrix, one with a zero determinant, cannot be inverted.",
+      "explanation": "This ties the computation note's rule, that a zero determinant blocks the inverse, to the loss of information that collapse causes."
+    },
+    {
+      "type": "mcq",
+      "concept": "inverse-as-undo",
+      "difficulty": "medium",
+      "question": "Geometrically, what is the inverse of a matrix, and why does A times A inverse equal the identity?",
+      "options": [
+        "The inverse is the transformation that undoes the original, so applying both returns space to its start.",
+        "The inverse is the transformation that doubles the original's effect, so applying both squares the scaling.",
+        "The inverse is the transpose of the original, so applying both reflects space across the diagonal.",
+        "The inverse is a rotation by the determinant's angle, so applying both spins space a full turn."
+      ],
+      "answer": 0,
+      "explanation": "The inverse is the transformation that reverses the original, carrying every vector back to where it began, so applying A and then A inverse returns space to its starting state, which is the identity (the do-nothing transformation). The inverse is not a doubling, not the transpose in general, and not a determinant-angle rotation.",
+      "misconception": "The inverse undoes the original transformation, which is why A times A inverse is the identity."
+    },
+    {
+      "type": "scenario",
+      "concept": "inverse-as-undo",
+      "difficulty": "hard",
+      "scenario": "You write a linear system as A x equals b and interpret it geometrically: some unknown vector x was transformed by A and landed at b.",
+      "question": "How does the inverse recover x, geometrically?",
+      "options": [
+        "It scales b by the determinant of A, since the determinant records how far x moved.",
+        "It reflects b across the line through the origin, undoing the rotation part of A only.",
+        "It applies A inverse to b, reversing the transformation so b travels back to the original x.",
+        "It projects b onto the nearest basis vector, since x must lie along an axis of the grid."
+      ],
+      "answer": 2,
+      "explanation": "Since A carried x to b, applying A inverse to b reverses that transformation and brings b back to the original x, which is exactly why x equals A inverse times b. Scaling by the determinant, reflecting across a line, or projecting onto an axis do not reverse a general transformation.",
+      "misconception": "The inverse reverses the whole transformation, sending b back to x, not a scaling or projection."
+    },
+    {
+      "type": "mcq",
+      "concept": "non-square-transforms",
+      "difficulty": "medium",
+      "question": "What does a wide matrix (more columns than rows) do to space?",
+      "options": [
+        "It embeds a lower-dimensional space into a higher one, lifting a sheet into a room.",
+        "It projects a higher-dimensional space down to a lower one, collapsing 3D onto a 2D plane.",
+        "It rotates space within the same dimension, leaving the number of dimensions unchanged.",
+        "It doubles the dimension of space, turning a plane into a solid of twice the extent."
+      ],
+      "answer": 1,
+      "explanation": "A wide matrix, such as 2 by 3, maps a higher-dimensional space onto a lower one, projecting all of 3D space down onto a 2D plane. Embedding a lower space into a higher one is what a tall matrix does; a wide matrix does not merely rotate within a dimension or double the dimension.",
+      "misconception": "A wide matrix projects down a dimension; a tall matrix embeds up a dimension."
+    },
+    {
+      "type": "card",
+      "concept": "square-inverse-only",
+      "difficulty": "hard",
+      "question": "Why can only square matrices have an inverse, in geometric terms?",
+      "answer": "A square matrix keeps the number of dimensions the same, so it can map space onto itself in a way that might be reversible. A non-square matrix changes the dimension: a tall matrix embeds a lower-dimensional space into a higher one, so its outputs do not fill the higher space and there is nothing to pull every point of that space back from; a wide matrix projects a higher-dimensional space down to a lower one, throwing away a whole dimension of information. In both cases the dimension change makes the map impossible to reverse, so there is no inverse. The determinant, which measures the area or volume scaling, is itself only defined for square matrices, reinforcing that invertibility is a square-matrix question.",
+      "explanation": "This connects the shape of a matrix to the reversibility of the transformation it represents."
+    },
+    {
+      "type": "mcq",
+      "concept": "non-singular-inverse",
+      "difficulty": "hard",
+      "question": "A square matrix is non-singular. Why does that condition allow an inverse to exist?",
+      "options": [
+        "Because a non-singular matrix is always the identity, which is trivially its own inverse.",
+        "Because a non-zero determinant means space is not collapsed, so every output traces back to one input.",
+        "Because a non-singular matrix has no determinant, removing the obstacle to inversion.",
+        "Because non-singular matrices are symmetric, and symmetric matrices are always invertible."
+      ],
+      "answer": 1,
+      "explanation": "Non-singular means the determinant is non-zero, so the transformation does not collapse space to a lower dimension; no direction is flattened, the map stays one-to-one, and every output can be traced back to a single input, which is what an inverse needs. Non-singular does not mean the identity, does not mean lacking a determinant, and has nothing to do with symmetry.",
+      "misconception": "A non-zero determinant preserves space without collapse, keeping the map one-to-one and invertible."
+    }
+  ]
+}

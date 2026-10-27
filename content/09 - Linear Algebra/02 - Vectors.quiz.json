@@ -1,0 +1,262 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "linear-algebra-why",
+      "difficulty": "easy",
+      "question": "Why is linear algebra central to machine learning?",
+      "options": [
+        "It guarantees that any model trained with it will reach perfect accuracy on real data.",
+        "It generalizes relationships to high dimensions and represents varied data as numbers.",
+        "It replaces the need for calculus and probability when deriving a learning algorithm.",
+        "It is required only for plotting data, since models themselves never use its operations."
+      ],
+      "answer": 1,
+      "explanation": "Linear algebra lets the same equations carry from a line in 2D to a hyperplane in many dimensions, and it expresses tabular, text, image, and video data as numbers a model can read. It does not promise perfect accuracy, does not displace calculus or probability, and is used far beyond plotting, inside the models themselves.",
+      "misconception": "Linear algebra provides representation and generalization, not a guarantee of accuracy."
+    },
+    {
+      "type": "mcq",
+      "concept": "components-dimension",
+      "difficulty": "easy",
+      "question": "What is the dimension of the vector [4, 1, 7, 2, 9]?",
+      "options": [
+        "The dimension is 9, taken from the largest component value in the list.",
+        "The dimension is 1, since the vector is written as a single row of numbers.",
+        "The dimension is 5, the number of components, placing it in 5-dimensional space.",
+        "The dimension is 23, the sum of all the component values added together."
+      ],
+      "answer": 2,
+      "explanation": "A vector's dimension is its number of components, so this vector has dimension 5 and lives in a 5-dimensional coordinate space. The largest value and the sum of values are properties of the numbers, not the dimension, and writing it as a row describes layout, not dimension.",
+      "misconception": "Dimension counts components, not the size of a value or the row layout."
+    },
+    {
+      "type": "mcq",
+      "concept": "feature-vector",
+      "difficulty": "medium",
+      "question": "A Titanic passenger has age 17, fare 52, sex male, and port of embarkation C. What must happen before this becomes a feature vector?",
+      "options": [
+        "The numeric columns must be removed so only the categorical columns remain as text.",
+        "The categorical columns must be encoded as numbers, for example male as 0 and ports as 0, 1, 2.",
+        "The passenger must be dropped, because rows with text values cannot be used for training.",
+        "The age and fare must be converted to text so every column shares the same data type."
+      ],
+      "answer": 1,
+      "explanation": "A feature vector is a collection of numbers, so the categorical columns such as sex and port must be encoded, for instance male as 0 and female as 1, and the three ports as 0, 1, and 2. Numeric columns stay as they are, the row is not discarded, and numbers are not turned into text, which would make them unusable.",
+      "misconception": "Categorical values are encoded to numbers; the numeric columns are kept as is."
+    },
+    {
+      "type": "mcq",
+      "concept": "row-column",
+      "difficulty": "easy",
+      "question": "If a vector is given with no orientation stated, how is it assumed to be, and what is a column vector's shape?",
+      "options": [
+        "Assumed a row vector, and a column vector has shape 1 by n across a single row.",
+        "Assumed a scalar, and a column vector has shape n by n filling a square block.",
+        "Orientation is undefined until multiplication, and a column vector has no fixed shape.",
+        "Assumed a column vector, and a column vector has shape n by 1 down a single column."
+      ],
+      "answer": 3,
+      "explanation": "By convention a vector is taken to be a column vector unless stated otherwise, and a column vector stacks its n components down one column, giving shape n by 1. A row vector is the 1 by n layout, a vector is never a scalar, and its shape is well defined before any multiplication.",
+      "misconception": "The default is a column vector of shape n by 1, not a row vector."
+    },
+    {
+      "type": "mcq",
+      "concept": "distance-from-origin",
+      "difficulty": "easy",
+      "question": "How is the distance of a vector from the origin computed for any number of components?",
+      "options": [
+        "The square root of the sum of the squared components of the vector.",
+        "The sum of the absolute values of all the components in the vector.",
+        "The largest single component value divided by the number of components.",
+        "The product of all the components multiplied together and then halved."
+      ],
+      "answer": 0,
+      "explanation": "The distance from the origin, the vector's magnitude or norm, generalizes the Pythagoras theorem: square every component, sum the squares, and take the square root. Summing absolute values, dividing a maximum, or multiplying components all give different quantities that are not the Euclidean length.",
+      "misconception": "Magnitude is the root of the sum of squares, not a sum of absolute values."
+    },
+    {
+      "type": "mcq",
+      "concept": "euclidean-distance",
+      "difficulty": "medium",
+      "question": "What is the Euclidean distance between two vectors?",
+      "options": [
+        "The difference between each vector's distance from the origin, taken as one number.",
+        "The dot product of the two vectors divided by the product of their magnitudes.",
+        "The norm of their component-wise difference: square the differences, sum, and take the root.",
+        "The number of components on which the two vectors hold exactly the same value."
+      ],
+      "answer": 2,
+      "explanation": "Subtract the two vectors component by component, square each difference, sum them, and take the square root; that is the norm of their difference. Subtracting their origin distances ignores direction, the dot-product ratio is cosine similarity, and counting equal components is a different measure entirely.",
+      "misconception": "Euclidean distance is the norm of the difference vector, not a gap in origin distances."
+    },
+    {
+      "type": "scenario",
+      "concept": "euclidean-distance",
+      "difficulty": "medium",
+      "scenario": "You are classifying a new Iris flower with k-nearest-neighbors, where every flower is a feature vector and labels come from the closest known flowers.",
+      "question": "Which quantity does the algorithm compute to decide the new flower's class?",
+      "options": [
+        "The cosine of the angle between the new flower and the origin, then the nearest label.",
+        "The Euclidean distance from the new flower to each known flower, then the nearest labels.",
+        "The dot product of the new flower with itself, choosing the label with the largest result.",
+        "The sum of the new flower's components, matching it to the class with the closest total."
+      ],
+      "answer": 1,
+      "explanation": "k-nearest-neighbors measures the Euclidean distance from the new point to every known point, finds the nearest ones, and copies their label, so a flower nearest to setosa examples is called setosa. An angle to the origin, a self dot product, or a component sum would not capture proximity between two data points.",
+      "misconception": "k-nearest-neighbors ranks by Euclidean distance between points, not by angles or sums."
+    },
+    {
+      "type": "mcq",
+      "concept": "shifting",
+      "difficulty": "medium",
+      "question": "Adding a scalar to every component of a vector has what geometric effect, and what preprocessing step uses it?",
+      "options": [
+        "It rotates the vector around the origin, used when whitening correlated features.",
+        "It stretches the vector away from the origin, used when normalizing feature ranges.",
+        "It shifts the vector to a new position, used in mean centering to recenter data on the origin.",
+        "It reflects the vector across an axis, used when augmenting an image training set."
+      ],
+      "answer": 2,
+      "explanation": "Changing every component by the same added amount moves the whole vector, which is called shifting, and mean centering applies this per axis by subtracting each axis mean so the data recenters on the origin. Rotation, stretching, and reflection are different transformations that scalar addition does not perform.",
+      "misconception": "Scalar addition shifts a vector; stretching comes from scalar multiplication."
+    },
+    {
+      "type": "mcq",
+      "concept": "scaling",
+      "difficulty": "easy",
+      "question": "How do shifting and scaling a vector differ?",
+      "options": [
+        "Shifting adds a scalar to each component and moves the vector, while scaling multiplies each component and stretches or shrinks it.",
+        "Shifting multiplies each component and stretches the vector, while scaling adds a scalar and moves it.",
+        "Both add a scalar to every component, differing only in whether the scalar is positive or negative.",
+        "Both multiply every component by a scalar, differing only in whether the result is rounded."
+      ],
+      "answer": 0,
+      "explanation": "Scalar addition or subtraction changes every component by the same amount, moving the vector, which is shifting; scalar multiplication or division changes every component by the same factor, stretching or shrinking it, which is scaling. The remaining options swap or merge these two distinct operations.",
+      "misconception": "Shifting adds, scaling multiplies; they are not the same operation with a sign change."
+    },
+    {
+      "type": "mcq",
+      "concept": "vector-addition",
+      "difficulty": "easy",
+      "question": "How are two vectors of the same dimension added?",
+      "options": [
+        "By multiplying their matching components and summing the products into one number.",
+        "By placing their components side by side to form a longer combined vector.",
+        "By adding their matching components to get a new vector of the same dimension.",
+        "By taking the larger of each pair of matching components to form the result."
+      ],
+      "answer": 2,
+      "explanation": "Vector addition is component-wise: add each pair of matching components to produce a new vector of the same dimension, pictured tip-to-tail. Multiplying and summing components is the dot product, concatenating lengthens the vector, and taking maxima is neither addition nor a standard vector operation.",
+      "misconception": "Addition is component-wise; multiplying and summing components gives the dot product instead."
+    },
+    {
+      "type": "mcq",
+      "concept": "dot-product",
+      "difficulty": "medium",
+      "question": "Why is the dot product of two vectors often written as A transpose times B?",
+      "options": [
+        "Because the transpose reverses the order of the components before they are multiplied.",
+        "Because vectors default to columns, so A is transposed to a row and multiplied by column B.",
+        "Because the transpose squares each component of A before the multiplication with B.",
+        "Because only transposed vectors can be multiplied, since columns cannot be combined at all."
+      ],
+      "answer": 1,
+      "explanation": "The dot product equals the matrix product of a 1 by n row and an n by 1 column, giving a single scalar. Since vectors default to columns, A must be transposed into a row first, hence A transpose times B. The transpose only changes orientation, not the order or the values, and columns can be combined once one is transposed.",
+      "misconception": "The transpose turns the column A into a row so the matrix product yields a scalar."
+    },
+    {
+      "type": "mcq",
+      "concept": "dot-product-laws",
+      "difficulty": "easy",
+      "question": "Which laws does the dot product obey?",
+      "options": [
+        "It is commutative and distributive, so A dot B equals B dot A and distributes over addition.",
+        "It is neither commutative nor distributive, so the order and grouping always change the result.",
+        "It is commutative but not distributive, so it cannot be expanded over a sum of vectors.",
+        "It is distributive but not commutative, so A dot B differs from B dot A in general."
+      ],
+      "answer": 0,
+      "explanation": "The dot product is commutative, A dot B equals B dot A, and distributive, A dot the sum of B and C equals A dot B plus A dot C. The other options deny one or both of these laws, which the component-wise multiply-and-sum definition clearly satisfies.",
+      "misconception": "The dot product is both commutative and distributive, unlike matrix multiplication."
+    },
+    {
+      "type": "mcq",
+      "concept": "angle-orthogonality",
+      "difficulty": "hard",
+      "question": "The dot product of two non-zero vectors comes out to zero. What does that tell you about the angle between them?",
+      "options": [
+        "The angle is 0 degrees, so the vectors point the same way and are maximally similar.",
+        "The angle is 180 degrees, so the vectors point in exactly opposite directions.",
+        "The angle cannot be determined from a zero dot product without knowing the magnitudes.",
+        "The angle is 90 degrees, so the vectors are orthogonal and share no common features."
+      ],
+      "answer": 3,
+      "explanation": "In the form A dot B equals the product of magnitudes times the cosine of the angle, a zero result with non-zero magnitudes forces the cosine to zero, so the angle is 90 degrees and the vectors are orthogonal. A 0-degree angle gives a maximal positive dot product and 180 degrees a maximal negative one, and the magnitudes being non-zero is exactly what pins the angle down.",
+      "misconception": "A zero dot product between non-zero vectors means a right angle, not any angle."
+    },
+    {
+      "type": "mcq",
+      "concept": "cosine-similarity",
+      "difficulty": "medium",
+      "question": "What does cosine similarity measure, and what is its range?",
+      "options": [
+        "The Euclidean distance between two vectors, ranging from 0 upward with no upper bound.",
+        "How alike two vectors' directions are, ranging from -1 for opposite to 1 for identical.",
+        "The difference in magnitude between two vectors, ranging from -1 to 1 after rescaling.",
+        "The number of shared components between two vectors, ranging from 0 to the dimension."
+      ],
+      "answer": 1,
+      "explanation": "Cosine similarity is the cosine of the angle between two vectors, the dot product divided by the product of magnitudes, so it captures how aligned their directions are regardless of length. It runs from -1 (opposite directions) through 0 (orthogonal) to 1 (same direction). It is not a distance, a magnitude gap, or a count of equal components.",
+      "misconception": "Cosine similarity compares direction, not length, and ranges from -1 to 1."
+    },
+    {
+      "type": "card",
+      "concept": "cosine-similarity",
+      "difficulty": "hard",
+      "question": "In a movie recommender, how is cosine similarity used to pick recommendations, and why is direction the right thing to compare?",
+      "answer": "Each movie's summary is turned into a vector, for example by counting vocabulary words. To recommend movies like a chosen one, compute the cosine similarity between the chosen movie's vector and every other movie's vector, and return those with the highest similarity, meaning the smallest angle. Direction is the right comparison because two summaries about the same topic point the same way even if one is much longer; cosine similarity ignores magnitude and compares only orientation, so length differences do not distort the match.",
+      "explanation": "This is why many simple recommenders rank by cosine similarity rather than raw distance, which would penalize longer summaries."
+    },
+    {
+      "type": "mcq",
+      "concept": "hyperplane-equation",
+      "difficulty": "medium",
+      "question": "In n dimensions, how is the equation of a hyperplane written compactly, and what happens if it passes through the origin?",
+      "options": [
+        "It is w transpose x plus w0 equals 0, and passing through the origin drops w0 to give w transpose x equals 0.",
+        "It is w transpose x times w0 equals 0, and passing through the origin sets every weight to 1.",
+        "It is x transpose x plus w0 equals 0, and passing through the origin removes the point vector x.",
+        "It is w transpose x plus w0 equals 1, and passing through the origin raises w0 to equal the dimension."
+      ],
+      "answer": 0,
+      "explanation": "Each weighted sum of component values is a dot product, so the hyperplane equation compresses to w transpose x plus w0 equals 0, where w0 is the intercept term. A hyperplane through the origin has w0 equal to zero, leaving w transpose x equals 0. The other forms misuse the dot product, the intercept, or the right-hand side.",
+      "misconception": "The compact form sets the equation to 0, and the origin case zeroes the intercept w0."
+    },
+    {
+      "type": "scenario",
+      "concept": "normal-vector-w",
+      "difficulty": "hard",
+      "scenario": "A linear classifier separates data with a hyperplane through the origin written as w transpose x equals 0, and you want to interpret the weight vector w.",
+      "question": "What is the geometric relationship between w and the hyperplane, and why?",
+      "options": [
+        "w lies within the hyperplane, because every point on the hyperplane is a scalar multiple of w.",
+        "w is parallel to the hyperplane, because w transpose x equals 0 means they never intersect.",
+        "w is perpendicular (normal) to the hyperplane, because w transpose x equals 0 forces a 90-degree angle.",
+        "w points from the origin to the nearest data point, because that distance defines the margin."
+      ],
+      "answer": 2,
+      "explanation": "For any point x on the hyperplane, w transpose x equals 0, which in geometric form is the product of magnitudes times the cosine of the angle equals 0. With non-zero vectors the cosine must be 0, so the angle is 90 degrees: w is perpendicular, the normal vector, to the hyperplane. It does not lie in the plane, run parallel to it, or point to a specific data point.",
+      "misconception": "The weight vector is the hyperplane's normal, set at a right angle to every point on it."
+    },
+    {
+      "type": "card",
+      "concept": "normal-vector-w",
+      "difficulty": "hard",
+      "question": "Starting from w transpose x equals 0 for a hyperplane through the origin, derive why w is perpendicular to the hyperplane.",
+      "answer": "Any point x lying on the hyperplane satisfies w transpose x equals 0, and w transpose x is the dot product of w and x. Writing the dot product in its geometric form, it equals the magnitude of w times the magnitude of x times the cosine of the angle between them. Setting that equal to 0, and knowing w and x are non-zero so their magnitudes are not zero, the cosine of the angle must be 0. A cosine of 0 means the angle is 90 degrees, so w meets every vector lying on the hyperplane at a right angle, which is exactly what it means for w to be the normal (perpendicular) vector.",
+      "explanation": "This interpretation of w as the normal vector is what lets classifiers reason about which side of the boundary a point falls on."
+    }
+  ]
+}

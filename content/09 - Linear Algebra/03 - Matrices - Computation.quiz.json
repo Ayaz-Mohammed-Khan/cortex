@@ -1,0 +1,239 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "order-shape",
+      "difficulty": "easy",
+      "question": "A matrix has 2 rows and 3 columns. What is its order?",
+      "options": [
+        "Its order is 3 by 2, written columns first and then rows.",
+        "Its order is 6, the total number of entries it contains.",
+        "Its order is 2 by 3, written as number of rows by number of columns.",
+        "Its order is 5, the number of rows added to the number of columns."
+      ],
+      "answer": 2,
+      "explanation": "The order of a matrix is its number of rows times its number of columns, written rows by columns, so 2 rows and 3 columns give order 2 by 3, matching a NumPy array's shape. Order is not written columns first, is not the total entry count, and is not a sum of the two dimensions.",
+      "misconception": "Order is rows by columns, not the entry count or a sum of dimensions."
+    },
+    {
+      "type": "mcq",
+      "concept": "matrix-types",
+      "difficulty": "easy",
+      "question": "Which description correctly names a type of matrix?",
+      "options": [
+        "A scalar matrix is any matrix with a single row and several columns of numbers.",
+        "An identity matrix is a scalar matrix whose equal diagonal entries are all 1.",
+        "A diagonal matrix is any matrix whose first row and first column are all zero.",
+        "A square matrix is any matrix whose entries are all perfect squares of integers."
+      ],
+      "answer": 1,
+      "explanation": "An identity matrix is a special scalar matrix (a diagonal matrix with equal diagonal entries) in which those entries are all 1. A single row is a row matrix, a diagonal matrix has zeros only off the diagonal rather than in the first row and column, and a square matrix is about equal row and column counts, not square-number entries.",
+      "misconception": "The identity is the scalar matrix with ones on the diagonal, not just any patterned grid."
+    },
+    {
+      "type": "mcq",
+      "concept": "matrix-types",
+      "difficulty": "medium",
+      "question": "What is the diagonal of a square matrix?",
+      "options": [
+        "The entries where the row index equals the column index.",
+        "The entries running from the bottom-left corner to the top-right corner.",
+        "The entire first row and the entire first column taken together.",
+        "The largest entry in each row, collected into a single list of values."
+      ],
+      "answer": 0,
+      "explanation": "The diagonal consists of the entries where the row index i equals the column index j, such as positions 1-1, 2-2, and 3-3. The bottom-left to top-right line is the anti-diagonal, the first row and column are not the diagonal, and row maxima are unrelated to the diagonal.",
+      "misconception": "The main diagonal is where row index equals column index, running top-left to bottom-right."
+    },
+    {
+      "type": "mcq",
+      "concept": "equality",
+      "difficulty": "easy",
+      "question": "Under what conditions are two matrices equal?",
+      "options": [
+        "When they contain the same set of numbers, regardless of where each number sits.",
+        "When they have the same order and every corresponding entry matches in position.",
+        "When they have the same determinant, even if their individual entries differ.",
+        "When they have the same number of total entries, whatever their shapes may be."
+      ],
+      "answer": 1,
+      "explanation": "Equality requires both the same order and equal entries at every matching position; a single mismatched entry or a different order breaks it. Sharing the same multiset of numbers, the same determinant, or the same entry count is not enough, since position and shape both matter.",
+      "misconception": "Equality needs matching order and matching entries position by position."
+    },
+    {
+      "type": "mcq",
+      "concept": "scalar-ops",
+      "difficulty": "easy",
+      "question": "What does multiplying a matrix by a scalar do, and which property follows?",
+      "options": [
+        "It multiplies only the diagonal entries, so k times A changes just the diagonal.",
+        "It multiplies the first row by the scalar, so k distributes across rows but not columns.",
+        "It multiplies every entry by the scalar, so k times the sum A plus B equals kA plus kB.",
+        "It adds the scalar to every entry, so k times A plus B equals A plus B plus k."
+      ],
+      "answer": 2,
+      "explanation": "A scalar operation multiplies every entry by the scalar, and from that the distributive property follows: k times the sum of A and B equals kA plus kB. It does not touch only the diagonal or first row, and multiplying is not the same as adding the scalar to each entry.",
+      "misconception": "A scalar multiplies all entries, giving the distributive rule k(A+B) = kA + kB."
+    },
+    {
+      "type": "mcq",
+      "concept": "addition",
+      "difficulty": "easy",
+      "question": "What must be true before two matrices can be added, and how is the sum formed?",
+      "options": [
+        "They must have the same order, and the sum is formed entry-wise at matching positions.",
+        "The columns of the first must equal the rows of the second, and the sum is a dot product.",
+        "They must both be square, and the sum keeps only the diagonal entries of each matrix.",
+        "They must have the same determinant, and the sum averages their corresponding entries."
+      ],
+      "answer": 0,
+      "explanation": "Addition requires the two matrices to share the same order, and the sum is formed by adding matching entries, giving a result of the same order. The inner-dimension rule and dot products belong to multiplication, squareness and determinants are irrelevant to addition, and entries are added, not averaged.",
+      "misconception": "Addition needs equal order and is entry-wise; the inner-dimension rule is for multiplication."
+    },
+    {
+      "type": "mcq",
+      "concept": "multiplication-rule",
+      "difficulty": "medium",
+      "question": "When can an m by n matrix be multiplied by another matrix, and what is the result's order?",
+      "options": [
+        "When the second matrix is also m by n, giving an m by n result formed entry-wise.",
+        "When the second matrix is n by p, giving an m by p result from row-by-column dot products.",
+        "When both matrices are square of the same size, giving a single scalar as the result.",
+        "When the second matrix is p by m, giving an n by n result that is always symmetric."
+      ],
+      "answer": 1,
+      "explanation": "Multiplication is defined when the inner dimensions match, so an m by n matrix multiplies an n by p matrix, and the outer dimensions give an m by p result whose entries are dot products of a row with a column. Matching full orders is the rule for addition, and the other options misstate the shape requirement and the result.",
+      "misconception": "Multiplication needs matching inner dimensions; the outer dimensions set the result's order."
+    },
+    {
+      "type": "mcq",
+      "concept": "non-commutative",
+      "difficulty": "medium",
+      "question": "Is matrix multiplication commutative?",
+      "options": [
+        "Yes, AB always equals BA, just as it does for ordinary numbers.",
+        "Yes, AB equals BA whenever both matrices are square of the same size.",
+        "No, AB generally differs from BA, so the order of the factors matters.",
+        "No, but only when the two matrices have different orders from each other."
+      ],
+      "answer": 2,
+      "explanation": "Matrix multiplication is not commutative: AB and BA generally give different results, so order matters even when both products are defined, as with two square matrices of the same size. Multiplication remains associative and distributive, but swapping the factors changes the outcome.",
+      "misconception": "Order matters in matrix multiplication; AB is generally not BA even for square matrices."
+    },
+    {
+      "type": "mcq",
+      "concept": "transpose",
+      "difficulty": "medium",
+      "question": "Which transpose rule is correct?",
+      "options": [
+        "The transpose of a product AB equals A transpose times B transpose, keeping the order.",
+        "The transpose of a product AB equals B transpose times A transpose, reversing the order.",
+        "The transpose of a sum A plus B equals A transpose minus B transpose.",
+        "The transpose of a transpose of A equals the inverse of A rather than A itself."
+      ],
+      "answer": 1,
+      "explanation": "Transposing a product reverses the factor order, so the transpose of AB equals B transpose times A transpose. The transpose of a sum distributes as a sum of transposes, and transposing twice returns the original matrix A, not its inverse.",
+      "misconception": "Transposing a product flips the factor order; it does not keep it."
+    },
+    {
+      "type": "mcq",
+      "concept": "determinant",
+      "difficulty": "medium",
+      "question": "What is the determinant of the 2 by 2 matrix with top row -2, 5 and bottom row -6, 7?",
+      "options": [
+        "It is -44, found by multiplying the two left entries with the two right entries.",
+        "It is 4, found by adding the diagonal product to the off-diagonal product.",
+        "It is 16, found as -2 times 7 minus 5 times -6, which is -14 plus 30.",
+        "It is -16, found as 5 times -6 minus -2 times 7, following the cross rule."
+      ],
+      "answer": 2,
+      "explanation": "For a 2 by 2 matrix with top row a, b and bottom row c, d, the determinant is ad minus bc, so here it is -2 times 7 minus 5 times -6, which is -14 plus 30, giving 16. The other options mix up which entries multiply, add instead of subtract, or reverse the subtraction order.",
+      "misconception": "The 2 by 2 determinant is ad minus bc, not a sum or a reversed difference."
+    },
+    {
+      "type": "mcq",
+      "concept": "minor-cofactor",
+      "difficulty": "medium",
+      "question": "How is the cofactor of an entry related to its minor?",
+      "options": [
+        "The cofactor is the minor with the sign -1 raised to the power i plus j attached.",
+        "The cofactor is the minor divided by the determinant of the full matrix.",
+        "The cofactor is the minor squared, which removes any negative sign it carried.",
+        "The cofactor is the minor of the transposed matrix at the same position."
+      ],
+      "answer": 0,
+      "explanation": "The minor M-i-j is the determinant left after deleting row i and column j, and the cofactor is that minor multiplied by -1 raised to the power i plus j, giving a checkerboard of signs. Dividing by the determinant, squaring, or transposing are not how the cofactor is defined.",
+      "misconception": "A cofactor is a signed minor, with the sign set by (-1) to the power i plus j."
+    },
+    {
+      "type": "mcq",
+      "concept": "adjoint",
+      "difficulty": "medium",
+      "question": "How is the adjoint of a matrix formed?",
+      "options": [
+        "By dividing every entry of the matrix by the determinant of the matrix.",
+        "By replacing each entry with its minor and leaving the matrix in place.",
+        "By inverting the matrix and then multiplying the result by its determinant.",
+        "By replacing each entry with its cofactor and then transposing the result."
+      ],
+      "answer": 3,
+      "explanation": "The adjoint, or adjugate, is built by replacing each entry with its cofactor to form the cofactor matrix, then transposing that matrix. Dividing by the determinant is part of forming the inverse, minors without signs are not cofactors, and the inverse is the end product, not a step toward the adjoint.",
+      "misconception": "The adjoint is the transpose of the cofactor matrix, not a scaled or minor-only version."
+    },
+    {
+      "type": "mcq",
+      "concept": "inverse-formula",
+      "difficulty": "medium",
+      "question": "What is the formula for the inverse of a matrix A?",
+      "options": [
+        "The inverse is the adjoint of A multiplied by the determinant of A.",
+        "The inverse is one divided by the determinant of A, times the adjoint of A.",
+        "The inverse is the transpose of A divided by the sum of its diagonal entries.",
+        "The inverse is the determinant of A divided by the adjoint of A, entry by entry."
+      ],
+      "answer": 1,
+      "explanation": "The inverse is one over the determinant of A times the adjoint of A, which is why a zero determinant makes the inverse undefined. Multiplying the adjoint by the determinant, using the transpose over a trace, or dividing the determinant by the adjoint all fail to give the matrix that satisfies A times its inverse equals the identity.",
+      "misconception": "The inverse scales the adjoint by one over the determinant, not by the determinant itself."
+    },
+    {
+      "type": "scenario",
+      "concept": "invertibility-conditions",
+      "difficulty": "hard",
+      "scenario": "You compute the determinant of a square matrix and it comes out to exactly zero.",
+      "question": "What can you conclude, and why?",
+      "options": [
+        "The matrix is singular and has no inverse, because the inverse formula would divide by zero.",
+        "The matrix is non-singular but needs the pseudo-inverse instead of the ordinary inverse.",
+        "The matrix is invertible, since a zero determinant simply means the inverse equals the identity.",
+        "Nothing can be concluded until you also check whether the matrix is symmetric."
+      ],
+      "answer": 0,
+      "explanation": "A zero determinant means the matrix is singular, and since the inverse is one over the determinant times the adjoint, a zero determinant would require dividing by zero, so no inverse exists. A zero determinant does not make the matrix non-singular, does not yield the identity, and symmetry has no bearing on invertibility.",
+      "misconception": "A zero determinant marks a singular matrix with no inverse, full stop."
+    },
+    {
+      "type": "card",
+      "concept": "invertibility-conditions",
+      "difficulty": "hard",
+      "question": "Explain why only square, non-singular matrices have an ordinary inverse.",
+      "answer": "The inverse is computed as one over the determinant times the adjoint, and both the determinant and the adjoint are defined only for square matrices, so a non-square matrix has no ordinary inverse. Among square matrices, the determinant sits in the denominator of the inverse formula, so if the determinant is zero the matrix is singular and the formula would divide by zero, leaving no inverse. An inverse therefore requires two things at once: the matrix must be square, and its determinant must be non-zero, meaning non-singular.",
+      "explanation": "The geometric reason, that a singular matrix collapses space and loses information, is developed in the companion intuition note."
+    },
+    {
+      "type": "scenario",
+      "concept": "solving-linear-systems",
+      "difficulty": "hard",
+      "scenario": "You have a system of three linear equations in three unknowns and write it as A times x equals b, with A holding the coefficients and b the constants.",
+      "question": "How do you solve for the unknown vector x?",
+      "options": [
+        "Compute x as b times A, multiplying the constants by the coefficient matrix directly.",
+        "Compute x as A inverse times b, after confirming A is square and non-singular.",
+        "Compute x as the determinant of A divided by b, entry by entry down the vector.",
+        "Compute x as b minus A, subtracting the coefficient matrix from the constant vector."
+      ],
+      "answer": 1,
+      "explanation": "Multiplying both sides of A x equals b by A inverse and using that A inverse times A is the identity gives x equals A inverse times b, valid whenever A is square and non-singular. The method scales to any number of equations. Multiplying b by A, dividing by b, or subtracting A do not solve the system.",
+      "misconception": "Solve a linear system as x equals A inverse times b, not by multiplying or subtracting directly."
+    }
+  ]
+}
