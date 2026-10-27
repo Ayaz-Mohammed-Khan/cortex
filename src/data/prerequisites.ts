@@ -98,19 +98,24 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   'Chi-Square Tests': ['Hypothesis Testing'],
   'ANOVA': ['Hypothesis Testing', 'P-values and T-tests'],
 
-  // ── Maths & ML Foundations ────────────────────────────────────────────
+  // ── Linear Algebra ────────────────────────────────────────────────────
   // The linear-algebra strand is a chain; Tensors is the entry point.
   'Vectors': ['Tensors'],
-  'Matrices: Computation': ['Vectors'],
-  'Matrices: Intuition': ['Matrices: Computation'],
+  'Matrices - Computation': ['Vectors'],
+  'Matrices - Intuition': ['Matrices - Computation'],
 
-  // ── Regression & Regularization ───────────────────────────────────────
-  // Linear regression is the base. Optimization → gradient descent feed the
-  // from-scratch models; regression analysis adds the inferential view;
-  // regularization (ridge → lasso) sits on bias-variance and gradient descent.
-  'Optimization': ['Linear Regression'],
+  // ── Regression & Regularization (Regression + Regularization tracks) ──
+  // Linear regression is the base, taught as a chain of four notes
+  // (introduction → simple → multiple → metrics). Optimization → gradient
+  // descent feed the from-scratch models; regression analysis adds the
+  // inferential view; regularization (ridge → lasso) sits on bias-variance
+  // and gradient descent.
+  'Simple Linear Regression': ['Introduction to Linear Regression'],
+  'Multiple Linear Regression': ['Simple Linear Regression'],
+  'Regression Metrics': ['Multiple Linear Regression'],
+  'Optimization': ['Multiple Linear Regression'],
   'Gradient Descent': ['Optimization'],
-  'Regression Analysis': ['Linear Regression', 'Inferential Statistics'],
+  'Regression Analysis': ['Multiple Linear Regression', 'Inferential Statistics'],
   'Multicollinearity': ['Regression Analysis'],
   'Ridge Regression': ['Bias-Variance Tradeoff', 'Gradient Descent'],
   'Lasso & ElasticNet': ['Ridge Regression'],
@@ -124,7 +129,7 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   // Naive Bayes needs the probability groundwork; logistic regression builds
   // on linear regression and gradient descent; SVM extends logistic.
   'Naive Bayes': ['Probability Distributions'],
-  'Logistic Regression': ['Linear Regression', 'Gradient Descent'],
+  'Logistic Regression': ['Multiple Linear Regression', 'Gradient Descent'],
   'Support Vector Machines': ['Logistic Regression'],
 
   // ── Trees & Ensembles ─────────────────────────────────────────────────
@@ -139,7 +144,7 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   // ── Dimensionality Reduction ──────────────────────────────────────────
   // The linear-algebra intuition note powers eigen decomposition, which powers
   // PCA and SVD; t-SNE and LDA sit on PCA.
-  'Eigen Decomposition': ['Matrices: Intuition'],
+  'Eigen Decomposition': ['Matrices - Intuition'],
   'PCA': ['Eigen Decomposition'],
   'SVD': ['Eigen Decomposition'],
   't-SNE': ['PCA'],
@@ -174,12 +179,13 @@ export const TRACK_PREREQUISITES: PrerequisiteMap = {
   'Descriptive Statistics': ['NumPy & Pandas'],
   'Probability Distributions': ['Descriptive Statistics'],
   'Inferential Statistics': ['Probability Distributions'],
-  'Maths & ML Foundations': ['NumPy & Pandas'],
-  'Regression & Regularization': ['Maths & ML Foundations', 'Inferential Statistics'],
-  'Feature Engineering & Selection': ['Regression & Regularization'],
-  'Classification': ['Regression & Regularization'],
+  'Linear Algebra': ['NumPy & Pandas'],
+  'Regression': ['Linear Algebra', 'Inferential Statistics'],
+  'Regularization': ['Regression'],
+  'Feature Engineering & Selection': ['Regression'],
+  'Classification': ['Regression'],
   'Trees & Ensembles': ['Classification'],
-  'Dimensionality Reduction': ['Maths & ML Foundations'],
+  'Dimensionality Reduction': ['Linear Algebra'],
   'Model Evaluation': ['Classification'],
   'Unsupervised Learning': ['Dimensionality Reduction'],
   'MLOps & Deployment': ['Trees & Ensembles'],

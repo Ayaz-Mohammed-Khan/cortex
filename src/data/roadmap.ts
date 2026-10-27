@@ -148,8 +148,9 @@ export const phases: Phase[] = [
     name: 'Core machine learning',
     hue: '#c2842a',
     tracks: [
-      'Maths & ML Foundations',
-      'Regression & Regularization',
+      'Linear Algebra',
+      'Regression',
+      'Regularization',
       'Feature Engineering & Selection',
       'Classification',
       'Trees & Ensembles',
@@ -815,7 +816,7 @@ export const spine: Step[] = [
       'Stored procedures & transactions',
       'Database normalization & ER diagrams',
     ],
-    right: [
+    left: [
       {
         label: 'Database Fundamentals',
         difficulty: 'beginner',
@@ -881,7 +882,7 @@ export const spine: Step[] = [
         ],
       },
     ],
-    left: [
+    right: [
       {
         label: 'Window Functions',
         difficulty: 'advanced',
@@ -1286,7 +1287,7 @@ export const spine: Step[] = [
     ],
   },
   {
-    label: 'Maths & ML Foundations',
+    label: 'Linear Algebra',
     difficulty: 'intermediate',
     concepts: [
       'Tensors: 0D, 1D, 2D, ND',
@@ -1301,15 +1302,6 @@ export const spine: Step[] = [
       'Inverse of a matrix',
       'Linear transformations',
       'Solving systems of linear equations',
-      'History & definition of ML',
-      'Supervised & unsupervised learning',
-      'Semi-supervised & reinforcement learning',
-      'Batch vs online learning',
-      'Instance vs model based learning',
-      'Challenges in ML',
-      'Overfitting and underfitting',
-      'ML development lifecycle',
-      'Framing an ML problem',
     ],
     left: [
       {
@@ -1343,6 +1335,7 @@ export const spine: Step[] = [
       },
       {
         label: 'Matrices: Computation',
+        match: 'Matrices - Computation',
         tier: 'advanced',
         difficulty: 'intermediate',
         concepts: [
@@ -1361,6 +1354,7 @@ export const spine: Step[] = [
       },
       {
         label: 'Matrices: Intuition',
+        match: 'Matrices - Intuition',
         difficulty: 'advanced',
         concepts: [
           'Basis vectors',
@@ -1375,55 +1369,13 @@ export const spine: Step[] = [
         ],
       },
     ],
-    right: [
-      {
-        label: 'Types of ML',
-        difficulty: 'beginner',
-        concepts: [
-          'About machine learning',
-          'Supervised machine learning',
-          'Unsupervised machine learning',
-          'Semi-supervised machine learning',
-          'Reinforcement learning',
-          'Batch / offline machine learning',
-          'Online machine learning',
-          'Learning rate & out of core learning',
-          'Batch vs online learning',
-          'Instance based learning',
-          'Model based learning',
-        ],
-      },
-      {
-        label: 'Challenges in ML',
-        difficulty: 'beginner',
-        concepts: [
-          'Data collection',
-          'Insufficient / unlabelled data',
-          'Non-representative data',
-          'Poor quality data',
-          'Irrelevant features',
-          'Overfitting and underfitting',
-          'Offline learning',
-          'Cost',
-        ],
-      },
-      {
-        label: 'ML Lifecycle',
-        difficulty: 'beginner',
-        concepts: [
-          'Machine learning development lifecycle',
-          'Different job roles in data science',
-          'Framing an ML problem',
-          'How to plan a data science project',
-        ],
-      },
-    ],
   },
   {
-    label: 'Regression & Regularization',
+    label: 'Regression',
     difficulty: 'intermediate',
     concepts: [
-      'Simple & multiple linear regression',
+      'Machine learning fundamentals',
+      { label: 'Simple & multiple linear regression', at: 'What linear regression is' },
       'Finding m and b',
       'Regression metrics: MAE, MSE, RMSE',
       'R2 and adjusted R2',
@@ -1434,32 +1386,68 @@ export const spine: Step[] = [
       'Polynomial regression',
       'Assumptions of linear regression',
       'Multicollinearity & VIF',
-      'Bias-variance decomposition',
-      'What is regularization?',
-      'When to use regularization',
-      'Types of regularization',
-      'Ridge regression & geometric intuition',
-      'Lasso regression & sparsity',
-      'ElasticNet regression',
     ],
     left: [
       {
-        label: 'Linear Regression',
+        label: 'Machine Learning Fundamentals',
+        difficulty: 'beginner',
+        concepts: [
+          'What is machine learning?',
+          'AI vs ML vs DL',
+          { label: 'Supervised & unsupervised learning', at: 'Supervised machine learning' },
+          'Semi-supervised & reinforcement learning',
+          'Batch vs online learning',
+          'Instance vs model based learning',
+          'Challenges in machine learning',
+          { label: 'Overfitting and underfitting', at: 'Challenges in machine learning' },
+          'Machine learning development lifecycle',
+          'Data science job roles',
+          'Framing an ML problem',
+        ],
+      },
+      {
+        label: 'Introduction to Linear Regression',
         difficulty: 'intermediate',
         concepts: [
-          'Introduction & types of linear regression',
-          'Simple linear regression intuition',
+          'What linear regression is',
+          'Types of linear regression',
+          'Where linear regression sits among algorithms',
+        ],
+      },
+      {
+        label: 'Simple Linear Regression',
+        difficulty: 'intermediate',
+        concepts: [
+          { label: 'Simple linear regression intuition', at: 'The best-fit line' },
+          'The best-fit line & residuals',
           'How to find m and b',
-          'Model code from scratch',
+          { label: 'Model code from scratch', at: 'A worked example' },
+        ],
+      },
+      {
+        label: 'Multiple Linear Regression',
+        difficulty: 'intermediate',
+        concepts: [
+          'From one feature to many',
           'Multiple linear regression (MLR)',
           'Mathematical formulation of MLR',
           'Error function of MLR & minimizing error',
-          'Regression metrics: MAE',
+        ],
+      },
+      {
+        label: 'Regression Metrics',
+        difficulty: 'intermediate',
+        concepts: [
+          'Why we need metrics',
+          'Mean absolute error (MAE)',
           'MSE and RMSE',
           'R2 score',
           'Adjusted R2 score',
+          'Choosing a metric',
         ],
       },
+    ],
+    right: [
       {
         label: 'Optimization',
         tier: 'advanced',
@@ -1473,7 +1461,7 @@ export const spine: Step[] = [
           'How to select a good loss function',
           'Convex and non-convex loss functions',
           'Gradient descent',
-          'Gradient descent with multiple parameters',
+          { label: 'Gradient descent with multiple parameters', at: 'Gradient descent as optimization' },
           'Problems faced in optimization',
         ],
       },
@@ -1490,7 +1478,7 @@ export const spine: Step[] = [
           'Batch gradient descent',
           'Stochastic gradient descent',
           'Problems with batch GD',
-          'Learning schedules',
+          { label: 'Learning schedules', at: 'Stochastic gradient descent' },
           'Mini-batch gradient descent',
         ],
       },
@@ -1522,8 +1510,8 @@ export const spine: Step[] = [
           'Homoscedasticity',
           'No autocorrelation',
           'Little or no multicollinearity',
-          'How to check each assumption',
-          'What to do when an assumption fails',
+          { label: 'How to check each assumption', at: 'How to check linearity' },
+          { label: 'What to do when an assumption fails', at: 'What to do when linearity fails' },
           'Standard error',
         ],
       },
@@ -1542,6 +1530,19 @@ export const spine: Step[] = [
           'How to remove multicollinearity',
         ],
       },
+    ],
+  },
+  {
+    label: 'Regularization',
+    difficulty: 'advanced',
+    concepts: [
+      'Bias-variance decomposition',
+      'What is regularization?',
+      'When to use regularization',
+      'Types of regularization',
+      'Ridge regression & geometric intuition',
+      'Lasso regression & sparsity',
+      'ElasticNet regression',
     ],
     right: [
       {
