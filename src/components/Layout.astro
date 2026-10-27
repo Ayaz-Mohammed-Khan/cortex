@@ -226,6 +226,13 @@ const isLanding = chrome === 'landing';
                 GitHub icon return at `sm+` where the width exists.
               */}
               <a
+                href="/"
+                aria-current={currentRoute === '/' ? 'page' : undefined}
+                class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex aria-[current]:text-accent-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50 dark:aria-[current]:text-accent-300"
+              >
+                Home
+              </a>
+              <a
                 href="/roadmap"
                 aria-current={currentRoute === '/roadmap' ? 'page' : undefined}
                 class="hidden rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 sm:inline-flex aria-[current]:text-accent-700 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50 dark:aria-[current]:text-accent-300"
@@ -365,7 +372,7 @@ const isLanding = chrome === 'landing';
         */}
         <div class="flex flex-col gap-2 px-4 pb-3 pt-4 lg:px-5">
           <a
-            href="/roadmap"
+            href="/"
             class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
           >
             <svg
@@ -375,6 +382,33 @@ const isLanding = chrome === 'landing';
               aria-hidden="true"
             >
               <path d="M10.7 2.3a1 1 0 0 0-1.4 0l-7 7A1 1 0 0 0 3 11h1v6a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-4h2v4a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-6h1a1 1 0 0 0 .7-1.7l-7-7z" />
+            </svg>
+            Home
+          </a>
+          <a
+            href="/roadmap"
+            class="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm font-semibold text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-600 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-gray-50"
+          >
+            {/*
+              Route/map icon (branching path with nodes): signals the learning
+              roadmap. Replaces the old house glyph, which now reads as "home"
+              and belongs on the Home link above.
+            */}
+            <svg
+              class="h-4 w-4 shrink-0 opacity-70"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="6" cy="19" r="2" />
+              <circle cx="6" cy="5" r="2" />
+              <circle cx="18" cy="12" r="2" />
+              <path d="M6 7v4a4 4 0 0 0 4 4h6" />
+              <path d="M6 17v-2" />
             </svg>
             Roadmap
           </a>
