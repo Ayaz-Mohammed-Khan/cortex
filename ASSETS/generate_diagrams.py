@@ -59,10 +59,13 @@ def _track(track_name, preferred_prefix):
 _DESCRIPTIVE = _track("Descriptive Statistics", "06")
 _PROBABILITY = _track("Probability Distributions", "07")
 _INFERENTIAL = _track("Inferential Statistics", "08")
-_MATHS_ML = _track("Maths & ML Foundations", "09")
+_LINEAR_ALGEBRA = _track("Linear Algebra", "09")
 _PYTHON = _track("Python Foundations", "01")
 _OOP = _track("OOP & Advanced Python", "02")
-_REGRESSION = _track("Regression & Regularization", "09")
+_REGRESSION = _track("Regression", "10")
+# ML-fundamentals figures now live with the Machine Learning Fundamentals note,
+# which leads the Regression track, so they resolve to the same 10 folder.
+_ML_FUNDAMENTALS = _track("Regression", "10")
 
 # Which track ASSETS/ folder each image belongs in. The statistics images are
 # split across the three Cortex statistics tracks to match where each note lives.
@@ -87,16 +90,18 @@ IMAGE_FOLDERS = {
     "type1_type2.png": _INFERENTIAL, "pvalue_area.png": _INFERENTIAL,
     "chi_square.png": _INFERENTIAL, "f_distribution.png": _INFERENTIAL,
     "anova_variance.png": _INFERENTIAL,
-    # Maths & ML Foundations (tensors, linear algebra, ML fundamentals)
-    "vector_components.png": _MATHS_ML, "mean_centering.png": _MATHS_ML,
-    "dot_product_geometry.png": _MATHS_ML, "hyperplane.png": _MATHS_ML,
-    "linear_transformation.png": _MATHS_ML, "matrix_composition.png": _MATHS_ML,
-    "determinant_area.png": _MATHS_ML, "tensor_dimensions.png": _MATHS_ML,
-    "traditional_vs_ml.png": _MATHS_ML, "ai_ml_dl_hierarchy.png": _MATHS_ML,
-    "ml_vs_dl_data.png": _MATHS_ML, "ml_types_supervision.png": _MATHS_ML,
-    "regression_vs_classification.png": _MATHS_ML, "clustering_example.png": _MATHS_ML,
-    "batch_vs_online.png": _MATHS_ML, "instance_vs_model.png": _MATHS_ML,
-    "overfitting_underfitting.png": _MATHS_ML, "mldlc_cycle.png": _MATHS_ML,
+    # Linear Algebra (tensors, vectors, matrices)
+    "vector_components.png": _LINEAR_ALGEBRA,
+    "dot_product_geometry.png": _LINEAR_ALGEBRA, "hyperplane.png": _LINEAR_ALGEBRA,
+    "linear_transformation.png": _LINEAR_ALGEBRA, "matrix_composition.png": _LINEAR_ALGEBRA,
+    "determinant_area.png": _LINEAR_ALGEBRA, "tensor_dimensions.png": _LINEAR_ALGEBRA,
+    # Machine Learning Fundamentals (leads the Regression track)
+    "mean_centering.png": _ML_FUNDAMENTALS,
+    "traditional_vs_ml.png": _ML_FUNDAMENTALS, "ai_ml_dl_hierarchy.png": _ML_FUNDAMENTALS,
+    "ml_vs_dl_data.png": _ML_FUNDAMENTALS, "ml_types_supervision.png": _ML_FUNDAMENTALS,
+    "regression_vs_classification.png": _ML_FUNDAMENTALS, "clustering_example.png": _ML_FUNDAMENTALS,
+    "batch_vs_online.png": _ML_FUNDAMENTALS, "instance_vs_model.png": _ML_FUNDAMENTALS,
+    "overfitting_underfitting.png": _ML_FUNDAMENTALS, "mldlc_cycle.png": _ML_FUNDAMENTALS,
     # Python Foundations: basics
     "compiler_vs_interpreter.png": _PYTHON,
     "variable_reference_model.png": _PYTHON,
@@ -127,12 +132,27 @@ IMAGE_FOLDERS = {
     "reference_variables.png": _OOP,
     "encapsulation_capsule.png": _OOP,
     "inheritance_types.png": _OOP,
-    # Regression & Regularization
+    # Regression
     "linear_regression_line.png": _REGRESSION,
     "residuals_vertical.png": _REGRESSION,
     "mlr_plane.png": _REGRESSION,
     "mae_vs_mse_outlier.png": _REGRESSION,
     "r2_variance_explained.png": _REGRESSION,
+    "convex_vs_nonconvex.png": _REGRESSION,
+    "derivative_slope.png": _REGRESSION,
+    "gradient_descent_steps.png": _REGRESSION,
+    "gd_parabola_descent.png": _REGRESSION,
+    "learning_rate_effect.png": _REGRESSION,
+    "gd_variants_paths.png": _REGRESSION,
+    "regression_variance_decomposition.png": _REGRESSION,
+    "f_test_rejection_region.png": _REGRESSION,
+    "polynomial_underfit_vs_fit.png": _REGRESSION,
+    "polynomial_degree_tradeoff.png": _REGRESSION,
+    "residual_plot_linearity.png": _REGRESSION,
+    "residual_normality_check.png": _REGRESSION,
+    "homoscedasticity_vs_hetero.png": _REGRESSION,
+    "multicollinearity_correlation_heatmap.png": _REGRESSION,
+    "multicollinearity_confidence_band.png": _REGRESSION,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -2533,6 +2553,723 @@ def r2_variance_explained():
     save(fig, "r2_variance_explained.png")
 
 
+def convex_vs_nonconvex():
+    # A convex loss has a single global minimum, so setting the slope to zero
+    # lands on the optimum. A non-convex loss has several local minima and
+    # maxima, so a zero-slope point can be the wrong one. Each panel draws the
+    # chord test: a line segment between two points stays above a convex curve
+    # but dips below a non-convex one.
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4))
+
+    # left: convex bowl
+    x = np.linspace(-3.0, 3.0, 400)
+    yc = 0.45 * x**2 + 0.5
+    axes[0].plot(x, yc, color=BLUE, lw=2.4, zorder=3, label="convex loss")
+    # chord between two points lies above the curve everywhere
+    xa, xb = -2.4, 2.1
+    ya, yb = 0.45 * xa**2 + 0.5, 0.45 * xb**2 + 0.5
+    axes[0].plot([xa, xb], [ya, yb], color=ORANGE, lw=1.8, ls="--", zorder=2,
+                 label="chord stays above")
+    axes[0].scatter([xa, xb], [ya, yb], color=ORANGE, s=40, zorder=4)
+    # single global minimum
+    axes[0].scatter([0], [0.5], color=GREEN, s=90, zorder=5, marker="o",
+                    label="one global minimum")
+    axes[0].set_title("Convex loss: one minimum")
+    axes[0].set_xlabel("parameter")
+    axes[0].set_ylabel("loss")
+    axes[0].legend(loc="upper center", fontsize=8)
+
+    # right: non-convex wavy curve
+    xn = np.linspace(-3.4, 3.4, 500)
+    yn = 0.25 * xn**2 + 1.6 * np.sin(1.9 * xn) + 2.6
+    axes[1].plot(xn, yn, color=BLUE, lw=2.4, zorder=3, label="non-convex loss")
+    # chord that dips below the curve between its endpoints
+    xa2, xb2 = -2.7, 1.1
+    ya2 = 0.25 * xa2**2 + 1.6 * np.sin(1.9 * xa2) + 2.6
+    yb2 = 0.25 * xb2**2 + 1.6 * np.sin(1.9 * xb2) + 2.6
+    axes[1].plot([xa2, xb2], [ya2, yb2], color=ORANGE, lw=1.8, ls="--", zorder=2,
+                 label="chord dips below")
+    axes[1].scatter([xa2, xb2], [ya2, yb2], color=ORANGE, s=40, zorder=4)
+    # mark a local minimum (a trap) and the global minimum
+    grid = np.linspace(-3.4, 3.4, 4000)
+    gy = 0.25 * grid**2 + 1.6 * np.sin(1.9 * grid) + 2.6
+    gi = int(np.argmin(gy))
+    axes[1].scatter([grid[gi]], [gy[gi]], color=GREEN, s=90, zorder=5,
+                    label="global minimum")
+    # a local minimum to the right of centre
+    right = grid > 1.0
+    li = int(np.argmin(np.where(right, gy, np.inf)))
+    axes[1].scatter([grid[li]], [gy[li]], color=RED, s=90, zorder=5, marker="X",
+                    label="local minimum (a trap)")
+    axes[1].set_title("Non-convex loss: many minima and maxima")
+    axes[1].set_xlabel("parameter")
+    axes[1].legend(loc="upper center", fontsize=8)
+
+    fig.suptitle("Convex loss has one minimum; non-convex loss has many",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "convex_vs_nonconvex.png")
+
+
+def derivative_slope():
+    # The geometric reason differentiation reads as a slope: a secant through
+    # two points on a curve turns into the tangent at a single point as the
+    # gap dx shrinks to zero. Left panel: a wide secant over an interval.
+    # Right panel: the tangent at the same point, the instantaneous slope.
+    f = lambda x: 0.35 * x**2 + 0.4
+    df = lambda x: 0.7 * x
+    xs = np.linspace(0.2, 4.6, 400)
+    x0 = 2.3
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharex=True, sharey=True)
+
+    # left: secant over a wide interval delta x
+    dx = 1.7
+    x1 = x0 + dx
+    for ax in axes:
+        ax.plot(xs, f(xs), color=BLUE, lw=2.4, zorder=3, label="y = f(x)")
+        ax.set_xlabel("x")
+    axes[0].plot([x0, x1], [f(x0), f(x1)], color=ORANGE, lw=2.0, zorder=2,
+                 label="secant over an interval")
+    axes[0].scatter([x0, x1], [f(x0), f(x1)], color=ORANGE, s=45, zorder=4)
+    # right-angle guides showing the rise over the run
+    axes[0].plot([x0, x1], [f(x0), f(x0)], color=GREY, lw=1.2, ls=":", zorder=1)
+    axes[0].plot([x1, x1], [f(x0), f(x1)], color=GREY, lw=1.2, ls=":", zorder=1)
+    axes[0].annotate("run = delta x", xy=((x0 + x1) / 2, f(x0)),
+                     xytext=((x0 + x1) / 2 - 0.3, f(x0) - 1.2), fontsize=9)
+    axes[0].annotate("rise = f(x+delta x) - f(x)", xy=(x1, (f(x0) + f(x1)) / 2),
+                     xytext=(x1 - 1.9, (f(x0) + f(x1)) / 2 + 0.6), fontsize=9)
+    axes[0].set_title("Average rate of change over an interval")
+    axes[0].set_ylabel("y")
+    axes[0].legend(loc="upper left", fontsize=8)
+
+    # right: tangent line at x0 (the limit as dx -> 0)
+    slope = df(x0)
+    tx = np.linspace(x0 - 1.6, x0 + 1.6, 50)
+    ty = f(x0) + slope * (tx - x0)
+    axes[1].plot(tx, ty, color=RED, lw=2.0, zorder=2, label="tangent at one point")
+    axes[1].scatter([x0], [f(x0)], color=RED, s=70, zorder=4)
+    axes[1].set_title("Instantaneous rate of change: the slope at a point")
+    axes[1].legend(loc="upper left", fontsize=8)
+
+    fig.suptitle("Shrinking the interval turns the secant into the tangent",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "derivative_slope.png")
+
+
+def gradient_descent_steps():
+    # Gradient descent walks downhill on the loss curve. From a random start it
+    # repeatedly moves against the slope by a small learning-rate step, so it
+    # converges on the minimum without ever solving for the slope being zero.
+    f = lambda b: 0.5 * (b - 4.0)**2 + 1.0
+    df = lambda b: (b - 4.0)
+    bs = np.linspace(-0.5, 8.5, 400)
+
+    lr = 0.35
+    b = 0.3
+    pts = [b]
+    for _ in range(7):
+        b = b - lr * df(b)
+        pts.append(b)
+    pts = np.array(pts)
+
+    fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    ax.plot(bs, f(bs), color=BLUE, lw=2.4, zorder=2, label="loss curve")
+    # steps: fade the early ones so the active path reads left to right
+    n = len(pts)
+    for i in range(n - 1):
+        x0, x1 = pts[i], pts[i + 1]
+        ax.annotate("", xy=(x1, f(x1)), xytext=(x0, f(x0)),
+                    arrowprops=dict(arrowstyle="->", color=ORANGE,
+                                    alpha=0.35 + 0.65 * i / (n - 1), lw=1.8),
+                    zorder=3)
+    ax.scatter(pts, f(pts), color=ORANGE, s=35, zorder=4)
+    ax.scatter([pts[0]], [f(pts[0])], color=GREY, s=90, zorder=5,
+               label="random start")
+    ax.scatter([4.0], [1.0], color=GREEN, s=110, zorder=6, marker="o",
+               label="minimum")
+    ax.annotate("each step moves\nagainst the slope", xy=(pts[1], f(pts[1])),
+                xytext=(pts[1] + 0.4, f(pts[1]) + 2.2), fontsize=9,
+                arrowprops=dict(arrowstyle="->", color="black"))
+    ax.set_title("Gradient descent steps downhill to the minimum")
+    ax.set_xlabel("parameter")
+    ax.set_ylabel("loss")
+    ax.legend(loc="upper right", fontsize=8)
+    fig.tight_layout()
+    save(fig, "gradient_descent_steps.png")
+
+
+def gd_parabola_descent():
+    # Gradient descent applied to the linear-regression loss with the slope
+    # held fixed, so the loss is a parabola in the single parameter b. Left
+    # panel: cost versus b, with the big early steps shrinking as the slope
+    # flattens near the minimum. Right panel: the matching lines in data space
+    # walking from a wrong intercept up to the best-fit line.
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4))
+
+    # a fixed slope and the true best-fit intercept for a small example
+    m = 2.4
+    b_star = 4.0
+    rng = np.random.default_rng(3)
+    x_data = np.linspace(1.0, 9.0, 12)
+    y_data = m * x_data + b_star + rng.normal(0, 1.2, x_data.size)
+
+    # loss as a function of b alone (slope fixed): a clean parabola
+    def loss(b):
+        return np.mean((y_data - (m * x_data + b)) ** 2)
+
+    def dloss(b):
+        return -2.0 * np.mean(y_data - (m * x_data + b))
+
+    bs = np.linspace(-6.0, 14.0, 400)
+    ls = np.array([loss(b) for b in bs])
+
+    # left: descent on the parabola, starting far below the optimum. The step
+    # size is proportional to the slope, so it shrinks as b nears the minimum.
+    axes[0].plot(bs, ls, color=BLUE, lw=2.4, zorder=2, label="loss curve L(b)")
+    lr = 0.045
+    b = -5.0
+    path = [b]
+    for _ in range(14):
+        b = b - lr * dloss(b)
+        path.append(b)
+    path = np.array(path)
+    n = len(path)
+    for i in range(n - 1):
+        x0, x1 = path[i], path[i + 1]
+        axes[0].annotate("", xy=(x1, loss(x1)), xytext=(x0, loss(x0)),
+                         arrowprops=dict(arrowstyle="->", color=ORANGE,
+                                         alpha=0.35 + 0.65 * i / (n - 1), lw=1.8),
+                         zorder=3)
+    axes[0].scatter(path, [loss(b) for b in path], color=ORANGE, s=32, zorder=4)
+    axes[0].scatter([path[0]], [loss(path[0])], color=GREY, s=90, zorder=5,
+                    label="random start")
+    axes[0].scatter([b_star], [loss(b_star)], color=GREEN, s=110, zorder=6,
+                    marker="o", label="minimum")
+    axes[0].annotate("big steps far out,\ntiny steps near the bottom",
+                     xy=(path[2], loss(path[2])),
+                     xytext=(2.0, loss(path[0]) * 0.72), fontsize=9,
+                     arrowprops=dict(arrowstyle="->", color="black"))
+    axes[0].set_title("Parabolic loss in the intercept b")
+    axes[0].set_xlabel("intercept b")
+    axes[0].set_ylabel("loss (MSE)")
+    axes[0].legend(loc="upper center", fontsize=8)
+
+    # right: the corresponding candidate lines in data space
+    axes[1].scatter(x_data, y_data, color=GREY, s=36, zorder=3, label="data")
+    xs_line = np.linspace(0.5, 9.5, 50)
+    show = [0, 2, 5, len(path) - 1]
+    for rank, idx in enumerate(show):
+        b_i = path[idx]
+        is_last = idx == len(path) - 1
+        axes[1].plot(xs_line, m * xs_line + b_i,
+                     color=GREEN if is_last else ORANGE,
+                     lw=2.4 if is_last else 1.6,
+                     alpha=1.0 if is_last else 0.3 + 0.2 * rank,
+                     zorder=4 if is_last else 2,
+                     label="best-fit line" if is_last else
+                     ("starting line" if rank == 0 else None))
+    axes[1].set_title("The same steps as improving fit lines")
+    axes[1].set_xlabel("input x")
+    axes[1].set_ylabel("output y")
+    axes[1].legend(loc="upper left", fontsize=8)
+
+    fig.suptitle("Gradient descent on the linear-regression loss",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "gd_parabola_descent.png")
+
+
+def learning_rate_effect():
+    # The learning rate decides step size on the same parabolic loss. Too small
+    # crawls and may stop short; well chosen converges in a few clean steps; too
+    # large overshoots and zig-zags, risking divergence. Three panels share the
+    # same loss curve and start point so only the step behaviour differs.
+    f = lambda b: 0.5 * (b - 4.0) ** 2 + 1.0
+    df = lambda b: (b - 4.0)
+    bs = np.linspace(-1.0, 9.0, 400)
+    start = 0.2
+
+    def run(lr, steps):
+        b = start
+        pts = [b]
+        for _ in range(steps):
+            b = b - lr * df(b)
+            pts.append(b)
+        return np.array(pts)
+
+    specs = [
+        (0.06, 14, "Too small: slow, may stop short", BLUE),
+        (0.55, 8, "Well chosen: quick, clean descent", GREEN),
+        (1.9, 8, "Too large: overshoots and diverges", RED),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), sharey=True)
+    for ax, (lr, steps, title, col) in zip(axes, specs):
+        ax.plot(bs, f(bs), color=GREY, lw=2.0, zorder=2)
+        pts = run(lr, steps)
+        # clip for display so a diverging path stays on the axes
+        n = len(pts)
+        for i in range(n - 1):
+            x0, x1 = pts[i], pts[i + 1]
+            if abs(x1) > 60:
+                break
+            ax.annotate("", xy=(x1, f(x1)), xytext=(x0, f(x0)),
+                        arrowprops=dict(arrowstyle="->", color=col,
+                                        alpha=0.4 + 0.6 * i / (n - 1), lw=1.6),
+                        zorder=3)
+        onscreen = pts[np.abs(pts) <= 9.2]
+        ax.scatter(onscreen, f(onscreen), color=col, s=26, zorder=4)
+        ax.scatter([start], [f(start)], color="black", s=55, zorder=5,
+                   marker="s")
+        ax.scatter([4.0], [1.0], color=GREEN, s=80, zorder=6, marker="o")
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("parameter")
+        ax.set_ylim(0, 14)
+    axes[0].set_ylabel("loss")
+    fig.suptitle("The learning rate sets the step size", y=1.04,
+                 fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "learning_rate_effect.png")
+
+
+def gd_variants_paths():
+    # Batch, stochastic, and mini-batch gradient descent reaching the same
+    # minimum on a loss surface drawn as contours. Batch takes a smooth direct
+    # path (one update per epoch over all rows); stochastic is noisy (one update
+    # per row); mini-batch sits between the two (one update per batch).
+    mb, bb = 4.0, 3.0  # true centre of the bowl
+    gm, gb = np.meshgrid(np.linspace(-1, 9, 240), np.linspace(-2, 8, 240))
+    # a mildly elongated bowl so the descent direction is visible
+    Z = 0.6 * (gm - mb) ** 2 + 1.0 * (gb - bb) ** 2
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2), sharex=True, sharey=True)
+    levels = np.linspace(1, 60, 12)
+    start = np.array([0.4, 7.2])
+    rng = np.random.default_rng(7)
+
+    def smooth_path(jitter, steps, lr):
+        p = start.copy()
+        pts = [p.copy()]
+        for _ in range(steps):
+            grad = np.array([1.2 * (p[0] - mb), 2.0 * (p[1] - bb)])
+            noise = rng.normal(0, jitter, 2)
+            p = p - lr * (grad + noise)
+            pts.append(p.copy())
+        return np.array(pts)
+
+    specs = [
+        ("Batch GD: one update per epoch", 0.0, 22, 0.16, BLUE),
+        ("Stochastic GD: one update per row", 3.4, 60, 0.07, ORANGE),
+        ("Mini-batch GD: one update per batch", 1.3, 34, 0.11, GREEN),
+    ]
+    for ax, (title, jitter, steps, lr, col) in zip(axes, specs):
+        ax.contour(gm, gb, Z, levels=levels, colors=GREY, alpha=0.45,
+                   linewidths=0.8)
+        pts = smooth_path(jitter, steps, lr)
+        ax.plot(pts[:, 0], pts[:, 1], color=col, lw=1.7, zorder=3)
+        ax.scatter(pts[:, 0], pts[:, 1], color=col, s=14, zorder=4)
+        ax.scatter([start[0]], [start[1]], color="black", s=60, marker="s",
+                   zorder=5, label="start")
+        ax.scatter([mb], [bb], color=RED, s=90, marker="o", zorder=6,
+                   label="minimum")
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("slope m")
+        ax.legend(loc="upper right", fontsize=8)
+    axes[0].set_ylabel("intercept b")
+    fig.suptitle("Batch is direct, stochastic is noisy, mini-batch sits between",
+                 y=1.03, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "gd_variants_paths.png")
+
+
+def regression_variance_decomposition():
+    # The total deviation of one point from the mean splits exactly into the
+    # part the regression line explains and the part it leaves as a residual:
+    # (y - mean) = (y_hat - mean) + (y - y_hat), i.e. TSS = ESS + RSS summed and
+    # squared. Draw the mean line and the fitted line together, then on one
+    # chosen point show all three segments stacked side by side so the split is
+    # visible rather than stated.
+    rng = np.random.default_rng(5)
+    exp = np.linspace(1.0, 9.0, 12)
+    salary = 0.8 * exp + 2.0 + rng.normal(0, 0.6, exp.size)
+    mean_y = salary.mean()
+    m, b = np.polyfit(exp, salary, 1)
+    fitted = m * exp + b
+    xs = np.linspace(exp.min() - 0.3, exp.max() + 0.3, 100)
+
+    fig, ax = plt.subplots(figsize=(8.4, 5.4))
+    ax.axhline(mean_y, color=GREY, lw=2.0, zorder=2, label="mean line (no input)")
+    ax.plot(xs, m * xs + b, color=RED, lw=2.2, zorder=2, label="regression line")
+    ax.scatter(exp, salary, color=BLUE, s=42, zorder=4, label="actual salary")
+
+    # a hand-placed point whose fitted value sits well below both its actual
+    # value and the mean, so all three parts are clearly sized: the total split
+    # is (actual - mean) = (fit - mean) + (actual - fit).
+    px = 8.2
+    pyhat = m * px + b
+    py = pyhat + 1.6  # actual sits clearly above the fit at this x
+    ax.scatter([px], [py], color=BLUE, s=90, zorder=5, edgecolor="black")
+
+    # reference column on the left shows the single total deviation; the column
+    # on the right shows the same total stacked as explained (bottom) + residual
+    # (top), so the eye reads TSS = ESS + RSS.
+    x_total = px + 0.9
+    x_split = px + 1.7
+
+    ax.plot([x_total, x_total], [mean_y, py], color=PURPLE, lw=5.0, zorder=3,
+            solid_capstyle="butt")
+    ax.plot([x_split, x_split], [mean_y, pyhat], color=GREEN, lw=5.0, zorder=3,
+            solid_capstyle="butt")
+    ax.plot([x_split, x_split], [pyhat, py], color=ORANGE, lw=5.0, zorder=3,
+            solid_capstyle="butt")
+
+    # dotted guides tying the point and its fitted value across to the columns
+    ax.plot([px, x_split], [py, py], color=GREY, lw=0.8, ls=":", zorder=1)
+    ax.plot([px, x_split], [pyhat, pyhat], color=GREY, lw=0.8, ls=":", zorder=1)
+
+    ax.annotate("total (TSS term):\nactual minus mean",
+                xy=(x_total, (mean_y + py) / 2), xytext=(px - 4.9, mean_y - 1.8),
+                color=PURPLE, fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=PURPLE))
+    ax.annotate("explained\n(ESS term):\nfit minus mean",
+                xy=(x_split, (mean_y + pyhat) / 2), xytext=(x_split + 0.4, mean_y - 1.6),
+                color=GREEN, fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=GREEN))
+    ax.annotate("residual\n(RSS term):\nactual minus fit",
+                xy=(x_split, (pyhat + py) / 2), xytext=(x_split + 0.4, py - 0.2),
+                color=ORANGE, fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=ORANGE))
+
+    ax.set_xlim(exp.min() - 0.6, exp.max() + 3.4)
+    ax.set_ylim(salary.min() - 0.6, salary.max() + 2.2)
+    ax.set_title("Total deviation splits into explained plus residual")
+    ax.set_xlabel("experience in years (input)")
+    ax.set_ylabel("salary (output)")
+    ax.legend(loc="upper left", fontsize=9)
+    fig.tight_layout()
+    save(fig, "regression_variance_decomposition.png")
+
+
+def f_test_rejection_region():
+    # The F-test for overall significance places the F-statistic on an
+    # F-distribution and shades the right tail beyond the critical value as the
+    # rejection region. A large F lands in that tail, so its p-value (the tail
+    # area) falls below the significance level and the null is rejected.
+    df1, df2 = 3, 60
+    x = np.linspace(0.001, 6, 500)
+    y = stats.f.pdf(x, df1, df2)
+    f_crit = stats.f.ppf(0.95, df1, df2)
+    f_stat = 4.3  # an observed statistic well inside the rejection region
+
+    fig, ax = plt.subplots(figsize=(8, 4.4))
+    ax.plot(x, y, color=BLUE, lw=2.2, zorder=3,
+            label=f"F-distribution (df1={df1}, df2={df2})")
+    mask = x >= f_crit
+    ax.fill_between(x[mask], y[mask], color=RED, alpha=0.35, zorder=2,
+                    label="rejection region (α = 0.05)")
+    ax.axvline(f_crit, color=RED, ls="--", lw=1.4, zorder=3)
+    ax.plot([f_stat, f_stat], [0, 0.52], color=GREEN, lw=2.2, zorder=4)
+
+    ax.annotate(f"critical value\n{f_crit:.2f}", xy=(f_crit, stats.f.pdf(f_crit, df1, df2)),
+                xytext=(f_crit + 0.5, 0.45), color=RED, fontsize=9,
+                arrowprops=dict(arrowstyle="->", color=RED))
+    ax.annotate("observed F-statistic\n(large: little variance left unexplained)",
+                xy=(f_stat, 0.02), xytext=(f_stat - 0.3, 0.30), color=GREEN,
+                fontsize=9, ha="right",
+                arrowprops=dict(arrowstyle="->", color=GREEN))
+
+    ax.set_ylim(0, 0.75)
+    ax.set_title("A large F falls in the right tail, so the p-value is small")
+    ax.set_xlabel("F value")
+    ax.set_ylabel("density")
+    ax.legend(loc="upper right", fontsize=9)
+    fig.tight_layout()
+    save(fig, "f_test_rejection_region.png")
+
+
+def polynomial_underfit_vs_fit():
+    # Why polynomial regression exists: a straight line cannot follow curved
+    # data, so it underfits. Adding polynomial features lets the same linear
+    # machinery bend to the shape. Left panel: the best straight line on a
+    # parabolic cloud, missing the curve. Right panel: a degree-2 polynomial
+    # fit tracking the same points closely.
+    rng = np.random.default_rng(4)
+    x = np.linspace(-3.0, 3.0, 40)
+    y = 0.8 * x**2 + 0.9 * x + 2.0 + rng.normal(0, 1.1, x.size)
+    xs = np.linspace(x.min() - 0.2, x.max() + 0.2, 200)
+
+    # straight line fit (underfit)
+    m, b = np.polyfit(x, y, 1)
+    # degree-2 polynomial fit
+    c2 = np.polyfit(x, y, 2)
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
+    axes[0].scatter(x, y, color=BLUE, s=38, zorder=3, label="non-linear data")
+    axes[0].plot(xs, m * xs + b, color=RED, lw=2.2, zorder=2,
+                 label="straight line (underfits)")
+    axes[0].set_title("A straight line cannot follow a curve")
+    axes[0].set_xlabel("input x")
+    axes[0].set_ylabel("output y")
+    axes[0].legend(loc="upper center", fontsize=8)
+
+    axes[1].scatter(x, y, color=BLUE, s=38, zorder=3, label="non-linear data")
+    axes[1].plot(xs, np.polyval(c2, xs), color=GREEN, lw=2.4, zorder=2,
+                 label="degree-2 polynomial fit")
+    axes[1].set_title("Polynomial features let the fit bend to the data")
+    axes[1].set_xlabel("input x")
+    axes[1].legend(loc="upper center", fontsize=8)
+
+    fig.suptitle("Polynomial regression: linear machinery on added x squared terms",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "polynomial_underfit_vs_fit.png")
+
+
+def polynomial_degree_tradeoff():
+    # The degree is a hyperparameter: too low underfits, a middling value
+    # captures the true shape, and too high overfits by chasing noise. Three
+    # panels share the same points and the true curve, varying only the degree.
+    rng = np.random.default_rng(11)
+    x = np.linspace(-3.0, 3.0, 22)
+    true = 0.8 * x**2 + 0.9 * x + 2.0
+    y = true + rng.normal(0, 1.4, x.size)
+    xs = np.linspace(x.min(), x.max(), 300)
+    true_xs = 0.8 * xs**2 + 0.9 * xs + 2.0
+
+    specs = [
+        (1, "Degree 1: underfits", RED),
+        (2, "Degree 2: fits the shape", GREEN),
+        (15, "Degree 15: overfits the noise", PURPLE),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8), sharey=True)
+    for ax, (deg, title, col) in zip(axes, specs):
+        coeffs = np.polyfit(x, y, deg)
+        ax.plot(xs, true_xs, color=GREY, lw=1.6, ls="--", zorder=2,
+                label="true relationship")
+        ax.scatter(x, y, color=BLUE, s=28, zorder=3, label="data")
+        ax.plot(xs, np.polyval(coeffs, xs), color=col, lw=2.2, zorder=4,
+                label=f"degree {deg} fit")
+        ax.set_title(title, fontsize=10)
+        ax.set_xlabel("input x")
+        ax.set_ylim(true.min() - 5, true.max() + 5)
+        ax.legend(loc="upper center", fontsize=7)
+    axes[0].set_ylabel("output y")
+    fig.suptitle("The degree sets the trade-off between underfitting and overfitting",
+                 y=1.03, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "polynomial_degree_tradeoff.png")
+
+
+def residual_plot_linearity():
+    # The residual plot is the sharpest check for linearity. When the
+    # relationship is linear, residuals scatter randomly around zero; when it is
+    # non-linear, they trace a systematic pattern. Left panel: linear data,
+    # random band. Right panel: curved data forced through a line, a parabola in
+    # the residuals.
+    rng = np.random.default_rng(8)
+    n = 80
+
+    # linear data: residuals land randomly around zero
+    x1 = np.linspace(0, 10, n)
+    y1 = 1.4 * x1 + 3.0 + rng.normal(0, 1.2, n)
+    m1, b1 = np.polyfit(x1, y1, 1)
+    r1 = y1 - (m1 * x1 + b1)
+
+    # non-linear data fit with a straight line: residuals curve
+    x2 = np.linspace(-3, 3, n)
+    y2 = 1.2 * x2**2 + rng.normal(0, 0.8, n)
+    m2, b2 = np.polyfit(x2, y2, 1)
+    fit2 = m2 * x2 + b2
+    r2 = y2 - fit2
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=False)
+    axes[0].scatter(m1 * x1 + b1, r1, color=GREEN, s=26, zorder=3)
+    axes[0].axhline(0, color=RED, lw=1.6, ls="--", zorder=2)
+    axes[0].set_title("Linear data: residuals scatter around zero")
+    axes[0].set_xlabel("predicted value")
+    axes[0].set_ylabel("residual (actual minus predicted)")
+
+    axes[1].scatter(fit2, r2, color=ORANGE, s=26, zorder=3)
+    axes[1].axhline(0, color=RED, lw=1.6, ls="--", zorder=2)
+    axes[1].set_title("Non-linear data: residuals trace a pattern")
+    axes[1].set_xlabel("predicted value")
+    axes[1].set_ylabel("residual (actual minus predicted)")
+
+    fig.suptitle("A residual plot reveals non-linearity as a pattern",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "residual_plot_linearity.png")
+
+
+def residual_normality_check():
+    # The normality-of-residuals assumption is checked with a histogram and a
+    # Q-Q plot. Normal residuals give a bell-shaped histogram and points hugging
+    # the diagonal; non-normal residuals skew the histogram and bend the Q-Q
+    # points away from the line. Two columns contrast a normal and a skewed set.
+    rng = np.random.default_rng(14)
+    normal_res = rng.normal(0, 1, 400)
+    skewed_res = rng.exponential(1.0, 400)
+    skewed_res = skewed_res - skewed_res.mean()
+
+    fig, axes = plt.subplots(2, 2, figsize=(10, 7))
+
+    axes[0, 0].hist(normal_res, bins=30, color=GREEN, alpha=0.75, edgecolor="none")
+    axes[0, 0].set_title("Normal residuals: bell-shaped histogram")
+    axes[0, 0].set_xlabel("residual")
+    axes[0, 0].set_ylabel("count")
+
+    stats.probplot(normal_res, dist="norm", plot=axes[0, 1])
+    axes[0, 1].set_title("Normal residuals: points on the line")
+    axes[0, 1].get_lines()[0].set_color(BLUE)
+    axes[0, 1].get_lines()[0].set_markersize(3)
+    axes[0, 1].get_lines()[1].set_color(RED)
+
+    axes[1, 0].hist(skewed_res, bins=30, color=ORANGE, alpha=0.75, edgecolor="none")
+    axes[1, 0].set_title("Skewed residuals: lopsided histogram")
+    axes[1, 0].set_xlabel("residual")
+    axes[1, 0].set_ylabel("count")
+
+    stats.probplot(skewed_res, dist="norm", plot=axes[1, 1])
+    axes[1, 1].set_title("Skewed residuals: points bend off the line")
+    axes[1, 1].get_lines()[0].set_color(BLUE)
+    axes[1, 1].get_lines()[0].set_markersize(3)
+    axes[1, 1].get_lines()[1].set_color(RED)
+
+    fig.suptitle("Checking residual normality with a histogram and a Q-Q plot",
+                 y=1.01, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "residual_normality_check.png")
+
+
+def homoscedasticity_vs_hetero():
+    # Homoscedasticity means the residual spread stays constant across the
+    # inputs; heteroscedasticity means it changes, often a funnel that widens.
+    # Left panel: a constant band around the line. Right panel: a fanning spread
+    # that violates the assumption and breaks the standard-error formula.
+    rng = np.random.default_rng(21)
+    n = 120
+    x = np.linspace(1, 10, n)
+
+    # homoscedastic: noise amplitude is constant
+    y_homo = 1.3 * x + 2.0 + rng.normal(0, 1.0, n)
+    mh, bh = np.polyfit(x, y_homo, 1)
+
+    # heteroscedastic: noise amplitude grows with x (funnel)
+    y_het = 1.3 * x + 2.0 + rng.normal(0, 1.0, n) * (0.25 * x)
+    mt, bt = np.polyfit(x, y_het, 1)
+    xs = np.linspace(x.min(), x.max(), 100)
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
+    axes[0].scatter(x, y_homo, color=GREEN, s=24, zorder=3, label="data")
+    axes[0].plot(xs, mh * xs + bh, color=RED, lw=2.0, zorder=2,
+                 label="regression line")
+    axes[0].set_title("Homoscedastic: constant spread")
+    axes[0].set_xlabel("input x")
+    axes[0].set_ylabel("output y")
+    axes[0].legend(loc="upper left", fontsize=8)
+
+    axes[1].scatter(x, y_het, color=ORANGE, s=24, zorder=3, label="data")
+    axes[1].plot(xs, mt * xs + bt, color=RED, lw=2.0, zorder=2,
+                 label="regression line")
+    axes[1].set_title("Heteroscedastic: spread fans out with x")
+    axes[1].set_xlabel("input x")
+    axes[1].legend(loc="upper left", fontsize=8)
+
+    fig.suptitle("Constant residual spread holds; a changing spread violates it",
+                 y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "homoscedasticity_vs_hetero.png")
+
+
+def multicollinearity_correlation_heatmap():
+    # Detecting multicollinearity with a correlation matrix. Two panels share
+    # the same three input columns; the left panel is a dataset where two inputs
+    # are strongly correlated (a red off-diagonal cell), the right panel is a
+    # clean dataset where the off-diagonal correlations are near zero. The eye
+    # goes straight to the hot off-diagonal cell that flags the problem.
+    labels = ["TV", "radio", "newspaper"]
+
+    # left: strong linear dependence between TV and radio
+    corr_bad = np.array([
+        [1.00, 0.88, 0.07],
+        [0.88, 1.00, 0.05],
+        [0.07, 0.05, 1.00],
+    ])
+    # right: no meaningful dependence between any pair of inputs
+    corr_ok = np.array([
+        [1.00, 0.06, 0.04],
+        [0.06, 1.00, 0.09],
+        [0.04, 0.09, 1.00],
+    ])
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
+    for ax, corr, title in zip(
+        axes, [corr_bad, corr_ok],
+        ["Strong correlation: multicollinearity",
+         "Near-zero correlation: no multicollinearity"],
+    ):
+        im = ax.imshow(corr, cmap="coolwarm", vmin=-1, vmax=1)
+        ax.set_xticks(range(len(labels)))
+        ax.set_yticks(range(len(labels)))
+        ax.set_xticklabels(labels)
+        ax.set_yticklabels(labels)
+        ax.grid(False)
+        # annotate every cell with its correlation value
+        for i in range(len(labels)):
+            for j in range(len(labels)):
+                val = corr[i, j]
+                shade = "white" if abs(val) > 0.6 else "black"
+                ax.text(j, i, f"{val:.2f}", ha="center", va="center",
+                        color=shade, fontsize=10)
+        ax.set_title(title, fontsize=11)
+    fig.colorbar(im, ax=axes, fraction=0.025, pad=0.04,
+                 label="Pearson correlation")
+    fig.suptitle("Scan the off-diagonal cells for a value near 1 or -1",
+                 y=1.02, fontsize=13, fontweight="bold")
+    save(fig, "multicollinearity_correlation_heatmap.png")
+
+
+def multicollinearity_confidence_band():
+    # The geometric meaning of an inflated standard error. Two panels fit the
+    # same line to the same points, but the left draws a wide confidence band
+    # (large standard error, high uncertainty about where the true line sits)
+    # and the right a narrow band (small standard error). A wide band is the
+    # visible symptom of multicollinearity inflating coefficient variance.
+    rng = np.random.default_rng(11)
+    n = 40
+    x = np.linspace(1, 10, n)
+    y = 1.1 * x + 2.0 + rng.normal(0, 1.2, n)
+    m, b = np.polyfit(x, y, 1)
+    xs = np.linspace(x.min(), x.max(), 100)
+    line = m * xs + b
+    centre = xs.mean()
+
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.4), sharey=True)
+    # a band that widens away from the centre, mimicking a confidence interval
+    shape = 1.0 + ((xs - centre) / (xs.max() - centre)) ** 2
+    for ax, width, title, colour in zip(
+        axes, [2.6, 0.7],
+        ["High standard error: wide, uncertain band",
+         "Low standard error: narrow, confident band"],
+        [RED, BLUE],
+    ):
+        band = width * shape
+        ax.fill_between(xs, line - band, line + band, color=colour, alpha=0.2,
+                        zorder=1, label="95% confidence band")
+        ax.plot(xs, line, color=colour, lw=2.2, zorder=3, label="fitted line")
+        ax.scatter(x, y, color=GREY, s=22, zorder=2, label="data")
+        ax.set_title(title, fontsize=11)
+        ax.set_xlabel("input x")
+        ax.legend(loc="upper left", fontsize=8)
+    axes[0].set_ylabel("output y")
+    fig.suptitle(
+        "Multicollinearity inflates the standard error, widening the band",
+        y=1.02, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "multicollinearity_confidence_band.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -2622,4 +3359,19 @@ if __name__ == "__main__":
     mlr_plane()
     mae_vs_mse_outlier()
     r2_variance_explained()
+    convex_vs_nonconvex()
+    derivative_slope()
+    gradient_descent_steps()
+    gd_parabola_descent()
+    learning_rate_effect()
+    gd_variants_paths()
+    regression_variance_decomposition()
+    f_test_rejection_region()
+    polynomial_underfit_vs_fit()
+    polynomial_degree_tradeoff()
+    residual_plot_linearity()
+    residual_normality_check()
+    homoscedasticity_vs_hetero()
+    multicollinearity_correlation_heatmap()
+    multicollinearity_confidence_band()
     print("\nAll diagrams generated.")
