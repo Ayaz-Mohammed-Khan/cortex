@@ -1,0 +1,245 @@
+{
+  "questions": [
+    {
+      "type": "scenario",
+      "concept": "ml-vs-traditional-programming",
+      "difficulty": "easy",
+      "scenario": "A spam filter is written as a long list of `if-else` rules that flag an email when the word 'huge' appears more than three times. Spammers notice the rule and stop using that word, and the filter stops catching their new emails.",
+      "question": "Why would a machine learning spam classifier handle this situation better?",
+      "options": [
+        "It learns the patterns from data, so when the incoming emails change the learned logic updates automatically instead of needing a human to rewrite rules.",
+        "It runs the same fixed rules faster, so it can rescan every email several times and catch the word 'huge' even when it is used only once.",
+        "It stores a permanent copy of every spam email ever seen, so any email that is not an exact match to a past spam message is passed through as safe.",
+        "It replaces the word filters with a single stricter threshold, so any email mentioning a product is blocked regardless of how the wording changes."
+      ],
+      "answer": 0,
+      "explanation": "In traditional programming you write the logic by hand, so when the world changes you must rewrite it. Machine learning learns the logic from data, so retraining on new examples updates the behavior without hand-edited rules. Running fixed rules faster does not adapt to new wording. Memorizing exact past spam fails on any novel message. A single blunt threshold would block legitimate mail and still not adapt.",
+      "misconception": "That machine learning is just faster or stricter rule execution rather than logic learned from data."
+    },
+    {
+      "type": "mcq",
+      "concept": "ml-vs-traditional-programming",
+      "difficulty": "easy",
+      "question": "What is the key reversal that distinguishes machine learning from traditional programming?",
+      "options": [
+        "Traditional programming always needs more hardware, while machine learning was designed to run on small devices without any training step at all.",
+        "Traditional programming works only on numbers, while machine learning was built specifically to process text and images and cannot handle numeric tables.",
+        "In traditional programming you write the rules and feed input to get output, while in machine learning you feed input and output and the algorithm learns the rules.",
+        "In machine learning you write the rules once and they never change, while traditional programs must be retrained on new data every single day."
+      ],
+      "answer": 2,
+      "explanation": "The defining reversal is that you supply the rules in traditional programming, but you supply data (inputs and outputs) in machine learning and the algorithm infers the rules. Hardware needs and data types are not the distinguishing idea. The claim about rules never changing describes traditional programming, not machine learning.",
+      "misconception": "That machine learning hand-codes rules the way traditional programming does."
+    },
+    {
+      "type": "mcq",
+      "concept": "ai-ml-dl",
+      "difficulty": "easy",
+      "question": "How do artificial intelligence (AI), machine learning (ML), and deep learning (DL) relate as sets?",
+      "options": [
+        "They are three separate fields with no overlap, each solving a different kind of problem that the others cannot touch.",
+        "DL is the largest set, ML is a subset of DL, and AI is a narrow subset that only covers symbolic rule systems.",
+        "ML is the largest set, with AI and DL as two independent subsets that do not contain each other.",
+        "AI is the largest set, ML is a subset of AI, and DL is a subset of ML."
+      ],
+      "answer": 3,
+      "explanation": "The standard nested picture is AI as the broadest goal, ML as a subset of AI, and DL as a subset of ML. The other orderings invert or separate the sets, which contradicts the hierarchy where deep learning is a specific class of machine learning and machine learning is one way to build AI.",
+      "misconception": "That deep learning is the broad field and AI is a narrow special case."
+    },
+    {
+      "type": "scenario",
+      "concept": "ai-ml-dl",
+      "difficulty": "medium",
+      "scenario": "A 1980s chess program plays by consulting a knowledge base of rules extracted from human experts and an inference engine that chooses moves. The same approach fails badly when asked to detect whether a photo contains a dog.",
+      "question": "What explains why the expert-system approach works for chess but fails for dog detection?",
+      "options": [
+        "Expert systems work on closed problems with clear logic but fail on fuzzy problems where you cannot write clean rules for every case, which is where machine learning fits.",
+        "Expert systems actually fail at chess too, and the program here only appeared to succeed because chess has fewer than a thousand legal positions that fit comfortably inside a hand-built knowledge base.",
+        "Dog detection fails purely because it needs more memory, so the very same rule-based program would succeed without changes if it were simply given a faster processor and far more storage.",
+        "Chess and dog detection are in fact both fuzzy perception problems, so the real reason for the gap is that the inference engine happened to use an outdated tree-search algorithm on the images."
+      ],
+      "answer": 0,
+      "explanation": "Symbolic AI and expert systems handle closed, well-defined problems where rules can be written, like chess. They break on fuzzy-logic problems such as recognizing a dog across every breed, pose, and lighting, because you cannot enumerate rules for all cases. Machine learning solves this by learning the representation from labeled examples. Chess is not reducible to a tiny fixed set here, more hardware does not make rules enumerable, and chess is not a fuzzy problem.",
+      "misconception": "That fuzzy perception problems can be solved with enough hand-written rules or faster hardware."
+    },
+    {
+      "type": "mcq",
+      "concept": "deep-learning",
+      "difficulty": "medium",
+      "question": "Why is deep learning often preferred over classical machine learning on a large, raw data set such as images?",
+      "options": [
+        "Deep learning needs no data at all to train, so it reaches high accuracy immediately out of the box while classical machine learning has to wait until a large labeled data set is painstakingly gathered.",
+        "Deep learning extracts features automatically from raw input and keeps improving as data grows, while classical machine learning needs hand-crafted features and tends to plateau.",
+        "Deep learning works only on small data sets, so it is the right tool here precisely because the overwhelming majority of real-world image data sets happen to be small and tidy.",
+        "Deep learning is a non-mathematical method that mimics the human brain exactly, so it conveniently avoids the feature engineering and the statistics that ordinary machine learning depends on."
+      ],
+      "answer": 1,
+      "explanation": "Deep learning's two advantages here are automatic feature extraction from raw input and performance that keeps climbing with more data, whereas classical machine learning needs you to design features and plateaus. Deep learning still needs data to train. It thrives on large, not small, data. It is a mathematical model only inspired by biology, not a literal brain.",
+      "misconception": "That deep learning literally works like the brain and needs no data or features."
+    },
+    {
+      "type": "scenario",
+      "concept": "deep-learning",
+      "difficulty": "medium",
+      "scenario": "A bank has a few thousand rows of customer records and wants to predict loan defaults. An engineer proposes a large deep learning model because it is the most powerful option available.",
+      "question": "What is the sound response to this proposal?",
+      "options": [
+        "Agree, because deep learning always outperforms classical machine learning regardless of how much data is available for the task.",
+        "Agree, but only after collecting a few hundred more rows, since deep learning reaches full accuracy once a data set passes a few thousand examples.",
+        "On small data, classical machine learning often gives better results, and since most real-world data is small, a simpler model is frequently the better fit here.",
+        "Reject machine learning entirely, because a problem with only a few thousand rows should be solved with hand-written `if-else` rules instead of any model."
+      ],
+      "answer": 2,
+      "explanation": "Deep learning is powerful but shines on large data; on small data classical machine learning typically does better, and roughly ninety percent of real-world data is small. A few extra rows will not change that. Hand-written rules are the wrong tool for a pattern-learning task like default prediction. The note's needle-versus-sword analogy captures the point.",
+      "misconception": "That the most powerful model is always the best choice irrespective of data size."
+    },
+    {
+      "type": "mcq",
+      "concept": "supervision-types",
+      "difficulty": "easy",
+      "question": "You have 5000 students with IQ and CGPA as inputs and the package in lakhs as the output you want to predict. What kind of problem is this?",
+      "options": [
+        "Unsupervised learning, because the model groups the students into clusters rather than predicting any specific output value for them.",
+        "Supervised classification, because the output is a label that places each student into one of several fixed salary categories.",
+        "Reinforcement learning, because an agent must interact with the students over time and receive rewards for each prediction it makes.",
+        "Supervised regression, because both input and output exist and the output is a numerical value."
+      ],
+      "answer": 3,
+      "explanation": "Both input and output are present, so it is supervised, and the target (a salary amount) is numerical, so it is regression. It is not unsupervised because there is a labeled target. It is not classification because the output is a number, not a category. Reinforcement learning involves an agent earning rewards, not learning from a labeled table.",
+      "misconception": "That any prediction of a money amount must be a classification into price bands."
+    },
+    {
+      "type": "mcq",
+      "concept": "supervision-types",
+      "difficulty": "medium",
+      "question": "Which task is an example of unsupervised learning?",
+      "options": [
+        "Grouping customers with only their IQ and CGPA recorded into natural segments, with no target column telling the algorithm the right answer.",
+        "Predicting whether an email is spam or not spam from a large labeled set of past emails that a human reviewer has already marked one by one.",
+        "Forecasting tomorrow's temperature from many years of historical weather readings, each one paired with the actual temperature of the day that followed it.",
+        "Teaching a self-driving car to stay on the road by handing out rewards for safe actions and penalties for crashes across many thousands of practice trials."
+      ],
+      "answer": 0,
+      "explanation": "Unsupervised learning works with input only and no target, so clustering unlabeled customers fits. Spam detection and temperature forecasting both have labeled outputs, making them supervised. The self-driving example is reinforcement learning, where an agent learns from rewards and punishments rather than a fixed data set.",
+      "misconception": "That any task involving customer data is automatically unsupervised."
+    },
+    {
+      "type": "scenario",
+      "concept": "supervision-types",
+      "difficulty": "hard",
+      "scenario": "Google Photos automatically clusters faces, then asks you to name one photo of a person. You type 'father', and it labels every other photo of that person for you.",
+      "question": "Which category of machine learning does this workflow best illustrate, and why?",
+      "options": [
+        "Pure supervised learning, because you provided a label and the system used only labeled examples throughout the entire process.",
+        "Reinforcement learning, because the system received a reward signal each time it placed a photo into the correct person's group.",
+        "Pure unsupervised learning, because the system never used any label and grouped photos entirely on its own from start to finish.",
+        "Semi-supervised learning, because the system clusters faces without labels and then propagates your one label to many unlabeled photos."
+      ],
+      "answer": 3,
+      "explanation": "Labels are expensive, so semi-supervised learning combines an unsupervised clustering step with a small number of human labels that are spread to the rest. Here the faces are clustered without labels, and your single 'father' label propagates across the cluster. It is not purely supervised because most photos are never hand-labeled, not purely unsupervised because your label is used, and not reinforcement learning because there is no reward loop.",
+      "misconception": "That providing even one label makes the whole process fully supervised."
+    },
+    {
+      "type": "scenario",
+      "concept": "batch-vs-online",
+      "difficulty": "hard",
+      "scenario": "A news recommendation service retrains its model once every 24 hours using batch learning. A major story breaks in the morning, and the team notices the feed does not surface related content until the next day's retrain.",
+      "question": "What does this reveal, and what approach would address it?",
+      "options": [
+        "It reveals that batch learning has no downside here, and the real fix is to collect more historical news data before the next scheduled retrain.",
+        "It reveals a batch learning availability limit, since a static model cannot reflect sudden events between retrains; online learning, which trains incrementally on mini batches, would adapt faster.",
+        "It reveals that the model is overfitting to old news, so the fix is to simplify the model until it stops reacting so strongly to any single story.",
+        "It reveals that the learning rate is set too low, and raising it would let the once-a-day batch model react to the story within minutes of the retrain."
+      ],
+      "answer": 1,
+      "explanation": "A batch model is static between retrains, so a 24-hour cycle cannot reflect a breaking story in time. That is the availability limitation of batch learning. Online learning trains incrementally on mini batches and keeps adapting on the server, which fits a fast-changing concept. More historical data does not fix latency, this is not overfitting, and the learning rate governs online adaptation, not a daily batch schedule.",
+      "misconception": "That a faster or larger batch retrain can substitute for continuous online adaptation."
+    },
+    {
+      "type": "mcq",
+      "concept": "batch-vs-online",
+      "difficulty": "medium",
+      "question": "What is out-of-core learning?",
+      "options": [
+        "Training a model on a live server in real time as each new user request streams in, so that fresh predictions and continuous learning both happen inside the same always-running production loop.",
+        "Using the online learning technique to train on a data set too large to fit in memory, by feeding it in small chunks even though the work is done offline.",
+        "Discarding all of the training data right after a model is built, so that only the small learned equation remains behind and the memory it used is freed up for the next modeling task.",
+        "Distributing one single training job across many processor cores simultaneously, so that an enormous data set can finally be loaded into memory all at once and trained on together."
+      ],
+      "answer": 1,
+      "explanation": "Out-of-core learning applies the incremental online-learning technique to a data set that cannot fit in RAM, splitting it into small chunks fed one by one, done offline. Real-time server training is online learning in production, not out-of-core specifically. Discarding data describes model-based learning. Spreading across cores is parallelism, which does not solve the memory limit the way chunked feeding does.",
+      "misconception": "That out-of-core learning means parallelizing across cores rather than streaming chunks past limited memory."
+    },
+    {
+      "type": "mcq",
+      "concept": "instance-vs-model-based",
+      "difficulty": "medium",
+      "question": "What is the defining difference between instance-based and model-based learning?",
+      "options": [
+        "Instance-based learning memorizes the data and answers a new query by similarity to stored points, while model-based learning extracts a function and can discard the training data.",
+        "Instance-based learning builds a compact mathematical equation during training, while model-based learning instead simply stores every single training point and compares a new query against all of them.",
+        "Instance-based learning works only on numerical data, while model-based learning is supposedly the one and only approach that can ever be applied when the target happens to be categorical.",
+        "Instance-based learning always needs far more data than model-based learning does, which is the reason it can be used only when a very large fully labeled data set is already on hand."
+      ],
+      "answer": 0,
+      "explanation": "Instance-based methods such as KNN do no real training; they store the data and answer new queries by similarity to neighbors, so they must keep the data. Model-based methods learn a function (a boundary or equation) and can then discard the training data. The second option swaps the two definitions. Data type and data volume are not what separate the two families.",
+      "misconception": "That instance-based learning builds an equation while model-based learning memorizes points."
+    },
+    {
+      "type": "scenario",
+      "concept": "challenges",
+      "difficulty": "hard",
+      "scenario": "A model scores very well on its training data but performs poorly on new, unseen customers. A colleague suggests the opposite problem is also possible: a model so simple it does poorly even on the training data.",
+      "question": "How are these two failures named and distinguished?",
+      "options": [
+        "Both failures are called underfitting, since any gap at all between training performance and new-data performance must come from a model that has simply not yet learned enough from the data it saw.",
+        "The first failure is sampling bias and the second is sampling noise, and both of them are caused by a collected data set that does a poor job of representing the real population of customers.",
+        "The first is overfitting, where the model fits the training data too tightly and generalizes poorly, and the second is underfitting, where the model is too simple to capture the pattern.",
+        "Both failures are really just overfitting, since in each of the two cases the model ends up failing on new data because it has memorized the training set far too closely to generalize well."
+      ],
+      "answer": 2,
+      "explanation": "Overfitting is fitting the training data too tightly so it fails on new data; underfitting is being too simple to capture the pattern, so it does poorly even on training data. They are opposite failures, not the same one. Sampling bias and sampling noise are data representation problems, a separate challenge from these fitting errors.",
+      "misconception": "That strong training performance with weak test performance and a generally weak model are the same failure."
+    },
+    {
+      "type": "mcq",
+      "concept": "challenges",
+      "difficulty": "easy",
+      "question": "What does the phrase 'garbage in, garbage out' capture about machine learning?",
+      "options": [
+        "That a model trained long enough will eventually clean its own inputs, so data quality matters far less than training time.",
+        "That a model is only as good as its data, so outliers, missing values, and inconsistent formats produce poor results no matter the algorithm.",
+        "That irrelevant feature columns are the only quality problem that matters, since missing values are automatically filled in during training.",
+        "That large data always beats clean data, so gathering more rows removes any need to fix quality issues before training."
+      ],
+      "answer": 1,
+      "explanation": "Poor quality data such as outliers, missing values, and inconsistent formats degrades results regardless of the algorithm, which is why cleaning can take sixty to seventy percent of a project. A model does not clean its own inputs. Irrelevant features are a separate challenge, and missing values are not filled automatically. More rows do not substitute for quality.",
+      "misconception": "That a powerful algorithm or more data can rescue fundamentally dirty data."
+    },
+    {
+      "type": "card",
+      "concept": "mldlc",
+      "difficulty": "hard",
+      "scenario": "A beginner stops a project right after training a model and checking its accuracy, believing the work is finished.",
+      "question": "Name the stages of the machine learning development life cycle (MLDLC) and explain why stopping at model training is incomplete.",
+      "answer": "The MLDLC runs through framing the problem, gathering data, data preprocessing, exploratory data analysis, feature engineering and selection, model training and evaluation and selection, deployment, testing, and ongoing optimization. Stopping at training is incomplete because a model only creates value once it is deployed to real users, tested in production (for example with A/B testing), and monitored for model decay so it can be retrained when performance degrades.",
+      "explanation": "The point is that real machine learning work is end to end, not just reaching an accuracy number on a held-out set. Deployment, testing, and maintenance are where the model actually serves the business, and a dedicated field, MLOps, exists to handle them."
+    },
+    {
+      "type": "scenario",
+      "concept": "mldlc",
+      "difficulty": "medium",
+      "scenario": "At Netflix, leadership asks a data scientist to 'increase revenue'. The data scientist reframes this as reducing the churn rate from 4 percent to 3.75 percent, and then decides to predict each customer's probability of leaving rather than a yes or no label.",
+      "question": "What does this sequence illustrate about framing the problem?",
+      "options": [
+        "That framing really means picking the most complex available model first, because leadership tends to judge the worth of a data scientist by the raw sophistication of the algorithm that was chosen.",
+        "That a vague business goal is turned into a concrete measurable target, and the framing can shift from classification to regression once a probability is needed to size each discount.",
+        "That customer churn should always be modeled strictly as a classification problem, so reframing it as a probability here was a plain mistake that only adds needless complexity to the task.",
+        "That framing is a strict one-time decision locked in before any analysis begins, so having to revisit the problem type later is a clear sign that the original framing must have been done incorrectly."
+      ],
+      "answer": 1,
+      "explanation": "Good framing converts a vague goal like 'increase revenue' into a measurable target like a churn reduction, and the problem type can evolve: predicting a leave-or-stay label is classification, but needing a probability to size each customer's discount makes it regression. Framing is not about choosing the fanciest model, classification is not mandatory, and framing legitimately evolves as the need becomes clearer rather than being a single fixed decision.",
+      "misconception": "That the problem type is fixed up front and never legitimately shifts as understanding improves."
+    }
+  ]
+}

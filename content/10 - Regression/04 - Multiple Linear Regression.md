@@ -9,6 +9,8 @@ aliases:
   - Multiple Linear Regression
   - MLR
 difficulty: intermediate
+prerequisites:
+  - Simple Linear Regression
 created: 2026-10-23
 ---
 

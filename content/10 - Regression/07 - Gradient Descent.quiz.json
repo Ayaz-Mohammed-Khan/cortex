@@ -1,0 +1,234 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "what-is-gradient-descent",
+      "difficulty": "easy",
+      "question": "What is the one requirement a function must meet before gradient descent can minimize it?",
+      "options": [
+        "It must be convex, so that the single global minimum is the only point where the slope reaches zero.",
+        "It must be differentiable, so that a slope exists at every point for the algorithm to step against.",
+        "It must be linear in its parameters, so that the direct matrix formula can be avoided during fitting.",
+        "It must be scaled to a common range, so that the contour lines of its loss surface come out near-circular."
+      ],
+      "answer": 1,
+      "explanation": "Gradient descent only ever reads the slope of the function and steps against it, so the one firm requirement is that a slope exists everywhere, which means the function must be differentiable. Convexity is not required; it only guarantees the minimum found is the global one. Linearity and scaling affect speed or the solving method but are not preconditions for the algorithm to run.",
+      "misconception": "Gradient descent needs differentiability, not convexity, to operate."
+    },
+    {
+      "type": "mcq",
+      "concept": "update-rule",
+      "difficulty": "medium",
+      "question": "In the update rule b_new = b_old minus learning rate times slope, what job does the minus sign do?",
+      "options": [
+        "It shrinks the learning rate over time so that the steps get smaller as the algorithm nears the minimum.",
+        "It keeps the loss positive by flipping the sign of any residual that would otherwise come out negative.",
+        "It turns the slope into a partial derivative whenever the loss depends on more than one parameter at once.",
+        "It makes every step head downhill, adding to b when the slope is negative and subtracting when it is positive."
+      ],
+      "answer": 3,
+      "explanation": "The minus sign is what steers the step downhill automatically: a negative slope becomes a positive adjustment so b increases, and a positive slope becomes a negative adjustment so b decreases, and in both cases the move is toward the bottom of the bowl. Shrinking the step near the minimum comes from the slope itself flattening, not the sign. The sign does not change residuals or convert a derivative into a partial derivative.",
+      "misconception": "The minus sign points each step downhill; it is not a learning-rate schedule or a sign fix on the loss."
+    },
+    {
+      "type": "mcq",
+      "concept": "step-size",
+      "difficulty": "medium",
+      "question": "On the parabolic linear-regression loss, why do gradient descent's steps naturally get smaller as the intercept nears the best value?",
+      "options": [
+        "The slope of the bowl flattens near the bottom, so the slope-sized step shrinks even with the learning rate fixed.",
+        "The learning rate is automatically reduced each epoch by a built-in schedule that activates close to the minimum.",
+        "The number of rows contributing to the slope falls as the fit improves, so the summed derivative gets smaller.",
+        "The loss switches from squared to absolute error near the minimum, which lowers the magnitude of each update."
+      ],
+      "answer": 0,
+      "explanation": "The step size is the learning rate times the slope, and on a parabola the slope is steep far from the bottom and shallow near it. So even with a fixed learning rate, the steps are large early and shrink as the intercept approaches the minimum. No schedule is active by default, every row still contributes to the batch slope, and the loss function does not change form during descent.",
+      "misconception": "Steps shrink because the slope flattens near the minimum, not because of a schedule or a change in the loss."
+    },
+    {
+      "type": "mcq",
+      "concept": "learning-rate",
+      "difficulty": "medium",
+      "question": "A gradient descent run reports the loss growing larger every epoch until the parameters become huge. What is the most likely cause?",
+      "options": [
+        "The learning rate is too small, so the algorithm is crawling and has simply not reached the minimum yet.",
+        "The input columns were scaled to a common range, which stretched the loss surface into a long narrow valley.",
+        "The learning rate is too large, so each step overshoots the minimum and the path climbs away instead of settling.",
+        "The loss function is convex, which forces gradient descent into a local minimum far from the true answer."
+      ],
+      "answer": 2,
+      "explanation": "A loss that grows each step until the parameters blow up is the signature of a learning rate that is too large: the steps overshoot the bottom and push ever farther away rather than converging. A too-small rate only crawls, it never diverges. Scaling makes the surface rounder, not narrower, and a convex loss has a single global minimum with no local-minimum trap.",
+      "misconception": "Diverging, growing loss points to a learning rate that is too large, not too small."
+    },
+    {
+      "type": "mcq",
+      "concept": "model-independence",
+      "difficulty": "medium",
+      "question": "Why can the same gradient descent code fit a logistic regression as easily as a linear regression?",
+      "options": [
+        "Because logistic regression reuses the squared-error loss of linear regression, so the derivative is identical in both.",
+        "Because the update rule needs only the slope of the loss, and any differentiable loss can supply its own derivative.",
+        "Because both models are convex, so the algorithm is guaranteed to reach the same global minimum in either case.",
+        "Because scaling the input columns makes every model's loss surface a round bowl, erasing the difference between them."
+      ],
+      "answer": 1,
+      "explanation": "The update rule mentions nothing about the model; it consumes the slope of whatever loss you supply. Linear regression differentiates its squared error, logistic regression differentiates its own log loss, and both feed the result into the identical rule. Logistic regression does not reuse the squared-error loss, convexity is not what makes the code reusable, and scaling affects speed rather than model independence.",
+      "misconception": "Gradient descent is model-independent because it only needs a derivative, whatever loss produces it."
+    },
+    {
+      "type": "scenario",
+      "concept": "convexity",
+      "difficulty": "hard",
+      "scenario": "Two colleagues run gradient descent on the ordinary linear-regression squared-error loss from different random starting points and worry they will land in different local minima.",
+      "question": "What should you tell them?",
+      "options": [
+        "Different starts will give different local minima here, so they should average the two results to approximate the global one.",
+        "The squared-error loss is convex, a single bowl with one minimum, so both starts converge to the same best answer.",
+        "The squared-error loss is non-convex, so only the start nearer the global minimum will find it while the other gets trapped.",
+        "Random starts make no difference because gradient descent ignores the starting point and jumps straight to the minimum."
+      ],
+      "answer": 1,
+      "explanation": "The linear-regression squared-error loss is convex, a single clean bowl with exactly one minimum, so gradient descent reaches that same global minimum no matter where it starts. There are no local-minimum traps to worry about, so neither averaging nor luck of the starting point is in play. The claim that the start is ignored is also wrong; the start simply does not matter here because every path leads to the one bottom.",
+      "misconception": "On a convex loss the starting point does not change the answer, because there is only one minimum."
+    },
+    {
+      "type": "scenario",
+      "concept": "effect-of-data",
+      "difficulty": "hard",
+      "scenario": "A linear regression is fit with gradient descent on columns measured in wildly different units, one in single digits and another in the thousands, and it takes thousands of epochs to converge.",
+      "question": "What is the best explanation and fix?",
+      "options": [
+        "The mismatched scales stretch the loss into a long narrow valley; scaling the columns rounds the bowl and speeds descent.",
+        "The mismatched scales push the final coefficients to the wrong values; only switching to the direct matrix formula will fix them.",
+        "The learning rate is clearly too small for this data; raising it far above one will cut the epochs without any other change.",
+        "The loss has become non-convex because of the different units; adding random restarts is the only way to find the minimum."
+      ],
+      "answer": 0,
+      "explanation": "Columns on very different scales stretch the loss surface into a long, narrow valley, so the downhill direction no longer points at the minimum and the path has to zig-zag across, costing many epochs. Scaling the columns to a common range reshapes the valley into a round bowl and lets descent head almost straight down. The scales do not change the final answer on a convex loss, a huge learning rate risks divergence, and differing units do not make a convex loss non-convex.",
+      "misconception": "Slow convergence from mismatched scales is a surface-shape problem that feature scaling fixes."
+    },
+    {
+      "type": "mcq",
+      "concept": "batch-gd",
+      "difficulty": "easy",
+      "question": "How often does batch gradient descent update the parameters?",
+      "options": [
+        "Once per row, so a pass over n rows produces n separate parameter updates in a single epoch.",
+        "Once per batch of rows, so the number of updates per epoch equals the number of batches chosen.",
+        "Once per epoch, after the slope has been computed using every row in the entire dataset.",
+        "Once per column, so a dataset with ten input columns yields ten updates during each epoch."
+      ],
+      "answer": 2,
+      "explanation": "Batch gradient descent looks at all the rows, computes the slope from the whole dataset, and only then takes a single update, so it updates once per epoch. Updating once per row is stochastic gradient descent, and updating once per batch is mini-batch; neither describes batch descent. The number of columns sets how many coefficients exist, not how many updates happen.",
+      "misconception": "Batch gradient descent takes exactly one update per epoch, after seeing all the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "batch-gd-problems",
+      "difficulty": "medium",
+      "question": "Besides heavy computation, what is the second limitation that stops batch gradient descent on very large datasets?",
+      "options": [
+        "It converges to a noisy, non-reproducible answer, so the same data gives a different result on every run.",
+        "It needs the whole dataset loaded in memory at once, so data larger than memory triggers an out-of-memory failure.",
+        "It cannot escape local minima, so on any realistic dataset it reliably settles into a sub-optimal valley.",
+        "It requires a fresh learning schedule for every epoch, which multiplies the tuning work beyond what is practical."
+      ],
+      "answer": 1,
+      "explanation": "Batch descent computes its single update with a one-shot operation over all the rows, which means the entire dataset must sit in memory at once; if it does not fit, the operation fails with an out-of-memory error. The noisy, non-reproducible behaviour belongs to stochastic descent, not batch. Local-minima trouble is about the loss shape, not dataset size, and batch descent does not need per-epoch schedules.",
+      "misconception": "Batch descent's second wall is memory: it must hold all the data at once."
+    },
+    {
+      "type": "mcq",
+      "concept": "stochastic-gd",
+      "difficulty": "easy",
+      "question": "What makes stochastic gradient descent stochastic?",
+      "options": [
+        "It randomly resets the parameters to new starting values at the beginning of every epoch during training.",
+        "It randomly varies the learning rate at each step so that no two updates ever use the same step size.",
+        "It randomly drops a fraction of the input columns before each update to keep the model from overfitting.",
+        "It picks a row at random and computes the update from that single row, so the path is random rather than steady."
+      ],
+      "answer": 3,
+      "explanation": "Stochastic means random, and the randomness here is in the choice of row: each step picks one row at random, computes the slope from it, and updates immediately, which makes the descent path noisy rather than steady. It does not reset the parameters, jitter the learning rate per step, or drop columns; those describe other techniques entirely.",
+      "misconception": "The randomness in SGD is the single random row used for each update."
+    },
+    {
+      "type": "mcq",
+      "concept": "stochastic-gd",
+      "difficulty": "medium",
+      "question": "How does stochastic gradient descent cut memory use compared with batch gradient descent?",
+      "options": [
+        "It holds only one row in memory at a time, so even data larger than memory can be processed without failing.",
+        "It compresses the whole dataset into a smaller summary matrix that is loaded once and reused across all epochs.",
+        "It reduces the number of coefficients it tracks, so the parameter vector that must be stored becomes far smaller.",
+        "It discards every row permanently after a single update, so the dataset shrinks steadily as training proceeds."
+      ],
+      "answer": 0,
+      "explanation": "Stochastic descent updates from one row at a time, so only a single row needs to be in memory for any given step, and a dataset far larger than memory causes no trouble. It does not build a compressed summary, it tracks the same coefficients as batch descent, and it does not delete rows; the same rows are revisited across epochs.",
+      "misconception": "SGD's small footprint comes from processing one row at a time, not from shrinking the data or the parameters."
+    },
+    {
+      "type": "scenario",
+      "concept": "variant-selection",
+      "difficulty": "hard",
+      "scenario": "You must train a model on a dataset with millions of rows and hundreds of columns that will not fit in your machine's memory all at once.",
+      "question": "Which approach is the sensible choice and why?",
+      "options": [
+        "Batch gradient descent, because averaging the slope over every row at once gives the most accurate single update.",
+        "The direct matrix formula, because solving in one shot avoids the per-epoch cost that iterative methods pay.",
+        "Stochastic gradient descent, because it updates from one row at a time, so it never needs the whole dataset in memory.",
+        "Batch gradient descent with a tiny learning rate, because small steps keep the large dataset from overflowing memory."
+      ],
+      "answer": 2,
+      "explanation": "With data too large for memory, stochastic gradient descent is the fit: it processes one row per update, so it never loads the whole dataset and converges quickly on big data. Batch descent and the direct matrix formula both require the full dataset in memory, which is exactly what fails here, and shrinking the learning rate changes step size, not memory use, so a tiny rate does nothing for the overflow.",
+      "misconception": "For data that will not fit in memory, the one-row-at-a-time method is the answer, not a batch method."
+    },
+    {
+      "type": "mcq",
+      "concept": "mini-batch-gd",
+      "difficulty": "medium",
+      "question": "If a dataset of 1000 rows is split into batches of 100, how many parameter updates does mini-batch gradient descent make in one epoch?",
+      "options": [
+        "One update, taken only after all ten batches have been processed and their slopes averaged together.",
+        "One thousand updates, one for each individual row, since every row still contributes its own step.",
+        "One hundred updates, matching the number of rows inside each batch that the algorithm processes.",
+        "Ten updates, one per batch, since ten batches of a hundred rows cover the thousand rows in the data."
+      ],
+      "answer": 3,
+      "explanation": "Mini-batch descent takes one update per batch, and 1000 rows split into batches of 100 gives 10 batches, so one epoch produces 10 updates. A single update per epoch would be batch descent, one update per row would be stochastic descent, and the batch size of 100 is the rows per batch, not the number of updates.",
+      "misconception": "Mini-batch updates once per batch, so the update count is the number of batches, not rows or batch size."
+    },
+    {
+      "type": "scenario",
+      "concept": "mini-batch-gd",
+      "difficulty": "hard",
+      "scenario": "A colleague says mini-batch gradient descent is a completely separate algorithm from batch and stochastic descent, with no relationship to either.",
+      "question": "How should you correct this?",
+      "options": [
+        "Mini-batch is the general form: batch size equal to all rows gives batch descent, and batch size one gives stochastic descent.",
+        "Mini-batch is simply batch descent run twice per epoch, so it has no connection at all to stochastic descent.",
+        "Mini-batch is a renamed stochastic descent, identical in every way, so batch descent is the only genuinely different method.",
+        "Mini-batch is the direct matrix formula applied in chunks, so it is unrelated to either iterative stepping method."
+      ],
+      "answer": 0,
+      "explanation": "Mini-batch is the general form of gradient descent, and the batch size slides it between the two extremes: set the batch to all n rows and you get batch descent with one update per epoch, set it to a single row and you get stochastic descent with n updates per epoch. So it is deeply related to both, not separate. It is neither batch run twice, nor a mere rename of stochastic descent, nor the direct matrix formula.",
+      "misconception": "Mini-batch is the general case that reduces to batch or stochastic at the extremes of batch size."
+    },
+    {
+      "type": "card",
+      "concept": "learning-schedule",
+      "difficulty": "medium",
+      "question": "Explain what a learning schedule is and why stochastic and mini-batch gradient descent benefit from one.",
+      "answer": "A learning schedule shrinks the learning rate as training proceeds instead of holding it fixed: the rate starts high so early steps move quickly, then decays so later steps become tiny. A common form is eta(t) = t0 divided by (t + t1), where t counts the updates and t0 and t1 are constants, so the rate falls as t grows. Stochastic and mini-batch descent trust only one row or one small batch per step, so near the minimum they keep fluctuating around it rather than settling. Decaying the learning rate makes those late steps small, which shrinks the fluctuation and lets the algorithm settle close to the true minimum.",
+      "explanation": "Learning schedules matter far more in deep learning than in linear regression, but the idea of large steps early and small steps late is worth carrying everywhere gradient descent is used."
+    },
+    {
+      "type": "card",
+      "concept": "variant-tradeoffs",
+      "difficulty": "hard",
+      "question": "Compare batch, stochastic, and mini-batch gradient descent on update frequency, convergence, and memory.",
+      "answer": "Batch gradient descent uses the whole dataset for one update per epoch. Its path is smooth and direct, but it is slow because every epoch touches all rows, and it must hold the entire dataset in memory, so it suits small data. Stochastic gradient descent updates once per row, so it converges in far fewer epochs and needs only one row in memory at a time, which handles data larger than memory; the cost is a noisy, wandering path and a slightly imprecise final answer, though that noise can help escape local minima on non-convex losses. Mini-batch gradient descent updates once per batch, sitting between the two: less noise than stochastic because each step averages over a batch, yet far cheaper than batch because it never loads all the rows. Batch size tunes where it lands between the extremes.",
+      "explanation": "In practice linear regression usually uses stochastic descent, while mini-batch is the default in deep learning where both the data and the models are large."
+    }
+  ]
+}

@@ -1,0 +1,233 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "inference-vs-prediction",
+      "difficulty": "easy",
+      "question": "A company wants to know which advertising channels actually drive sales and by how much, not to forecast next year's revenue. Which goal is this?",
+      "options": [
+        "Prediction, because any question answered with a regression model is a forecast of a future output value.",
+        "Inference, because the aim is to understand how the inputs relate to the output rather than to estimate a new output.",
+        "Goodness of fit, because measuring how much each channel contributes is the same task as scoring the model with R2.",
+        "Cross-validation, because comparing channels against each other requires holding out part of the data to test on."
+      ],
+      "answer": 1,
+      "explanation": "Inference studies the structure of the relationship: which inputs matter and how strongly. Prediction instead estimates the output for a new input, which is not what the company asked. Goodness of fit is a single strength score, not a per-channel attribution, and cross-validation is a validation technique, not the goal being described.",
+      "misconception": "Not every regression question is a prediction; studying the relationship itself is inference."
+    },
+    {
+      "type": "mcq",
+      "concept": "sample-vs-population",
+      "difficulty": "easy",
+      "question": "Why are the coefficients you get from fitting linear regression on your data called estimates rather than exact values?",
+      "options": [
+        "Because gradient descent always stops early on real data, so the fitted coefficients never quite reach the exact values that ordinary least squares would have given.",
+        "Because the output column always contains rounding error that propagates into the fitted slope and intercept.",
+        "Because the coefficients are computed from a sample, so a different sample would produce somewhat different values for the same population.",
+        "Because the intercept is always an estimate while the slope coefficients are exact once the line is fitted to the data."
+      ],
+      "answer": 2,
+      "explanation": "Your data is a sample of a larger population, so the fitted coefficients estimate the unknown population coefficients; redraw the sample and they shift. The reason is sampling, not the optimizer, not rounding in the output, and the intercept and slopes are all estimates alike.",
+      "misconception": "The uncertainty comes from having a sample, not from how the fit was computed."
+    },
+    {
+      "type": "mcq",
+      "concept": "irreducible-error",
+      "difficulty": "medium",
+      "question": "In the relationship y = f(x) + epsilon, what does the epsilon term represent?",
+      "options": [
+        "The gap between the fitted line and the true population line, which shrinks to zero as you collect more training rows.",
+        "The irreducible error from factors that were never measured, which no model can remove no matter how good the fit.",
+        "The optimization error left over because the coefficients were approximated rather than solved for exactly.",
+        "The rounding introduced when continuous outputs are stored at finite precision in the dataset."
+      ],
+      "answer": 1,
+      "explanation": "Epsilon is the irreducible error, the part of the output driven by things you never recorded, like a candidate being unwell at an interview. It does not vanish with more data, it is not the sampling gap between fitted and true lines, and it is not an optimization or storage artifact.",
+      "misconception": "Irreducible error is structural and permanent; more data cannot model it away."
+    },
+    {
+      "type": "mcq",
+      "concept": "sum-of-squares",
+      "difficulty": "medium",
+      "question": "How do the total, explained, and residual sums of squares relate in linear regression?",
+      "options": [
+        "RSS equals TSS plus ESS, because the residuals add to the total once the explained part is included.",
+        "ESS equals TSS times RSS, because the explained variation scales with both the total and the leftover.",
+        "TSS equals ESS plus RSS, because total variation splits into the part the line explains and the part it leaves behind.",
+        "TSS equals ESS minus RSS, because the explained variation is reduced by whatever the model fails to capture."
+      ],
+      "answer": 2,
+      "explanation": "Total variation decomposes exactly as TSS = ESS + RSS: the explained sum of squares plus the residual sum of squares. The other forms misstate the decomposition; the residual is TSS minus ESS, never the total, and the relationship is additive, not multiplicative.",
+      "misconception": "Total variation is the sum of the explained and residual parts, not a product or a difference."
+    },
+    {
+      "type": "mcq",
+      "concept": "tss-definition",
+      "difficulty": "easy",
+      "question": "What does the total sum of squares (TSS) measure?",
+      "options": [
+        "All the variation in the output around its mean, before any input column is used.",
+        "The variation that remains in the output after the regression line has been fitted.",
+        "The variation the fitted line manages to account for, measured from the predictions to the mean.",
+        "The average squared distance between each prediction and the corresponding actual value."
+      ],
+      "answer": 0,
+      "explanation": "TSS sums each output's squared distance from the mean output, capturing the whole spread you set out to explain before using any input. The leftover after fitting is RSS, the part the line captures is ESS, and the average squared prediction gap describes a per-row error, not TSS.",
+      "misconception": "TSS is the total spread around the mean, independent of any fitted model."
+    },
+    {
+      "type": "scenario",
+      "concept": "degrees-of-freedom",
+      "difficulty": "hard",
+      "scenario": "A colleague insists that two data points are enough to fit a meaningful regression line, since two points already define a line.",
+      "question": "What is the flaw in this reasoning?",
+      "options": [
+        "Two points define a line, but that line always passes exactly through both, so there is no freedom for it to vary and explain variability; a third point is needed.",
+        "Two points are perfectly fine for fitting a regression line, and the only real requirement the colleague is overlooking is that the two chosen points must not happen to share the exact same input value.",
+        "Two points are too few only because the standard error formula divides by zero when the sample size is below three.",
+        "Two points work for simple regression but a plane in three dimensions needs exactly three points to be determined."
+      ],
+      "answer": 0,
+      "explanation": "With two points the line is forced through both, so it has no room to vary and cannot express how the data scatters; only a third point gives the system a degree of freedom. The issue is this lack of freedom, not a divide-by-zero, and a plane actually needs a fourth point before it is free, matching the n minus k minus 1 pattern.",
+      "misconception": "A fitted line needs enough points to have freedom to vary, not just enough to be defined."
+    },
+    {
+      "type": "mcq",
+      "concept": "degrees-of-freedom",
+      "difficulty": "medium",
+      "question": "For a linear regression with n rows and k input columns, how do the degrees of freedom split?",
+      "options": [
+        "Total is n, model is k, and residual is n minus k, so the three add up with no constant subtracted.",
+        "Total is n minus 1, model is k, and residual is n minus k minus 1, so the model and residual add back to the total.",
+        "Total is n minus k, model is 1, and residual is n minus 1, regardless of how many inputs the model has.",
+        "Total is k, model is n minus 1, and residual is n minus k, so most of the freedom belongs to the model."
+      ],
+      "answer": 1,
+      "explanation": "Total degrees of freedom is n minus 1, the model takes k (one per input column), and the residual keeps n minus k minus 1, and k plus (n minus k minus 1) returns n minus 1. The versions without the minus one, or that swap n and k, break that identity.",
+      "misconception": "Estimating the mean costs one degree of freedom, giving n minus 1 total, which splits as k plus n minus k minus 1."
+    },
+    {
+      "type": "mcq",
+      "concept": "f-statistic",
+      "difficulty": "medium",
+      "question": "The F-statistic for overall significance is the ratio MSR over MSE. What do a large and a small F mean?",
+      "options": [
+        "A large F means the residual variation dwarfs the explained variation, and a small F means the fitted line manages to explain almost all of the total variation.",
+        "A large F means the sample is large, and a small F means the sample is small, since F scales with the number of rows.",
+        "A large F means the explained variation dwarfs the unexplained variation, so the line does real work, and a small F means the opposite.",
+        "A large F means the model has many input columns, and a small F means it has few, since F counts the predictors used."
+      ],
+      "answer": 2,
+      "explanation": "F is mean explained variation over mean unexplained variation, so a large F means the line explains far more than it leaves, pointing to a real relationship, and a small F means the opposite. F is a ratio of variation per degree of freedom, not a count of rows or columns.",
+      "misconception": "A high F reflects explained beating unexplained variation, not sample size or predictor count."
+    },
+    {
+      "type": "scenario",
+      "concept": "f-test",
+      "difficulty": "hard",
+      "scenario": "You fit a model and the summary reports an F-statistic with Prob(F-statistic) equal to 0.0003, well below your 0.05 significance level.",
+      "question": "What should you conclude from this alone?",
+      "options": [
+        "At least one input has a linear relationship with the output, but this result on its own does not tell you which input or which inputs are the ones responsible.",
+        "Every input column has a significant linear relationship with the output, since the overall test passed for the whole model.",
+        "The model will predict new outputs accurately, because a tiny Prob(F-statistic) guarantees a high R2 and low error.",
+        "The first input column must be the significant one, because when the F-test rejects its null it always attributes the detected relationship to whichever predictor was entered into the model first."
+      ],
+      "answer": 0,
+      "explanation": "Rejecting the overall null means at least one coefficient is nonzero, so some linear relationship exists, but the F-test cannot say which input carries it; that needs per-coefficient t-tests. It does not certify every input, does not guarantee strong prediction, and never singles out the first column.",
+      "misconception": "A significant F confirms a relationship exists overall, not that every input matters or which one does."
+    },
+    {
+      "type": "mcq",
+      "concept": "f-distribution",
+      "difficulty": "hard",
+      "question": "Why is there no single F-statistic threshold, like 'above 4', that always signals significance?",
+      "options": [
+        "Because the F-statistic can be negative, so a fixed positive threshold would miss the significant cases on the other side.",
+        "Because the critical value depends on both degrees of freedom, so the same F can be significant for one model and not another.",
+        "Because statsmodels rescales the F-statistic differently for every dataset, so raw values are never comparable.",
+        "Because the threshold changes only with the significance level, so 4 works at 0.05 but a different fixed number works at 0.01."
+      ],
+      "answer": 1,
+      "explanation": "The F-distribution has two shape parameters, k and n minus k minus 1, so the critical value and therefore the meaning of a given F change with the model. Decide by the p-value against the significance level, not a raw F. F is never negative, statsmodels does not rescale arbitrarily, and the cutoff depends on more than just the significance level.",
+      "misconception": "Significance depends on the p-value given both degrees of freedom, not on a universal F cutoff."
+    },
+    {
+      "type": "mcq",
+      "concept": "r2-strength",
+      "difficulty": "easy",
+      "question": "In regression analysis, what does the R2 score tell you once the F-test has confirmed a relationship exists?",
+      "options": [
+        "How many input columns contributed to the model, expressed as a fraction of the total columns available.",
+        "Whether the relationship is statistically significant, by comparing its value directly against the 0.05 cutoff.",
+        "The proportion of the output's total variation that the model explains, which reads as the strength of the relationship.",
+        "The probability that the fitted coefficients equal the true population coefficients for the whole population."
+      ],
+      "answer": 2,
+      "explanation": "R2 is the explained variation over the total variation, a proportion read as how strong the relationship is: a high R2 means the model explains most of the spread. It is not a column count, not a significance test (that is the F-test and p-values), and not a probability about the coefficients.",
+      "misconception": "R2 measures strength of fit, while the F-test and p-values handle significance."
+    },
+    {
+      "type": "scenario",
+      "concept": "adjusted-r2",
+      "difficulty": "hard",
+      "scenario": "On one model R2 is 0.91 and adjusted R2 is 0.91. On a second model built from the same output, R2 is 0.92 but adjusted R2 drops to 0.84.",
+      "question": "What does the second model's gap between R2 and adjusted R2 most likely indicate?",
+      "options": [
+        "Some of its input columns are irrelevant, since adjusted R2 penalizes added columns that do not earn their place.",
+        "It is strictly the better model, because its R2 is higher and R2 is the more trustworthy of the two scores.",
+        "Its target variable has more variance than the first model's, which widens the gap between the two scores.",
+        "It was trained on fewer rows, because a smaller sample is the only thing that can pull adjusted R2 below R2."
+      ],
+      "answer": 0,
+      "explanation": "A wide gap is a red flag: R2 rose a little from added columns, but adjusted R2 fell because those columns were irrelevant and got penalized. The higher R2 does not make it better, since R2 always rises with more columns; the gap is driven by useless predictors, not by target variance or row count alone.",
+      "misconception": "A large R2 to adjusted R2 gap signals irrelevant features, not a better model."
+    },
+    {
+      "type": "mcq",
+      "concept": "t-test",
+      "difficulty": "medium",
+      "question": "You fit sales against television, radio, and newspaper spend. The newspaper coefficient has a t-test p-value of 0.8. What does this say?",
+      "options": [
+        "Newspaper spend has the strongest effect on sales, since a high p-value means the coefficient is far from zero.",
+        "Newspaper spend cannot be judged, because a t-test only works when there is a single input column in the model.",
+        "The whole model is insignificant, because one input with a high p-value drags the overall F-test above 0.05.",
+        "Newspaper spend does not significantly relate to sales, so you cannot reject its null and would consider dropping it."
+      ],
+      "answer": 3,
+      "explanation": "A p-value of 0.8 is far above 0.05, so you fail to reject the null that the newspaper coefficient is zero: it does not significantly help predict sales, and you would likely drop it and refit. A high p-value means weak evidence of an effect, not a strong one; the t-test works with many inputs; and one weak input does not by itself sink the overall F-test.",
+      "misconception": "A high p-value means weak evidence for an effect, so the input is a candidate to drop."
+    },
+    {
+      "type": "mcq",
+      "concept": "confidence-interval",
+      "difficulty": "medium",
+      "question": "A television coefficient has a 95 percent confidence interval of 0.043 to 0.049. What does this interval claim?",
+      "options": [
+        "There is a 95 percent chance that any single future prediction of sales will land inside this range of values.",
+        "You are 95 percent confident that the true population coefficient for television spend lies between 0.043 and 0.049.",
+        "Exactly 95 percent of the training rows have a television coefficient that falls between 0.043 and 0.049.",
+        "The coefficient will equal 0.046 in 95 percent of resamples and move outside the interval in the remaining 5 percent."
+      ],
+      "answer": 1,
+      "explanation": "The interval is a range that, with 95 percent confidence, contains the true population coefficient, acknowledging that one sample gives only an estimate. It is not about where predictions fall, not a share of training rows, and not a probability that the point estimate recurs.",
+      "misconception": "A coefficient confidence interval is about the true coefficient, not about predictions or individual rows."
+    },
+    {
+      "type": "card",
+      "concept": "ci-t-test-agreement",
+      "difficulty": "hard",
+      "question": "Explain why a coefficient's 95 percent confidence interval excluding zero is equivalent to its t-test rejecting the null at the 0.05 level.",
+      "answer": "Both are built from the same estimate and standard error. The t-test rejects the null beta equals zero when the fitted coefficient sits far enough from zero relative to its standard error. The confidence interval is that same estimate plus or minus the critical t-value times the standard error. If zero falls outside the interval, then zero is not a plausible value for the coefficient, which is exactly the condition under which the t-test rejects the null. So an interval that excludes zero and a significant t-test are two views of the same result.",
+      "explanation": "This is why the statsmodels summary lets you read significance two ways: check the p-value against 0.05, or check whether the confidence interval straddles zero. They always agree because they share the estimate, the standard error, and the critical value."
+    },
+    {
+      "type": "card",
+      "concept": "regression-analysis-purpose",
+      "difficulty": "medium",
+      "question": "In your own words, what does regression analysis add once you already have the fitted coefficients from linear regression?",
+      "answer": "Fitting gives you the slope and intercept, but regression analysis judges whether those numbers are trustworthy. It treats each coefficient as an estimate from a sample, then uses statistical tests to decide whether a relationship exists at all (the F-test for overall significance), how strong it is (R2 and adjusted R2), and which individual inputs genuinely matter (per-coefficient t-tests and confidence intervals). It turns a bare fit into claims you can defend.",
+      "explanation": "The shift is from 'the slope is 2.3, done' to asking whether 2.3 is a real signal you can act on. That is the whole purpose of reading the statsmodels summary rather than just the coefficients."
+    }
+  ]
+}

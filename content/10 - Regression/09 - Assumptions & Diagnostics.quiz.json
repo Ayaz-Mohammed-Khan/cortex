@@ -1,0 +1,251 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "polynomial-why",
+      "difficulty": "easy",
+      "question": "Why does a plain linear regression fit poorly on data that follows a strong curve?",
+      "options": [
+        "Because a line, plane, or hyperplane is a straight object and cannot trace a curved relationship, so its predictions miss systematically.",
+        "Because the fitting routine cannot converge on curved data and returns whichever coefficients it reached when it gave up.",
+        "Because curved data always contains more noise than straight data, and that extra noise is what drags the predictions off.",
+        "Because linear regression needs the output squared before fitting, and omitting that step is what leaves the curve unfitted."
+      ],
+      "answer": 0,
+      "explanation": "A linear model fits a straight object, so on curved data the best straight fit sits above the data at the ends and below it in the middle, missing by a structural amount rather than by chance. Fitting still converges fine, curved data is not inherently noisier, and nothing in linear regression squares the output.",
+      "misconception": "The failure is the shape mismatch between a straight model and a curved truth, not a convergence or noise issue."
+    },
+    {
+      "type": "mcq",
+      "concept": "polynomial-linear",
+      "difficulty": "medium",
+      "question": "Polynomial regression fits curved data, yet it is still called a form of linear regression. Why?",
+      "options": [
+        "Because the fitted curve is made of short straight segments, so it stays linear between each pair of adjacent data points.",
+        "Because the output stays a linear combination of the coefficients, each to the first power, even as the input is raised to powers.",
+        "Because the degree is capped at one in practice, so the model never actually produces anything more curved than a single line.",
+        "Because the inputs are scaled to a straight range before fitting, which strips the curvature out of the raw data before it is used."
+      ],
+      "answer": 1,
+      "explanation": "A model counts as linear regression when the output is linear in its coefficients, each to the first power. Raising the input to a power changes the shape in the input, not the role of the coefficients, so the same fitting machinery applies. The curve is one smooth polynomial not straight segments, the degree is not capped at one, and scaling does not remove curvature.",
+      "misconception": "Linearity here is about the coefficients, not about the shape of the curve in the input."
+    },
+    {
+      "type": "mcq",
+      "concept": "polynomial-formulation",
+      "difficulty": "medium",
+      "question": "To fit a degree-2 polynomial on a single input `x`, what does the preprocessing step produce for each row?",
+      "options": [
+        "Two features, the input and the output squared, so the model can relate the curved output back to the input it came from.",
+        "One feature, the input squared, which replaces the original input entirely before the model is ever fit to the data.",
+        "Three features, the constant x to the zero, the input x to the one, and its square x to the two, handed to linear regression.",
+        "Four features, the powers x to the zero through x to the three, giving the fit freedom to bend in both directions at once."
+      ],
+      "answer": 2,
+      "explanation": "Degree 2 expands each input value into three features: x to the zero which is always 1 and supplies the intercept, x to the one the input unchanged, and x to the two its square. These go to linear regression. The output is never transformed, the original input is kept not replaced, and degree 2 stops at the square rather than reaching the cube.",
+      "misconception": "The expansion is applied to the input only, and degree 2 yields the powers up to the square."
+    },
+    {
+      "type": "scenario",
+      "concept": "polynomial-features",
+      "difficulty": "medium",
+      "scenario": "You build polynomial features on the training set and fit a model that scores well, but the test predictions come out far worse than expected.",
+      "question": "What is the most likely cause tied to the polynomial setup?",
+      "options": [
+        "The polynomial features were applied to the output column, so the model learned a distorted target it cannot reproduce on test data.",
+        "The test set was not passed through the same polynomial feature expansion as the training set, so the model sees inputs in the wrong shape.",
+        "The degree was set too low, which always lowers the test score far more than it lowers the training score every time.",
+        "The constant intercept feature was included in the expansion, and that extra column is what inflates the test error here."
+      ],
+      "answer": 1,
+      "explanation": "Training and test data must pass through the identical feature expansion; if the test set is left untransformed, the model receives inputs in a shape it was never trained on and predicts badly. Polynomial features go on inputs not the output, too low a degree underfits both sets rather than the test set alone, and the constant intercept feature is a normal, helpful part of the expansion.",
+      "misconception": "Both splits need the same transformation, and the expansion applies to inputs only."
+    },
+    {
+      "type": "mcq",
+      "concept": "degree-tradeoff",
+      "difficulty": "medium",
+      "question": "The polynomial degree is a hyperparameter. What happens at the two extremes of its range?",
+      "options": [
+        "A low degree memorizes the training points while a high degree is too stiff to follow the data, the opposite of the usual pattern.",
+        "Both a low and a high degree underfit, because either extreme leaves the curve unable to match the true shape.",
+        "A low degree underfits because the curve is too stiff, while a high degree overfits because it bends enough to chase the noise.",
+        "Both a low and a high degree overfit, since any departure from a mid-range degree pushes the model to track individual points."
+      ],
+      "answer": 2,
+      "explanation": "A low degree gives a stiff curve that cannot follow the data, so it underfits; a high degree gives a flexible curve that passes through individual points and chases noise, so it overfits and swings between points. The two extremes fail in opposite ways, not the same way, and the roles of low and high are not reversed.",
+      "misconception": "Low degree underfits and high degree overfits; the two extremes are different failures, not the same one."
+    },
+    {
+      "type": "scenario",
+      "concept": "degree-selection",
+      "difficulty": "hard",
+      "scenario": "You are tuning a polynomial model on a dataset with twelve input columns, so you cannot eyeball a single scatter plot to judge the fit.",
+      "question": "How should you choose the degree?",
+      "options": [
+        "Pick the highest degree your hardware can fit, since more flexibility can only improve a model's quality.",
+        "Compare a cross-validated score such as R2 across degrees and pick the degree where the score stops improving.",
+        "Set the degree equal to the number of input columns, so each column gets one unit of curvature.",
+        "Default to degree 1, because with many columns the extra inputs already supply all the flexibility the model needs."
+      ],
+      "answer": 1,
+      "explanation": "With too many inputs to plot, you judge the degree by a cross-validated score and stop raising it once the score plateaus, which guards against overfitting. The highest degree overfits rather than always improving quality, tying the degree to the column count is arbitrary, and defaulting to degree 1 ignores any real curvature in the data.",
+      "misconception": "In high dimensions you select the degree by a validation score, not by a rule of thumb or the largest fit."
+    },
+    {
+      "type": "mcq",
+      "concept": "assumptions-list",
+      "difficulty": "easy",
+      "question": "Which of the following is one of the five main assumptions of linear regression?",
+      "options": [
+        "The output column must be scaled to lie between zero and one before the model is fit.",
+        "Every input column must be numeric, since the model cannot represent any categorical information.",
+        "The number of rows must exceed the number of input columns by at least a factor of ten.",
+        "The residuals should follow a normal distribution with a mean of zero."
+      ],
+      "answer": 3,
+      "explanation": "Normality of the residuals, centered at zero, is one of the five core assumptions, alongside linearity, homoscedasticity, no autocorrelation, and little or no multicollinearity. Scaling the output, requiring numeric inputs, and a ten-to-one row ratio are not among the assumptions the model's inference rests on.",
+      "misconception": "The five assumptions concern the residuals and the inputs' relationships, not output scaling or row counts."
+    },
+    {
+      "type": "scenario",
+      "concept": "linearity-check",
+      "difficulty": "medium",
+      "scenario": "You fit a linear model, then plot the residuals against the predicted values and see them trace a clear parabola rather than scattering randomly around zero.",
+      "question": "What does this residual plot tell you?",
+      "options": [
+        "The linearity assumption is violated, because a systematic pattern in the residuals signals a curve a line cannot capture.",
+        "The homoscedasticity assumption is violated, because the residuals plainly change their spread from one end to the other.",
+        "The model is fine, because a clean parabola in the residuals is the exact shape you expect when a linear fit works well.",
+        "The normality assumption is violated, because a parabola is the signature that a Q-Q plot produces for strongly skewed residuals."
+      ],
+      "answer": 0,
+      "explanation": "When linearity holds the residuals scatter randomly around zero; a systematic parabola means a curved relationship the line missed, so linearity is violated. A changing spread (not a pattern) signals heteroscedasticity, a healthy residual plot shows no pattern at all, and residual normality is judged by a histogram or Q-Q plot rather than a parabola in a residual-versus-fit plot.",
+      "misconception": "A pattern in a residual-versus-fit plot flags non-linearity; a changing spread would flag heteroscedasticity."
+    },
+    {
+      "type": "mcq",
+      "concept": "linearity-remedy",
+      "difficulty": "medium",
+      "question": "Which approach does NOT address a violated linearity assumption?",
+      "options": [
+        "Applying a log or square-root transformation to an input or the output to straighten the relationship.",
+        "Fitting piecewise regression, splitting the input range into segments each roughly linear.",
+        "Dropping all the input columns and predicting the output's mean for every row instead.",
+        "Switching to a non-parametric model such as a generalized additive model or kernel regression."
+      ],
+      "answer": 2,
+      "explanation": "Transformations, polynomial features, piecewise regression, and non-parametric models all give the fit a way to handle a curved relationship. Predicting the mean for every row throws away the inputs entirely, which is the uninformative baseline rather than a remedy for non-linearity.",
+      "misconception": "Remedies add flexibility to fit the curve; collapsing to the mean just abandons the problem."
+    },
+    {
+      "type": "scenario",
+      "concept": "inference-vs-prediction",
+      "difficulty": "hard",
+      "scenario": "A non-parametric model clearly out-predicts linear regression on your curved data, yet a bank still wants to keep the linear model.",
+      "question": "What is the sound reason to prefer linear regression here?",
+      "options": [
+        "Linear regression will eventually overtake the non-parametric model's accuracy once it has seen enough extra rows of training data.",
+        "Non-parametric models cannot produce predictions for genuinely new inputs, so only the linear model can ever be deployed to users.",
+        "The bank wants inference, and the linear model's coefficients state how the output moves with each input, which it values over accuracy.",
+        "Non-parametric models violate every one of the regression assumptions, so their predictions can never be trustworthy enough in practice."
+      ],
+      "answer": 2,
+      "explanation": "When the goal is inference, understanding how each input drives the output, a linear model's interpretable coefficients are worth more than a few points of accuracy, which is why a bank keeps it. Linear regression does not catch up with more data on genuinely curved relationships, non-parametric models do predict on new inputs, and they are not barred by the assumptions, which govern linear regression's inference.",
+      "misconception": "The choice is interpretability for inference versus accuracy for prediction, not a claim that one model cannot predict."
+    },
+    {
+      "type": "mcq",
+      "concept": "normality-why",
+      "difficulty": "hard",
+      "question": "Why does the F-test for overall significance rely on the residuals being normally distributed?",
+      "options": [
+        "Because the F-test simply averages the raw residuals, and only normal residuals will average to a meaningful central value here.",
+        "Because the F-statistic is a ratio of chi-square quantities, and a quantity is chi-square only when it is the square of a normal.",
+        "Because non-normal residuals force the F-statistic to come out negative, and the test has no way to interpret a negative value.",
+        "Because the F-test counts how many residuals exceed zero, a count that stays valid only when the residuals are perfectly symmetric."
+      ],
+      "answer": 1,
+      "explanation": "The F-statistic is built from two chi-square quantities, and a quantity follows a chi-square distribution only when it is the square of a normal variable. Normal residuals make their squares chi-square, which makes the ratio a genuine F-statistic with a trustworthy p-value. The test is not a simple average or count of residuals, and losing normality breaks the distribution of the statistic rather than making it negative.",
+      "misconception": "Normality lets the squared residuals be chi-square, which is what makes the F-statistic valid."
+    },
+    {
+      "type": "scenario",
+      "concept": "normality-sample-size",
+      "difficulty": "medium",
+      "scenario": "A colleague is alarmed that the residuals of a model trained on 5000 rows fail a strict normality test, and wants to abandon linear regression over it.",
+      "question": "How should you respond?",
+      "options": [
+        "Agree and abandon the model at once, since any failed normality test makes linear regression unusable regardless of the data size.",
+        "Point out that with a sample this large the central limit theorem keeps the sampling distribution normal, so the check rarely matters.",
+        "Suggest duplicating rows until the residuals finally pass the test, because a larger dataset is known to force normality directly.",
+        "Advise ignoring all of the assumptions once a dataset passes a few thousand rows, since large data makes every assumption irrelevant."
+      ],
+      "answer": 1,
+      "explanation": "When the sample size is well above roughly 30, the central limit theorem makes the sampling distribution normal regardless of the residual shape, so a failed normality check rarely matters much. A failed test does not automatically kill the model, duplicating rows is data leakage that forces nothing, and large data relaxes this particular assumption, not all of them.",
+      "misconception": "A large sample size softens the normality assumption through the central limit theorem, but the other assumptions still hold."
+    },
+    {
+      "type": "mcq",
+      "concept": "homoscedasticity",
+      "difficulty": "medium",
+      "question": "What does the homoscedasticity assumption require, and what is the telltale sign that it fails?",
+      "options": [
+        "That the residuals sum to zero; failure shows up as a residual plot whose points steadily drift above the zero line as x grows.",
+        "That the input columns are uncorrelated; failure shows up as two separate input columns that visibly rise and fall together.",
+        "That the residual spread stays constant across the inputs; failure shows up as a funnel where the spread widens as an input grows.",
+        "That the residuals are normally distributed; failure shows up as a residual histogram with a long, lopsided one-sided tail."
+      ],
+      "answer": 2,
+      "explanation": "Homoscedasticity requires an even residual spread across the inputs, and the classic failure is a funnel shape where the spread fans out as an input grows, signaling heteroscedasticity. Residuals summing to zero, uncorrelated inputs, and residual normality are the concerns of other assumptions, not this one.",
+      "misconception": "Homoscedasticity is about constant spread; the funnel shape is the signature of its failure."
+    },
+    {
+      "type": "scenario",
+      "concept": "homoscedasticity-effect",
+      "difficulty": "hard",
+      "scenario": "A model's residuals clearly fan out as an input increases, so the data is heteroscedastic.",
+      "question": "What is the concrete consequence for the model's output?",
+      "options": [
+        "The coefficient point estimates themselves become badly biased, so the fitted slopes point in the wrong direction entirely.",
+        "The coefficient standard errors become unreliable, so the t-tests and confidence intervals built on them can no longer be trusted.",
+        "The R2 score drops all the way to zero, since a funnel shape means the model now explains none of the output's variance at all.",
+        "The model simply refuses to produce any predictions, because heteroscedastic data cannot be passed through a fitted regression line."
+      ],
+      "answer": 1,
+      "explanation": "Heteroscedasticity makes the standard-error formula invalid because the line has uneven freedom to wiggle across the inputs, so the standard errors become unreliable and the t-tests and confidence intervals built on them fail. The slope point estimates are not necessarily biased, R2 does not collapse to zero, and the model still produces predictions; the damage is to the inference.",
+      "misconception": "Heteroscedasticity corrupts the standard errors and the inference, not the point estimates or the model's ability to predict."
+    },
+    {
+      "type": "card",
+      "concept": "standard-error",
+      "difficulty": "hard",
+      "question": "Explain what the standard error of a regression coefficient measures, and why that makes it the engine behind the t-test and the confidence interval.",
+      "answer": "The standard error of a coefficient is the standard deviation of that coefficient's estimate across repeated samples. If you fit the same model on many different samples drawn from the same population, each sample gives a slightly different slope; the standard error measures how much those slopes vary, which is the precision of the estimate. The t-statistic divides the coefficient by its standard error to express it as a number of standard errors away from zero, and the confidence interval extends out from the coefficient by multiples of the standard error. So both the significance test and the interval are built directly on it, which is why any assumption that corrupts the standard error, such as heteroscedasticity or non-normal residuals, corrupts the whole inference.",
+      "explanation": "This is the same idea as the standard error of a sample mean, which is the standard deviation of the sampling distribution of the mean; here the statistic being resampled is a regression coefficient rather than a mean."
+    },
+    {
+      "type": "mcq",
+      "concept": "autocorrelation",
+      "difficulty": "medium",
+      "question": "The no-autocorrelation assumption requires that the residuals not be correlated with one another. When is this assumption most likely to matter?",
+      "options": [
+        "With time-series data, where consecutive observations are measured over time and an error at one step can carry into the next.",
+        "With high-dimensional data, where the sheer number of input columns is what forces the model's residuals to correlate with each other.",
+        "With small datasets, where having too few rows makes every residual end up depending on every other residual out of necessity.",
+        "With categorical inputs, where the fixed set of possible categories ends up linking the residuals of any rows that share a category."
+      ],
+      "answer": 0,
+      "explanation": "Autocorrelation mostly surfaces in time-series data, where observations are ordered in time and an error can persist from one step to the next. For the cross-sectional data of a basic regression it is usually not a concern, which is why it is the least worrisome assumption unless you are working over time. The column count, the row count, and categorical inputs do not inherently create correlated residuals.",
+      "misconception": "Autocorrelation is chiefly a time-series concern, not a side effect of many columns, few rows, or categorical inputs."
+    },
+    {
+      "type": "card",
+      "concept": "multicollinearity-handoff",
+      "difficulty": "easy",
+      "question": "State the multicollinearity assumption and explain in one or two sentences why it causes trouble.",
+      "answer": "The assumption is that no input column should be strongly linearly related to another input column. When two inputs move together, the model cannot cleanly separate how much each one contributes to the output, so the coefficient estimates become unstable and hard to interpret.",
+      "explanation": "This assumption is detailed on its own, including how to state it mathematically and how to detect it with the variance inflation factor and the condition number."
+    }
+  ]
+}

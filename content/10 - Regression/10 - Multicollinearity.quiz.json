@@ -1,0 +1,219 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "definition",
+      "difficulty": "easy",
+      "question": "What condition defines multicollinearity in a multiple regression model?",
+      "options": [
+        "Two or more of the independent input variables are highly correlated with one another.",
+        "The output variable is strongly correlated with each of the independent input variables.",
+        "The residuals of the fitted model fail to follow a normal distribution around zero.",
+        "The relationship between the inputs and the output curves rather than following a straight line."
+      ],
+      "answer": 0,
+      "explanation": "Multicollinearity is a property of the input columns alone: two or more of them carry a strong linear relationship, so one can be largely predicted from the others. Correlation between an input and the output is normal and desired, non-normal residuals describe a different assumption, and a curved relationship is about linearity, not multicollinearity.",
+      "misconception": "Multicollinearity is about the inputs relating to each other, not about an input relating to the output."
+    },
+    {
+      "type": "scenario",
+      "concept": "inference-vs-prediction",
+      "difficulty": "medium",
+      "scenario": "A colleague is building a model only to forecast next quarter's sales and notices two input columns are correlated at 0.9. They ask whether they must fix it before shipping.",
+      "question": "What is the right advice?",
+      "options": [
+        "They must drop one column first, because a 0.9 correlation always destroys a model's forecasting accuracy.",
+        "They can leave it, because multicollinearity does not degrade predictive accuracy on new, unseen data.",
+        "They should combine the two columns first, because forecasts are only valid once every input is independent.",
+        "They must collect more data first, because no forecast can be trusted while any correlation above 0.8 remains."
+      ],
+      "answer": 1,
+      "explanation": "Multicollinearity leaves predictive power intact, because the correlated inputs simply fold into an equivalent regression that still fits the data. Since the goal here is forecasting, not understanding each input's effect, there is nothing to fix. Dropping, combining, or gathering more data are remedies for inference problems, which this task does not have.",
+      "misconception": "Multicollinearity only threatens inference; a purely predictive model can ignore it."
+    },
+    {
+      "type": "mcq",
+      "concept": "inference-vs-prediction",
+      "difficulty": "medium",
+      "question": "Why does multicollinearity make an individual coefficient impossible to interpret?",
+      "options": [
+        "Because the output variable stops responding linearly to any of the inputs once they are correlated.",
+        "Because the model switches from least squares to a different solver whenever the inputs overlap.",
+        "Because reading a coefficient assumes the other inputs are held constant, which correlated inputs forbid.",
+        "Because correlated inputs force the intercept to absorb all of the effect that the slopes should carry."
+      ],
+      "answer": 2,
+      "explanation": "A coefficient means 'hold the other inputs constant and move this one', but when inputs are correlated you cannot move one without dragging the others along, so that reading collapses. The output still responds linearly, the solver does not change, and the intercept does not swallow the slopes. The broken assumption is specifically the 'hold the others constant' story.",
+      "misconception": "The coefficient's meaning rests on holding other inputs constant, which multicollinearity makes impossible."
+    },
+    {
+      "type": "mcq",
+      "concept": "perfect-multicollinearity",
+      "difficulty": "hard",
+      "question": "Under perfect multicollinearity, why can the coefficients not be computed at all?",
+      "options": [
+        "The residual variance becomes zero, so the standard-error formula divides by zero and returns no value.",
+        "The output column becomes an exact copy of one input, leaving nothing for the other coefficients to explain.",
+        "The design matrix gains more rows than columns, so the least-squares system is left overdetermined.",
+        "The determinant of the input-product matrix becomes zero, so that matrix is singular and has no inverse."
+      ],
+      "answer": 3,
+      "explanation": "Ordinary least squares needs the inverse of X-transpose-X, and an exact linear dependence among inputs drives that matrix's determinant to zero, making it singular and non-invertible, so no coefficients come out. It is the input-product matrix, not the residual variance or the output column, that fails, and the row count is not the issue.",
+      "misconception": "Perfect multicollinearity makes X-transpose-X singular, which blocks the inverse and the coefficients."
+    },
+    {
+      "type": "mcq",
+      "concept": "perfect-vs-near",
+      "difficulty": "medium",
+      "question": "What distinguishes perfect multicollinearity from the near version seen in real data?",
+      "options": [
+        "Perfect multicollinearity reproduces one input from the others with no error, while the near version carries some error.",
+        "Perfect multicollinearity appears only in prediction tasks, while the near version appears only in inference tasks.",
+        "Perfect multicollinearity involves exactly two inputs, while the near version always involves three or more inputs.",
+        "Perfect multicollinearity raises the condition number, while the near version lowers the correlation instead."
+      ],
+      "answer": 0,
+      "explanation": "Perfect multicollinearity means one input is an exact linear combination of the others, with no error term, so it is reproduced precisely; near multicollinearity carries an error term, so the relationship is strong but not exact. The distinction has nothing to do with the task type, the number of inputs, or opposite effects on the condition number.",
+      "misconception": "The difference is the presence of an error term, not the task, the input count, or the diagnostic direction."
+    },
+    {
+      "type": "mcq",
+      "concept": "vif",
+      "difficulty": "medium",
+      "question": "A radio column regressed on the other inputs returns an R-squared of 0.8. What is its variance inflation factor, and what does it signal?",
+      "options": [
+        "A VIF of 0.2, signalling that the other inputs explain almost none of the variation in the radio column.",
+        "A VIF of 1.25, signalling only a mild and perfectly acceptable overlap of radio with the other inputs.",
+        "A VIF of 5, signalling that the other inputs explain the radio column strongly enough to flag multicollinearity.",
+        "A VIF of 0.8, signalling that the R-squared value itself can be read directly as the final inflation factor."
+      ],
+      "answer": 2,
+      "explanation": "VIF is one divided by one minus R-squared, so with R-squared of 0.8 the VIF is one over 0.2, which equals 5, right at the common warning threshold. A VIF cannot be less than 1, so 0.2 and 0.8 are impossible, and 1.25 would come from an R-squared of 0.2, not 0.8.",
+      "misconception": "VIF is 1 over (1 minus R-squared), so a high R-squared yields a large VIF, not a small one."
+    },
+    {
+      "type": "mcq",
+      "concept": "vif",
+      "difficulty": "hard",
+      "question": "Why does the variance inflation factor catch multicollinearity that a correlation matrix can miss?",
+      "options": [
+        "Because VIF uses the Spearman rank correlation, which detects relationships the linear Pearson measure overlooks.",
+        "Because VIF measures each input against the output, whereas the correlation matrix only compares inputs with each other.",
+        "Because VIF regresses each input on all the others at once, catching joint dependence across three or more columns.",
+        "Because VIF inspects the residuals of the final model, where group dependence shows up as non-constant spread."
+      ],
+      "answer": 2,
+      "explanation": "A correlation matrix compares only two columns at a time, so it misses multicollinearity shared across a group of inputs where no single pair looks extreme. VIF regresses each input on all the remaining inputs together, so it captures that joint dependence. VIF uses ordinary regression, not Spearman, it works among the inputs rather than against the output, and it does not rely on residual spread.",
+      "misconception": "VIF tests an input against all the others jointly, which is what reveals group multicollinearity."
+    },
+    {
+      "type": "scenario",
+      "concept": "detection-correlation",
+      "difficulty": "easy",
+      "scenario": "You compute a correlation heatmap of your three input columns and want a fast read on whether multicollinearity is present.",
+      "question": "Which cells should you focus on, and what value raises a red flag?",
+      "options": [
+        "The diagonal cells, flagging trouble whenever any of them drops below a value of 1.",
+        "The output row, flagging trouble whenever an input correlates with the output above 0.8.",
+        "Every cell equally, flagging trouble whenever the whole matrix averages above a value of 0.5.",
+        "The off-diagonal cells, flagging trouble whenever a pair of inputs correlates near 1 or near -1."
+      ],
+      "answer": 3,
+      "explanation": "The diagonal is always 1 and carries no information, so you read the off-diagonal cells, where each entry is the correlation between a pair of inputs. A value near 1 or near -1, by convention above about 0.8 in magnitude, flags that pair as strongly collinear. The output is not part of this check, and the matrix average is meaningless here.",
+      "misconception": "Multicollinearity is read from the off-diagonal input-to-input cells, not the diagonal or the output."
+    },
+    {
+      "type": "mcq",
+      "concept": "condition-number",
+      "difficulty": "medium",
+      "question": "How is the condition number computed, and what does a large value indicate?",
+      "options": [
+        "It is the ratio of the largest to the smallest eigenvalue of X-transpose-X, so a large value marks an ill-conditioned matrix.",
+        "It is the average of all the eigenvalues of X-transpose-X, so a large value is taken to mean the residual variance has grown too large.",
+        "It is the product of the largest and the smallest eigenvalue, so a large value is taken to mean the output has far too many distinct levels.",
+        "It is the number of input columns divided by the number of rows, so a large value is taken to mean the collected sample is simply too small."
+      ],
+      "answer": 0,
+      "explanation": "The condition number is the largest eigenvalue of X-transpose-X divided by the smallest, and a large ratio means the matrix is ill-conditioned, close to singular, which is the matrix-level fingerprint of strong multicollinearity. It is a ratio of extreme eigenvalues, not an average, a product, or a count of columns and rows.",
+      "misconception": "The condition number is a ratio of the extreme eigenvalues, and a high ratio means a near-singular matrix."
+    },
+    {
+      "type": "mcq",
+      "concept": "condition-number",
+      "difficulty": "easy",
+      "question": "A statsmodels regression summary reports a condition number of 420. How should you read it?",
+      "options": [
+        "It is comfortably below the warning level, so the inputs show no meaningful multicollinearity.",
+        "It is far above the warning level of about 30, so the data very likely has strong multicollinearity.",
+        "It is the percentage of output variance the model explains, so the fit is unusually strong here.",
+        "It is the count of iterations the solver needed, so the model simply took a while to converge."
+      ],
+      "answer": 1,
+      "explanation": "A condition number above roughly 30 is a warning sign of multicollinearity, and 420 is far beyond that, so the data very likely has a strong case. The number is not a share of explained variance, not an iteration count, and certainly not below the threshold.",
+      "misconception": "A condition number well past 30 flags strong multicollinearity; it is not an accuracy or iteration figure."
+    },
+    {
+      "type": "scenario",
+      "concept": "inflated-standard-errors",
+      "difficulty": "hard",
+      "scenario": "After fitting a model with correlated inputs, you notice the confidence band around the regression line is very wide and the coefficients swing sharply when you nudge a single input value.",
+      "question": "What links these two observations to multicollinearity?",
+      "options": [
+        "The wide band and the swings both come from a residual variance that has collapsed all the way toward zero under the input correlation.",
+        "The wide band and the swings are unrelated symptoms here, since the bandwidth only tracks the sample size while the coefficient swings only track outliers.",
+        "The wide band and the swings both come from a near-zero determinant inflating the inverse matrix in the standard-error formula.",
+        "The wide band and the swings both come from the output variable itself being correlated far too strongly with just one of the input columns."
+      ],
+      "answer": 2,
+      "explanation": "Strong multicollinearity drives the determinant of X-transpose-X toward zero, and inverting that matrix divides by the determinant, so every entry of the inverse inflates. That inflation enlarges the standard errors in the formula, widening the confidence band, and makes the coefficients hypersensitive to tiny data changes. The residual variance does not collapse, the two symptoms share this one cause, and input-to-output correlation is not the mechanism.",
+      "misconception": "Both the wide band and the unstable coefficients trace to the near-zero determinant inflating the inverse matrix."
+    },
+    {
+      "type": "scenario",
+      "concept": "removal",
+      "difficulty": "medium",
+      "scenario": "Your three inputs return VIFs of 2.4, 3.2, and 18, and you need reliable coefficients for an inference report.",
+      "question": "What is the most direct fix?",
+      "options": [
+        "Drop the input with a VIF of 18, since the others explain it heavily, then recompute VIF on what remains.",
+        "Drop the input with the lowest VIF of 2.4, since a small VIF means that column is contributing the least.",
+        "Raise the model's regularization until all three VIFs settle below 5 without removing any column.",
+        "Switch the metric from VIF to plain correlation, since VIF overstates the problem for inference tasks."
+      ],
+      "answer": 0,
+      "explanation": "The column with VIF 18 is heavily explained by the others and adds little unique information, so dropping it breaks the dependence and restores reliable coefficients; you then recompute VIF and repeat if needed. Dropping the lowest-VIF column removes a useful input, regularization is a separate technique not covered here, and correlation is the weaker detector, not a reason to distrust VIF.",
+      "misconception": "You drop the highest-VIF column, the one the others explain most, not the lowest."
+    },
+    {
+      "type": "mcq",
+      "concept": "types",
+      "difficulty": "medium",
+      "question": "One-hot encoding a three-city column into three dummy columns introduces which kind of multicollinearity, and why?",
+      "options": [
+        "Data-driven multicollinearity, because the cities naturally cluster together in the population being sampled.",
+        "Structural multicollinearity, because any one dummy is an exact combination of the other two that the analyst created.",
+        "No multicollinearity, because one-hot encoding deliberately produces columns that are mutually independent.",
+        "Data-driven multicollinearity, because the encoding reflects real correlations already present in the raw text column."
+      ],
+      "answer": 1,
+      "explanation": "The encoding is something the analyst does, and it makes any one dummy equal to one minus the sum of the others, an exact linear combination, which is structural and in fact perfect multicollinearity. Dropping one dummy removes it. It is not data-driven, since the cause is the engineering step, and the dummies are certainly not independent.",
+      "misconception": "Multicollinearity created by a feature-engineering step is structural, not data-driven."
+    },
+    {
+      "type": "card",
+      "concept": "inference-vs-prediction",
+      "difficulty": "hard",
+      "question": "Explain why multicollinearity ruins inference but leaves prediction intact.",
+      "answer": "Inference reads each coefficient as the effect of moving one input while holding the others constant. When inputs are correlated you cannot move one without the others following, so that reading collapses and the individual coefficients become unreliable. Prediction does not need the coefficients to mean anything individually: if one input is roughly a linear function of another, substituting that relationship into the regression folds the correlated inputs into an equivalent single-variable regression. The coefficients lose their original meaning, but the model still fits the data and still forecasts new points as accurately as before. So the overall predictive power survives while the ability to attribute effects to individual inputs is destroyed.",
+      "explanation": "This is why the first question to ask about any flagged multicollinearity is whether the model is for prediction or for inference."
+    },
+    {
+      "type": "card",
+      "concept": "removal",
+      "difficulty": "medium",
+      "question": "List the four ways to remove multicollinearity and give the core idea of each.",
+      "answer": "First, collect more data: a limited sample can show multicollinearity by chance, and more rows can push the determinant away from zero. Second, drop one of the correlated variables, specifically the one with the highest VIF, which breaks the linear dependence tying the inputs together. Third, combine the correlated variables into a single feature through an operation such as averaging or summing, which removes the overlap while keeping the information. Fourth, apply partial least squares regression, which first transforms the inputs with principal component analysis into new uncorrelated features and then regresses on those. The first three are simple and direct; PLS is the most involved and leaves inputs that no longer map to the originals.",
+      "explanation": "All four target the same root cause, a design matrix whose columns are too close to linearly dependent."
+    }
+  ]
+}

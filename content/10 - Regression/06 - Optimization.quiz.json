@@ -1,0 +1,296 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "parameters-vs-inputs",
+      "difficulty": "easy",
+      "question": "In the function `f(x) = a*x squared`, what role does `a` play that `x` does not?",
+      "options": [
+        "`a` is the input you feed in each time you call the function, while `x` is instead the fixed setting that defines the rule.",
+        "`a` is a parameter that reshapes the function's behavior, while `x` is the input fed in at use time.",
+        "`a` and `x` are both inputs, and the function simply multiplies the two of them together.",
+        "`a` is the output the function returns once the input `x` has been processed by the rule."
+      ],
+      "answer": 1,
+      "explanation": "A parameter is a constant built into the rule that shapes the curve, so changing `a` makes the parabola steeper or flatter without any input changing. The input `x` is what you supply when you use the function. They are not both inputs, and `a` is certainly not the output, which is the value the whole rule returns.",
+      "misconception": "Parameters are settings that define which function you have, not inputs and not outputs."
+    },
+    {
+      "type": "mcq",
+      "concept": "model-as-function",
+      "difficulty": "easy",
+      "question": "Once you decide to use linear regression with the form `y_hat = b0 + b1*x1 + b2*x2`, what is left to find?",
+      "options": [
+        "A brand new functional form for the model, because committing to linear regression only fixes the inputs and leaves the equation itself still to be chosen.",
+        "The number of input columns, since the form of the function depends on how many inputs there are.",
+        "The values of the parameters b0, b1, and b2, since the functional form is already settled.",
+        "Whether the data is a regression or a classification problem, which the form cannot by itself decide."
+      ],
+      "answer": 2,
+      "explanation": "Committing to linear regression fixes the shape of the function, so the entire fitting problem collapses to choosing the parameter values b0, b1, and b2. The input columns are already known from the data, the form is not something still to invent, and the regression-versus-classification question is settled before you pick the algorithm.",
+      "misconception": "For a parametric model the form is fixed up front, leaving only the parameter values to optimize."
+    },
+    {
+      "type": "scenario",
+      "concept": "parametric-vs-nonparametric",
+      "difficulty": "medium",
+      "scenario": "You train linear regression on 500 student rows, then rerun it after 5000 more rows arrive, and a colleague asks how many parameters the model now carries.",
+      "question": "What is the right answer?",
+      "options": [
+        "The same number as before, because linear regression is parametric and fixes its parameter count regardless of row count.",
+        "Ten times as many, because the parameter count scales directly with the number of rows in the training data.",
+        "Zero extra, because linear regression stores the rows themselves rather than any parameters at all.",
+        "It cannot be known without retraining, since the count is chosen freshly from the data on every fit."
+      ],
+      "answer": 0,
+      "explanation": "A parametric model works with a fixed number of parameters that does not depend on how much data it sees, so the count is unchanged. For two inputs the model keeps its three betas whether it has 500 rows or 5500. The count does not scale with rows, linear regression does not memorize rows the way a non-parametric method might, and the count is fixed by the form rather than re-chosen each time.",
+      "misconception": "A parametric model's parameter count is fixed by its form, independent of the amount of data."
+    },
+    {
+      "type": "mcq",
+      "concept": "loss-function",
+      "difficulty": "easy",
+      "question": "What does a loss function compute for a machine learning model?",
+      "options": [
+        "The number of input columns the model needs before it can make any prediction at all.",
+        "A single number measuring how far the model's predictions sit from the actual target values.",
+        "The fixed functional form the model will take once an algorithm has finally been chosen.",
+        "The direction in which each parameter should move, read directly off the raw data rows."
+      ],
+      "answer": 1,
+      "explanation": "A loss function, also called a cost or objective function, collapses all the prediction errors into one number that says how badly the model is doing. It does not count input columns, it does not choose the functional form, and while its derivative later gives a direction to move, the loss itself is just the measure of error.",
+      "misconception": "The loss is a measure of total prediction error, not a count of columns or a choice of form."
+    },
+    {
+      "type": "mcq",
+      "concept": "optimization-definition",
+      "difficulty": "medium",
+      "question": "In the language of this note, what does training a parametric model mean?",
+      "options": [
+        "Collecting enough input columns that the model can represent every row in the data exactly.",
+        "Switching from a parametric to a non-parametric form so the model can adapt to the data freely.",
+        "Finding the parameter values that make the loss function as small as possible, which is optimization.",
+        "Choosing a loss function whose value is large, so the guiding signal is as strong as it can be."
+      ],
+      "answer": 2,
+      "explanation": "Training is the search for the parameter values that minimize the loss, and that minimization is exactly what optimization means. It is not about amassing columns, it never switches the model to a different family, and the aim is to make the loss small, not large, since the loss measures error.",
+      "misconception": "Training a parametric model is minimizing its loss, nothing more exotic."
+    },
+    {
+      "type": "scenario",
+      "concept": "loss-selection-differentiability",
+      "difficulty": "hard",
+      "scenario": "You propose a loss built on the absolute value of the error, and a teammate warns it will cause trouble when you later optimize by following the loss's slope.",
+      "question": "What is the teammate pointing at?",
+      "options": [
+        "The absolute value grows without bound as the error grows, so its loss can never reach any finite minimum for the optimizer to settle on.",
+        "The absolute value has a sharp corner at zero where it is not differentiable, so it has no slope there to follow.",
+        "The absolute value ignores the sign of the error, so overshoots and undershoots cancel and hide the real error.",
+        "The absolute value reports in squared units, so the optimizer cannot read its output as a real-world quantity."
+      ],
+      "answer": 1,
+      "explanation": "Optimization follows the slope of the loss downhill, so the loss must be differentiable, and the absolute value has a non-differentiable corner at zero where no slope is defined. That corner, not unboundedness, is the problem. The absolute value keeps the error's magnitude rather than cancelling it, and it is a squared loss, not an absolute one, that would report in squared units.",
+      "misconception": "A loss needs a well-defined slope everywhere, and the absolute value's corner at zero breaks that."
+    },
+    {
+      "type": "mcq",
+      "concept": "instantaneous-rate-of-change",
+      "difficulty": "medium",
+      "question": "Why does the definition of a derivative insist on the instantaneous rate of change rather than a plain rate of change?",
+      "options": [
+        "Because a plain rate of change is measured over an interval, while a derivative is needed at a single point.",
+        "Because a plain rate of change is allowed to come out negative, whereas a derivative is restricted to taking positive values only.",
+        "Because a plain rate of change uses division, which the limit definition carefully avoids using at all.",
+        "Because a plain rate of change applies only to straight lines, and a derivative is reserved for curves."
+      ],
+      "answer": 0,
+      "explanation": "A plain rate of change averages the output's change across a whole interval between two points, but many quantities, like a car's speed at an exact instant, are needed at a single point. Shrinking the interval to zero gives that instantaneous value. Derivatives can be negative, the limit definition still divides by the shrinking interval, and derivatives apply to curves and lines alike.",
+      "misconception": "The derivative measures change at one point, obtained by collapsing the interval to zero."
+    },
+    {
+      "type": "mcq",
+      "concept": "derivative-as-slope",
+      "difficulty": "medium",
+      "question": "Geometrically, what happens to the secant line between two points on a curve as the interval between them shrinks to zero?",
+      "options": [
+        "It rotates until it is vertical, so its slope grows without limit toward infinity at the point.",
+        "It splits into two separate tangent lines, one touching each of the two original points on the curve.",
+        "It flattens to a horizontal line, so the slope it reports is forced to zero everywhere on the curve.",
+        "It becomes the tangent at a single point, whose slope is the derivative there."
+      ],
+      "answer": 3,
+      "explanation": "As the two points merge, the secant pivots into the tangent line that touches the curve at one point, and the slope of that tangent is the derivative. The secant does not go vertical in general, it does not split into two lines, and it does not flatten to horizontal, since the tangent takes whatever slope the curve has at that point.",
+      "misconception": "Shrinking the interval turns the secant into the tangent, whose slope is the derivative."
+    },
+    {
+      "type": "mcq",
+      "concept": "critical-points",
+      "difficulty": "easy",
+      "question": "At a minimum or a maximum of a smooth curve, what is true of the slope?",
+      "options": [
+        "The slope is at its steepest, since turning points are where the curve changes fastest.",
+        "The slope is zero, because the tangent line is flat at a turning point.",
+        "The slope is undefined, because the curve has a sharp corner at every turning point.",
+        "The slope equals the value of the function, which is what marks the point as special."
+      ],
+      "answer": 1,
+      "explanation": "At a minimum or maximum the tangent is flat, so the slope is zero, which is why these are called critical points and why setting the derivative to zero finds candidate turning points. The slope is not steepest there, smooth turning points have no corner so the slope is defined, and the slope has no general relationship to the function's value.",
+      "misconception": "Minima and maxima are exactly where the slope is zero, not steepest."
+    },
+    {
+      "type": "mcq",
+      "concept": "chain-rule",
+      "difficulty": "medium",
+      "question": "The chain rule differentiates a composed function like `g(h(x))`. Why does it matter so much for deep learning?",
+      "options": [
+        "Because it lets you skip differentiation entirely once a function is composed from simpler pieces.",
+        "Because backpropagation applies the chain rule across many stacked layers to get each weight's effect on the loss.",
+        "Because it converts any non-convex loss into a convex one before the network is ever trained.",
+        "Because it removes the need for a learning rate by fixing the exact step size for every parameter."
+      ],
+      "answer": 1,
+      "explanation": "A deep network is a function inside a function inside a function, and backpropagation is the chain rule applied through those stacked layers to find how each weight changes the loss. It does not let you skip differentiation, it does nothing to make a loss convex, and it has no bearing on the learning rate.",
+      "misconception": "Backpropagation is the chain rule run through many layers, which is why the rule is central."
+    },
+    {
+      "type": "scenario",
+      "concept": "derivative-as-sensitivity",
+      "difficulty": "medium",
+      "scenario": "You start fitting with a random value for a parameter b0 and compute the derivative of the loss with respect to b0, which comes out positive.",
+      "question": "What does that positive derivative tell you to do with b0?",
+      "options": [
+        "Increase b0, because a positive derivative means that moving upward in b0 is the direction that lowers the loss the fastest from here.",
+        "Leave b0 unchanged, because a positive derivative signals you are already at the minimum of the loss.",
+        "Decrease b0, because a positive derivative means increasing b0 raises the loss, so down is the way to go.",
+        "Set b0 to zero, because the sign of the derivative shows the parameter is contributing nothing useful."
+      ],
+      "answer": 2,
+      "explanation": "The derivative is the sensitivity of the loss to a nudge in b0: a positive value means nudging b0 up raises the loss, so to reduce the loss you move b0 down. A positive slope does not mean you are at the minimum, which needs a zero slope, and the sign says which way is downhill rather than telling you to zero the parameter out.",
+      "misconception": "A positive loss derivative means increasing the parameter worsens the loss, so you step the other way."
+    },
+    {
+      "type": "mcq",
+      "concept": "second-derivative",
+      "difficulty": "medium",
+      "question": "At a critical point where the slope is zero, how does the second derivative tell a minimum from a maximum?",
+      "options": [
+        "A positive second derivative marks a minimum, since the curve bends upward there.",
+        "A positive second derivative marks a maximum there instead, on the grounds that the curve must be sitting at its highest point.",
+        "A zero second derivative marks a minimum, since the slope is no longer changing at all.",
+        "The second derivative cannot distinguish them; only plotting the full curve can settle it."
+      ],
+      "answer": 0,
+      "explanation": "The second derivative is the rate of change of the slope, so a positive value means the curve bends upward, which is a minimum, and a negative value means it bends downward, which is a maximum. A zero second derivative does not identify a minimum, and the sign of the second derivative does distinguish the two without needing to plot anything.",
+      "misconception": "A positive second derivative means upward curvature, hence a minimum."
+    },
+    {
+      "type": "mcq",
+      "concept": "partial-differentiation",
+      "difficulty": "medium",
+      "question": "For `z = x squared + y squared`, how do you compute the partial derivative with respect to `x`?",
+      "options": [
+        "Differentiate both terms normally and add the results, giving a single combined slope of `2x + 2y`.",
+        "Differentiate with respect to `x` while treating `y` as a constant, so `y squared` drops out and you get `2x`.",
+        "Differentiate with respect to `y` first, then substitute the result back in to eliminate `x` entirely.",
+        "Set `y` to zero before differentiating, since partial derivatives ignore every variable but the first one."
+      ],
+      "answer": 1,
+      "explanation": "A partial derivative finds the slope along one direction by holding the other variables constant, so with respect to `x` the term `y squared` is a constant and differentiates to zero, leaving `2x`. You do not blend both slopes into one expression, you do not differentiate with respect to the wrong variable, and holding `y` constant is not the same as forcing it to zero.",
+      "misconception": "A partial derivative holds the other variables constant rather than zeroing or blending them."
+    },
+    {
+      "type": "scenario",
+      "concept": "convex-vs-nonconvex",
+      "difficulty": "hard",
+      "scenario": "You draw a loss curve, pick two points on it, join them with a straight segment, and notice the segment dips below the curve between those points.",
+      "question": "What does that tell you about the loss and about solving it by setting the slope to zero?",
+      "options": [
+        "The loss is convex, so setting the slope to zero is guaranteed to land on its single global minimum.",
+        "The loss is non-convex, so it may have several minima and maxima and setting the slope to zero can land on the wrong one.",
+        "The loss is undefined between the two points, so no derivative exists anywhere along that stretch.",
+        "The loss is linear, so it has no minimum at all and gradient-based methods cannot be applied to it."
+      ],
+      "answer": 1,
+      "explanation": "The chord test says a convex curve keeps every connecting segment above it, so a segment dipping below the curve proves the loss is non-convex. A non-convex loss can have many critical points, so setting the slope to zero might land on a local minimum, a maximum, or a flat spot rather than the global minimum. The curve is still defined and differentiable, and a dipping chord does not make it linear.",
+      "misconception": "A chord dipping below the curve signals non-convexity, which defeats the slope-to-zero shortcut."
+    },
+    {
+      "type": "mcq",
+      "concept": "gradient-descent-update",
+      "difficulty": "hard",
+      "question": "In the update `b0_new = b0_old - learning_rate * slope`, why is the slope subtracted rather than added?",
+      "options": [
+        "Subtracting guarantees the parameter always increases, which is the only direction that lowers any loss.",
+        "Subtracting cancels the learning rate, leaving a clean step whose size never depends on the slope.",
+        "Subtracting the slope moves against it, which is always the downhill direction toward a lower loss.",
+        "Subtracting keeps the parameter positive, which gradient descent requires for the update to be valid."
+      ],
+      "answer": 2,
+      "explanation": "Moving against the slope is what heads downhill: where the slope is negative, subtracting it increases the parameter, and where the slope is positive, subtracting it decreases the parameter, so either way the loss falls. Subtracting does not force the parameter to always rise or stay positive, and it does not cancel the learning rate, which still scales the step.",
+      "misconception": "The minus sign makes the step go against the slope, which is the downhill direction."
+    },
+    {
+      "type": "mcq",
+      "concept": "learning-rate",
+      "difficulty": "medium",
+      "question": "What goes wrong if the learning rate in gradient descent is far too large?",
+      "options": [
+        "The steps become tiny, so the parameter barely moves and training stalls short of the minimum.",
+        "The steps become huge, so the updates overshoot and bounce across the minimum without settling.",
+        "The slope is forced to zero, so the update rule stops changing the parameter at every step.",
+        "The loss function switches from convex to non-convex, creating local minima that were not there before."
+      ],
+      "answer": 1,
+      "explanation": "The learning rate scales each step, so a large one makes the steps huge and the updates leap past the minimum, bouncing from side to side instead of settling. Tiny steps are the symptom of a learning rate that is too small, not too large, and the learning rate does not alter the slope or change the convexity of the loss.",
+      "misconception": "An oversized learning rate causes overshooting, while an undersized one causes stalling."
+    },
+    {
+      "type": "scenario",
+      "concept": "why-not-closed-form",
+      "difficulty": "hard",
+      "scenario": "A teammate suggests always fitting by setting the gradient to zero and solving directly, the closed-form route, instead of running gradient descent.",
+      "question": "Which objection is a genuine reason the closed-form route often fails?",
+      "options": [
+        "It can only ever be applied to data with a single input column, so it breaks the moment a second column appears.",
+        "It produces parameter values that are correct but reported in the wrong units for the target.",
+        "On non-convex or very large problems it can land on the wrong critical point or be computationally prohibitive.",
+        "It requires a learning rate to be tuned by hand, which is exactly the step gradient descent removes."
+      ],
+      "answer": 2,
+      "explanation": "Solving for a zero gradient directly can return a local minimum or a maximum on a non-convex loss, and on large or high-dimensional data the required matrix inversion is prohibitively expensive, alongside trouble with streaming data. It is not limited to a single input column, it does not misreport units, and it is gradient descent, not the closed form, that needs a learning rate.",
+      "misconception": "The closed-form route breaks on non-convexity and scale, which is why iterative gradient descent is preferred."
+    },
+    {
+      "type": "scenario",
+      "concept": "optimization-problems",
+      "difficulty": "medium",
+      "scenario": "During training the parameter sits at a point where the slope is nearly zero, yet the loss there is clearly not the lowest the curve reaches.",
+      "question": "What is most likely happening, and why does the update stall?",
+      "options": [
+        "The parameter has reached the global minimum, and the near-zero slope correctly signals training is complete.",
+        "The learning rate has grown too large, which is why the step is small and the parameter refuses to move.",
+        "The loss has become convex, so there is only one point left and the update has nowhere else to go.",
+        "The parameter is stuck at a saddle point or local minimum, so the near-zero slope makes the step almost nothing."
+      ],
+      "answer": 3,
+      "explanation": "A near-zero slope away from the lowest point signals a saddle point or a local minimum, and since the update multiplies the slope by the learning rate, a near-zero slope yields a near-zero step, so progress stalls. It is not the global minimum because the loss is not lowest there, a large learning rate causes overshooting rather than tiny steps, and becoming convex would not trap the parameter above the true minimum.",
+      "misconception": "A near-zero slope above the true minimum means a saddle point or local-minimum trap, not completion."
+    },
+    {
+      "type": "card",
+      "concept": "optimization-definition",
+      "difficulty": "medium",
+      "question": "Explain the full chain from 'a machine learning model is a function' to 'optimization finds its parameters'.",
+      "answer": "A parametric model is a mathematical function from the input columns to a predicted output, and choosing the algorithm fixes the function's form, leaving only its parameters to decide. To judge a choice of parameters you define a loss function that collapses all the prediction errors into one number measuring how wrong the model is. Training then means finding the parameter values that make that loss as small as possible, and that minimization is optimization. Gradient descent carries it out by starting from a random guess and repeatedly stepping against the slope of the loss until it reaches a minimum.",
+      "explanation": "This is the spine of the whole note: model as function, parameters as the unknowns, loss as the thing to minimize, and optimization as the minimization itself."
+    },
+    {
+      "type": "card",
+      "concept": "derivative-as-slope",
+      "difficulty": "hard",
+      "question": "Explain why 'take the derivative' and 'find the slope' mean the same thing, starting from the idea of an interval.",
+      "answer": "The average rate of change over an interval is the rise over the run between two points on the curve, which is the slope of the secant line joining them. The derivative is the instantaneous rate of change, obtained by shrinking that interval toward zero. As the two points merge, the secant pivots into the tangent line that touches the curve at a single point, and the derivative is the slope of that tangent. So differentiating a function at a point and finding the slope of the curve there are the same operation, which is why setting the derivative to zero finds the flat-slope minima and maxima.",
+      "explanation": "This geometric link is what lets optimization use derivatives: the slope points downhill, and a zero slope marks a turning point."
+    }
+  ]
+}
