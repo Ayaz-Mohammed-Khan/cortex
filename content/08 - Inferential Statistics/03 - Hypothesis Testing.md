@@ -7,6 +7,7 @@ tags:
 aliases:
   - Hypothesis Testing
 difficulty: advanced
+runnable: true
 prerequisites:
   - Confidence Intervals
 created: 2026-07-09

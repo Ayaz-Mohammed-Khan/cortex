@@ -8,6 +8,7 @@ aliases:
   - Python Fundamentals
   - Python Basics
 difficulty: beginner
+runnable: true
 created: 2026-09-23
 ---
 
@@ -127,6 +128,7 @@ Before using it, understand what a **function** is. A function is a named box yo
 `print` is a **built-in function**, meaning it already exists inside Python and needs no setup.
 
 ```python
+# cortex:norun
 print('Hello world')
 ```
 
@@ -142,6 +144,7 @@ Hello world
 Text must be wrapped in quotes. The quotes are how you tell Python that something is text rather than a name it should look up.
 
 ```python
+# cortex:norun
 print('Salman Khan')   # works: quoted, so it is text
 print(Salman Khan)     # error: Python does not know what this is
 ```
@@ -149,6 +152,7 @@ print(Salman Khan)     # error: Python does not know what this is
 You can print other kinds of values too, and they do not need quotes because they are not text.
 
 ```python
+# cortex:norun
 print(7)        # a whole number
 print(7.5)      # a decimal
 print(True)     # a boolean
@@ -159,6 +163,7 @@ print(True)     # a boolean
 `print` is flexible. Separate values with commas and it prints them all, joined by spaces.
 
 ```python
+# cortex:norun
 print('hello', 1, 4.5, True)
 ```
 
@@ -175,6 +180,7 @@ Every built-in function comes with documentation, which you can think of as the 
 `sep` is the **separator**: what Python puts between multiple values. Its default is a single space, which is why the example above had spaces.
 
 ```python
+# cortex:norun
 print('hello', 1, 4.5, sep='/')
 ```
 
@@ -185,6 +191,7 @@ hello/1/4.5
 `end` is what Python adds after finishing the line. Its default is `\n`, the newline character, which is why two `print` statements produce two lines.
 
 ```python
+# cortex:norun
 print('hello')
 print('world')
 ```
@@ -197,6 +204,7 @@ world
 Override `end` to keep them on one line:
 
 ```python
+# cortex:norun
 print('hello', end='-')
 print('world')
 ```
@@ -225,6 +233,7 @@ Each type is introduced below.
 **Integers** (`int`) are whole numbers, positive or negative. Python integers have **arbitrary precision**: they grow as large as your memory allows, with no fixed maximum, so you never overflow an integer.
 
 ```python
+# cortex:norun
 print(8)
 print(2 ** 1000)    # a 302-digit number, computed exactly
 ```
@@ -232,6 +241,7 @@ print(2 ** 1000)    # a 302-digit number, computed exactly
 **Floats** (`float`) are decimals. Unlike integers, they have a finite range, holding values up to about $1.8 \times 10^{308}$. Beyond that a float reports `inf` (infinity).
 
 ```python
+# cortex:norun
 print(8.55)
 print(1e308)        # 1 multiplied by 10 to the power 308
 print(1e309)        # inf: past the float range
@@ -245,6 +255,7 @@ In $1e308$, the `e` notation means $1 \times 10^{308}$.
 **Complex numbers** (`complex`) have a real part and an imaginary part, written with `j`.
 
 ```python
+# cortex:norun
 print(5 + 6j)
 ```
 
@@ -255,6 +266,7 @@ They exist for completeness and mathematical work, but you will rarely use them 
 A **boolean** (`bool`) is either `True` or `False`. These power all decision logic.
 
 ```python
+# cortex:norun
 print(True)
 print(False)
 ```
@@ -267,6 +279,7 @@ print(False)
 **Strings** (`str`) hold text.
 
 ```python
+# cortex:norun
 print('hello world')
 ```
 
@@ -286,6 +299,7 @@ These types hold several values together. Each is covered in depth on its own, s
 A **list** plays the role that arrays play in C, though it is more capable. A **tuple** looks almost identical to a list but behaves differently in ways that matter later. A **set** is the mathematical set you met in school, holding unique items. A **dictionary** stores **key-value pairs**, where you look up a value by its key.
 
 ```python
+# cortex:norun
 {'name': 'Aarav', 'gender': 'male', 'weight': 70}
 ```
 
@@ -303,6 +317,7 @@ Here `name` is a key and `'Aarav'` is its value.
 `type` is a built-in function that reports the data type of whatever you give it. It is one of the most useful tools for understanding what your program is holding.
 
 ```python
+# cortex:norun
 print(type(3))        # <class 'int'>
 print(type(3.5))      # <class 'float'>
 print(type('hello'))  # <class 'str'>
@@ -332,6 +347,7 @@ int name = 5;
 Python needs no type. Write the name, an equals sign, and the value.
 
 ```python
+# cortex:norun
 name = 'Aarav'
 print(name)
 ```
@@ -343,6 +359,7 @@ Aarav
 The `=` here is the assignment operator. It stores the value on the right into the name on the left.
 
 ```python
+# cortex:norun
 a = 5
 b = 6
 print(a + b)
@@ -368,6 +385,7 @@ Python sees `5` and concludes `int`. It sees `5.5` and concludes `float`. It see
 **Dynamic binding** means a variable is not permanently tied to one data type. The same variable can hold different types at different points in the same program.
 
 ```python
+# cortex:norun
 a = 5
 print(a)        # 5
 
@@ -398,6 +416,7 @@ This single picture explains both concepts. Dynamic typing works because Python 
 You can create several variables on one line.
 
 ```python
+# cortex:norun
 a, b, c = 1, 2, 3
 print(a, b, c)
 ```
@@ -409,6 +428,7 @@ print(a, b, c)
 You can also give several variables the same value in one statement.
 
 ```python
+# cortex:norun
 a = b = c = 5
 print(a, b, c)
 ```
@@ -428,6 +448,7 @@ A **comment** is a note you write inside your code for humans to read. The inter
 In Python a comment starts with `#`. Everything after the `#` on that line is ignored.
 
 ```python
+# cortex:norun
 # add two numbers and show the result
 a = 5
 b = 6
@@ -439,6 +460,7 @@ Comments can sit above the code they describe or at the end of a line. Placing t
 Python has no true multi-line comment. For several lines of explanation, put `#` at the start of each line.
 
 ```python
+# cortex:norun
 # this is the first line of explanation
 # this is the second line
 ```
@@ -470,6 +492,7 @@ An **identifier** is any name you create in your program: a variable name, a fun
 **Rule one: do not start with a digit.**
 
 ```python
+# cortex:norun
 1name = 'Aarav'    # error
 name1 = 'Aarav'    # works
 ```
@@ -477,6 +500,7 @@ name1 = 'Aarav'    # works
 **Rule two: use letters, digits, and underscores only.** Uppercase and lowercase are both fine. Among special characters, only the underscore is allowed.
 
 ```python
+# cortex:norun
 first_name = 'Aarav'    # works
 first-name = 'Aarav'    # error
 ```
@@ -503,6 +527,7 @@ Think of software in two categories.
 Building dynamic software starts with being able to read input, which in Python uses the built-in `input` function.
 
 ```python
+# cortex:norun
 input()
 ```
 
@@ -511,6 +536,7 @@ Running this shows an input box, and whatever the user types comes back as the r
 There is a problem though: an empty box tells the user nothing. They cannot know whether to type a name, an email, or a password. As the programmer it is your responsibility to say what is expected, so pass a message to `input`.
 
 ```python
+# cortex:norun
 input('Enter your email: ')
 ```
 
@@ -525,6 +551,7 @@ The goal: take two numbers from the user, add them, and display the result.
 A useful habit when starting out is to think before typing. Programming happens in your head first and on the keyboard second. Write the steps as comments, then fill in the code under each one.
 
 ```python
+# cortex:norun
 # take input from the user and store it in variables
 fnum = input('Enter first number: ')
 snum = input('Enter second number: ')
@@ -549,6 +576,7 @@ That is not the sum. The two values were joined end to end instead of added.
 Use `type()` to inspect what the variables hold.
 
 ```python
+# cortex:norun
 print(type(fnum), type(snum))
 ```
 
@@ -576,6 +604,7 @@ The fix requires converting the text into numbers, which is the next concept.
 **Implicit** conversion happens automatically. The interpreter recognizes what you intended and handles it without being asked.
 
 ```python
+# cortex:norun
 print(5 + 5.6)
 ```
 
@@ -588,6 +617,7 @@ Here one value is an `int` and the other a `float`. Strictly, that is an operati
 Implicit conversion has limits. When the intent is not clear, Python refuses.
 
 ```python
+# cortex:norun
 print(4 + '4')    # error: cannot add an integer and a string
 ```
 
@@ -598,6 +628,7 @@ Adding a number to text has no obvious meaning, so Python raises an error instea
 **Explicit** conversion is when you ask for the change yourself, using a built-in function named after the target type.
 
 ```python
+# cortex:norun
 print(int('4'))        # 4,   now an integer
 print(int(4.5))        # 4,   decimal part dropped
 print(str(5))          # '5', now a string
@@ -609,6 +640,7 @@ There is one function per data type: `int()`, `float()`, `str()`, `bool()`, `lis
 Conversion only works when it makes sense.
 
 ```python
+# cortex:norun
 print(int(4 + 5j))    # error
 ```
 
@@ -618,6 +650,7 @@ A complex number has a real and an imaginary part. Keeping $4$ and discarding $5
 > Type conversion never modifies the original value. It creates a new one. This is a frequent source of confusion, so it is worth seeing directly.
 
 ```python
+# cortex:norun
 fnum = input('Enter first number: ')    # user types 56
 result = int(fnum) + 10
 print(type(fnum))                       # still <class 'str'>
@@ -635,6 +668,7 @@ print(type(fnum))                       # still <class 'str'>
 Convert the input to integers. The cleaner approach is to convert at the moment you read the input, so the variable holds a number from the start.
 
 ```python
+# cortex:norun
 # take input from the user and store it in variables
 fnum = int(input('Enter first number: '))
 snum = int(input('Enter second number: '))
@@ -678,6 +712,7 @@ You can write whole numbers in four number systems. The prefix tells Python whic
 | Hexadecimal | `0x` | `0x12c` | 300 |
 
 ```python
+# cortex:norun
 a = 0b1010
 print(a)        # 10
 ```
@@ -692,6 +727,7 @@ Python prints `10` because `0b1010` is binary notation for the decimal value $10
 Decimals can be written normally or in scientific notation using `e`.
 
 ```python
+# cortex:norun
 b = 10.5
 c = 1.5e2       # 1.5 × 10²  = 150.0
 d = 1.5e-3      # 1.5 × 10⁻³ = 0.0015
@@ -704,6 +740,7 @@ The `e` notation means $1.5 \times 10^{2}$, and a negative exponent gives a tiny
 You can write only the imaginary part, and read the two halves separately.
 
 ```python
+# cortex:norun
 x = 3 + 4j
 print(x.real)    # 3.0
 print(x.imag)    # 4.0
@@ -714,6 +751,7 @@ print(x.imag)    # 4.0
 Python accepts several ways to write text, all valid.
 
 ```python
+# cortex:norun
 a = 'single quotes'
 b = "double quotes"
 c = '''triple quotes'''
@@ -726,6 +764,7 @@ Two special forms are worth knowing now.
 A **raw string** is prefixed with `r`. Normally `\n` means a new line and `\t` means a tab; these are escape sequences. A raw string turns that off, so the characters appear literally.
 
 ```python
+# cortex:norun
 print('hello\nworld')     # prints on two lines
 print(r'hello\nworld')    # prints hello\nworld
 ```
@@ -733,6 +772,7 @@ print(r'hello\nworld')    # prints hello\nworld
 A **Unicode string** is prefixed with `u`. Unicode is the standard that lets text represent far more than letters and digits, including symbols and emoji.
 
 ```python
+# cortex:norun
 d = u'\U0001f600'    # an emoji
 ```
 
@@ -741,6 +781,7 @@ d = u'\U0001f600'    # an emoji
 `True` and `False` are the boolean literals. Internally Python treats `True` as $1$ and `False` as $0$, which means they work inside arithmetic.
 
 ```python
+# cortex:norun
 a = True + 4     # 1 + 4
 b = False + 10   # 0 + 10
 print(a)         # 5
@@ -757,6 +798,7 @@ print(b)         # 10
 Its practical use solves the declaration problem noted earlier. Python has no variable declaration, so you cannot reserve a name for later:
 
 ```python
+# cortex:norun
 k           # error: Python does not know what k is
 a = 5
 ```
@@ -764,6 +806,7 @@ a = 5
 Assigning `None` reserves the name without committing to a value.
 
 ```python
+# cortex:norun
 k = None    # reserved for later; no error
 a = 5
 ```

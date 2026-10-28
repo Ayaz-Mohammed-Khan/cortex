@@ -8,6 +8,7 @@ aliases:
   - Lists
   - Python Lists
 difficulty: beginner
+runnable: true
 prerequisites:
   - Strings
   - Time Complexity
@@ -26,6 +27,7 @@ A **list** is a data type that stores many items under one name. When you have a
 A list is written as comma-separated items inside square brackets.
 
 ```python
+# cortex:norun
 reviews = ['good', 'bad', 'average']
 numbers = [1, 2, 3, 4, 5]
 ```
@@ -45,6 +47,7 @@ Other languages (C, C++, Java) have a similar type called an **array**. Python's
 - An array is **homogeneous**: every item must be the same type. A list is **heterogeneous**: it can mix integers, strings, floats, even other lists.
 
 ```python
+# cortex:norun
 mixed = [20, 'aarav', 35.75, [1, 2, 3]]   # all valid in one list
 ```
 
@@ -66,6 +69,7 @@ Because a list holds addresses (references) rather than the values themselves, i
 ## Creating lists
 
 ```python
+# cortex:norun
 empty = []                          # empty list
 one_d = [1, 2, 3, 4, 5]             # 1D list
 two_d = [1, 2, 3, [4, 5]]           # 2D (nested) list
@@ -88,6 +92,7 @@ This works exactly as it did for strings, which is the payoff of Python's consis
 **Indexing** pulls one item. Positive indexing counts from `0` on the left; negative indexing counts from `-1` on the right.
 
 ```python
+# cortex:norun
 L = [1, 2, 3, 4, 5]
 print(L[0])     # 1
 print(L[-1])    # 5
@@ -96,6 +101,7 @@ print(L[-1])    # 5
 **Slicing** pulls a range, with the stop index excluded, and supports a step.
 
 ```python
+# cortex:norun
 print(L[0:3])    # [1, 2, 3]
 print(L[::2])    # [1, 3, 5]
 print(L[::-1])   # [5, 4, 3, 2, 1]   reversed
@@ -104,6 +110,7 @@ print(L[::-1])   # [5, 4, 3, 2, 1]   reversed
 For a nested list, use one set of brackets per dimension, working from the outside in.
 
 ```python
+# cortex:norun
 L = [[1, 2, 3], [4, 5, 6]]
 print(L[1][0])   # 4   (second inner list, its first item)
 ```
@@ -121,6 +128,7 @@ Lists are **mutable**, meaning they can be changed after creation. This is the k
 | `insert(i, x)` | adds one item at index `i` |
 
 ```python
+# cortex:norun
 L = [1, 2, 3, 4, 5]
 L.append(6)          # [1, 2, 3, 4, 5, 6]
 L.extend([7, 8])     # [1, 2, 3, 4, 5, 6, 7, 8]
@@ -137,6 +145,7 @@ L.insert(1, 100)     # [1, 100, 2, 3, 4, 5, 6, 7, 8]
 Because lists are mutable, you can overwrite items by assigning to an index or a slice.
 
 ```python
+# cortex:norun
 L = [1, 2, 3, 4, 5]
 L[-1] = 500              # [1, 2, 3, 4, 500]
 L[1:4] = [200, 300, 400] # [1, 200, 300, 400, 500]
@@ -158,6 +167,7 @@ There are four ways to remove items, each suited to a different situation.
 | `L.clear()` | every item, leaving an empty list |
 
 ```python
+# cortex:norun
 L = [1, 2, 3, 4, 5]
 del L[-1]        # [1, 2, 3, 4]
 L.remove(3)      # [1, 2, 4]
@@ -178,6 +188,7 @@ Two operators work on lists.
 - `*` **repeats** a list.
 
 ```python
+# cortex:norun
 print([1, 2] + [3, 4])   # [1, 2, 3, 4]
 print([1, 2] * 3)        # [1, 2, 1, 2, 1, 2]
 ```
@@ -185,6 +196,7 @@ print([1, 2] * 3)        # [1, 2, 1, 2, 1, 2]
 Membership with `in` and `not in` tests whether an item is present, and a `for` loop walks through the items.
 
 ```python
+# cortex:norun
 print(5 in [1, 2, 3, 4, 5])   # True
 
 for item in [1, 2, 3]:
@@ -234,6 +246,7 @@ The shape is:
 Compare the long form with the comprehension:
 
 ```python
+# cortex:norun
 # long form
 L = []
 for i in range(1, 11):
@@ -248,6 +261,7 @@ Comprehensions are not just shorter; Python optimizes them, so they are usually 
 More examples build up the pattern:
 
 ```python
+# cortex:norun
 # square every number
 squares = [i ** 2 for i in [1, 2, 3, 4, 5]]      # [1, 4, 9, 16, 25]
 
@@ -265,6 +279,7 @@ p_langs = [lang for lang in langs if lang.startswith('p')]  # ['python', 'php']
 Comprehensions can nest, which lets you build 2D lists (matrices) and beyond in a single expression.
 
 ```python
+# cortex:norun
 matrix = [[i * j for j in range(1, 4)] for i in range(1, 4)]
 ```
 
@@ -280,6 +295,7 @@ There are two styles of loop, and different problems call for each.
 **Item-wise**: the loop variable is each item in turn. This is the natural Python way.
 
 ```python
+# cortex:norun
 for item in L:
     print(item)
 ```
@@ -287,6 +303,7 @@ for item in L:
 **Index-wise**: the loop variable is each index position, and you fetch the item with it. This mirrors how other languages loop and is needed when you must know or change positions.
 
 ```python
+# cortex:norun
 for i in range(len(L)):
     print(L[i])
 ```
@@ -296,6 +313,7 @@ for i in range(len(L)):
 `zip` pairs up items from two or more lists by position: the first items together, the second items together, and so on. It is the clean way to process two lists in parallel.
 
 ```python
+# cortex:norun
 L1 = [1, 2, 3, 4]
 L2 = [5, 6, 7, 8]
 result = [i + j for i, j in zip(L1, L2)]   # [6, 8, 10, 12]

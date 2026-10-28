@@ -9,6 +9,7 @@ aliases:
   - Operators & Control Flow
   - Python Operators and Control Flow
 difficulty: beginner
+runnable: true
 prerequisites:
   - Python Fundamentals
 created: 2026-09-25
@@ -72,6 +73,7 @@ Relational operators, also called comparison operators, compare two values and a
 | `!=` | not equal to |
 
 ```python
+# cortex:norun
 print(4 > 5)    # False
 print(4 == 4)   # True
 ```
@@ -88,6 +90,7 @@ Logical operators combine boolean values and are the backbone of decision logic.
 - `not` flips a value: `not True` is `False`.
 
 ```python
+# cortex:norun
 print(True and False)   # False
 print(True or False)    # True
 print(not True)         # False
@@ -110,6 +113,7 @@ Bitwise operators work on the binary representation of integers, bit by bit. The
 | `>>` | right shift |
 
 ```python
+# cortex:norun
 print(2 & 3)   # 2
 ```
 
@@ -130,6 +134,7 @@ To see why `2 & 3` is `2`, line up the bits and apply `and` to each column, wher
 The single `=` is the **assignment operator**: it stores the value on its right into the variable on its left. You can combine it with an arithmetic operator as a shorthand.
 
 ```python
+# cortex:norun
 a = 5
 a += 2    # same as: a = a + 2
 print(a)  # 7
@@ -145,6 +150,7 @@ print(a)  # 7
 Membership operators check whether a value exists inside a sequence. There are two: `in` and `not in`. Both return a boolean.
 
 ```python
+# cortex:norun
 print('D' in 'Delhi')       # True
 print(1 in [2, 3, 4, 5])    # False
 ```
@@ -163,6 +169,7 @@ Sometimes a program reaches a point where it must choose between paths based on 
 Consider a login page. When a user submits an email and password, there are two possibilities: the credentials are correct, or they are not. Each possibility needs different code, so the program branches.
 
 ```python
+# cortex:norun
 email = input('Enter email: ')
 password = input('Enter password: ')
 
@@ -182,6 +189,7 @@ Two things are worth noticing.
 Where C and Java use curly braces `{ }` to group the code inside an `if`, Python uses **indentation**: the lines belonging to a branch are shifted to the right by one level. There are no braces and no semicolons.
 
 ```python
+# cortex:norun
 if condition:
     # this indented line runs when the condition is true
     print('inside the if')
@@ -195,6 +203,7 @@ Indentation is not optional styling in Python; it is the syntax. This is a delib
 `if` and `else` handle two possibilities. For three or more, add one or more `elif` (short for "else if") branches between them.
 
 ```python
+# cortex:norun
 if email == 'aarav@gmail.com' and password == '1234':
     print('Welcome')
 elif email == 'aarav@gmail.com' and password != '1234':
@@ -217,6 +226,7 @@ As a program grows, you will want to reuse code that someone has already written
 You bring a module in with the `import` keyword. Once imported, you reach its contents through the module name and a dot.
 
 ```python
+# cortex:norun
 import math
 
 print(math.sqrt(25))      # 5.0
@@ -228,6 +238,7 @@ Here `math` is a module, `sqrt` is a function inside it, and `pi` is a value ins
 You do not have to import the whole module. When you need one or two names, import them directly, and then you can use them without the module prefix.
 
 ```python
+# cortex:norun
 from math import sqrt, pi
 
 print(sqrt(25))           # 5.0, no math. prefix needed
@@ -252,6 +263,7 @@ A **loop** repeats a block of code. Without loops you would have to copy the sam
 A `while` loop repeats its body as long as a condition stays true. You typically set up a counter, check it in the condition, and update it inside the loop.
 
 ```python
+# cortex:norun
 number = int(input('Enter a number: '))
 i = 1
 while i < 11:
@@ -272,6 +284,7 @@ This prints the multiplication table of a number. Read it as a cycle:
 Python also lets you attach an `else` to a loop. The `else` block runs once, after the loop finishes normally.
 
 ```python
+# cortex:norun
 x = 1
 while x < 3:
     print(x)
@@ -285,6 +298,7 @@ else:
 A `for` loop repeats once for each item in a sequence. It is simpler and more powerful than the C-style loop, because you do not manage a counter by hand. The most common way to drive a `for` loop is the built-in `range` function, which generates a sequence of numbers.
 
 ```python
+# cortex:norun
 for i in range(1, 11):
     print(i)          # prints 1 to 10
 ```
@@ -298,6 +312,7 @@ for i in range(1, 11):
 A `for` loop can also walk directly through the items of a string, list, tuple, set, or dictionary, without any `range` at all.
 
 ```python
+# cortex:norun
 for char in 'DELHI':
     print(char)       # prints D, E, L, H, I
 ```
@@ -316,6 +331,7 @@ Three statements let you control a loop from the inside. They are called loop co
 **`break`** stops the loop immediately and moves on to the code after it.
 
 ```python
+# cortex:norun
 for i in range(1, 10):
     if i == 5:
         break
@@ -327,6 +343,7 @@ for i in range(1, 10):
 **`continue`** skips the rest of the current iteration and jumps straight to the next one.
 
 ```python
+# cortex:norun
 for i in range(1, 10):
     if i == 5:
         continue
@@ -336,6 +353,7 @@ for i in range(1, 10):
 **`pass`** does nothing. It is a placeholder for a spot where Python's syntax requires a statement but you have no code to put there yet.
 
 ```python
+# cortex:norun
 for i in range(1, 10):
     if i == 5:
         pass          # a reminder to add logic here later
@@ -349,6 +367,7 @@ for i in range(1, 10):
 A **nested loop** is a loop inside another loop. The inner loop runs completely for every single pass of the outer loop. Use one whenever you need to pair every item from one set with every item from another.
 
 ```python
+# cortex:norun
 for i in range(1, 5):
     for j in range(1, 5):
         print(i, j)

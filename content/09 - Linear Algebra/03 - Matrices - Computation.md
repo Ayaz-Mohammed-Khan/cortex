@@ -10,6 +10,7 @@ aliases:
   - Matrices - Computation
   - Matrix operations
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Vectors
 created: 2026-10-24

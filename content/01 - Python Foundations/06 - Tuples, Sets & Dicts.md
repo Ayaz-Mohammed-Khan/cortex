@@ -10,6 +10,7 @@ aliases:
   - Tuples, Sets & Dicts
   - Tuples Sets and Dictionaries
 difficulty: beginner
+runnable: true
 prerequisites:
   - Lists
 created: 2026-09-25
@@ -27,6 +28,7 @@ The list is one way to hold a collection, but not the only one. Sometimes you wa
 A **tuple** is an ordered collection of items, written with round brackets instead of square ones. In almost every way it behaves like a list, with one crucial difference.
 
 ```python
+# cortex:norun
 t = (1, 2, 3, 4)
 ```
 
@@ -44,6 +46,7 @@ Its three defining properties:
 Creation mirrors lists, with one trap.
 
 ```python
+# cortex:norun
 empty = ()
 one_item = (2,)              # note the comma
 homogeneous = (1, 2, 3, 4)
@@ -64,6 +67,7 @@ Two tuple conveniences are worth knowing.
 **Unpacking** assigns the items of a tuple to several variables at once, and `*` collects the rest into a list.
 
 ```python
+# cortex:norun
 a, b = (1, 2)              # a = 1, b = 2
 a, b, *others = (1, 2, 3, 4)   # a=1, b=2, others=[3, 4]
 ```
@@ -80,6 +84,7 @@ a, b, *others = (1, 2, 3, 4)   # a=1, b=2, others=[3, 4]
 A **set** is an unordered collection of unique items, written with curly braces. It is the mathematical set from school, turned into a data type.
 
 ```python
+# cortex:norun
 s = {1, 2, 3, 4}
 ```
 
@@ -96,6 +101,7 @@ Four properties define a set, and remembering them prevents every common mistake
 ### Creating sets
 
 ```python
+# cortex:norun
 s1 = {1, 2, 3}          # a set
 empty = set()           # the ONLY way to make an empty set
 from_list = set([1, 2, 3, 2])   # {1, 2, 3}, duplicate dropped
@@ -107,6 +113,7 @@ from_list = set([1, 2, 3, 2])   # {1, 2, 3}, duplicate dropped
 Because sets drop duplicates and ignore order, this behavior surprises beginners:
 
 ```python
+# cortex:norun
 print({1, 'hello', 4.5, True})   # True vanishes: Python treats True as 1
 ```
 
@@ -154,6 +161,7 @@ Three relationship tests return booleans:
 A **frozen set** is an immutable set: the same relationship a tuple has to a list.
 
 ```python
+# cortex:norun
 fs = frozenset([1, 2, 3])
 ```
 
@@ -169,6 +177,7 @@ Because it cannot change, the read operations (union, intersection, subset check
 A **dictionary** stores data as **key-value pairs**. Instead of looking items up by position, you look them up by a key, like a real dictionary where you find a definition by its word. Other languages call this a map or an associative array.
 
 ```python
+# cortex:norun
 person = {'name': 'Aarav', 'age': 26, 'gender': 'male'}
 ```
 
@@ -182,6 +191,7 @@ Here `name` is a key and `'Aarav'` is its value. Four properties to remember:
 ### Creating dictionaries
 
 ```python
+# cortex:norun
 empty = {}
 one_d = {'name': 'Aarav', 'gender': 'male'}
 mixed_keys = {(1, 2): 3, 'name': 'Aarav'}   # tuple and string keys
@@ -191,6 +201,7 @@ from_pairs = dict([(1, 1), (2, 2)])          # {1: 1, 2: 2}
 A **nested (2D) dictionary** holds a dictionary as a value, which models tree-like data.
 
 ```python
+# cortex:norun
 student = {
     'name': 'Aarav',
     'college': 'BIT',
@@ -207,6 +218,7 @@ student = {
 Look up a value by its key, either with square brackets or the `get` method.
 
 ```python
+# cortex:norun
 print(person['name'])       # Aarav
 print(person.get('name'))   # Aarav
 ```
@@ -214,6 +226,7 @@ print(person.get('name'))   # Aarav
 For a nested dictionary, chain the keys, one bracket per level.
 
 ```python
+# cortex:norun
 print(student['subjects']['maths'])   # 80
 ```
 
@@ -222,6 +235,7 @@ print(student['subjects']['maths'])   # 80
 Because dictionaries are mutable, all three work. Adding and editing use the same syntax; if the key exists it is edited, if not it is added.
 
 ```python
+# cortex:norun
 person['weight'] = 70        # add a new pair
 person['age'] = 27           # edit an existing pair
 ```
@@ -243,6 +257,7 @@ Two operations work on dictionaries, and both act on **keys**, not values.
 - **Looping**: `for k in person` iterates over the keys. To get values too, use `person[k]` inside the loop, or loop over `person.items()`.
 
 ```python
+# cortex:norun
 for key, value in person.items():
     print(key, value)
 ```
@@ -267,12 +282,14 @@ The list comprehension from the previous note extends to sets and dictionaries. 
 A **dictionary comprehension** uses `key: value` before the `for`:
 
 ```python
+# cortex:norun
 squares = {i: i ** 2 for i in range(1, 6)}   # {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}
 ```
 
 It can transform an existing dictionary, filter with a condition, or combine two lists with `zip`:
 
 ```python
+# cortex:norun
 # transform values
 km = {'a': 100, 'b': 200}
 miles = {city: dist * 0.62 for city, dist in km.items()}

@@ -10,6 +10,7 @@ aliases:
   - Normal Distribution
   - Gaussian Distribution
 difficulty: beginner
+runnable: true
 prerequisites:
   - Probability Distributions
 created: 2026-07-09

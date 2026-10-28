@@ -12,6 +12,7 @@ aliases:
   - Polynomial Regression
 created: 2026-10-23
 difficulty: advanced
+runnable: true
 ---
 
 > [!info] Where this fits

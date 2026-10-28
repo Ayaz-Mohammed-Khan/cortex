@@ -9,6 +9,7 @@ tags:
 aliases:
   - P-values and T-tests
 difficulty: advanced
+runnable: true
 prerequisites:
   - Hypothesis Testing
 created: 2026-07-09

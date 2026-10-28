@@ -11,6 +11,7 @@ aliases:
   - Bivariate Analysis
   - Covariance and Correlation
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Foundations and Central Tendency
 created: 2026-06-30

@@ -4,6 +4,7 @@ tags:
   - exception-handling
   - errors
 difficulty: intermediate
+runnable: true
 prerequisites:
   - File Handling
 created: 2026-09-29
@@ -30,6 +31,7 @@ The two moments an error can occur give the two families of error:
 A **syntax error** means something is written against the language's rules, a missing bracket, a missing colon, a misspelled keyword, wrong indentation. Python reports it before running any line, because it cannot parse the file:
 
 ```python
+# cortex:norun
 print 'hello world'     # SyntaxError: missing parentheses
 ```
 
@@ -38,6 +40,7 @@ Python cannot parse the code, so it refuses to run and points at the problem. (B
 An **exception** is different: the code is written correctly, but something goes wrong *while it runs*.
 
 ```python
+# cortex:norun
 a = int(input())
 b = int(input())
 print(a / b)        # fine, unless the user enters b = 0, then it fails at runtime
@@ -83,6 +86,7 @@ When an exception is not handled, Python prints a **stack trace**: a technical m
 The core tool is the **`try`/`except` block**: put the risky code in `try`, and what to do when it fails in `except`.
 
 ```python
+# cortex:norun
 try:
     with open('sample.txt', 'r') as f:
         print(f.read())
@@ -102,6 +106,7 @@ If the `try` code raises an exception, control jumps to `except` instead of cras
 A single bare `except` treats every failure the same, the "government website" approach where every mistake gets one vague "something went wrong, try again." Better to tell the user *exactly* what failed, with one `except` block per error type:
 
 ```python
+# cortex:norun
 try:
     with open('sample1.txt', 'r') as f:
         print(f.read())
@@ -143,6 +148,7 @@ Two more blocks complete the structure. Think of the flow as a diamond: from `tr
 **`else`** runs only when the `try` block succeeds, with no exception. Put the follow-up work that depends on success here, code you are sure will not fail:
 
 ```python
+# cortex:norun
 try:
     f = open('sample.txt', 'r')
 except FileNotFoundError:
@@ -157,6 +163,7 @@ If `try` fails, an `except` runs and `else` is skipped; if `try` succeeds, `exce
 **`finally`** runs **no matter what**, whether an exception occurred or not. It is where you clean up:
 
 ```python
+# cortex:norun
 try:
     f = open('sample.txt', 'r')
     print(f.read())
@@ -176,6 +183,7 @@ finally:
 So far exceptions have come *from* Python. You can also throw one yourself with **`raise`**, at any point in your code:
 
 ```python
+# cortex:norun
 raise NameError('something went wrong')
 raise ValueError('amount is invalid')
 ```

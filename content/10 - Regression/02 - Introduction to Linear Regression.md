@@ -8,6 +8,7 @@ aliases:
   - Introduction to Linear Regression
   - Linear Regression
 difficulty: intermediate
+runnable: true
 created: 2026-10-23
 ---
 

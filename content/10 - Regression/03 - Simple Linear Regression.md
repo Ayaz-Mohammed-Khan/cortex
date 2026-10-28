@@ -9,6 +9,7 @@ aliases:
   - Simple Linear Regression
   - SLR
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Introduction to Linear Regression
 created: 2026-10-23

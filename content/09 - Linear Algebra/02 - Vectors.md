@@ -9,6 +9,7 @@ aliases:
   - Vectors
   - Feature vectors
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Tensors
 created: 2026-10-24

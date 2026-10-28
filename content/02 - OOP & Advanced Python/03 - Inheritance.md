@@ -5,6 +5,7 @@ tags:
   - inheritance
   - aggregation
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Encapsulation
 created: 2026-09-29
@@ -27,6 +28,7 @@ Large applications rarely have one class. A food-delivery site might have separa
 The owner stores an object of the owned class as one of its attributes.
 
 ```python
+# cortex:norun
 class Address:
     def __init__(self, city, pincode, state):
         self.__city = city
@@ -46,6 +48,7 @@ class Customer:
 To build a `Customer`, first build an `Address` and pass it in:
 
 ```python
+# cortex:norun
 addr = Address('Gurgaon', 122011, 'Haryana')
 cust = Customer('Aarav', 'male', addr)
 ```
@@ -157,6 +160,7 @@ print(s.brand)                       # Apple
 **Case 2: the child has its own constructor.** The parent's constructor does not run automatically, so the parent's attributes are never created.
 
 ```python
+# cortex:norun
 class SmartPhone(Phone):
     def __init__(self):
         print('inside SmartPhone constructor')

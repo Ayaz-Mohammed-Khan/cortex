@@ -7,6 +7,7 @@ tags:
 aliases:
   - Confidence Intervals
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Central Limit Theorem
 created: 2026-07-09

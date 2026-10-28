@@ -10,6 +10,7 @@ aliases:
   - CLT
   - Sampling Distribution
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Bernoulli and Binomial Distributions
 created: 2026-07-09

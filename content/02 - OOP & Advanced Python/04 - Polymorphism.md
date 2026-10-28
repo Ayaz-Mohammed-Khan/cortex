@@ -5,6 +5,7 @@ tags:
   - polymorphism
   - operator-overloading
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Inheritance
 created: 2026-09-29
@@ -88,6 +89,7 @@ One operator, three forms, chosen by the operands. You define what an operator m
 This is exactly how the `Fraction` type in [[Classes & Objects]] taught `+` to add two fractions.
 
 ```python
+# cortex:norun
 class Fraction:
     def __init__(self, n, d):
         self.num = n

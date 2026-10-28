@@ -8,6 +8,7 @@ aliases:
   - Functions
   - Python Functions
 difficulty: beginner
+runnable: true
 prerequisites:
   - Tuples, Sets & Dicts
 created: 2026-09-25
@@ -29,6 +30,7 @@ You define a function with the `def` keyword.
 ![The anatomy of a function definition and how calling it runs the body](./ASSETS/function_anatomy.png)
 
 ```python
+# cortex:norun
 def is_even(num):
     """Returns whether the given number is odd or even.
     Input: any valid integer.
@@ -52,6 +54,7 @@ The parts are:
 Defining a function does not run it. To run it, you **call** it by name with input in parentheses.
 
 ```python
+# cortex:norun
 for i in range(1, 11):
     x = is_even(i)
     print(x)
@@ -119,6 +122,7 @@ power()    # 1: both default
 **Keyword arguments** are matched by name, not position, so the order does not matter.
 
 ```python
+# cortex:norun
 power(b=3, a=2)   # 8: matched by name, not order
 ```
 
@@ -231,6 +235,7 @@ This stack of frames is why a function's local variables are private and tempora
 - A **local variable** lives inside a function's scope and vanishes when the function finishes.
 
 ```python
+# cortex:norun
 x = 5              # global
 
 def f():
@@ -267,6 +272,7 @@ In Python, a function is a value like any other. This idea is called **first-cla
 Start with the simplest consequence. The name of a function is just a variable pointing at the function, so you can assign it to another name and delete it.
 
 ```python
+# cortex:norun
 def greet():
     return 'hello'
 
@@ -358,18 +364,21 @@ Python provides three built-in higher-order functions that you will use constant
 **`map`** applies a function to every item, producing a transformed collection of the same size.
 
 ```python
+# cortex:norun
 list(map(lambda x: x ** 2, [1, 2, 3, 4, 5]))    # [1, 4, 9, 16, 25]
 ```
 
 **`filter`** keeps only the items for which the function returns `True`.
 
 ```python
+# cortex:norun
 list(filter(lambda x: x > 5, [3, 4, 5, 6, 7]))  # [6, 7]
 ```
 
 **`reduce`** combines all items into a single value, taking two at a time. It lives in the `functools` module.
 
 ```python
+# cortex:norun
 from functools import reduce
 reduce(lambda x, y: x + y, [1, 2, 3, 4, 5])     # 15
 ```

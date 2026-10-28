@@ -6,6 +6,7 @@ tags:
   - scope
   - closures
 difficulty: advanced
+runnable: true
 prerequisites:
   - Iterators & Generators
 created: 2026-09-29
@@ -34,6 +35,7 @@ Python has **four kinds of namespace**:
 The **built-in** namespace is where names like `print`, `len`, `type`, `min`, `max`, `sorted`, and `input` live. You can see them all:
 
 ```python
+# cortex:norun
 import builtins
 print(dir(builtins))     # every built-in name available to any program
 ```
@@ -56,6 +58,7 @@ B  ->  Built-in    (names Python always provides)
 A classic consequence: define your own `max` at the global level and the built-in `max` becomes unreachable from global code.
 
 ```python
+# cortex:norun
 max = 5                 # a global name 'max'
 print(max([1, 2, 3]))   # TypeError: 'int' object is not callable
 ```
@@ -84,6 +87,7 @@ Function parameters are local too, they live only in that call's namespace.
 When a function is defined **inside** another function, the outer one's namespace is the inner one's **enclosing** scope. The LEGB search checks it after local and before global.
 
 ```python
+# cortex:norun
 def outer():
     a = 3                 # enclosing variable
     def inner():
@@ -94,6 +98,7 @@ def outer():
 If `inner` had its own `a`, that local would win; if neither had it, Python would continue to global, then built-in, and finally raise `NameError`. To **reassign** an enclosing variable from the inner function, use `nonlocal` (the enclosing-scope counterpart of `global`):
 
 ```python
+# cortex:norun
 def outer():
     a = 1
     def inner():
@@ -170,6 +175,7 @@ a()
 Writing `a = my_decorator(hello)` then calling `a()` is indirect. Python gives you a shorthand: place `@decorator_name` directly above the function definition.
 
 ```python
+# cortex:norun
 @my_decorator
 def hello():
     print("hello")
@@ -217,6 +223,7 @@ Without `*args`, the inner `func(...)` call would break the moment you decorated
 Sometimes the decorator itself needs information beyond the function. For example, a decorator that checks the **data type** of a function's argument needs to be told which type is allowed. This requires **three** nested functions: the outer takes the configuration, the middle takes the function, and the inner is the wrapper.
 
 ```python
+# cortex:norun
 def sanity_check(data_type):           # 1. takes the configuration (the type)
     def outer_wrapper(func):           # 2. takes the function being decorated
         def inner_wrapper(*args):      # 3. the actual wrapper

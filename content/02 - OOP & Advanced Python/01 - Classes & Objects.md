@@ -5,6 +5,7 @@ tags:
   - classes
   - objects
 difficulty: beginner
+runnable: true
 prerequisites:
   - Functions
 created: 2026-09-29
@@ -48,6 +49,7 @@ OOP rests on five ideas. This note covers the first; the rest follow in later no
 In Python, **everything is an object**. Run `type` on any value and Python names its class:
 
 ```python
+# cortex:norun
 L = [1, 2, 3]
 print(type(L))     # <class 'list'>
 ```
@@ -83,6 +85,7 @@ Classes come in two families:
 Define a class with the `class` keyword and a name in **PascalCase** (each word capitalized, no separators: `MyClass`, `Atm`). Take a small ATM machine; its blueprint needs two pieces of data, a PIN and a balance.
 
 ```python
+# cortex:norun
 class Atm:
     def __init__(self):
         self.pin = ''
@@ -97,6 +100,7 @@ Two rules appear here, both explained below. For now, take them as given:
 Defining a class produces no output; a blueprint does nothing until you build from it. Create an **object** with the pattern `object = ClassName()`:
 
 ```python
+# cortex:norun
 obj = Atm()
 print(type(obj))   # <class '__main__.Atm'>
 ```
@@ -152,6 +156,7 @@ The terms look interchangeable but differ precisely:
 - **Method**: a function defined inside a class.
 
 ```python
+# cortex:norun
 L = [1, 2, 3]
 len(L)        # len is a FUNCTION: defined outside the list class
 L.append(4)   # append is a METHOD: defined inside the list class

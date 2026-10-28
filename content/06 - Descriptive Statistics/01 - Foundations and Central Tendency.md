@@ -9,6 +9,7 @@ aliases:
   - Foundations and Central Tendency
   - Central Tendency and Spread
 difficulty: beginner
+runnable: true
 created: 2026-06-30
 ---
 

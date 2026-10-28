@@ -8,6 +8,7 @@ aliases:
   - Strings
   - Python Strings
 difficulty: beginner
+runnable: true
 prerequisites:
   - Python Fundamentals
 created: 2026-09-25
@@ -39,6 +40,7 @@ More precisely, a Python string is a **sequence of Unicode characters**. That la
 Python gives you a few ways to write a string, and each exists for a reason.
 
 ```python
+# cortex:norun
 a = 'single quotes'
 b = "double quotes"
 c = '''triple quotes'''
@@ -48,6 +50,7 @@ d = str(5)            # build a string from another value
 Single and double quotes both work so you can put one kind of quote **inside** a string wrapped in the other kind.
 
 ```python
+# cortex:norun
 print("it's raining")   # single quote inside double quotes, works
 print('it's raining')   # error: Python thinks the string ends at it'
 ```
@@ -55,6 +58,7 @@ print('it's raining')   # error: Python thinks the string ends at it'
 Triple quotes are for **multi-line strings**, text that spans several lines, such as a paragraph a user types into a form.
 
 ```python
+# cortex:norun
 para = '''This is line one.
 This is line two.'''
 ```
@@ -73,6 +77,7 @@ There are two ways to number the characters:
 - **Negative indexing** runs right to left and starts at `-1`. The last character is `-1`, the second-to-last is `-2`, and so on.
 
 ```python
+# cortex:norun
 s = 'hello world'
 print(s[0])     # h   (first character)
 print(s[-1])    # d   (last character)
@@ -93,6 +98,7 @@ Asking for an index that does not exist, like `s[41]` on an 11-character string,
 ![Slicing with s[0:5] takes characters 0 to 4, because the stop index is excluded](./ASSETS/string_slicing.png)
 
 ```python
+# cortex:norun
 s = 'hello world'
 print(s[0:5])    # hello
 ```
@@ -102,6 +108,7 @@ The rule that trips up beginners: the **start index is included, but the stop in
 You can leave out either number, and add a third for the step size, exactly like `range`.
 
 ```python
+# cortex:norun
 print(s[:5])       # hello   (start defaults to 0)
 print(s[6:])       # world   (stop defaults to the end)
 print(s[:])        # hello world   (the whole string)
@@ -111,6 +118,7 @@ print(s[0:6:2])    # hlo     (step size 2, take every other character)
 A negative step walks backward. The most famous use is reversing a string in one line:
 
 ```python
+# cortex:norun
 print(s[::-1])     # dlrow olleh
 ```
 
@@ -124,6 +132,7 @@ print(s[::-1])     # dlrow olleh
 Try to change a single character in place, and Python refuses.
 
 ```python
+# cortex:norun
 s = 'hello world'
 s[0] = 'H'    # error: 'str' object does not support item assignment
 ```
@@ -136,6 +145,7 @@ Python strings are **immutable**, which means once a string is created it cannot
 You can delete a whole string with the `del` keyword, but you cannot delete part of one, because deleting part would be a change.
 
 ```python
+# cortex:norun
 s = 'hello world'
 del s            # deletes the whole variable, works
 del s[0:5]       # error: cannot partially delete an immutable string
@@ -150,12 +160,14 @@ Several operators work on strings.
 **Concatenation with `+`** joins two strings into one.
 
 ```python
+# cortex:norun
 print('Delhi' + ' ' + 'Mumbai')   # Delhi Mumbai
 ```
 
 **Repetition with `*`** repeats a string a given number of times. This is handy for building separators.
 
 ```python
+# cortex:norun
 print('Delhi' * 3)   # DelhiDelhiDelhi
 print('*' * 20)      # ********************
 ```
@@ -163,6 +175,7 @@ print('*' * 20)      # ********************
 **Comparison operators** compare strings lexicographically, meaning dictionary order based on character values. A word that comes later in the dictionary is "greater".
 
 ```python
+# cortex:norun
 print('Mumbai' > 'Pune')   # False, Mumbai comes first alphabetically
 ```
 
@@ -172,6 +185,7 @@ print('Mumbai' > 'Pune')   # False, Mumbai comes first alphabetically
 **Membership** with `in` and `not in` checks whether one string appears inside another, and it is case sensitive.
 
 ```python
+# cortex:norun
 print('b' in 'Delhi')    # False
 print('D' in 'Delhi')    # True
 ```
@@ -179,6 +193,7 @@ print('D' in 'Delhi')    # True
 **Looping** works because a string is iterable: a `for` loop walks through it one character at a time.
 
 ```python
+# cortex:norun
 for ch in 'DELHI':
     print(ch)    # D, E, L, H, I on separate lines
 ```
@@ -229,6 +244,7 @@ print(s.endswith('av'))    # True
 `split` breaks a string into a **list** of pieces, and `join` does the reverse. These are among the most used string methods in real work.
 
 ```python
+# cortex:norun
 sentence = 'hi my name is aarav'
 words = sentence.split()          # ['hi', 'my', 'name', 'is', 'aarav']
 back = ' '.join(words)            # 'hi my name is aarav'
@@ -237,6 +253,7 @@ back = ' '.join(words)            # 'hi my name is aarav'
 `split` breaks on spaces by default, but you can split on any character.
 
 ```python
+# cortex:norun
 print('a-b-c'.split('-'))    # ['a', 'b', 'c']
 ```
 
@@ -245,6 +262,7 @@ print('a-b-c'.split('-'))    # ['a', 'b', 'c']
 `replace` swaps every occurrence of one substring with another, returning a new string.
 
 ```python
+# cortex:norun
 print('data cleaning in progress'.replace('progress', 'done'))
 # data cleaning in done
 ```
@@ -279,6 +297,7 @@ print(f'Hi, my name is {name} and I am a {gender}.')
 An older method, `.format()`, does the same by filling numbered placeholders in order.
 
 ```python
+# cortex:norun
 print('Hi, my name is {} and I am a {}.'.format(name, gender))
 ```
 

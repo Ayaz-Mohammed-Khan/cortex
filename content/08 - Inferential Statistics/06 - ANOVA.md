@@ -10,6 +10,7 @@ aliases:
   - Analysis of Variance
   - One-Way ANOVA
 difficulty: advanced
+runnable: true
 prerequisites:
   - Hypothesis Testing
   - P-values and T-tests

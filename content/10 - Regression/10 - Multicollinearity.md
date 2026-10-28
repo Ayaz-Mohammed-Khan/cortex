@@ -10,6 +10,7 @@ aliases:
   - VIF
   - Variance Inflation Factor
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Regression Analysis
 created: 2026-10-24

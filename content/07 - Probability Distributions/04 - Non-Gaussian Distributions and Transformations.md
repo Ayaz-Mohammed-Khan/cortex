@@ -10,6 +10,7 @@ aliases:
   - Non-Gaussian Distributions
   - Mathematical Transformations
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Skewness, Kurtosis and Normality Checks
 created: 2026-07-09

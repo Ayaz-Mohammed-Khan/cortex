@@ -10,6 +10,7 @@ aliases:
   - F-test for overall significance
   - Statsmodels summary
 difficulty: advanced
+runnable: true
 prerequisites:
   - Multiple Linear Regression
   - Inferential Statistics
@@ -82,6 +83,7 @@ where $y$ is the output, $f(x)$ is the true relationship between inputs and outp
 The `statsmodels` library fits linear regression and prints a detailed report, far richer than the bare coefficients a plain fit returns. Regression analysis is, in practice, the skill of reading that report. It breaks into three blocks.
 
 ```python
+# cortex:norun
 import statsmodels.api as sm
 
 X = sm.add_constant(X)        # add the intercept column

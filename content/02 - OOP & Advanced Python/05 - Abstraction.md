@@ -5,6 +5,7 @@ tags:
   - abstraction
   - abstract-class
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Inheritance
 created: 2026-09-29
@@ -74,6 +75,7 @@ Python provides abstract classes through the `abc` module (abstract base classes
 - A method becomes abstract with the `@abstractmethod` decorator.
 
 ```python
+# cortex:norun
 from abc import ABC, abstractmethod
 
 class BankApp(ABC):
@@ -88,6 +90,7 @@ class BankApp(ABC):
 `BankApp` is abstract because of `security`. A child that ignores the requirement cannot be built:
 
 ```python
+# cortex:norun
 class MobileApp(BankApp):
     def mobile_login(self):
         print('login into mobile')
@@ -98,6 +101,7 @@ obj = MobileApp()   # error: can't instantiate abstract class
 Creating `MobileApp` fails, because it inherits an unimplemented `security` and stays abstract. Implement it, and the child becomes concrete and usable, still inheriting the concrete `database` method:
 
 ```python
+# cortex:norun
 class MobileApp(BankApp):
     def security(self):
         print('mobile security')       # required method implemented

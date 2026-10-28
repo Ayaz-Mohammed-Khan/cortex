@@ -12,6 +12,7 @@ aliases:
   - Percentiles and Box Plots
   - Univariate Analysis
 difficulty: beginner
+runnable: true
 prerequisites:
   - Foundations and Central Tendency
 created: 2026-06-30

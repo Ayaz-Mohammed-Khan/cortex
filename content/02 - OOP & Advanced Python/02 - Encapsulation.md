@@ -5,6 +5,7 @@ tags:
   - encapsulation
   - static
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Classes & Objects
 created: 2026-09-29
@@ -22,6 +23,7 @@ created: 2026-09-29
 An object reaches its class's members with a dot. Reading an attribute that exists returns its value; reading one that does not raises an error.
 
 ```python
+# cortex:norun
 class Person:
     def __init__(self, name, country):
         self.name = name
@@ -35,6 +37,7 @@ print(p.gender)    # error: 'Person' object has no attribute 'gender'
 There is a twist worth remembering: you can create a **new attribute from outside the class** just by assigning to it.
 
 ```python
+# cortex:norun
 p.gender = 'male'
 print(p.gender)    # male
 ```
@@ -56,6 +59,7 @@ Because `p` holds an address, `q = p` copies the address, not the object, so bot
 ![Two panels: on the left, names p and q both point to one Person object; on the right, editing name through q to Ankit changes the single shared object, so p sees it too](./ASSETS/reference_variables.png)
 
 ```python
+# cortex:norun
 p = Person('Aarav', 'India')
 q = p                 # q holds the same address as p
 print(id(p) == id(q)) # True: one object, two names
@@ -77,6 +81,7 @@ Handing an object to a function follows the same rule. First, two facts:
 - A function **can return an object** as output.
 
 ```python
+# cortex:norun
 def greet(person):
     print('Hi, my name is', person.name)
     p1 = Person('Ankit', 'India')
@@ -93,6 +98,7 @@ The key point: passing an object sends its **reference** (address), not a copy. 
 - Therefore any edit the function makes is visible outside.
 
 ```python
+# cortex:norun
 def rename(person):
     person.name = 'Ankit'
 
@@ -108,6 +114,7 @@ print(p.name)     # Ankit: the function changed the original object
 Pass by reference raises a sharper question: are your own objects **mutable** (changed in place) or **immutable** (any "change" makes a new object)? The test is whether an edit keeps the memory address the same.
 
 ```python
+# cortex:norun
 def rename(person):
     person.name = 'Ankit'
     return person
@@ -146,6 +153,7 @@ Nothing stops this, and later a withdraw method doing `self.balance - amount` cr
 **Move 1: make attributes private** by prefixing the name with two underscores. Python has no `private` keyword; the double underscore is the mechanism.
 
 ```python
+# cortex:norun
 class Atm:
     def __init__(self):
         self.__pin = ''
@@ -165,6 +173,7 @@ class Atm:
 - A **setter** changes it, and can validate the new value first.
 
 ```python
+# cortex:norun
 class Atm:
     def __init__(self):
         self.__pin = ''
@@ -193,6 +202,7 @@ The setter is where protection lives: it rejects anything that is not an integer
 Objects are ordinary values, so you can store them in a list (or tuple or dictionary) and work with them like any collection.
 
 ```python
+# cortex:norun
 p1 = Person('Aarav', 'male')
 p2 = Person('Ankit', 'male')
 p3 = Person('Ankita', 'female')

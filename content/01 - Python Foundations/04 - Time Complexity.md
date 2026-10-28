@@ -9,6 +9,7 @@ aliases:
   - Time Complexity
   - Big O Notation
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Operators & Control Flow
 created: 2026-09-25
@@ -69,6 +70,7 @@ This is easy, and it does let you compare two algorithms. But it has serious fla
 A better idea: count how many basic operations the program performs, treating each arithmetic step, comparison, and assignment as one unit.
 
 ```python
+# cortex:norun
 def sum_to(x):
     total = 0                 # 1 operation
     for i in range(x + 1):    # runs x times
@@ -177,6 +179,7 @@ The way to get fluent is to run the recipe on real code: count the operations as
 **Example 1: a single loop is $O(n)$.** The function sums the numbers from 1 to `n`.
 
 ```python
+# cortex:norun
 def sum_to(n):
     total = 0                 # 1 operation
     for i in range(1, n + 1): # the body runs n times
@@ -189,6 +192,7 @@ The count is $n + 2$. Drop the additive constant to get $n$, so this is $O(n)$. 
 **Example 2: separate loops still add up to $O(n)$.** One loop after another does not multiply; the counts add.
 
 ```python
+# cortex:norun
 def two_passes(n):
     for i in range(n):    # n iterations
         print(i)
@@ -201,6 +205,7 @@ The count is $n + n = 2n$. Drop the multiplicative constant and it is $O(n)$. Ru
 **Example 3: a nested loop is $O(n^2)$.** When one loop sits inside another, the inner body runs for every pass of the outer loop, so the counts multiply.
 
 ```python
+# cortex:norun
 def all_pairs(n):
     for i in range(n):        # runs n times
         for j in range(n):    # runs n times for each i
@@ -212,6 +217,7 @@ The inner line runs $n \times n = n^2$ times, so this is $O(n^2)$. Double `n` an
 **Example 4: keep only the dominant term.** A function can mix a nested loop with a single loop.
 
 ```python
+# cortex:norun
 def mixed(n):
     for i in range(n):        # n iterations
         for j in range(n):    # n iterations each -> n^2 total

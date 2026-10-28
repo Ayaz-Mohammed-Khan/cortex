@@ -5,6 +5,7 @@ tags:
   - generators
   - memory-efficiency
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Exception Handling
 created: 2026-09-29
@@ -26,6 +27,7 @@ These three sound alike and are constantly confused. Pin them down first:
 - **Iterator**: the object that *makes* iteration happen, fetching one item at a time without holding the whole sequence in memory.
 
 ```python
+# cortex:norun
 L = [1, 2, 3]
 for item in L:      # this is ITERATION
     print(item)
@@ -39,6 +41,7 @@ for item in L:      # this is ITERATION
 The defining feature of an iterator is that it holds **only one item in memory at a time**. This is its entire reason for existing. Compare two ways to double every number up to 100,000:
 
 ```python
+# cortex:norun
 import sys
 
 # Way 1: build a list, holds all 100,000 numbers in memory
@@ -67,6 +70,7 @@ Both can be looped over, so what separates them? Two rules capture it:
 You can turn an iterable into an iterator with the **`iter()`** function:
 
 ```python
+# cortex:norun
 L = [1, 2, 3]
 type(L)          # <class 'list'>, an iterable
 type(iter(L))    # <class 'list_iterator'>, an iterator derived from it
@@ -80,6 +84,7 @@ Use the `dir()` function to inspect an object's methods:
 - An object is an **iterator** if it has **both `__iter__` and `__next__`**.
 
 ```python
+# cortex:norun
 L = [1, 2, 3]
 '__iter__' in dir(L)              # True, so L is iterable
 '__next__' in dir(L)              # False, so L is NOT an iterator
@@ -100,6 +105,7 @@ Python's `for` loop has no visible counter or stop condition, yet it walks a lis
 2. **Call `next()` repeatedly** on that iterator to pull items, until `next()` raises `StopIteration`.
 
 ```python
+# cortex:norun
 num = [1, 2, 3]
 it = iter(num)       # step 1: get the iterator
 next(it)             # 1
@@ -169,6 +175,7 @@ This works, but it is heavy, two classes and three protocol methods for a simple
 A **generator** is a simple way of creating an iterator. It looks like an ordinary function, with one change: it uses **`yield`** instead of `return`.
 
 ```python
+# cortex:norun
 def gen_demo():
     yield 'first statement'
     yield 'second statement'
@@ -178,6 +185,7 @@ def gen_demo():
 Calling a generator does not run its body; it returns a **generator object** (which is an iterator). You then pull values with `next()` or a `for` loop:
 
 ```python
+# cortex:norun
 gen = gen_demo()
 next(gen)        # 'first statement'
 next(gen)        # 'second statement'
@@ -230,6 +238,7 @@ for i in gen:
 The whole custom `MyRange` class above collapses to this:
 
 ```python
+# cortex:norun
 def my_range(start, end):
     for i in range(start, end):
         yield i
@@ -249,6 +258,7 @@ Generators give you four concrete wins:
 - **Chaining**: generators can feed one another to build complex pipelines.
 
 ```python
+# cortex:norun
 def all_even():
     n = 0
     while True:          # infinite, but safe: only one number in memory

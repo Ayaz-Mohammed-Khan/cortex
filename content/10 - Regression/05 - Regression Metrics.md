@@ -10,6 +10,7 @@ aliases:
   - R2 Score
   - Adjusted R2
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Multiple Linear Regression
 created: 2026-10-23

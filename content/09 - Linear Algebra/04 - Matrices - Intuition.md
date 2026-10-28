@@ -10,6 +10,7 @@ aliases:
   - Matrices - Intuition
   - Linear transformations
 difficulty: advanced
+runnable: true
 prerequisites:
   - Matrices - Computation
 created: 2026-10-24

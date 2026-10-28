@@ -8,6 +8,7 @@ aliases:
   - Probability Distributions Notes
   - Probability Distributions
 difficulty: intermediate
+runnable: true
 prerequisites:
   - Bivariate and Multivariate Analysis
 created: 2026-07-08

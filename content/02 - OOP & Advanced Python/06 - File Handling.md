@@ -5,6 +5,7 @@ tags:
   - serialization
   - json
 difficulty: beginner
+runnable: true
 prerequisites:
   - Classes & Objects
 created: 2026-09-29
@@ -40,6 +41,7 @@ So there are two kinds of file to handle: **text files** and **binary files**. E
 `open(path, mode)` returns a **file object** (a handle) you use to read or write. The **mode** says what you intend to do. To write, use `'w'`:
 
 ```python
+# cortex:norun
 f = open('sample.txt', 'w')
 f.write('hello world')
 f.close()
@@ -58,6 +60,7 @@ The write modes differ in what they do to existing content:
 | `'a'` | append | **kept**; new text added at the end |
 
 ```python
+# cortex:norun
 # 'w' replaces everything that was there
 with open('sample.txt', 'w') as f:
     f.write('Salman Khan')      # old "hello world" is gone
@@ -70,6 +73,7 @@ with open('sample.txt', 'a') as f:
 To write several lines at once, build a list and use `writelines`:
 
 ```python
+# cortex:norun
 lines = ['hello\n', 'hi\n', 'how are you\n', 'I am fine\n']
 with open('sample.txt', 'w') as f:
     f.writelines(lines)         # one call writes every line
@@ -82,6 +86,7 @@ with open('sample.txt', 'w') as f:
 Calling `f.close()` by hand is easy to forget, and a forgotten handle wastes memory and leaves the file open. The **`with` statement** is a context manager that **closes the file automatically** the moment the block ends.
 
 ```python
+# cortex:norun
 with open('sample.txt', 'w') as f:
     f.write('Salman bhai')
 # file is already closed here, no f.close() needed
@@ -108,6 +113,7 @@ Two methods read text, and they differ in how much they pull at once:
 | `readline()` | the next single line | the file is large; process line by line |
 
 ```python
+# cortex:norun
 with open('sample.txt', 'r') as f:
     print(f.read())        # entire file
 ```
@@ -118,6 +124,7 @@ with open('sample.txt', 'r') as f:
 `readline()` reads one line per call, which is how you stream a large file without loading it whole. Since you rarely know the line count in advance, loop until a read returns an empty string (the end of the file):
 
 ```python
+# cortex:norun
 with open('big.txt', 'r') as f:
     while True:
         line = f.readline()
@@ -133,6 +140,7 @@ with open('big.txt', 'r') as f:
 A file can be larger than your RAM, a 10 GB file will not fit in 8 GB of memory. The fix is to read it a **chunk** at a time: pull a fixed number of characters, process them, discard, and repeat. Only one chunk is ever in memory.
 
 ```python
+# cortex:norun
 with open('big.txt', 'r') as f:
     chunk_size = 100
     while True:
@@ -157,6 +165,7 @@ When a file is open, a cursor tracks your position in it (this is the **buffer**
 - **`f.seek(n)`** moves the cursor to position `n`.
 
 ```python
+# cortex:norun
 with open('sample.txt', 'r') as f:
     print(f.read(10))   # first 10 characters; cursor now at 10
     print(f.tell())     # 10
@@ -185,6 +194,7 @@ Text modes (`'r'`, `'w'`, `'a'`) only understand Unicode characters, so reading 
 Copying an image is reading its bytes and writing them to a new file:
 
 ```python
+# cortex:norun
 with open('screenshot.png', 'rb') as rf:
     with open('screenshot_copy.png', 'wb') as wf:
         wf.write(rf.read())      # bytes in, bytes out
@@ -209,6 +219,7 @@ Python's `json` module has two file functions:
 - **`json.load(f)`** deserializes the file `f` back into a Python object.
 
 ```python
+# cortex:norun
 import json
 
 d = {'name': 'Aarav', 'marks': [23, 14, 34, 45, 56]}
@@ -234,6 +245,7 @@ The payoff: `json.load` returns a genuine `dict`, so nested lists and dictionari
 JSON cannot serialize an instance of your own class directly, `json.dump(person, f)` raises "object of type Person is not JSON serializable", because JSON does not know how your object maps to its format. You tell it, by passing a function to `default` that turns the object into something JSON understands (usually a dict):
 
 ```python
+# cortex:norun
 import json
 
 class Person:
@@ -267,6 +279,7 @@ The `pickle` module mirrors `json`, but works in binary mode:
 - **`pickle.load(f)`** unpickles it back into the object.
 
 ```python
+# cortex:norun
 import pickle
 
 class Person:

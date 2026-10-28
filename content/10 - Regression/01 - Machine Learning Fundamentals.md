@@ -8,6 +8,7 @@ aliases:
   - Machine Learning Fundamentals
   - ML Basics
 difficulty: beginner
+runnable: true
 created: 2026-08-12
 ---
 

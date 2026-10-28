@@ -12,6 +12,7 @@ aliases:
   - Normality Checks
   - QQ Plot
 difficulty: intermediate
+runnable: true
 prerequisites:
   - The Normal Distribution
 created: 2026-07-09

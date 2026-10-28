@@ -9,6 +9,7 @@ aliases:
   - Chi-Square Tests
   - Chi-Square Test
 difficulty: advanced
+runnable: true
 prerequisites:
   - Hypothesis Testing
 created: 2026-07-09

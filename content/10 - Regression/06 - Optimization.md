@@ -10,6 +10,7 @@ aliases:
   - Loss Functions
   - Optimization Theory
 difficulty: advanced
+runnable: true
 prerequisites:
   - Multiple Linear Regression
 created: 2026-10-23

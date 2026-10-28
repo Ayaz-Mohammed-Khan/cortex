@@ -8,6 +8,7 @@ tags:
 aliases:
   - Bernoulli and Binomial Distributions
 difficulty: beginner
+runnable: true
 prerequisites:
   - Probability Distributions
 created: 2026-07-09
