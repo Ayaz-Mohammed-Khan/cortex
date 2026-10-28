@@ -498,9 +498,12 @@ export const spine: Step[] = [
           'Scalar and vector operations',
           'NumPy array functions',
           'Dot product',
-          'log, exp, mean, median, std, prod',
-          'min, max, trigonometry, variance',
-          'ceil, floor, slicing, iteration',
+          // These three compound bullets each list several functions that the
+          // note groups under one section, so point them at the covering
+          // heading rather than expecting a per-function heading.
+          { label: 'log, exp, mean, median, std, prod', at: 'Array functions' },
+          { label: 'min, max, trigonometry, variance', at: 'Array functions' },
+          { label: 'ceil, floor, slicing, iteration', at: 'Rounding functions' },
           'Reshaping',
           'Stacking and splitting',
         ],

@@ -1,0 +1,204 @@
+{
+  "questions": [
+    {
+      "type": "card",
+      "concept": "ndarray-vs-list",
+      "difficulty": "medium",
+      "question": "A NumPy array is homogeneous and fixed-size, while a Python list is heterogeneous and dynamic. State why those two constraints are what make the array fast.",
+      "answer": "Because every element shares one data type, every element occupies the same number of bytes, and the whole array sits in one contiguous block of memory. That lets NumPy run a single tight compiled loop over the block and apply one operation to all elements at once, which is called vectorization. A Python list stores references to objects scattered in memory of mixed types, so Python must dereference and type-check each element in a slow interpreted loop.",
+      "explanation": "Fixed size means NumPy never has to leave gaps for growth, and homogeneity means it can stride through memory a fixed number of bytes at a time. The payoff is speed; the cost is that growing an array builds a new one."
+    },
+    {
+      "type": "mcq",
+      "concept": "array-creation",
+      "difficulty": "medium",
+      "question": "What is the difference between `np.arange(start, stop, step)` and `np.linspace(start, stop, num)`?",
+      "options": [
+        "`np.arange` includes the stop value while `np.linspace` always excludes it, and that endpoint behaviour is the one and only thing that separates the two routines.",
+        "`np.arange` fixes the step and lets the count fall out; `np.linspace` fixes the count and computes the spacing between inclusive endpoints.",
+        "`np.arange` returns a plain Python list while `np.linspace` returns a NumPy array, so only the second of them can be reshaped or sliced.",
+        "`np.arange` works only on integer inputs while `np.linspace` works only on floating-point inputs, so the two never overlap in any real use."
+      ],
+      "answer": 1,
+      "explanation": "With `np.arange` you choose the step and NumPy decides how many values you get, stopping before the stop value. With `np.linspace` you choose how many values you want and NumPy computes the spacing to fit them between the endpoints inclusive. Both return arrays, and both accept a `dtype`.",
+      "misconception": "The two routines differ in what you pin down, the step or the count, not in their return type."
+    },
+    {
+      "type": "mcq",
+      "concept": "array-creation",
+      "difficulty": "easy",
+      "question": "What does `np.identity(3)` produce?",
+      "options": [
+        "A 3 by 3 matrix of all ones, since identity means every entry is identical.",
+        "A 1D array `[1, 1, 1]` representing the identity of a length-3 vector.",
+        "A 3 by 3 matrix with ones on the main diagonal and zeros everywhere else.",
+        "A random 3 by 3 matrix whose determinant happens to equal one."
+      ],
+      "answer": 2,
+      "explanation": "`np.identity(n)` returns the n by n identity matrix: ones along the main diagonal and zeros elsewhere. It is the multiplicative identity for matrix multiplication, not a matrix of all ones, which is what `np.ones((3, 3))` would give.",
+      "misconception": "Identity refers to the identity matrix with a diagonal of ones, not an array where all entries are the same."
+    },
+    {
+      "type": "mcq",
+      "concept": "dtype",
+      "difficulty": "medium",
+      "question": "An array of values that never exceed 100 is stored with the default `int64` dtype. How do you cut its memory use, and by roughly how much?",
+      "options": [
+        "Call `np.compress` on it, which halves the storage by stripping out the padding bytes that NumPy leaves between neighbouring elements.",
+        "Reshape it into a 2D array, because a rectangular matrix layout packs the same integers together far more tightly than a flat 1D layout does.",
+        "Nothing useful can be done here, since NumPy always stores every integer in a fixed 64-bit slot no matter how small the actual values are.",
+        "Cast it with `astype(np.int8)`, which stores each element in one byte instead of eight, about an eighth of the memory."
+      ],
+      "answer": 3,
+      "explanation": "`astype` returns a new array with the requested dtype. Values that fit in a signed 8-bit integer (up to 127) can be stored as `int8`, one byte each rather than eight, so the array uses roughly one eighth of the memory. Reshaping and compressing do not change the per-element byte size.",
+      "misconception": "The dtype controls bytes per element, so narrowing it is the direct lever on an integer array's memory."
+    },
+    {
+      "type": "mcq",
+      "concept": "shape-ndim",
+      "difficulty": "easy",
+      "question": "For `a = np.arange(8).reshape(2, 2, 2)`, what are `a.ndim`, `a.shape`, and `a.size`?",
+      "options": [
+        "`ndim` is 3, `shape` is `(2, 2, 2)`, and `size` is 8.",
+        "`ndim` is 8, `shape` is `(2, 2, 2)`, and `size` is 3.",
+        "`ndim` is `(2, 2, 2)`, `shape` is 3, and `size` is 8.",
+        "`ndim` is 2, `shape` is `(2, 2, 2)`, and `size` is 6."
+      ],
+      "answer": 0,
+      "explanation": "`ndim` counts the axes, which is 3 here. `shape` gives the length of each axis as a tuple, `(2, 2, 2)`. `size` is the total number of elements, the product of the shape, which is 8.",
+      "misconception": "`ndim` is a single integer count of axes, `shape` is the tuple of axis lengths, and `size` is their product."
+    },
+    {
+      "type": "scenario",
+      "concept": "axis",
+      "difficulty": "hard",
+      "scenario": "You have a 2D array where each row is one sample and each column is one feature. You want the mean of every feature across all samples.",
+      "question": "Which call gives you a per-feature mean, and why?",
+      "options": [
+        "`np.mean(a, axis=1)`, because axis 1 is the feature axis, and naming the feature axis directly is what keeps each feature intact in the result.",
+        "`np.mean(a)` with no axis at all, because NumPy inspects the array shape and infers that the columns are the features you want averaged.",
+        "`np.mean(a, axis=0)`, because axis 0 runs down the rows, so reducing it collapses the samples and leaves one value per column.",
+        "`np.mean(a, axis=-1)`, because a negative axis index always targets the columns of a 2D array regardless of how the data is laid out."
+      ],
+      "answer": 2,
+      "explanation": "The `axis` argument names the axis that gets collapsed. Axis 0 runs down the rows (the samples), so reducing along it leaves one mean per column, which is one mean per feature. Reducing along axis 1 would collapse the columns and give one value per sample instead.",
+      "misconception": "The axis you pass is the one that disappears, so axis 0 aggregates down the rows and yields a per-column result."
+    },
+    {
+      "type": "mcq",
+      "concept": "scalar-vs-vector-ops",
+      "difficulty": "easy",
+      "question": "What does the expression `a == 15` return when `a` is a NumPy array?",
+      "options": [
+        "A single `True` or `False` saying whether the array contains the value 15 anywhere.",
+        "A boolean array the same shape as `a`, with `True` where an element equals 15 and `False` elsewhere.",
+        "An error, because an array cannot be compared against a plain number without a loop.",
+        "A new array containing only the elements of `a` that are equal to 15."
+      ],
+      "answer": 1,
+      "explanation": "A relational operator applied to an array and a scalar compares every element against that scalar and returns a boolean array of the same shape. That boolean array is the raw material for boolean indexing covered in Advanced NumPy; it is not a single truth value and does not itself filter the array.",
+      "misconception": "A comparison broadcasts the scalar to every element and returns a full boolean array, not one combined truth value."
+    },
+    {
+      "type": "scenario",
+      "concept": "scalar-vs-vector-ops",
+      "difficulty": "medium",
+      "scenario": "You write `a1 ** a2` on two integer arrays and some results come back negative even though both inputs are positive.",
+      "question": "What has happened?",
+      "options": [
+        "NumPy quietly switched the array over to signed exponents, and that switch flips the sign of every other element in the computed result.",
+        "The two arrays had slightly different shapes, so NumPy padded the missing positions with negative placeholder values before combining them.",
+        "Element-wise exponentiation produced values too large for the 64-bit integer dtype, so they overflowed and wrapped into negatives.",
+        "The `**` operator computes a matrix dot product on arrays, and the dot product of two positive integer matrices can come out negative."
+      ],
+      "answer": 2,
+      "explanation": "`a1 ** a2` raises each element of `a1` to the matching element of `a2`. Large bases with large exponents exceed the range of a 64-bit integer, and NumPy wraps around rather than promoting to arbitrary precision the way a Python `int` would, so you see negative and wrapped values. Watch the dtype when exponents grow.",
+      "misconception": "Fixed-width integer dtypes overflow silently; `**` is still element-wise, not a dot product."
+    },
+    {
+      "type": "mcq",
+      "concept": "dot-product",
+      "difficulty": "medium",
+      "question": "For `np.dot(A, B)` to work, how must the shapes of `A` and `B` relate, and what is the result shape?",
+      "options": [
+        "`A` and `B` must have identical shapes, and the result has that same shape as both of them.",
+        "The columns of `A` must equal the rows of `B`; a `(3, 4)` times a `(4, 3)` gives a `(3, 3)` result.",
+        "The rows of `A` must equal the columns of `B`, and the result is always a single scalar value.",
+        "Either array can be any shape, because `np.dot` broadcasts them the way element-wise operators do."
+      ],
+      "answer": 1,
+      "explanation": "The dot product is matrix multiplication, so the inner dimensions must match: the number of columns of the left operand must equal the number of rows of the right operand. A `(3, 4)` times a `(4, 3)` produces a `(3, 3)` result. Mismatched inner dimensions raise a `ValueError`.",
+      "misconception": "The dot product needs conformable inner dimensions, not identical shapes, and it does not broadcast like `+` or `*`."
+    },
+    {
+      "type": "scenario",
+      "concept": "array-creation",
+      "difficulty": "medium",
+      "scenario": "You need four different starting arrays: a 3 by 4 block of zeros to fill in later, a 3 by 4 block of ones, the even numbers from 0 to 10, and exactly five values evenly spread from 0 to 1 inclusive.",
+      "question": "Which set of routines fits, in that order?",
+      "options": [
+        "`np.zeros((3, 4))`, `np.ones((3, 4))`, `np.arange(0, 11, 2)`, `np.linspace(0, 1, 5)`.",
+        "`np.empty((3, 4))`, `np.full((3, 4))`, `np.range(0, 11, 2)`, `np.spaced(0, 1, 5)`.",
+        "`np.ones((3, 4))`, `np.zeros((3, 4))`, `np.linspace(0, 11, 2)`, `np.arange(0, 1, 5)`.",
+        "`np.zeros(3, 4)`, `np.ones(3, 4)`, `np.arange(0, 10)`, `np.linspace(0, 1)`."
+      ],
+      "answer": 0,
+      "explanation": "`np.zeros` and `np.ones` take a shape tuple and pre-fill a block. `np.arange(0, 11, 2)` steps by 2 and stops before 11, giving the even numbers through 10. `np.linspace(0, 1, 5)` returns five values spaced evenly between 0 and 1 inclusive, which is the count-based routine rather than the step-based one.",
+      "misconception": "Shape routines need a tuple argument, `arange` is step-based, and `linspace` is count-based with inclusive endpoints."
+    },
+    {
+      "type": "mcq",
+      "concept": "slicing-2d",
+      "difficulty": "hard",
+      "question": "For `a2 = np.arange(12).reshape(3, 4)`, what does `a2[:, 2]` return?",
+      "options": [
+        "The third row of the array, since the single index after the comma selects a row.",
+        "The element at position 2 flattened from the whole array, which is the value 2.",
+        "A 3 by 1 column block preserving two dimensions, because a comma always keeps the rank.",
+        "The third column `array([2, 6, 10])`, because `:` keeps all rows and `2` picks column index 2."
+      ],
+      "answer": 3,
+      "explanation": "The first entry before the comma selects rows and the second selects columns. `:` keeps every row, and the integer `2` picks column index 2 from each, giving `array([2, 6, 10])`. Using an integer rather than a slice drops that axis, so the result is 1D, not a 3 by 1 block.",
+      "misconception": "In 2D indexing the first slot is rows and the second is columns, and an integer index collapses its axis."
+    },
+    {
+      "type": "mcq",
+      "concept": "reshape",
+      "difficulty": "easy",
+      "question": "When can `a.reshape(rows, cols)` succeed?",
+      "options": [
+        "Only when `rows` equals `cols`, because reshape produces square arrays.",
+        "Whenever `rows` times `cols` equals the number of elements in `a`.",
+        "Always, because reshape pads or truncates the data to fit any requested shape.",
+        "Only when the new shape has the same number of dimensions as the original."
+      ],
+      "answer": 1,
+      "explanation": "`reshape` rearranges the existing elements without adding or dropping any, so the product of the new shape must equal the current element count. It does not pad or truncate, the shape need not be square, and the rank can change freely as long as the total stays the same.",
+      "misconception": "Reshape only rearranges existing elements, so the only rule is that the sizes multiply to the element count."
+    },
+    {
+      "type": "scenario",
+      "concept": "stacking",
+      "difficulty": "medium",
+      "scenario": "You have two arrays of shape `(3, 4)` and want one `(6, 4)` array, then later you want to cut a `(4, 6)` array back into two `(2, 6)` halves.",
+      "question": "Which pair of functions does this?",
+      "options": [
+        "`np.hstack` to reach `(6, 4)` by placing the arrays side by side, then `np.hsplit(a, 2)` to cut the other array into the two `(2, 6)` halves.",
+        "`np.concatenate` for both the joining and the cutting, because stacking and splitting are really the same single operation hidden under one name.",
+        "`np.vstack` to get `(6, 4)` by stacking top to bottom, then `np.vsplit(a, 2)` to cut into two `(2, 6)` halves.",
+        "`np.append` to grow the first array to `(6, 4)`, then `np.delete` to keep removing rows one at a time until two equal halves remain."
+      ],
+      "answer": 2,
+      "explanation": "`np.vstack` stacks arrays top to bottom, turning two `(3, 4)` arrays into one `(6, 4)` array. `np.vsplit` is its inverse, cutting along the rows into equal pieces, so a `(4, 6)` array splits into two `(2, 6)` halves. Horizontal stacking and splitting act on columns instead, which would give the wrong shapes here.",
+      "misconception": "Vertical stacking and splitting act on rows, horizontal on columns, and the split count must divide that axis evenly."
+    },
+    {
+      "type": "card",
+      "concept": "axis",
+      "difficulty": "hard",
+      "question": "Explain in your own words what `axis=0` and `axis=1` mean for a reduction like `np.sum` on a 2D array.",
+      "answer": "The `axis` argument names the axis that collapses. Axis 0 runs down the rows, so `np.sum(a, axis=0)` sums each column and returns one value per column. Axis 1 runs across the columns, so `np.sum(a, axis=1)` sums each row and returns one value per row. With no axis, the whole array reduces to a single number.",
+      "explanation": "A useful rule: the axis you pass is the dimension that disappears from the result shape. Summing a `(3, 4)` array along axis 0 gives a length-4 result, and along axis 1 gives a length-3 result."
+    }
+  ]
+}
