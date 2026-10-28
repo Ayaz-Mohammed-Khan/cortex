@@ -264,6 +264,8 @@ interface CellState {
   textarea: HTMLTextAreaElement | null;
   /** The status pill element. */
   status: HTMLSpanElement;
+  /** The adopted "Python" language label, lit green once the worker is live. */
+  langLabel: HTMLElement | null;
   /** The output region (created on first Run). */
   output: HTMLElement;
   /** The meta/status footer line. */
@@ -483,15 +485,26 @@ async function doRun(pre: HTMLPreElement, state: CellState, runButton: HTMLButto
 
   try {
     const res = await runInWorker(code);
-    setStatus(state, 'Python live', 'live');
+    markLive(state);
     renderResult(state, res);
   } catch (e) {
     const err = e as RunError;
-    setStatus(state, 'Python live', 'live');
+    markLive(state);
     renderError(state, err);
   } finally {
     runButton.disabled = false;
   }
+}
+
+/**
+ * Signal that Python is booted and live. Rather than a separate "Python live"
+ * status pill, we light the existing "Python" language label green (a subtle
+ * glow) — a cleaner, less cluttered cue — and retire the transient status pill,
+ * whose job (Editable / boot / Running…) is done once the cell is live.
+ */
+function markLive(state: CellState): void {
+  if (state.langLabel) state.langLabel.dataset.live = 'true';
+  setStatus(state, '', 'live');
 }
 
 /** Enhance one eligible `<pre>` with the runnable chrome. */
@@ -620,6 +633,7 @@ function enhance(pre: HTMLPreElement): void {
     originalHtml: pre.querySelector('code')?.innerHTML ?? '',
     textarea: null,
     status,
+    langLabel: langLabel ?? null,
     output,
     meta,
     live: false,

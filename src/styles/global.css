@@ -815,6 +815,35 @@ article[data-pagefind-body] > h1 {
   top: auto;
   left: auto;
   z-index: auto;
+  /* Smooth the colour change when the label lights up "live". */
+  transition: color 0.25s ease, text-shadow 0.25s ease;
+}
+/* Once Python has booted, the "Python" label itself glows green to signal the
+   cell is live — a subtler, less cluttered cue than a separate "Python live"
+   pill. A small inline dot before the word reinforces the "live" read. */
+.note-body .code-block.rc-cell .code-block__lang.rc-adopted-lang[data-live="true"] {
+  color: var(--success-light);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--success-light) 55%, transparent);
+  font-weight: 700;
+}
+.note-body .code-block.rc-cell .code-block__lang.rc-adopted-lang[data-live="true"]::before {
+  content: "";
+  display: inline-block;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: 0.35rem;
+  border-radius: 999px;
+  vertical-align: baseline;
+  background: var(--success-light);
+  box-shadow: 0 0 6px color-mix(in srgb, var(--success-light) 70%, transparent);
+}
+[data-theme="dark"] .note-body .code-block.rc-cell .code-block__lang.rc-adopted-lang[data-live="true"] {
+  color: var(--success-dark);
+  text-shadow: 0 0 9px color-mix(in srgb, var(--success-dark) 55%, transparent);
+}
+[data-theme="dark"] .note-body .code-block.rc-cell .code-block__lang.rc-adopted-lang[data-live="true"]::before {
+  background: var(--success-dark);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--success-dark) 70%, transparent);
 }
 
 /* Status pill. Boot/run uses the accent; "Python live" uses the success token. */
@@ -954,6 +983,39 @@ article[data-pagefind-body] > h1 {
      underlay in JS (see makeEditable's `mirrorScroll`). */
   overflow: hidden;
 }
+/* The focus ring is drawn as a dedicated OVERLAY on the wrapper (a `::after`
+   pseudo-element shown on :focus-within), NOT on the textarea and NOT as the
+   wrapper's own outline/box-shadow. Why an overlay on top:
+     - the textarea is `position:absolute; inset:0` and paints ABOVE the
+       wrapper's own border/shadow layer, so a ring on the wrapper got covered
+       by the textarea (the ring "disappeared");
+     - a square `outline` on the wrapper had its bottom corners clipped by the
+       `.rc-cell`'s rounded `overflow:hidden` boundary (the ring looked open).
+   The overlay matches the editor box exactly (inset:0 + the wrapper's rounded
+   bottom corners), sits on top via a higher z-index, and is `pointer-events:
+   none` so it never blocks typing or clicks. */
+.note-body .rc-code-wrap {
+  border-bottom-left-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+}
+.note-body .rc-code-wrap > .rc-textarea {
+  z-index: 1;
+}
+.note-body .rc-code-wrap:focus-within::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border: 2px solid var(--accent-600);
+  /* Match the wrapper's corners so the ring hugs the editor boundary exactly:
+     square at the top (it meets the bar) and rounded at the bottom. */
+  border-bottom-left-radius: 0.6rem;
+  border-bottom-right-radius: 0.6rem;
+}
+[data-theme="dark"] .note-body .rc-code-wrap:focus-within::after {
+  border-color: var(--accent-400);
+}
 /* Underlay keeps showing colour; it must not intercept clicks (the textarea on
    top handles all interaction) and must not scroll on its own — it is scrolled
    programmatically to follow the textarea, so a long line stays aligned under
@@ -983,11 +1045,12 @@ article[data-pagefind-body] > h1 {
   padding: 1rem 1.1rem;
   white-space: pre;
   tab-size: 4;
-  /* A transparent outline at rest reserves the focus ring's space so focusing
-     adds no layout shift; `:focus-visible` paints it the accent colour for
-     keyboard users. We avoid a blanket native-outline reset here on purpose —
-     the keyboard-nav a11y guard forbids one — and never leave a focusable
-     control without a visible ring. */
+  /* The textarea keeps a transparent outline at rest (not a blanket native
+     reset, which the keyboard-nav a11y guard forbids). The VISIBLE accent ring
+     is drawn by `.rc-code-wrap:focus-within` above — an inset ring on the
+     wrapper that renders all four edges cleanly; painting one on the textarea
+     too would double it up and clip the bottom stroke in the scroll box. A
+     focusable control is therefore never left without a visible ring. */
   outline: 2px solid transparent;
   outline-offset: -2px;
 }
@@ -995,14 +1058,8 @@ article[data-pagefind-body] > h1 {
   background: color-mix(in srgb, var(--accent-500) 35%, transparent);
   color: transparent;
 }
-.note-body .rc-code-wrap > .rc-textarea:focus-visible {
-  outline-color: var(--accent-600);
-}
 [data-theme="dark"] .note-body .rc-code-wrap > .rc-textarea {
   caret-color: var(--accent-400);
-}
-[data-theme="dark"] .note-body .rc-code-wrap > .rc-textarea:focus-visible {
-  outline-color: var(--accent-400);
 }
 
 /* Output region: a distinct, surfaced panel below the code (not loose text).
