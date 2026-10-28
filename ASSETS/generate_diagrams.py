@@ -66,6 +66,7 @@ _REGRESSION = _track("Regression", "10")
 # ML-fundamentals figures now live with the Machine Learning Fundamentals note,
 # which leads the Regression track, so they resolve to the same 10 folder.
 _ML_FUNDAMENTALS = _track("Regression", "10")
+_NUMPY = _track("NumPy & Pandas", "03")
 
 # Which track ASSETS/ folder each image belongs in. The statistics images are
 # split across the three Cortex statistics tracks to match where each note lives.
@@ -153,6 +154,13 @@ IMAGE_FOLDERS = {
     "homoscedasticity_vs_hetero.png": _REGRESSION,
     "multicollinearity_correlation_heatmap.png": _REGRESSION,
     "multicollinearity_confidence_band.png": _REGRESSION,
+    # NumPy & Pandas
+    "array_axes.png": _NUMPY,
+    "ndarray_dimensions.png": _NUMPY,
+    "reshape_1d_to_2d.png": _NUMPY,
+    "fancy_indexing.png": _NUMPY,
+    "boolean_mask.png": _NUMPY,
+    "broadcasting_stretch.png": _NUMPY,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -3270,6 +3278,257 @@ def multicollinearity_confidence_band():
     save(fig, "multicollinearity_confidence_band.png")
 
 
+# ============================================================ NumPy & Pandas
+def array_axes():
+    """A 2D array with axis 0 (down the rows) and axis 1 (across the columns)
+    labelled, so the meaning of an `axis=` argument becomes concrete."""
+    data = [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]]
+    rows, cols = len(data), len(data[0])
+    fig, ax = plt.subplots(figsize=(7.2, 4.6))
+    ax.set_xlim(-1.6, cols + 0.4)
+    ax.set_ylim(-1.2, rows + 0.8)
+    ax.set_aspect("equal")
+    ax.axis("off")
+    for r in range(rows):
+        for c in range(cols):
+            y = rows - 1 - r
+            ax.add_patch(FancyBboxPatch((c, y), 0.9, 0.9, boxstyle="square,pad=0",
+                                        facecolor=BLUE, edgecolor="black",
+                                        alpha=0.85, lw=1.1))
+            ax.text(c + 0.45, y + 0.45, str(data[r][c]), ha="center", va="center",
+                    color="white", fontsize=12, family="monospace")
+    # axis 0 arrow: down the rows (left side)
+    ax.annotate("", xy=(-0.7, -0.1), xytext=(-0.7, rows - 0.1),
+                arrowprops=dict(arrowstyle="-|>", color=RED, lw=2.2))
+    ax.text(-1.15, rows / 2 - 0.1, "axis 0\n(down rows)", ha="center", va="center",
+            color=RED, fontsize=10, fontweight="bold", rotation=90)
+    # axis 1 arrow: across the columns (top)
+    ax.annotate("", xy=(cols - 0.1, rows + 0.3), xytext=(0.1, rows + 0.3),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=2.2))
+    ax.text(cols / 2, rows + 0.6, "axis 1 (across columns)", ha="center",
+            color=GREEN, fontsize=10, fontweight="bold")
+    ax.text(cols / 2, -0.9, "shape = (3, 4)", ha="center", color=GREY, fontsize=10)
+    ax.set_title("A 2D array: axis 0 runs down the rows, axis 1 across the columns")
+    save(fig, "array_axes.png")
+
+
+def ndarray_dimensions():
+    """1D vector, 2D matrix, and 3D cube side by side, tying ndim and shape to a
+    picture so the jump in dimension is visible."""
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.2))
+    for ax in axes:
+        ax.set_xlim(0, 10)
+        ax.set_ylim(0, 10)
+        ax.set_aspect("equal")
+        ax.axis("off")
+
+    # ---- 1D: a row of four cells
+    ax = axes[0]
+    ax.set_title("1D array\nndim = 1, shape = (4,)", fontsize=11)
+    for k in range(4):
+        ax.add_patch(FancyBboxPatch((1.2 + k * 1.7, 4.2), 1.5, 1.5,
+                                    boxstyle="square,pad=0", facecolor=BLUE,
+                                    edgecolor="black", alpha=0.85, lw=1.1))
+        ax.text(1.95 + k * 1.7, 4.95, str(k), ha="center", va="center",
+                color="white", fontsize=12, family="monospace")
+
+    # ---- 2D: a 3x3 grid
+    ax = axes[1]
+    ax.set_title("2D array\nndim = 2, shape = (3, 3)", fontsize=11)
+    for r in range(3):
+        for c in range(3):
+            ax.add_patch(FancyBboxPatch((2.0 + c * 1.7, 6.2 - r * 1.7), 1.5, 1.5,
+                                        boxstyle="square,pad=0", facecolor=GREEN,
+                                        edgecolor="black", alpha=0.85, lw=1.1))
+
+    # ---- 3D: two offset 2x2 planes suggesting depth
+    ax = axes[2]
+    ax.set_title("3D array\nndim = 3, shape = (2, 2, 2)", fontsize=11)
+    for depth, dx, dy, alpha in [(1, 1.1, 1.1, 0.5), (0, 0, 0, 0.9)]:
+        for r in range(2):
+            for c in range(2):
+                ax.add_patch(FancyBboxPatch((2.4 + dx + c * 1.9, 3.6 + dy - r * 1.9),
+                                            1.7, 1.7, boxstyle="square,pad=0",
+                                            facecolor=PURPLE, edgecolor="black",
+                                            alpha=alpha, lw=1.1))
+    fig.suptitle("The same data as dimensions grow: ndim counts the axes",
+                 y=1.0, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "ndarray_dimensions.png")
+
+
+def reshape_1d_to_2d():
+    """The same twelve elements laid out as a 1D row, then folded into a 3x4
+    grid, showing NumPy fills rows first (row-major order)."""
+    fig, axes = plt.subplots(2, 1, figsize=(11, 5.4))
+    for ax in axes:
+        ax.set_xlim(0, 13)
+        ax.set_ylim(0, 3)
+        ax.axis("off")
+
+    # top: flat 1D array of 0..11
+    ax = axes[0]
+    ax.set_title("np.arange(12)  ->  one flat row of 12 elements", fontsize=11)
+    for k in range(12):
+        ax.add_patch(FancyBboxPatch((0.5 + k, 1.0), 0.9, 0.9,
+                                    boxstyle="square,pad=0", facecolor=BLUE,
+                                    edgecolor="black", alpha=0.85, lw=1.1))
+        ax.text(0.95 + k, 1.45, str(k), ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+
+    # bottom: folded into 3 rows of 4, row-major
+    ax = axes[1]
+    ax.set_title(".reshape(3, 4)  ->  filled one row at a time (row-major order)",
+                 fontsize=11)
+    ax.set_ylim(0, 3.4)
+    for r in range(3):
+        for c in range(4):
+            val = r * 4 + c
+            ax.add_patch(FancyBboxPatch((3.5 + c, 2.6 - r * 0.95), 0.9, 0.9,
+                                        boxstyle="square,pad=0", facecolor=ORANGE,
+                                        edgecolor="black", alpha=0.85, lw=1.1))
+            ax.text(3.95 + c, 3.05 - r * 0.95, str(val), ha="center", va="center",
+                    color="white", fontsize=11, family="monospace")
+    ax.annotate("fill row 0, then row 1, then row 2", xy=(8.4, 2.1),
+                xytext=(8.9, 0.4), fontsize=9, color=GREY,
+                arrowprops=dict(arrowstyle="->", color=GREY))
+    fig.tight_layout()
+    save(fig, "reshape_1d_to_2d.png")
+
+
+def fancy_indexing():
+    """A row of cells with an index array [0, 2, 4] pulling the matching
+    elements out into a new, smaller array."""
+    values = [10, 20, 30, 40, 50, 60]
+    picks = [0, 2, 4]
+    fig, ax = plt.subplots(figsize=(9.5, 4.2))
+    ax.set_xlim(0, len(values) + 1)
+    ax.set_ylim(0, 6)
+    ax.axis("off")
+
+    # source row
+    for k, v in enumerate(values):
+        chosen = k in picks
+        ax.add_patch(FancyBboxPatch((0.5 + k, 4.0), 0.9, 0.9,
+                                    boxstyle="square,pad=0",
+                                    facecolor=GREEN if chosen else GREY,
+                                    edgecolor="black",
+                                    alpha=0.9 if chosen else 0.4, lw=1.1))
+        ax.text(0.95 + k, 4.45, str(v), ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+        ax.text(0.95 + k, 5.1, str(k), ha="center", color=BLUE, fontsize=9)
+    ax.text(len(values) / 2 + 0.5, 5.6, "a = [10, 20, 30, 40, 50, 60]",
+            ha="center", fontsize=10, color=GREY)
+
+    # index array
+    ax.text(0.95, 2.7, "a[[0, 2, 4]]", fontsize=12, color=GREEN,
+            fontweight="bold", family="monospace")
+
+    # result row
+    for j, p in enumerate(picks):
+        ax.add_patch(FancyBboxPatch((0.5 + j, 0.6), 0.9, 0.9,
+                                    boxstyle="square,pad=0", facecolor=GREEN,
+                                    edgecolor="black", alpha=0.9, lw=1.1))
+        ax.text(0.95 + j, 1.05, str(values[p]), ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+        ax.annotate("", xy=(0.95 + j, 1.55), xytext=(0.95 + p, 3.95),
+                    arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.3,
+                                    connectionstyle="arc3,rad=-0.1"))
+    ax.text(len(picks) / 2 + 0.3, 0.1, "result = [10, 30, 50]", ha="center",
+            fontsize=10, color=GREEN)
+    ax.set_title("Fancy indexing: an array of positions pulls those elements out")
+    save(fig, "fancy_indexing.png")
+
+
+def boolean_mask():
+    """An array, a boolean mask of the same shape, and the filtered result that
+    keeps only the elements where the mask is True."""
+    values = [12, 7, 25, 3, 40, 18]
+    mask = [v > 10 for v in values]
+    fig, ax = plt.subplots(figsize=(9.5, 4.6))
+    ax.set_xlim(0, len(values) + 1)
+    ax.set_ylim(0, 7)
+    ax.axis("off")
+
+    # source
+    for k, v in enumerate(values):
+        ax.add_patch(FancyBboxPatch((0.5 + k, 5.0), 0.9, 0.9,
+                                    boxstyle="square,pad=0", facecolor=BLUE,
+                                    edgecolor="black", alpha=0.85, lw=1.1))
+        ax.text(0.95 + k, 5.45, str(v), ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+    ax.text(0.2, 5.45, "a", ha="right", va="center", color=GREY, fontsize=11)
+
+    # mask row
+    for k, m in enumerate(mask):
+        ax.add_patch(FancyBboxPatch((0.5 + k, 3.0), 0.9, 0.9,
+                                    boxstyle="square,pad=0",
+                                    facecolor=GREEN if m else RED,
+                                    edgecolor="black", alpha=0.8, lw=1.1))
+        ax.text(0.95 + k, 3.45, "T" if m else "F", ha="center", va="center",
+                color="white", fontsize=11, fontweight="bold")
+    ax.text(0.2, 3.45, "a > 10", ha="right", va="center", color=GREY, fontsize=10)
+
+    # result row: only True positions, packed left
+    kept = [v for v, m in zip(values, mask) if m]
+    for j, v in enumerate(kept):
+        ax.add_patch(FancyBboxPatch((0.5 + j, 0.8), 0.9, 0.9,
+                                    boxstyle="square,pad=0", facecolor=GREEN,
+                                    edgecolor="black", alpha=0.9, lw=1.1))
+        ax.text(0.95 + j, 1.25, str(v), ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+    ax.text(0.2, 1.25, "a[a > 10]", ha="right", va="center", color=GREEN,
+            fontsize=10)
+    ax.set_title("Boolean indexing: a True/False mask keeps the matching elements")
+    save(fig, "boolean_mask.png")
+
+
+def broadcasting_stretch():
+    """The canonical broadcasting picture: a (3,1) column and a (1,3) row each
+    stretched to a (3,3) grid before they are added element by element."""
+    fig, axes = plt.subplots(1, 3, figsize=(12, 4.4))
+    for ax in axes:
+        ax.set_xlim(0, 5)
+        ax.set_ylim(0, 5)
+        ax.set_aspect("equal")
+        ax.axis("off")
+
+    def cell(ax, c, r, text, color, alpha=0.85):
+        ax.add_patch(FancyBboxPatch((0.6 + c, 3.2 - r), 0.9, 0.9,
+                                    boxstyle="square,pad=0", facecolor=color,
+                                    edgecolor="black", alpha=alpha, lw=1.1))
+        ax.text(1.05 + c, 3.65 - r, text, ha="center", va="center",
+                color="white", fontsize=11, family="monospace")
+
+    col = [0, 10, 20]
+    row = [0, 1, 2]
+
+    # left: the (3,1) column stretched across 3 columns
+    ax = axes[0]
+    ax.set_title("column (3, 1)\nstretched across", fontsize=10.5)
+    for r in range(3):
+        for c in range(3):
+            cell(ax, c, r, str(col[r]), BLUE, alpha=0.85 if c == 0 else 0.35)
+
+    # middle: the (1,3) row stretched down 3 rows
+    ax = axes[1]
+    ax.set_title("row (1, 3)\nstretched down", fontsize=10.5)
+    for r in range(3):
+        for c in range(3):
+            cell(ax, c, r, str(row[c]), ORANGE, alpha=0.85 if r == 0 else 0.35)
+
+    # right: the (3,3) elementwise sum
+    ax = axes[2]
+    ax.set_title("result (3, 3)\nelementwise sum", fontsize=10.5)
+    for r in range(3):
+        for c in range(3):
+            cell(ax, c, r, str(col[r] + row[c]), GREEN)
+    fig.suptitle("Broadcasting: a size-1 axis is stretched to match the other array",
+                 y=1.0, fontsize=13, fontweight="bold")
+    fig.tight_layout()
+    save(fig, "broadcasting_stretch.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3374,4 +3633,11 @@ if __name__ == "__main__":
     homoscedasticity_vs_hetero()
     multicollinearity_correlation_heatmap()
     multicollinearity_confidence_band()
+    # numpy & pandas
+    array_axes()
+    ndarray_dimensions()
+    reshape_1d_to_2d()
+    fancy_indexing()
+    boolean_mask()
+    broadcasting_stretch()
     print("\nAll diagrams generated.")

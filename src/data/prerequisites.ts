@@ -57,6 +57,13 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   'Tuples, Sets & Dicts': ['Lists'],
   'Functions': ['Tuples, Sets & Dicts'],
 
+  // ── NumPy & Pandas ────────────────────────────────────────────────────
+  // A linear chain: Fundamentals builds on the list-versus-array contrast from
+  // Lists; the advanced and tricks notes each build on the one before.
+  'NumPy Fundamentals': ['Lists'],
+  'Advanced NumPy': ['NumPy Fundamentals'],
+  'NumPy Tricks': ['Advanced NumPy'],
+
   // ── OOP & Advanced Python ─────────────────────────────────────────────
   // Two strands off the OOP base. The class strand is linear; the advanced
   // strand (file handling → exceptions → iterators → decorators) builds on
