@@ -62,6 +62,7 @@ let breadcrumbs: CategoryRef[] = [];
 let body: string | null = null;
 let description: string | null = null;
 let difficulty: 'beginner' | 'intermediate' | 'advanced' | undefined;
+let runnable: boolean | undefined;
 let prerequisites: { label: string; href: string | null }[] = [];
 
 // Prev/next published-Note neighbours (Tier 3). `site.entries` is already in
@@ -92,6 +93,9 @@ if (data.kind === 'note') {
   body = data.content.body;
   description = data.content.description ?? null;
   difficulty = data.entry.data.difficulty;
+  // Opt-in flag for in-browser runnable Python. Passed to NoteContent, which
+  // marks `.note-body` so the `./runnable-code` island upgrades python fences.
+  runnable = data.entry.data.runnable;
   // Prerequisites come from the single source of truth (`src/data/
   // prerequisites.ts`), keyed by this note's Display_Name, NOT from the note's
   // frontmatter. This is what keeps the "Prerequisites" line here identical to
@@ -153,6 +157,7 @@ if (data.kind === 'note') {
         Content={Content}
         route={route}
         difficulty={difficulty}
+        runnable={runnable}
         prerequisites={prerequisites}
         quiz={site.quizzes.get(route) ?? null}
       />

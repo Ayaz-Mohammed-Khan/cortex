@@ -45,6 +45,35 @@ Name files `NN - Name.md`, e.g. `03 - The Normal Distribution.md`.
 - Add `published: false` to a note's frontmatter to keep it out of the built
   site while you work on it. Remove it (or set `true`) to publish.
 
+## Runnable code
+
+Python code blocks can become runnable, editable cells in the browser, powered
+by Pyodide. This is a progressive enhancement: the authored code and its static
+output always render, and only turn interactive after the reader clicks Run.
+
+- Opt a note in by adding `runnable: true` to its frontmatter. Every `python`
+  and `py` code fence in that note then gets a Run button.
+- Opt a single block out by making its first code line exactly `# cortex:norun`.
+  Use this for illustrative or broken snippets that should not run. The marker
+  is a normal Python comment, so it is harmless if the reader never runs the
+  block.
+- The first Run loads Python once per browser session from the jsDelivr CDN
+  (the status pill reads "Warming up Python... this happens once."); later runs
+  are instant and reuse the same runtime, even after navigating to another note.
+- Keep the authored static output fence (the ```` ```text ```` block) next to a
+  runnable block. Readers with no JavaScript, and everyone before clicking Run,
+  still see a correct result.
+- Packages are loaded on demand from what the code imports (numpy, pandas,
+  matplotlib, seaborn, scipy, scikit-learn, and more). Code that reads an
+  external data file will not work unless that data is created in the same
+  block, so prefer self-contained examples.
+
+```yaml
+---
+runnable: true
+---
+```
+
 ## Callouts
 
 Use blockquote callouts:

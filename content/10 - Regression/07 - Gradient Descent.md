@@ -11,6 +11,7 @@ aliases:
   - Stochastic Gradient Descent
   - Mini-batch Gradient Descent
 difficulty: advanced
+runnable: true
 prerequisites:
   - Optimization
 created: 2026-10-23
@@ -194,9 +195,21 @@ The fix is to update far more often, using one row at a time instead of all of t
 **Stochastic gradient descent (SGD) updates the parameters once for every single row, so one epoch over $n$ rows produces $n$ updates.** The word stochastic means random: each step picks a row at random, computes the slope from that one row, and immediately updates. With one row, the summation in the derivative disappears entirely.
 
 ```python
-idx = np.random.randint(0, X_train.shape[0])   # pick a random row
-y_hat = np.dot(X_train[idx], self.coef_) + self.intercept_
-# update using just this one row's residual, then repeat
+import numpy as np
+
+rng = np.random.default_rng(0)
+X = np.array([[1.0], [2.0], [3.0], [4.0]])   # 4 rows, 1 feature
+y = np.array([3.0, 5.0, 7.0, 9.0])           # true line: y = 2x + 1
+m, b = 0.0, 0.0                              # start the slope and intercept at zero
+lr = 0.1
+
+# One stochastic step: pick a single random row and update from just that row.
+i = rng.integers(0, X.shape[0])              # pick one random row
+y_hat = m * X[i, 0] + b                       # predict for that one row
+error = y_hat - y[i]                          # its residual (no summation over rows)
+m -= lr * error * X[i, 0]                     # gradient from the single row
+b -= lr * error
+print(f"used row {i}, updated m={m:.3f}, b={b:.3f}")
 ```
 
 SGD improves on batch gradient descent on both fronts:

@@ -8,6 +8,7 @@ aliases:
   - Tensors
   - N-dimensional arrays
 difficulty: beginner
+runnable: true
 created: 2026-10-24
 ---
 

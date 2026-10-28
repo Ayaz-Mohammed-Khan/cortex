@@ -40,6 +40,12 @@ const notes = defineCollection({
     // Optional prerequisites: display names of notes/topics to learn first.
     // Rendered as links under the title (resolved by display name downstream).
     prerequisites: z.array(z.string()).optional(),
+    // Opt a note into in-browser runnable Python (Pyodide). When `true`, every
+    // `python`/`py` code fence in the note becomes a runnable, editable cell
+    // (progressive enhancement; the static authored output always remains). An
+    // individual block opts OUT with a first code line of `# cortex:norun`.
+    // Optional, so every existing note stays valid without the flag.
+    runnable: z.boolean().optional(),
   }),
 });
 

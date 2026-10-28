@@ -34,6 +34,9 @@ interface Props {
   route: string;
   /** Optional material difficulty (frontmatter), shown as a badge. */
   difficulty?: Difficulty;
+  /** When true, this note's python code fences become runnable cells. Sets
+   *  `data-runnable` on `.note-body`; the `./runnable-code` island reads it. */
+  runnable?: boolean;
   /** Optional prerequisites (frontmatter), resolved to links where possible. */
   prerequisites?: PrereqLink[];
   /** This note's quiz, when one exists; drives the "Test yourself" banner. */
@@ -46,6 +49,7 @@ const {
   Content,
   route,
   difficulty,
+  runnable,
   prerequisites = [],
   quiz = null,
 } = Astro.props;
@@ -155,7 +159,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
     )
   }
 
-  <div class="note-body mt-6">
+  <div class="note-body mt-6" data-runnable={runnable ? 'true' : undefined}>
     <Content />
   </div>
 
@@ -458,6 +462,7 @@ const diff = difficulty ? DIFFICULTY[difficulty] : null;
 <script>
   import './image-fallback';
   import './code-block';
+  import './runnable-code';
   import './image-zoom';
   import './search-highlight';
   import './note-progress';
