@@ -1,0 +1,241 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "array-vs-list-speed",
+      "difficulty": "easy",
+      "question": "Adding two ten-million-element sequences took about 3.3 seconds with a Python loop over lists and about 0.06 seconds with `a + b` on NumPy arrays. What explains the gap?",
+      "options": [
+        "NumPy secretly spreads the addition across every CPU core, while Python lists are always limited to one core.",
+        "NumPy caches the result of the first addition, so the timed call reuses a value that was computed earlier.",
+        "NumPy runs one compiled loop over a contiguous block of same-typed values instead of an interpreted per-element loop.",
+        "NumPy skips the elements that are zero, and `np.arange` produces mostly zeros, so it does far less real work."
+      ],
+      "answer": 2,
+      "explanation": "The array stores values of one dtype in a single contiguous block, so `a + b` runs a tight compiled loop. The list version makes the interpreter fetch, type-check, and add Python objects one at a time. NumPy does not cache results or skip zeros, and simple addition is not where multi-core parallelism comes from.",
+      "misconception": "Vectorized speed comes from compiled loops over packed memory, not from caching or hidden shortcuts."
+    },
+    {
+      "type": "mcq",
+      "concept": "array-vs-list-speed",
+      "difficulty": "medium",
+      "question": "A list of ten million Python integers measured about 81.5 MB with `sys.getsizeof`, while `np.arange(10000000, dtype=np.int8)` measured about 10 MB. Why is the array so much smaller?",
+      "options": [
+        "The array compresses repeated values on the fly, and a range of integers compresses extremely well into a few bytes.",
+        "The list holds references to full Python objects, while the int8 array stores each value as one byte in a packed block.",
+        "`sys.getsizeof` only counts the first million elements of a NumPy array, so the reported array size is an undercount.",
+        "The list stores every number as a 64-bit float, which takes eight times the space of an integer stored in an array."
+      ],
+      "answer": 1,
+      "explanation": "Every list slot is a reference to a separate Python integer object with its own header. The NumPy array with `dtype=np.int8` packs each value into a single byte in one contiguous buffer, so ten million values cost about ten million bytes. NumPy does not compress data, and the list holds ints, not floats.",
+      "misconception": "Array memory is the element count times the dtype size; there is no hidden compression."
+    },
+    {
+      "type": "mcq",
+      "concept": "fancy-indexing",
+      "difficulty": "easy",
+      "question": "For `a = np.arange(24).reshape(6, 4)`, what does `a[:, [0, 2, 3]]` return?",
+      "options": [
+        "Rows 0, 2, and 3 with all four of their columns, giving an array of shape (3, 4).",
+        "The single elements at positions 0, 2, and 3 of the flattened array, as a 1D array.",
+        "All six rows with columns 0, 2, and 3, giving an array of shape (6, 3).",
+        "An error, because a list cannot be mixed with a slice inside one indexing expression."
+      ],
+      "answer": 2,
+      "explanation": "The `:` keeps every row, and the list `[0, 2, 3]` in the column position is fancy indexing that picks those three columns. The result has six rows and three columns. Mixing a slice with an index list is allowed, and the list sits in the column slot, so it does not select rows.",
+      "misconception": "The position of the index list decides which axis it selects; after the comma it picks columns."
+    },
+    {
+      "type": "scenario",
+      "concept": "fancy-indexing",
+      "difficulty": "medium",
+      "scenario": "You have a 2D array of records, one per row, and need rows 4, 1, and 4 again, in that order, to build a small resampled batch.",
+      "question": "Which approach does this directly?",
+      "options": [
+        "A slice such as `a[1:5]`, then delete the unwanted rows, since slices are the only way to select whole rows.",
+        "Fancy indexing with `a[[4, 1, 4]]`, which gathers rows in the listed order and allows repeats.",
+        "A boolean mask marking rows 1 and 4 as `True`, since a mask can repeat a row by listing it twice.",
+        "`np.hstack` of the three rows, because stacking is the standard way to pick rows out by their positions."
+      ],
+      "answer": 1,
+      "explanation": "Fancy indexing takes a list of positions and returns the rows in exactly that order, repeats included. A slice only selects a contiguous range in order, a boolean mask keeps each row at most once in its original order, and `np.hstack` joins arrays side by side rather than selecting rows.",
+      "misconception": "Only fancy indexing can reorder or repeat; slices and masks preserve the original order."
+    },
+    {
+      "type": "mcq",
+      "concept": "boolean-indexing",
+      "difficulty": "easy",
+      "question": "What does `a[a > 50]` return when `a` is a 2D array?",
+      "options": [
+        "A 1D array of the elements greater than 50, in row-major order.",
+        "A 2D array of the same shape with values not above 50 set to zero.",
+        "A boolean array of the same shape marking which elements exceed 50.",
+        "The row and column indices of every element that is greater than 50."
+      ],
+      "answer": 0,
+      "explanation": "`a > 50` builds a boolean mask of the same shape, and indexing with that mask returns only the elements where it is `True`, flattened into a 1D array in row-major order. The mask alone is the boolean array; indexing with it filters rather than zeroing values or returning positions.",
+      "misconception": "Indexing with a mask filters and flattens; it does not keep the original 2D shape."
+    },
+    {
+      "type": "scenario",
+      "concept": "boolean-combinators",
+      "difficulty": "medium",
+      "scenario": "A teammate writes `a[a > 50 and a % 2 == 0]` to keep the even values above 50, and it raises `ValueError: The truth value of an array with more than one element is ambiguous`.",
+      "question": "What is the correct fix?",
+      "options": [
+        "Wrap the whole condition in `bool(...)`, which turns the array condition into the single truth value that Python's `and` expects.",
+        "Write `a[(a > 50) & (a % 2 == 0)]`, using the elementwise `&` and wrapping each comparison in parentheses.",
+        "Write `a[a > 50 & a % 2 == 0]`, because swapping in `&` alone fixes the error and the parentheses are optional.",
+        "Call `a.any()` on each condition first, because `and` works once each side has been reduced to one boolean."
+      ],
+      "answer": 1,
+      "explanation": "Python's `and` asks for one truth value per side, which an array cannot give, hence the error. The bitwise `&` combines masks element by element. Each comparison needs parentheses because `&` binds tighter than `>` and `==`, so dropping them changes the meaning. Reducing with `bool` or `any` collapses the mask and loses the per-element filter.",
+      "misconception": "Masks combine with `&`, `|`, and `~`, never `and`, `or`, or `not`, and each condition needs its own parentheses."
+    },
+    {
+      "type": "mcq",
+      "concept": "boolean-combinators",
+      "difficulty": "easy",
+      "question": "Which expression keeps the elements of `a` that are not divisible by 7?",
+      "options": [
+        "`a[not (a % 7 == 0)]`",
+        "`a[a % 7 == 0]`",
+        "`a[-(a % 7 == 0)]`",
+        "`a[~(a % 7 == 0)]`"
+      ],
+      "answer": 3,
+      "explanation": "`a % 7 == 0` marks the multiples of 7, and `~` flips every entry of that mask, so indexing keeps the values that are not multiples. The keyword `not` fails on a multi-element array, the unnegated mask keeps the multiples, and unary minus is not the logical negation of a boolean mask.",
+      "misconception": "The elementwise negation of a mask is `~`, not the `not` keyword."
+    },
+    {
+      "type": "mcq",
+      "concept": "broadcasting-rules",
+      "difficulty": "medium",
+      "question": "What is the shape of `np.arange(3).reshape(1, 3) + np.arange(4).reshape(4, 1)`?",
+      "options": [
+        "(1, 3), because the result always keeps the shape of the left operand.",
+        "(4, 3), because each size-1 axis stretches to match the other array.",
+        "(4, 1), because the larger array decides the shape of the result.",
+        "It raises a `ValueError`, because the two shapes are not equal."
+      ],
+      "answer": 1,
+      "explanation": "Compare the axes from the right: 3 against 1, then 1 against 4. On each axis one side is 1, so it stretches to the other size, and the result is (4, 3). The left operand does not set the shape, neither array is simply larger, and shapes do not need to be equal to broadcast.",
+      "misconception": "Broadcasting can stretch both operands at once, one along each axis."
+    },
+    {
+      "type": "mcq",
+      "concept": "broadcasting-rules",
+      "difficulty": "medium",
+      "question": "Why does adding a 1D array of shape (3,) to a 2D array of shape (4, 3) work?",
+      "options": [
+        "NumPy pads the (3,) shape to (1, 3) with a leading 1, then stretches that 1 to 4 to match the rows.",
+        "NumPy pads the (3,) shape to (3, 1) with a trailing 1, then stretches that 1 to fill the 3 columns.",
+        "NumPy repeats the 1D array until its total element count matches the 12 elements of the 2D array.",
+        "NumPy transposes the 2D array to (3, 4) so the first axis matches the length of the 1D array."
+      ],
+      "answer": 0,
+      "explanation": "Rule 1 prepends size-1 axes to the shorter shape, giving (1, 3). Rule 2 then compares each axis: 3 matches 3, and the leading 1 stretches to 4. New axes go on the left, not the right, NumPy never transposes for you, and it matches axes rather than element counts.",
+      "misconception": "Missing dimensions are added at the front, so a 1D array lines up with the last axis."
+    },
+    {
+      "type": "scenario",
+      "concept": "broadcasting-fail",
+      "difficulty": "hard",
+      "scenario": "Your code adds a per-row offset vector of length 3 to a data matrix of shape (3, 4) and crashes with `ValueError: operands could not be broadcast together with shapes (3,4) (3,)`.",
+      "question": "What is the diagnosis and the fix?",
+      "options": [
+        "The vector has too few elements in total; repeat it with `np.tile` until it holds all 12 values of the matrix.",
+        "Broadcasting only works on square matrices; reshape the data to (4, 4) by padding it with zeros before adding.",
+        "The (3,) vector lines up with the trailing axis of 4 and mismatches; reshape it to (3, 1) so it stretches across columns.",
+        "The dtypes differ between the operands; cast the vector to float with `astype` and the addition will then succeed."
+      ],
+      "answer": 2,
+      "explanation": "A (3,) array is padded to (1, 3), so its 3 is compared with the trailing 4 of the matrix, and neither is 1. Reshaping the vector to (3, 1) puts the 3 against the 3 rows and a 1 against the 4 columns, which stretches. Element count, squareness, and dtype are not what broadcasting checks.",
+      "misconception": "Broadcasting compares shapes from the trailing axis, so a 1D vector always aligns with the last axis."
+    },
+    {
+      "type": "mcq",
+      "concept": "broadcasting-fail",
+      "difficulty": "hard",
+      "question": "Which pair of shapes cannot be broadcast together?",
+      "options": [
+        "(4, 4) and (2, 2)",
+        "(2, 2) and (1,)",
+        "(4, 3) and (3,)",
+        "(1, 3) and (3, 1)"
+      ],
+      "answer": 0,
+      "explanation": "For (4, 4) and (2, 2), both axes compare 4 against 2 and neither is 1, so NumPy raises a `ValueError`. A (1,) array stretches to any shape, (3,) pads to (1, 3) and matches the trailing 3, and (1, 3) with (3, 1) stretches both into (3, 3).",
+      "misconception": "A smaller array that divides the larger shape evenly still fails; only size-1 axes stretch."
+    },
+    {
+      "type": "mcq",
+      "concept": "vectorization",
+      "difficulty": "medium",
+      "question": "Why does `1 / (1 + np.exp(-x))` compute the sigmoid of every element when `x` is an array?",
+      "options": [
+        "Because `np.exp` returns one scalar for the whole array, and that scalar is then divided into each element in turn.",
+        "Because NumPy compiles the expression into a hidden Python `for` loop that visits each element of `x` one by one.",
+        "Because the expression only works on 1D arrays, where NumPy is able to treat the whole array as a single number.",
+        "Because `np.exp` is elementwise and the scalars 1 broadcast, so the formula applies to every element at once."
+      ],
+      "answer": 3,
+      "explanation": "`np.exp` applies to each element and returns an array of the same shape. The scalar 1 broadcasts against that array in both the addition and the division, so the whole formula is vectorized. There is no hidden Python loop, `np.exp` does not reduce to one value, and the expression works on arrays of any shape.",
+      "misconception": "A formula built from elementwise functions and scalars is vectorized automatically."
+    },
+    {
+      "type": "scenario",
+      "concept": "vectorization",
+      "difficulty": "medium",
+      "scenario": "You have arrays `actual` and `predicted` of equal length and need the mean squared error for a regression model.",
+      "question": "Which expression computes it?",
+      "options": [
+        "`np.mean(actual - predicted) ** 2`, which averages the errors and then squares that average.",
+        "`np.mean((actual - predicted) ** 2)`, which squares each error and then averages them.",
+        "`np.sum(actual - predicted) ** 2 / 2`, which squares the total error and halves the result.",
+        "`(np.mean(actual) - np.mean(predicted)) ** 2`, which squares the gap between the two means."
+      ],
+      "answer": 1,
+      "explanation": "Mean squared error is the average of the squared per-sample errors, so the squaring must happen elementwise before `np.mean`. Squaring after averaging lets positive and negative errors cancel, and comparing the two means ignores how each prediction misses its own target.",
+      "misconception": "The order matters: square each error first, then average."
+    },
+    {
+      "type": "mcq",
+      "concept": "missing-values",
+      "difficulty": "medium",
+      "question": "For `a = np.array([1, 2, 3, 4, np.nan, 6])`, which expression returns only the present values?",
+      "options": [
+        "`a[a != np.nan]`, because comparing against `np.nan` marks the missing entry as `False`.",
+        "`a[a == a]`, though `np.isnan` exists only for pandas objects and not for NumPy arrays.",
+        "`a[~np.isnan(a)]`, because `np.isnan` marks the missing entry and `~` keeps the rest.",
+        "`np.delete(a, np.nan)`, because `np.delete` removes every element matching a value."
+      ],
+      "answer": 2,
+      "explanation": "`np.nan` is not equal to anything, including itself, so `a != np.nan` is `True` everywhere and removes nothing. `np.isnan` is the NumPy test that returns a mask of the missing entries, and `~` inverts it to keep the present values. `np.delete` takes positions, not values.",
+      "misconception": "Never test for `np.nan` with `==` or `!=`; use `np.isnan`."
+    },
+    {
+      "type": "mcq",
+      "concept": "view-vs-copy",
+      "difficulty": "hard",
+      "question": "What is the difference between `a[1:3]` and `a[[1, 2]]` when you then modify the result?",
+      "options": [
+        "The slice is a view that shares memory with `a`, while fancy indexing returns a new copy, so only edits to the slice change `a`.",
+        "Fancy indexing is a view that shares memory with `a`, while the slice returns a new copy, so only edits to the list result change `a`.",
+        "Both are views that share memory with `a`, so editing either result changes the original array in exactly the same way.",
+        "Both are independent copies of the data, so editing either result leaves the original array `a` completely unchanged."
+      ],
+      "answer": 0,
+      "explanation": "Basic slicing returns a view onto the same buffer, so writing into it writes into `a`. Fancy and boolean indexing gather arbitrary elements that may not be evenly spaced, so NumPy has to build a new array, a copy, and edits to it leave `a` untouched.",
+      "misconception": "Slices are views; fancy and boolean indexing always return copies."
+    },
+    {
+      "type": "card",
+      "concept": "broadcasting-rules",
+      "difficulty": "hard",
+      "question": "State the broadcasting rules NumPy uses to decide whether two arrays can be combined.",
+      "answer": "Compare the shapes axis by axis from the trailing (rightmost) axis. First, if one array has fewer dimensions, prepend axes of size 1 to its shape until both have the same number of axes. Second, on each axis the sizes must be equal or one of them must be 1; an axis of size 1 is stretched to match the other. If any axis has two different sizes and neither is 1, the shapes are incompatible and NumPy raises a `ValueError`.",
+      "explanation": "A quick check: right-align the two shapes and read each column. Every column must be equal or contain a 1. For example, (4, 3) and (3,) works, while (3, 4) and (3,) fails on the trailing 4 against 3."
+    }
+  ]
+}
