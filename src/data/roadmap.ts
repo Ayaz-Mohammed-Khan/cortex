@@ -518,9 +518,11 @@ export const spine: Step[] = [
           'Fancy indexing',
           'Boolean indexing',
           'Broadcasting',
-          'Mathematical operations in NumPy',
-          'Sigmoid in NumPy',
-          'Mean squared error in NumPy',
+          // The note teaches these three together, as vectorized formulas under
+          // one section, so point them at that covering heading.
+          { label: 'Mathematical operations in NumPy', at: 'Working with mathematical formulas' },
+          { label: 'Sigmoid in NumPy', at: 'Working with mathematical formulas' },
+          { label: 'Mean squared error in NumPy', at: 'Working with mathematical formulas' },
           'Working with missing values',
           'Plotting graphs',
         ],
