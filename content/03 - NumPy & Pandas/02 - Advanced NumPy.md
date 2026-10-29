@@ -124,6 +124,30 @@ array([[ 0,  2,  3],
 
 The index list can reorder or repeat. `a[[2, 0, 2]]` returns row 2, then row 0, then row 2 again. This is how you reorder rows, build a sample with replacement, or gather specific records by position.
 
+A basic slice and a fancy index also differ in what they hand back. A slice such as `a[1:3]` is a **view**: it shares memory with `a`, so writing into it changes `a`. Fancy indexing such as `a[[1, 2]]`, and boolean indexing too, returns a new **copy**, so edits to the result leave `a` untouched.
+
+```python
+import numpy as np
+
+a = np.arange(6)
+s = a[1:3]      # slice: a view
+s[0] = 100
+print(a)
+
+b = np.arange(6)
+f = b[[1, 2]]   # fancy index: a copy
+f[0] = 100
+print(b)
+```
+
+```text
+[  0 100   2   3   4   5]
+[0 1 2 3 4 5]
+```
+
+> [!warning]
+> Editing a slice silently edits the original array. Call `.copy()` on the slice, as in `a[1:3].copy()`, when you need an independent array.
+
 ---
 
 ## Boolean indexing
