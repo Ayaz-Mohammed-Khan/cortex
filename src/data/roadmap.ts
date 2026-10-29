@@ -469,7 +469,9 @@ export const spine: Step[] = [
       'Reshaping, stacking, splitting',
       'Fancy & boolean indexing',
       'Broadcasting',
-      'Mathematical operations',
+      // The Advanced NumPy note teaches these as vectorized formulas under one
+      // section, which shares no distinctive wording with this bullet.
+      { label: 'Mathematical operations', at: 'Working with mathematical formulas' },
       'Working with missing values',
       'Sorting & set functions',
       'Series & DataFrame objects',
