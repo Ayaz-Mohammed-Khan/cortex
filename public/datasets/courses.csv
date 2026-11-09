@@ -1,0 +1,13 @@
+course_id,course_name,price
+1,Python Basics,1199
+2,Data Cleaning,2499
+3,SQL Essentials,1499
+4,Statistics Primer,4499
+5,Excel to pandas,2999
+6,Data Visualization,4999
+7,Machine Learning 101,3999
+8,Deep Learning Intro,3999
+9,Web Scraping,3499
+10,Time Series Basics,3499
+11,Text Analysis,1999
+12,Dashboards with Python,1499

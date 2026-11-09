@@ -1,0 +1,901 @@
+passenger_id,survived,cabin_class,name,sex,age,sib_sp,par_ch,ticket,fare,cabin,embarked
+1,0,3,"Mallory, Mr. Lionel",male,49,0,0,139070,38.32,,S
+2,1,3,"Yeoman, Miss. Rosalind Florence",female,5,0,0,121453,34.41,,C
+3,0,3,"Lindqvist, Mr. Silas",male,24,0,0,A/5 7144,22.06,,S
+4,0,3,"Sandoval, Master. Rupert",male,1,0,1,F.C.C. 24031,30.36,,S
+5,1,2,"Garrick, Miss. Constance",female,51,0,0,74004,55.25,,C
+6,0,3,"Yeoman, Mr. Lionel Edmund",male,46,0,0,217843,34.42,,S
+7,0,1,"Fairbanks, Mr. Victor",male,44,2,0,A/5 8776,123.71,,S
+8,0,1,"Brannock, Mr. George Henry",male,45,1,0,159091,220.61,,S
+9,0,2,"Brannock, Mr. Hugo Edwin",male,39,0,0,96753,59.07,E45,S
+10,1,3,"Bellamy, Mrs. Margaret",female,38,1,1,SOTON/O.Q. 22025,18.94,,S
+11,0,1,"Dunmore, Mr. Hugo Frederick",male,16,0,0,C.A. 31714,226.27,C57,S
+12,0,3,"Oakhurst, Mr. Leopold",male,72,0,0,220960,23.49,,S
+13,1,1,"Abernath, Miss. Lavinia",female,3,4,0,10275,64.44,E70,S
+14,1,3,"Elsworth, Master. Lionel",male,2,0,1,W./C. 8841,22.38,,S
+15,1,1,"Gillespie, Miss. Nora",female,3,0,0,318003,205.71,A72,S
+16,0,1,"Gillespie, Mr. Nathaniel Matthias",male,62,1,1,268788,86.51,,C
+17,0,2,"Farraday, Mr. Arthur",male,17,0,3,70938,31.97,,S
+18,0,2,"Fennimore, Mr. Leopold",male,15,1,0,W./C. 18497,28.67,,S
+19,0,3,"Fennimore, Mr. Milo Felix",male,,0,0,255479,37.59,,S
+20,0,3,"Castellan, Mr. Walter",male,25,0,2,153966,29.37,,S
+21,1,2,"Lindqvist, Miss. Olive Constance",female,2,0,0,F.C.C. 36426,56.10,,C
+22,0,2,"Zellweger, Mr. Albert Edwin",male,41,0,0,185189,12.09,,S
+23,0,3,"Ivers, Mr. Theodore",male,37,1,0,78517,30.07,,S
+24,0,1,"Sandoval, Mr. Lionel",male,23,0,0,S.C./PARIS 13632,216.22,C51,C
+25,0,2,"Coldharbour, Mr. Cecil Leopold",male,,1,0,55584,56.02,,C
+26,0,3,"Thackery, Ms. Constance",female,69,0,0,201259,15.67,,S
+27,1,1,"Brightwater, Miss. Matilda Sybil",female,9,3,0,A/5 39127,253.80,,S
+28,0,1,"Lockhart, Mr. Isaac Albert",male,27,0,0,51536,203.41,D58,S
+29,1,3,"Vasquez, Master. Percival Arthur",male,12,2,1,246193,22.61,,C
+30,1,1,"Underhill, Mr. Walter",male,53,0,2,99699,51.77,C64,S
+31,1,1,"Kilbride, Mr. Hugo",male,72,0,0,176127,251.57,D139,S
+32,1,1,"Rourke, Mr. Bertram",male,,0,1,116065,40.10,,Q
+33,0,3,"Greaves, Mr. Felix",male,,0,0,S.C./PARIS 21146,34.07,G2,Q
+34,1,1,"Elsworth, Mr. Frederick",male,26,1,0,PC 29314,131.56,D6,S
+35,1,3,"Pemberly, Miss. Constance",female,16,1,2,293758,15.65,,S
+36,1,2,"Sorensen, Mr. Cecil",male,57,1,0,351395,13.97,D116,S
+37,0,3,"Halloran, Mr. George",male,68,4,0,C.A. 35967,27.51,,S
+38,0,1,"Sandoval, Mr. Cecil Oscar",male,,1,0,87692,123.02,B143,S
+39,1,1,"Coldharbour, Mr. Ernest George",male,65,0,0,F.C.C. 29467,243.68,D48,S
+40,1,1,"Garrick, Mrs. Ida",female,24,1,3,156150,133.11,A118,Q
+41,0,3,"Wyndham, Mr. Walter",male,31,0,0,S.C./PARIS 25605,7.54,,C
+42,0,3,"Oakhurst, Mr. Nathaniel Oscar",male,45,0,0,W./C. 25558,36.13,,S
+43,0,3,"Wyndham, Mr. Cecil",male,19,0,0,STON/O2. 15612,14.40,,S
+44,1,3,"Dewhurst, Miss. Harriet",female,62,2,0,63836,12.85,,S
+45,0,3,"Jessamy, Mr. Felix",male,20,0,0,PC 33133,23.66,,S
+46,0,2,"Brannock, Mr. Jasper",male,,0,0,PC 35107,16.50,,S
+47,0,2,"Castellan, Master. Felix Matthias",male,10,0,2,PC 18151,21.52,F48,S
+48,0,3,"Dunmore, Mrs. Lillian",female,,0,0,270676,20.80,,S
+49,0,3,"Fairbanks, Major. Victor",male,40,0,1,226097,22.30,,S
+50,0,3,"Underhill, Mr. Bertram Percival",male,69,0,0,SOTON/O.Q. 39985,26.33,,S
+51,0,3,"Rourke, Mr. Isaac",male,42,0,0,81028,29.25,F92,S
+52,1,2,"Zellweger, Mr. Hugo",male,41,1,0,218838,42.07,,C
+53,0,3,"Kingsley, Mrs. Beatrice",female,58,0,0,323217,30.93,,S
+54,0,3,"Lindqvist, Mr. Leopold",male,44,0,0,189801,14.38,,S
+55,0,3,"Ashdown, Mr. Cecil",male,45,0,0,F.C.C. 20482,16.48,,C
+56,1,1,"Jessamy, Mr. Isaac",male,14,0,1,F.C.C. 31287,203.25,,S
+57,0,3,"Fennimore, Mr. Victor Edmund",male,58,0,1,244199,16.64,,S
+58,0,3,"Dunmore, Mr. George",male,34,0,1,74918,27.35,,S
+59,1,3,"Castellan, Mr. Jasper",male,67,0,0,68477,21.26,,S
+60,1,2,"Tremaine, Miss. Florence",female,21,1,0,F.C.C. 31447,30.49,,S
+61,1,3,"Greaves, Miss. Violet Harriet",female,46,0,2,312621,14.46,,S
+62,0,2,"Dunmore, Mr. Silas Silas",male,31,0,0,241302,39.55,,C
+63,0,3,"Lindqvist, Mr. Edmund",male,74,0,0,184616,36.88,,S
+64,0,3,"Bellamy, Master. Bertram",male,,0,2,62026,15.67,,C
+65,0,3,"Halloran, Mr. Lionel Jasper",male,15,0,0,S.C./PARIS 7705,35.61,,S
+66,1,3,"Thackery, Mr. Walter",male,,1,0,45477,10.88,,S
+67,0,3,"Pemberly, Mr. Jasper Lionel",male,18,1,1,17899,21.96,,S
+68,1,2,"Pendleton, Miss. Violet",female,13,2,0,A/5 20958,39.58,D63,S
+69,0,3,"Jessamy, Mr. Cecil",male,,0,0,76672,13.31,,S
+70,0,3,"Fennimore, Mr. Isaac",male,60,0,0,S.C./PARIS 9996,19.35,,S
+71,0,3,"Radcliffe, Mr. Milo Ernest",male,,0,0,W./C. 22478,38.14,,S
+72,0,3,"Kilbride, Mrs. Lavinia",female,53,0,0,124414,39.63,,Q
+73,0,3,"Sandoval, Mr. Walter Henry",male,36,0,1,339562,9.83,,S
+74,0,3,"Brannock, Mr. Theodore Milo",male,17,0,0,18607,33.48,,S
+75,0,2,"Vasquez, Mr. Theodore",male,23,0,0,198677,43.61,,C
+76,1,3,"Wyndham, Master. Arthur",male,6,0,2,75569,33.62,,S
+77,1,1,"Radcliffe, Master. Felix",male,2,0,2,178867,92.51,A66,S
+78,0,1,"Quayle, Mr. Isaac Bertram",male,23,0,0,F.C.C. 13799,160.81,B132,C
+79,1,3,"Lockhart, Master. Walter Rupert",male,,1,2,223688,13.27,,Q
+80,1,3,"Kingsley, Master. Nathaniel Henry",male,10,1,2,A/5 36537,26.30,,S
+81,1,1,"Castellan, Miss. Dorothea Georgina",female,61,0,0,311148,173.49,A61,C
+82,0,1,"Carrow, Mr. Theodore Arthur",male,,0,1,22317,171.35,B65,S
+83,0,3,"Coldharbour, Mrs. Florence",female,65,0,0,27885,31.85,,S
+84,0,3,"Tremaine, Mr. Theodore",male,68,0,0,261686,6.78,E75,S
+85,1,3,"Maddox, Miss. Nora",female,2,0,0,STON/O2. 38819,10.44,,S
+86,1,2,"Sorensen, Mr. Arthur",male,50,0,0,189965,30.14,,C
+87,1,3,"Thackery, Master. Walter",male,10,0,1,115714,8.75,,S
+88,0,3,"Pemberly, Mr. Felix",male,43,1,0,337591,17.46,,S
+89,1,3,"Wyndham, Miss. Agnes",female,64,0,0,S.C./PARIS 10121,22.69,,C
+90,0,3,"Carrow, Mr. Hugo",male,44,0,0,C.A. 36974,12.79,,S
+91,0,1,"Norcross, Mr. Isaac",male,39,0,0,154506,100.66,B146,S
+92,1,1,"Ivers, Miss. Harriet",female,42,1,0,STON/O2. 1839,186.64,A95,C
+93,0,1,"Brannock, Master. Rupert",male,,0,2,369048,257.36,A108,S
+94,1,2,"Ivers, Master. Lionel",male,11,0,2,C.A. 20157,43.76,,S
+95,1,1,"Pemberly, Mr. Milo",male,23,0,0,269678,66.89,,S
+96,0,3,"Lacombe, Mr. Leopold",male,39,1,0,117873,24.00,,S
+97,1,3,"Coldharbour, Miss. Eleanor",female,,0,1,PC 17008,17.52,,S
+98,0,3,"Oakhurst, Miss. Harriet Ida",female,7,0,0,C.A. 22053,24.77,,C
+99,1,1,"Prescott, Mr. Theodore",male,63,0,4,79101,76.84,C9,C
+100,1,3,"Quayle, Miss. Georgina",female,10,0,1,155940,15.64,,S
+101,1,1,"Waverly, Miss. Beatrice",female,68,1,0,214395,158.94,,S
+102,0,3,"Halloran, Mr. Theodore",male,43,1,0,214099,15.05,,S
+103,0,2,"Whitcombe, Mr. Harold",male,,0,0,PC 33193,35.75,,C
+104,0,3,"Yeoman, Miss. Harriet",female,11,0,2,57792,27.81,F120,S
+105,0,3,"Lindqvist, Mr. Felix Rupert",male,60,0,0,361245,9.31,,S
+106,0,1,"Pendleton, Mr. Percival",male,54,0,0,368666,175.94,E124,S
+107,0,3,"Norcross, Mr. Rupert",male,61,0,0,C.A. 31471,14.94,,S
+108,1,2,"Sandoval, Mr. Walter George",male,,0,0,284486,64.71,,S
+109,0,3,"Carrow, Mr. Oscar",male,25,1,0,338444,25.25,,S
+110,0,1,"Radcliffe, Mr. Isaac",male,18,0,2,154873,155.74,D120,S
+111,1,2,"Oakhurst, Master. Harold",male,10,0,2,165852,59.90,,C
+112,0,2,"Radcliffe, Mr. Henry",male,14,0,0,SOTON/O.Q. 33794,43.03,,S
+113,0,3,"Yeoman, Mr. George Ernest",male,17,0,0,C.A. 3262,11.72,,C
+114,0,3,"Pendleton, Mr. Leopold",male,20,0,0,41458,11.67,,S
+115,1,1,"Fairbanks, Mrs. Lavinia",female,49,1,0,235527,162.14,B116,S
+116,0,2,"Farraday, Mr. Albert Leopold",male,,0,0,344247,52.56,E31,S
+117,0,3,"Sandoval, Mr. Rupert Edwin",male,54,1,0,97957,12.43,,S
+118,0,3,"Underhill, Mr. Edwin",male,51,0,0,95033,31.60,,S
+119,0,3,"Greaves, Mrs. Edith",female,,0,0,161350,30.22,,S
+120,0,3,"Elsworth, Mr. Ernest Ernest",male,56,0,0,65712,32.02,,S
+121,0,3,"Mallory, Mr. Henry",male,66,0,0,130877,12.60,,Q
+122,0,1,"Sandoval, Mr. Silas Matthias",male,61,0,1,F.C.C. 11286,248.09,,S
+123,0,1,"Waverly, Mr. Victor Cecil",male,66,0,0,192203,142.69,A107,S
+124,1,3,"Greaves, Mr. Matthias",male,35,0,0,PC 23069,27.98,,S
+125,0,3,"Gillespie, Mr. Leopold Harold",male,58,0,0,315960,32.66,,Q
+126,1,3,"Elsworth, Mrs. Beatrice",female,19,0,2,C.A. 14158,7.05,,S
+127,1,3,"Sandoval, Master. Felix Lionel",male,,0,2,304278,24.61,,S
+128,0,3,"Sorensen, Mr. Theodore",male,18,1,1,C.A. 8954,7.43,,S
+129,0,3,"Lindqvist, Dr. Leopold George",male,17,0,2,STON/O2. 24929,27.35,,S
+130,0,3,"Bellamy, Mr. Hugo",male,19,0,1,155447,21.89,,C
+131,1,1,"Lacombe, Miss. Nora",female,73,0,0,107260,131.95,A14,S
+132,1,2,"Ashdown, Miss. Edith",female,17,0,0,186654,27.06,,S
+133,0,2,"Merriweather, Mr. Felix Rupert",male,61,1,0,371550,71.78,F113,S
+134,1,2,"Castellan, Mrs. Winifred",female,35,0,0,383442,27.22,,Q
+135,0,3,"Carrow, Miss. Sybil",female,12,0,0,39125,24.77,,C
+136,0,2,"Dunmore, Mr. Albert",male,56,0,0,264409,41.01,,S
+137,0,2,"Merriweather, Mr. Albert",male,24,0,0,52599,69.73,,Q
+138,0,3,"Gillespie, Mr. Isaac",male,,0,0,C.A. 24597,36.91,,S
+139,0,1,"Mallory, Mr. Ernest",male,41,3,0,STON/O2. 18216,58.44,A111,S
+140,0,2,"Lockhart, Mr. Arthur",male,,0,0,108158,27.40,,S
+141,0,3,"Merriweather, Mr. Lionel",male,44,0,0,197877,13.44,,S
+142,0,3,"Brannock, Miss. Florence",female,38,1,0,220407,22.29,,S
+143,0,3,"Dewhurst, Mr. Albert",male,17,0,0,136079,28.71,,S
+144,0,1,"Sandoval, Mr. Henry",male,40,0,1,199084,60.47,,C
+145,0,3,"Farraday, Mr. Matthias",male,72,0,0,65924,16.63,,S
+146,0,3,"Lockhart, Miss. Georgina",female,8,0,0,100242,9.48,,C
+147,0,3,"Brightwater, Mr. Silas",male,29,1,0,276930,17.54,,Q
+148,0,1,"Brightwater, Master. Walter Rupert",male,7,0,1,170674,52.94,C121,S
+149,0,3,"Thackery, Mr. Frederick",male,59,1,0,325376,29.18,,S
+150,1,1,"Hartigan, Miss. Philippa Dorothea",female,72,1,0,226169,100.03,,Q
+151,0,3,"Hartigan, Mr. Henry",male,23,2,0,130397,26.35,,S
+152,0,3,"Garrick, Mr. Cecil",male,34,0,0,C.A. 29149,8.39,,S
+153,1,3,"Ivers, Mrs. Imogen",female,,1,0,134275,31.63,,S
+154,0,3,"Farraday, Mr. Cecil",male,,0,0,PC 35988,36.12,,S
+155,0,1,"Zellweger, Master. Victor",male,8,1,1,209002,106.08,B136,S
+156,0,3,"Elsworth, Mr. Theodore Frederick",male,19,0,1,296200,6.90,,C
+157,1,1,"Jessamy, Master. Lionel Silas",male,4,0,1,C.A. 24706,73.31,A85,S
+158,0,3,"Lacombe, Mr. Isaac",male,,0,0,125122,23.93,,S
+159,1,3,"Abernath, Mrs. Olive",female,,1,2,A/5 10377,8.73,,S
+160,0,2,"Dewhurst, Mr. Percival",male,23,1,0,W./C. 12252,68.19,,S
+161,0,2,"Wyndham, Mr. Hugo",male,71,0,0,384910,36.35,,S
+162,0,3,"Radcliffe, Mr. Victor Henry",male,,4,0,121121,10.40,,C
+163,0,3,"Norcross, Mr. Bertram",male,21,2,0,162749,18.19,,S
+164,0,1,"Waverly, Mr. George",male,67,0,4,341287,228.45,C133,S
+165,0,2,"Lockhart, Miss. Philippa Harriet",female,,0,0,308186,72.62,,S
+166,0,3,"Pendleton, Mr. Isaac",male,19,0,0,189008,22.93,,S
+167,1,1,"Pendleton, Miss. Olive",female,40,0,0,A/5 32562,214.03,E114,S
+168,0,3,"Ashdown, Mr. Milo Felix",male,,2,1,80900,11.88,,Q
+169,0,3,"Gillespie, Mr. Jasper Ernest",male,50,0,0,193304,21.68,,S
+170,0,2,"Waverly, Countess. Josephine",female,36,0,0,A/5 9239,32.48,,S
+171,1,2,"Castellan, Master. Silas",male,1,0,2,17255,68.38,,S
+172,0,3,"Halloran, Mr. Oscar Ernest",male,19,1,0,F.C.C. 17748,20.63,,S
+173,0,2,"Quayle, Mr. Theodore",male,51,1,1,177522,49.26,,S
+174,0,3,"Sandoval, Mr. Percival",male,42,0,0,298142,28.02,,Q
+175,0,3,"Holloway, Mrs. Nora",female,65,0,0,292988,14.96,,S
+176,0,3,"Sandoval, Mr. Harold",male,52,1,0,C.A. 33977,19.88,,Q
+177,1,1,"Holloway, Mr. Oscar",male,,2,0,S.C./PARIS 18307,167.21,,S
+178,0,1,"Merriweather, Mr. Nathaniel Percival",male,,0,0,W./C. 20039,142.51,C108,S
+179,0,3,"Sorensen, Master. Hugo Rupert",male,11,0,3,245155,33.98,G120,S
+180,0,3,"Bellamy, Mr. Oscar",male,13,1,0,31803,36.33,,S
+181,0,3,"Radcliffe, Mr. Milo",male,53,1,0,37335,10.69,,S
+182,0,3,"Dewhurst, Miss. Florence Josephine",female,48,1,0,W./C. 14294,32.40,,C
+183,0,2,"Merriweather, Mr. Walter Isaac",male,19,1,0,126903,51.38,,S
+184,0,3,"Lockhart, Mr. Bertram",male,24,0,2,82415,19.04,,S
+185,0,1,"Tremaine, Mr. Bertram",male,56,1,0,205242,245.49,A56,S
+186,0,3,"Brightwater, Master. Silas",male,6,1,1,189043,32.47,,S
+187,0,3,"Brannock, Mr. Oscar Arthur",male,39,0,0,104620,27.29,,S
+188,1,3,"Fennimore, Miss. Philippa",female,,0,0,W./C. 37523,14.70,,C
+189,0,1,"Mallory, Mr. Jasper",male,45,4,4,281511,259.14,A85,S
+190,0,3,"Hartigan, Mrs. Beatrice",female,56,0,0,130286,28.01,,S
+191,1,2,"Pemberly, Mr. Cecil",male,,0,1,316416,46.89,,C
+192,0,3,"Waverly, Mr. Ernest Theodore",male,55,0,0,125256,23.92,,S
+193,1,1,"Lacombe, Mr. Rupert Edwin",male,61,0,0,258645,189.87,E31,S
+194,0,3,"Mallory, Mr. Edmund",male,30,1,0,78140,24.61,,C
+195,1,1,"Pemberly, Miss. Winifred",female,62,1,0,308160,220.05,A109,S
+196,0,3,"Castellan, Master. Jasper Theodore",male,7,1,2,185204,22.45,,S
+197,0,3,"Pemberly, Col. Lionel Lionel",male,24,1,0,143493,11.83,,S
+198,0,3,"Whitcombe, Master. Rupert Frederick",male,3,0,2,192313,10.60,,C
+199,0,2,"Zellweger, Mr. Silas Felix",male,69,0,0,264926,33.55,,S
+200,1,3,"Elsworth, Miss. Eliza",female,6,0,1,51422,12.69,E145,S
+201,1,1,"Kingsley, Miss. Violet Imogen",female,,1,0,STON/O2. 30600,41.02,B11,S
+202,0,2,"Holloway, Mr. Lionel",male,73,0,0,111125,16.79,,S
+203,1,3,"Castellan, Master. Leopold",male,,0,1,C.A. 2849,9.81,,S
+204,1,2,"Kingsley, Miss. Adelaide",female,11,0,0,184097,23.75,,C
+205,0,3,"Nettleton, Dr. Clara",female,55,1,2,193805,38.84,,C
+206,0,3,"Holloway, Miss. Adelaide",female,59,0,0,398310,7.46,G147,S
+207,1,3,"Quayle, Miss. Clara Philippa",female,,0,0,164788,35.77,,S
+208,0,3,"Kilbride, Mr. Nathaniel",male,,1,1,349083,39.37,,S
+209,0,1,"Radcliffe, Master. Matthias",male,,1,2,193734,161.42,D27,S
+210,1,3,"Garrick, Mrs. Rosalind",female,48,0,0,245523,26.35,,S
+211,1,1,"Yeoman, Mrs. Eleanor",female,54,0,0,81672,241.49,C68,S
+212,0,3,"Ivers, Mr. Milo Isaac",male,29,0,0,230830,10.42,,S
+213,1,3,"Carrow, Mrs. Florence",female,,1,0,163063,28.09,,S
+214,0,3,"Carrow, Mrs. Lillian",female,,0,0,A/5 27199,17.68,,S
+215,1,3,"Merriweather, Miss. Mabel",female,71,0,0,19294,26.17,,S
+216,0,2,"Garrick, Master. Edmund",male,,0,2,307783,28.43,,S
+217,1,3,"Greaves, Master. Arthur",male,4,0,2,339716,16.47,F11,S
+218,1,1,"Kilbride, Miss. Philippa",female,3,1,0,190125,148.94,B108,S
+219,1,3,"Halloran, Miss. Winifred",female,16,0,0,S.C./PARIS 22303,10.21,,S
+220,0,3,"Yeoman, Miss. Dorothea Margaret",female,,0,2,379866,12.40,,S
+221,0,3,"Gillespie, Mr. Matthias",male,38,4,4,154377,17.40,,S
+222,0,3,"Ivers, Mr. Frederick Albert",male,38,0,0,W./C. 1620,35.10,F56,C
+223,1,2,"Vasquez, Master. Silas",male,12,0,1,230313,22.86,,S
+224,0,3,"Waverly, Mrs. Eleanor",female,57,0,0,357292,36.91,,C
+225,1,3,"Wyndham, Mrs. Constance",female,37,0,0,337257,36.79,,S
+226,1,3,"Maddox, Miss. Josephine",female,50,0,0,110835,35.05,,S
+227,1,2,"Coldharbour, Master. Victor",male,1,0,2,297923,43.73,,S
+228,1,3,"Nettleton, Miss. Olive",female,74,0,0,14002,23.45,,S
+229,0,2,"Hartigan, Mr. Silas",male,16,0,0,197611,54.00,,C
+230,0,3,"Kingsley, Mr. Albert",male,,1,0,181362,9.11,,S
+231,1,3,"Castellan, Mr. Victor George",male,74,1,0,208038,20.83,,Q
+232,1,1,"Garrick, Miss. Winifred Margaret",female,5,0,0,S.C./PARIS 11886,42.33,,S
+233,1,1,"Radcliffe, Master. Leopold Albert",male,11,0,1,C.A. 37008,121.92,E132,S
+234,0,2,"Whitcombe, Mr. Lionel",male,38,0,0,116941,43.52,,S
+235,0,2,"Vasquez, Mr. Edmund Cecil",male,29,0,0,127301,47.94,,S
+236,0,3,"Greaves, Mr. Arthur",male,36,0,1,108532,31.25,,Q
+237,0,3,"Kilbride, Mr. Felix Hugo",male,15,1,0,300355,22.98,,S
+238,0,3,"Holloway, Mr. Silas",male,56,0,0,PC 39485,12.46,,S
+239,0,3,"Oakhurst, Mr. Edmund",male,55,4,0,STON/O2. 38683,33.09,,C
+240,1,3,"Jessamy, Mrs. Lionel (Ida Dunmore)",female,43,0,0,A/5 5811,32.70,,C
+241,0,3,"Brannock, Miss. Clara Adelaide",female,30,0,0,377063,20.60,,C
+242,0,3,"Ashdown, Mr. George Theodore",male,14,1,0,124980,24.13,,S
+243,1,1,"Ivers, Miss. Josephine Constance",female,32,0,0,292581,235.75,E69,S
+244,0,3,"Farraday, Master. Matthias",male,10,0,1,S.C./PARIS 15410,30.91,,S
+245,0,3,"Hartigan, Mr. Henry",male,30,0,0,129083,37.82,,Q
+246,0,1,"Garrick, Mr. Frederick",male,45,3,1,W./C. 28428,162.12,C60,S
+247,0,2,"Farraday, Mr. Walter",male,,0,0,218443,57.97,,S
+248,0,3,"Whitcombe, Mr. Ernest Milo",male,64,1,4,332813,37.39,,S
+249,1,1,"Yeoman, Mrs. Edith",female,36,0,0,253357,235.24,A72,S
+250,0,3,"Yeoman, Mr. Henry",male,34,0,0,129654,19.81,,C
+251,0,3,"Sorensen, Mr. Theodore",male,65,0,0,123681,17.35,,S
+252,0,2,"Farraday, Miss. Georgina Eleanor",female,25,5,0,290110,15.76,,C
+253,1,1,"Yeoman, Mr. Percival Arthur",male,31,0,0,39501,81.16,C26,S
+254,1,3,"Holloway, Master. Walter Edmund",male,9,0,1,177634,22.05,,S
+255,1,1,"Pemberly, Mrs. Mabel",female,,0,0,318413,167.32,B82,C
+256,1,1,"Gillespie, Miss. Olive",female,46,0,0,PC 24261,155.59,B15,S
+257,0,3,"Kingsley, Mrs. Constance",female,30,0,0,352157,10.52,,S
+258,0,3,"Lockhart, Mrs. Nora",female,,0,0,A/5 39926,33.27,,S
+259,0,2,"Thackery, Mr. Theodore",male,45,0,0,12866,13.21,,C
+260,1,1,"Rourke, Mr. Clement Bertram",male,18,1,1,PC 2449,258.39,A103,S
+261,0,3,"Dewhurst, Mr. Henry Percival",male,40,1,0,323727,30.36,,C
+262,1,3,"Ashdown, Mr. Nathaniel",male,63,0,1,314101,17.73,,S
+263,1,3,"Coldharbour, Miss. Agnes Imogen",female,20,4,0,388748,12.77,,S
+264,0,3,"Rourke, Mr. Matthias",male,,0,0,107786,25.11,F90,S
+265,0,3,"Fennimore, Mr. Jasper",male,32,0,0,347711,13.48,,S
+266,0,3,"Pemberly, Mr. Edwin",male,37,0,0,STON/O2. 22948,18.21,G67,C
+267,0,3,"Lacombe, Mr. Oscar",male,,0,0,42214,10.32,,S
+268,0,3,"Garrick, Miss. Harriet",female,13,0,0,16121,37.21,,C
+269,1,1,"Garrick, Master. Walter Harold",male,4,0,1,132734,222.06,B98,S
+270,1,2,"Castellan, Mrs. Imogen",female,,0,0,W./C. 13934,21.62,,S
+271,0,3,"Rourke, Mrs. Beatrice",female,68,0,1,S.C./PARIS 21829,17.45,G120,Q
+272,0,3,"Mallory, Mr. Cecil",male,43,1,0,STON/O2. 18040,27.57,,S
+273,0,2,"Halloran, Mr. Edwin Hugo",male,53,0,0,312410,49.88,,S
+274,0,2,"Ashdown, Mr. Edmund",male,17,0,0,172546,35.90,,S
+275,0,1,"Rourke, Dr. Felix Cecil",male,25,1,1,129695,42.42,D6,C
+276,1,2,"Radcliffe, Miss. Eliza",female,71,1,0,341813,19.35,E120,Q
+277,1,2,"Thackery, Miss. Dorothea",female,,0,2,A/5 17624,23.17,,S
+278,1,2,"Nettleton, Miss. Sybil",female,42,0,1,F.C.C. 34329,45.34,,S
+279,1,1,"Castellan, Dr. Henry",male,15,0,0,STON/O2. 28264,69.61,A44,C
+280,1,3,"Sorensen, Miss. Edith Nora",female,56,2,0,F.C.C. 28646,14.06,,S
+281,0,3,"Ashdown, Mr. Percival",male,42,0,0,194519,32.82,,S
+282,0,1,"Dunmore, Capt. Victor",male,36,0,0,323319,117.80,C124,S
+283,0,1,"Mallory, Mr. Clement",male,,0,0,176401,207.81,B38,S
+284,0,2,"Abernath, Rev. Henry Ernest",male,20,0,0,121735,49.85,,S
+285,1,1,"Garrick, Miss. Edith Harriet",female,45,0,0,STON/O2. 28997,209.40,A130,S
+286,1,1,"Oakhurst, Master. Isaac",male,7,0,2,STON/O2. 32539,217.55,A36,Q
+287,1,2,"Tremaine, Miss. Sybil Lillian",female,3,0,0,99411,31.53,E144,S
+288,1,1,"Castellan, Mrs. Violet",female,57,0,0,A/5 36522,260.84,B124,C
+289,0,3,"Ivers, Mr. Edwin Matthias",male,,0,0,337916,32.43,,S
+290,1,3,"Nettleton, Mrs. Harriet",female,36,0,1,164921,28.66,,C
+291,0,3,"Kilbride, Miss. Edith Dorothea",female,57,0,0,391796,31.56,,S
+292,0,1,"Jessamy, Mr. Victor",male,28,1,1,181232,56.92,,S
+293,1,1,"Mallory, Mr. Henry",male,36,1,0,326741,147.71,E120,S
+294,0,3,"Pemberly, Mr. Victor Clement",male,29,0,0,173566,33.20,,S
+295,0,1,"Fennimore, Mr. Edmund",male,,2,0,300994,240.53,C71,S
+296,1,3,"Fairbanks, Mr. Arthur",male,33,1,0,239030,16.97,,S
+297,1,1,"Vasquez, Miss. Georgina",female,45,0,0,9977,208.98,E85,S
+298,1,3,"Castellan, Master. Arthur Victor",male,3,0,2,237733,18.00,E17,C
+299,0,3,"Prescott, Mr. Cecil",male,31,1,0,364953,21.58,,S
+300,0,1,"Fennimore, Master. Clement",male,9,0,1,302992,253.30,A19,S
+301,0,3,"Pemberly, Mr. Oscar Clement",male,57,0,0,C.A. 8268,29.61,,S
+302,0,3,"Bellamy, Mr. Bertram Jasper",male,60,0,0,A/5 20730,18.47,,C
+303,0,3,"Fairbanks, Mr. Cecil Walter",male,71,0,0,S.C./PARIS 3379,30.79,,S
+304,0,3,"Lockhart, Miss. Ida Winifred",female,16,0,2,S.C./PARIS 11315,25.75,F33,S
+305,0,3,"Quayle, Mrs. Theodore (Harriet Lockhart)",female,71,0,0,293273,20.98,,Q
+306,0,3,"Mallory, Rev. Rupert",male,,0,0,SOTON/O.Q. 9884,27.07,,S
+307,1,1,"Yeoman, Mr. Milo Clement",male,42,0,1,186953,81.65,B85,S
+308,0,3,"Hartigan, Mr. Jasper Leopold",male,55,0,0,A/5 9553,35.91,,S
+309,1,3,"Kingsley, Mr. Percival Percival",male,34,0,0,49565,22.24,,C
+310,1,2,"Nettleton, Miss. Winifred",female,50,0,1,STON/O2. 9161,73.27,,S
+311,1,1,"Norcross, Miss. Lavinia",female,29,0,0,199244,156.30,C114,S
+312,0,2,"Hartigan, Mr. Frederick",male,55,0,0,S.C./PARIS 30770,72.82,F36,S
+313,1,1,"Prescott, Master. Edwin Oscar",male,6,1,2,371451,183.01,B4,S
+314,0,3,"Brightwater, Miss. Mabel",female,69,0,1,14479,13.75,,C
+315,0,3,"Ivers, Mr. Isaac",male,67,0,0,58749,17.20,,S
+316,1,1,"Kilbride, Miss. Agnes",female,68,3,2,276726,254.89,E17,C
+317,1,2,"Zellweger, Miss. Nora",female,,1,0,194701,69.43,,S
+318,0,3,"Quayle, Mr. Hugo",male,74,0,0,295197,10.20,,S
+319,0,3,"Bellamy, Mr. Nathaniel",male,66,0,1,275105,35.71,,S
+320,0,1,"Zellweger, Mr. Victor",male,38,0,0,133184,253.54,B114,C
+321,0,3,"Lacombe, Mr. Matthias",male,65,0,0,238982,29.99,,S
+322,1,3,"Mallory, Mrs. Adelaide",female,66,0,0,261950,9.81,,S
+323,0,3,"Halloran, Mr. Frederick",male,36,0,1,323191,19.00,,S
+324,1,1,"Norcross, Mr. Milo",male,69,2,2,A/5 32899,50.43,,S
+325,0,2,"Dunmore, Mr. Ernest",male,,0,0,156311,11.12,,S
+326,1,3,"Hartigan, Mr. Rupert",male,,0,0,STON/O2. 33810,33.66,,S
+327,1,1,"Zellweger, Col. Oscar",male,50,1,0,256861,157.19,A12,S
+328,0,2,"Dewhurst, Miss. Mabel",female,46,0,0,385012,14.24,,S
+329,1,3,"Dewhurst, Master. Harold Hugo",male,1,0,1,159329,20.69,,S
+330,0,3,"Lacombe, Mr. Nathaniel",male,69,0,0,316777,21.10,,Q
+331,1,1,"Jessamy, Mr. Matthias",male,39,0,0,134637,159.91,,S
+332,0,3,"Kingsley, Mr. Leopold",male,42,0,0,137786,22.34,,S
+333,0,1,"Underhill, Mr. Cecil",male,,0,0,80280,31.61,D66,S
+334,1,2,"Nettleton, Miss. Rosalind Agnes",female,3,0,0,199968,59.38,,S
+335,1,1,"Vasquez, Mrs. George (Imogen Thackery)",female,40,1,0,353939,31.78,C114,S
+336,0,1,"Norcross, Mr. Theodore",male,40,0,0,337387,175.11,A7,S
+337,1,3,"Ashdown, Mr. Nathaniel",male,39,0,0,227547,39.56,,S
+338,1,1,"Kingsley, Miss. Edith",female,40,0,1,SOTON/O.Q. 26471,52.21,A127,S
+339,1,2,"Pendleton, Mrs. Mabel",female,67,0,0,395799,51.61,,Q
+340,0,2,"Norcross, Mr. Cecil",male,42,1,0,134127,15.32,,S
+341,0,3,"Whitcombe, Mr. Walter Percival",male,19,0,0,78886,21.27,,Q
+342,0,3,"Castellan, Mr. Hugo",male,56,0,0,13814,24.82,,S
+343,1,3,"Yeoman, Mr. Arthur",male,15,1,0,10890,21.56,,S
+344,1,1,"Kilbride, Mrs. Lillian",female,,0,0,299454,97.53,E84,S
+345,1,1,"Sandoval, Mr. Arthur Cecil",male,49,0,0,141540,172.19,B143,C
+346,0,2,"Rourke, Dr. Henry",male,23,0,0,PC 4987,34.97,,S
+347,0,3,"Holloway, Mr. Clement",male,29,0,0,397630,36.85,,S
+348,0,1,"Maddox, Mr. Clement",male,29,0,0,55001,28.47,,S
+349,1,3,"Kingsley, Master. Theodore",male,7,1,1,238421,9.09,,S
+350,0,3,"Brightwater, Mrs. Rosalind",female,,0,0,106311,8.97,,S
+351,1,2,"Dunmore, Mrs. Sybil",female,34,0,0,73009,66.72,D108,S
+352,0,1,"Pendleton, Mr. Rupert",male,17,3,0,79893,92.11,D91,S
+353,0,3,"Dunmore, Mr. Matthias",male,64,0,1,F.C.C. 8883,33.19,,S
+354,0,1,"Radcliffe, Mr. Bertram",male,34,0,0,PC 6417,176.44,D142,S
+355,0,1,"Dewhurst, Mr. Felix",male,27,0,0,SOTON/O.Q. 35963,143.57,A86,S
+356,1,1,"Kilbride, Miss. Ida Harriet",female,,0,0,157375,74.59,A9,S
+357,0,3,"Brightwater, Mr. Victor",male,,0,0,389283,30.27,,S
+358,0,1,"Kingsley, Mr. Rupert",male,25,1,0,385265,47.32,D112,Q
+359,1,1,"Vasquez, Master. George",male,4,2,2,237359,126.57,,S
+360,0,2,"Greaves, Mr. Hugo Henry",male,68,0,0,A/5 37777,20.45,,S
+361,1,3,"Ivers, Miss. Nora",female,9,0,0,W./C. 26600,39.10,,S
+362,0,3,"Farraday, Miss. Violet",female,16,1,0,167738,36.61,,S
+363,0,3,"Rourke, Dr. Harold Percival",male,,0,0,242606,32.49,,S
+364,0,3,"Wyndham, Mr. Matthias",male,62,0,0,STON/O2. 24630,36.44,,S
+365,0,2,"Waverly, Mr. Lionel Isaac",male,34,0,0,353946,53.50,,C
+366,0,2,"Merriweather, Mr. Ernest",male,,0,0,A/5 10757,37.61,,C
+367,1,3,"Garrick, Master. Hugo",male,4,3,2,W./C. 35417,28.09,,S
+368,1,3,"Pendleton, Master. Oscar Cecil",male,8,5,2,164227,20.35,,S
+369,1,1,"Bellamy, Mr. Oscar",male,71,0,2,PC 23721,199.72,,S
+370,1,2,"Lacombe, Miss. Edith",female,70,1,0,SOTON/O.Q. 26792,66.63,,C
+371,1,1,"Radcliffe, Master. Ernest Edmund",male,10,0,1,91594,41.49,C56,S
+372,0,3,"Zellweger, Mr. Henry",male,,0,0,277885,18.94,,C
+373,1,3,"Kingsley, Mr. Harold",male,,1,2,256976,38.91,,C
+374,0,3,"Lacombe, Mr. Jasper",male,71,1,0,A/5 12838,21.11,,S
+375,1,3,"Gillespie, Mr. Isaac Jasper",male,30,0,4,330269,25.08,,S
+376,0,3,"Norcross, Mr. Bertram",male,28,0,0,318267,37.26,,C
+377,0,2,"Prescott, Mr. Silas",male,60,0,0,C.A. 21455,16.41,,S
+378,0,1,"Ashdown, Mr. Bertram",male,,0,0,210702,166.16,E87,S
+379,0,3,"Lockhart, Dr. Albert Henry",male,30,0,2,282165,9.20,,C
+380,0,3,"Tremaine, Mr. Harold",male,57,0,0,SOTON/O.Q. 11930,8.21,,Q
+381,0,3,"Yeoman, Mr. Isaac",male,60,0,0,73572,18.10,,C
+382,0,3,"Quayle, Mrs. Imogen",female,32,0,2,17790,12.87,,S
+383,0,1,"Maddox, Master. Edwin",male,7,0,2,PC 37315,48.84,B67,S
+384,0,3,"Coldharbour, Master. Bertram",male,,0,2,110181,14.30,,S
+385,1,1,"Whitcombe, Mr. Frederick",male,,0,0,307977,139.55,A24,S
+386,0,3,"Castellan, Mr. Arthur",male,47,0,0,360569,28.55,,S
+387,1,3,"Tremaine, Miss. Imogen",female,5,0,0,44547,17.70,,S
+388,0,3,"Fairbanks, Mr. Oscar",male,35,1,0,380839,37.14,G23,S
+389,1,2,"Brannock, Master. Edmund",male,12,0,2,F.C.C. 13722,43.10,,S
+390,1,2,"Zellweger, Mrs. Rosalind",female,60,0,2,STON/O2. 38942,44.05,,Q
+391,0,3,"Holloway, Miss. Philippa",female,40,0,0,293696,28.53,,C
+392,0,2,"Holloway, Miss. Margaret",female,46,1,0,107795,50.30,,S
+393,1,3,"Ivers, Mr. Albert",male,52,0,0,177274,22.30,,S
+394,1,2,"Carrow, Mrs. Ida",female,72,0,2,36582,37.03,,S
+395,1,1,"Castellan, Miss. Olive Winifred",female,29,1,1,131135,223.79,C9,S
+396,0,3,"Quayle, Mr. Oscar",male,73,0,0,139972,26.29,,S
+397,0,3,"Castellan, Mr. Felix",male,64,1,2,STON/O2. 26499,7.31,,S
+398,0,2,"Fennimore, Mr. Albert",male,19,0,0,A/5 15865,57.72,,S
+399,0,3,"Abernath, Miss. Lavinia Harriet",female,,0,0,C.A. 12307,33.56,,Q
+400,1,2,"Bellamy, Mrs. Agnes",female,,0,0,STON/O2. 25032,53.52,,S
+401,0,3,"Vasquez, Mr. Nathaniel",male,23,0,0,21804,18.09,,Q
+402,1,1,"Rourke, Miss. Edith Agnes",female,12,0,0,22545,76.53,,S
+403,0,3,"Gillespie, Mr. Oscar Edmund",male,62,0,0,F.C.C. 1675,31.25,,S
+404,1,2,"Prescott, Mr. Cecil",male,64,0,0,209412,16.22,D67,S
+405,1,3,"Maddox, Miss. Margaret Lillian",female,63,0,0,387823,20.61,,S
+406,0,3,"Lacombe, Mr. Frederick",male,43,1,0,371803,27.01,,S
+407,1,1,"Lockhart, Mrs. Florence",female,27,0,0,251421,170.81,E44,S
+408,1,3,"Lindqvist, Miss. Beatrice",female,,0,0,SOTON/O.Q. 13805,30.77,,C
+409,0,1,"Ivers, Mr. Rupert",male,,1,0,W./C. 6920,106.03,B124,C
+410,0,3,"Whitcombe, Mrs. Violet",female,46,1,0,F.C.C. 21226,37.97,,C
+411,1,2,"Fairbanks, Mr. Silas",male,,0,0,81752,54.30,,C
+412,1,2,"Pemberly, Mrs. Dorothea",female,53,5,0,53731,47.44,,S
+413,1,2,"Holloway, Master. Felix",male,7,1,1,368055,40.20,,Q
+414,1,2,"Wyndham, Mrs. Violet",female,,1,0,A/5 30189,49.97,,S
+415,0,3,"Dewhurst, Mr. Nathaniel Harold",male,72,1,0,117396,36.32,,C
+416,0,3,"Prescott, Mr. Cecil Hugo",male,17,0,0,386542,30.31,,C
+417,0,3,"Waverly, Master. Oscar Walter",male,1,1,1,S.C./PARIS 27104,13.43,,C
+418,0,2,"Hartigan, Mr. Oscar",male,65,0,0,152593,56.06,,S
+419,1,1,"Tremaine, Master. Felix Bertram",male,12,0,1,212083,189.57,,S
+420,0,3,"Coldharbour, Mr. Edmund",male,42,0,1,385325,19.87,,S
+421,0,3,"Nettleton, Mrs. Philippa",female,,0,0,STON/O2. 11898,37.64,,S
+422,1,3,"Waverly, Miss. Agnes",female,27,0,0,339034,8.42,,C
+423,1,3,"Yeoman, Mr. Nathaniel",male,74,0,0,213416,11.18,,S
+424,1,3,"Holloway, Mrs. George (Violet Maddox)",female,65,0,0,C.A. 30659,22.24,,S
+425,0,2,"Holloway, Mr. Edwin",male,18,0,0,374953,32.02,,S
+426,1,1,"Castellan, Mr. Isaac",male,73,0,0,166578,141.34,E90,S
+427,0,3,"Underhill, Master. Nathaniel Leopold",male,5,0,2,243188,36.79,,S
+428,0,2,"Dunmore, Mr. Henry",male,28,1,0,149494,15.67,,S
+429,1,3,"Lockhart, Master. Arthur",male,9,0,1,336873,12.63,,S
+430,1,3,"Dunmore, Mr. Clement",male,,0,0,91209,32.70,,C
+431,0,3,"Greaves, Mr. Percival Theodore",male,66,0,0,SOTON/O.Q. 10564,39.47,,C
+432,1,2,"Halloran, Miss. Matilda Philippa",female,10,1,0,40204,19.33,,S
+433,0,3,"Dewhurst, Mr. Bertram Leopold",male,31,0,0,45781,16.17,,C
+434,1,3,"Abernath, Mr. Cecil",male,28,1,0,98961,28.57,,S
+435,1,1,"Sorensen, Mrs. Olive",female,,1,0,SOTON/O.Q. 37050,154.93,C20,S
+436,0,3,"Maddox, Miss. Beatrice Lavinia",female,31,0,0,399073,15.64,,S
+437,1,2,"Lockhart, Mrs. Winifred",female,56,0,0,265027,40.24,,S
+438,1,1,"Holloway, Mr. Harold Walter",male,53,0,0,PC 11075,183.75,A47,S
+439,0,2,"Brannock, Mr. Silas Edwin",male,,1,0,141518,33.03,E44,S
+440,0,3,"Wyndham, Mr. Henry Bertram",male,28,0,1,243909,28.22,F119,S
+441,0,2,"Underhill, Mr. Edmund",male,17,1,0,A/5 26690,26.61,,S
+442,1,3,"Holloway, Mrs. Adelaide",female,,1,0,STON/O2. 18746,32.17,,S
+443,0,2,"Carrow, Mr. Edmund",male,45,0,0,F.C.C. 37142,48.76,,C
+444,0,3,"Lockhart, Mr. Cecil",male,48,0,0,SOTON/O.Q. 28333,11.94,,S
+445,0,3,"Rourke, Master. Arthur",male,1,1,2,242733,26.68,,S
+446,0,3,"Dewhurst, Mr. Silas Jasper",male,,0,0,C.A. 19985,34.44,,C
+447,0,1,"Kingsley, Master. Oscar",male,3,2,2,85920,97.18,B107,S
+448,1,3,"Kilbride, Mr. Oscar",male,37,0,1,359298,12.47,,C
+449,0,3,"Oakhurst, Mr. Cecil Hugo",male,55,0,0,A/5 3322,33.35,,S
+450,0,3,"Carrow, Major. Arthur",male,72,0,0,334651,28.02,,S
+451,1,3,"Prescott, Mr. Theodore",male,45,0,0,W./C. 33982,18.73,,S
+452,0,3,"Norcross, Mr. Matthias Arthur",male,,0,0,C.A. 13356,22.85,,S
+453,1,3,"Tremaine, Master. Clement Hugo",male,,1,1,86337,39.41,,C
+454,0,3,"Ashdown, Mrs. Winifred",female,38,0,0,289528,31.57,,C
+455,0,1,"Rourke, Mr. Harold",male,,0,1,S.C./PARIS 32709,137.62,E73,S
+456,0,2,"Merriweather, Mr. Matthias",male,66,0,0,155225,16.49,,S
+457,0,3,"Coldharbour, Mr. Silas",male,,1,1,166683,37.23,,S
+458,0,2,"Maddox, Mr. Felix",male,73,0,0,107507,53.80,F62,C
+459,1,2,"Kingsley, Miss. Lavinia Margaret",female,34,1,0,SOTON/O.Q. 21060,14.66,F24,S
+460,1,3,"Sandoval, Mrs. Florence",female,32,1,0,110706,32.40,,S
+461,0,1,"Hartigan, Mr. Walter Percival",male,23,0,1,SOTON/O.Q. 38568,143.43,E121,S
+462,0,3,"Castellan, Mr. Cecil",male,49,0,1,254023,30.11,,Q
+463,0,3,"Underhill, Mr. Arthur",male,21,0,0,A/5 27465,27.52,,S
+464,1,3,"Hartigan, Miss. Sybil Constance",female,58,0,0,C.A. 16813,30.39,,S
+465,0,3,"Tremaine, Mrs. Imogen",female,,0,0,386286,34.08,,C
+466,0,3,"Halloran, Mr. Milo",male,60,0,0,PC 12390,11.77,,S
+467,1,2,"Greaves, Mrs. Rosalind",female,,1,0,370897,64.63,,S
+468,1,2,"Garrick, Mrs. Josephine",female,,0,0,SOTON/O.Q. 24052,29.17,,S
+469,1,1,"Lockhart, Mr. Percival",male,49,2,0,159761,155.03,,S
+470,1,3,"Lockhart, Mrs. Constance",female,28,0,0,233558,30.29,G99,S
+471,1,3,"Tremaine, Master. Theodore Arthur",male,,2,2,SOTON/O.Q. 22052,31.31,,C
+472,0,1,"Whitcombe, Mr. Bertram",male,,1,0,374763,215.75,C3,S
+473,1,1,"Rourke, Dr. Florence",female,57,0,0,255555,223.85,E116,S
+474,0,2,"Pendleton, Mr. Nathaniel Frederick",male,61,0,0,PC 13003,24.75,,S
+475,0,3,"Castellan, Miss. Matilda",female,20,0,2,S.C./PARIS 8848,24.47,,C
+476,0,2,"Greaves, Mr. Matthias",male,53,0,0,54118,54.47,E40,S
+477,1,3,"Waverly, Mrs. Clara",female,19,0,0,150804,19.84,,C
+478,0,3,"Hartigan, Miss. Rosalind",female,57,0,2,111755,14.28,,C
+479,0,3,"Lacombe, Mr. Harold",male,,0,1,296672,13.01,,S
+480,0,1,"Quayle, Mr. Albert",male,,2,0,C.A. 20619,50.73,B32,C
+481,0,2,"Coldharbour, Mr. Arthur Bertram",male,71,0,0,58302,72.33,,S
+482,0,2,"Kingsley, Mr. Harold",male,50,0,0,50330,55.00,,C
+483,1,2,"Lockhart, Mrs. Lavinia",female,42,0,0,139643,63.23,,C
+484,0,2,"Castellan, Mr. Matthias",male,59,0,0,PC 22217,37.24,,Q
+485,1,1,"Underhill, Miss. Sybil",female,,0,0,W./C. 3198,238.04,D134,S
+486,0,2,"Sorensen, Mr. Lionel",male,31,0,1,347452,37.77,,S
+487,0,1,"Pemberly, Mr. Albert",male,61,0,0,388655,218.60,B133,Q
+488,0,3,"Quayle, Mr. Isaac",male,62,0,0,W./C. 14458,33.58,,S
+489,1,2,"Gillespie, Mr. Clement Isaac",male,24,0,0,PC 30470,59.44,,S
+490,0,3,"Norcross, Mr. Victor Oscar",male,,1,0,F.C.C. 22136,36.16,,S
+491,1,2,"Yeoman, Master. Felix",male,1,1,2,118901,72.95,,Q
+492,1,1,"Pendleton, Mrs. Arthur (Ida Farraday)",female,56,0,2,10434,102.23,D56,S
+493,1,3,"Dewhurst, Master. George Bertram",male,,1,1,375125,8.71,,C
+494,0,3,"Thackery, Master. Felix",male,10,0,1,322831,15.39,,S
+495,1,1,"Ashdown, Mrs. Imogen",female,60,0,0,A/5 34816,260.83,D84,C
+496,0,2,"Wyndham, Mr. Henry",male,47,0,0,294000,37.40,,C
+497,0,3,"Underhill, Master. Clement",male,2,0,2,F.C.C. 3131,22.87,,C
+498,0,3,"Pemberly, Mr. Isaac Arthur",male,64,1,0,STON/O2. 12599,34.61,,Q
+499,0,3,"Waverly, Mr. Milo",male,,0,0,38899,37.83,E95,C
+500,0,3,"Sorensen, Mrs. Rosalind",female,48,0,0,243443,26.78,,S
+501,0,3,"Kilbride, Mr. Theodore",male,39,0,2,238426,37.23,,Q
+502,0,3,"Jessamy, Mr. Milo",male,24,0,0,24844,16.59,,S
+503,1,2,"Fairbanks, Master. Leopold",male,1,0,2,372400,24.12,,S
+504,0,3,"Fairbanks, Mr. Silas",male,61,0,0,199809,27.79,,S
+505,0,3,"Brannock, Dr. Oscar Silas",male,,0,2,A/5 29246,33.26,,S
+506,1,2,"Carrow, Miss. Adelaide",female,,4,0,231830,42.25,,C
+507,0,3,"Greaves, Mr. Victor",male,20,0,0,PC 13784,15.91,,S
+508,0,1,"Yeoman, Mr. Clement",male,38,2,1,109687,203.14,D107,S
+509,0,3,"Zellweger, Mrs. Mabel",female,25,1,0,382474,38.31,,S
+510,0,2,"Tremaine, Master. Matthias",male,,0,2,168586,52.59,,S
+511,1,1,"Pemberly, Mr. Lionel",male,17,1,0,PC 18359,254.30,D47,S
+512,1,3,"Hartigan, Mr. Victor",male,19,0,0,242679,13.08,,S
+513,0,1,"Coldharbour, Master. George",male,2,0,2,C.A. 32662,217.98,A24,C
+514,0,2,"Vasquez, Mr. Clement",male,60,0,0,93522,60.23,,C
+515,1,3,"Carrow, Mrs. Dorothea",female,53,1,0,STON/O2. 38183,18.13,,
+516,0,3,"Bellamy, Mrs. Harriet",female,47,3,1,37465,33.53,,S
+517,0,3,"Mallory, Mr. Silas Henry",male,63,1,0,SOTON/O.Q. 39156,20.07,E36,S
+518,0,3,"Waverly, Mr. Oscar",male,67,0,0,312630,23.02,,S
+519,1,3,"Brannock, Miss. Olive",female,32,0,1,21139,14.29,F26,C
+520,0,3,"Mallory, Mr. Henry",male,49,0,0,229804,10.90,,C
+521,0,3,"Carrow, Mr. Cecil",male,15,0,0,44993,35.58,,S
+522,0,3,"Quayle, Mr. Victor",male,74,1,2,363849,14.89,,S
+523,0,3,"Lockhart, Mr. Silas George",male,,0,0,94917,13.67,,Q
+524,1,1,"Farraday, Mrs. Eleanor",female,27,0,0,71476,162.42,D129,C
+525,0,3,"Holloway, Mr. Theodore Albert",male,57,0,1,252188,11.41,,S
+526,0,2,"Vasquez, Mrs. Clara",female,27,0,1,PC 18922,50.53,F65,S
+527,0,3,"Fennimore, Mr. Hugo",male,22,0,0,191613,14.61,,S
+528,1,2,"Fairbanks, Mr. Rupert",male,49,1,0,W./C. 16155,38.02,,S
+529,1,1,"Lockhart, Master. Bertram Matthias",male,10,0,2,STON/O2. 33436,152.67,C39,S
+530,1,2,"Farraday, Mrs. Lavinia",female,,0,2,F.C.C. 13206,64.39,,Q
+531,0,3,"Carrow, Mrs. Eliza",female,,0,0,234843,17.33,,C
+532,0,3,"Zellweger, Mr. Silas",male,,0,0,C.A. 7483,33.53,,S
+533,1,3,"Maddox, Miss. Margaret",female,55,2,0,A/5 8125,22.84,,C
+534,0,3,"Waverly, Mr. Leopold",male,21,0,0,A/5 13614,37.36,,S
+535,0,3,"Halloran, Mr. Cecil",male,43,1,2,153149,18.36,,S
+536,1,3,"Sorensen, Mrs. Eliza",female,71,0,2,212869,10.65,,C
+537,0,1,"Nettleton, Mr. Theodore George",male,39,0,0,251205,189.00,A32,S
+538,1,3,"Whitcombe, Mrs. Lavinia",female,,0,0,SOTON/O.Q. 13708,27.55,,S
+539,0,2,"Vasquez, Mr. Clement",male,18,0,1,S.C./PARIS 2328,72.95,,Q
+540,1,3,"Oakhurst, Mr. Matthias Oscar",male,20,0,0,115484,32.82,,S
+541,1,1,"Fennimore, Mr. Clement",male,17,0,0,331274,58.05,A120,S
+542,0,2,"Lindqvist, Mr. Jasper",male,19,0,1,338333,69.09,,S
+543,1,3,"Sandoval, Miss. Nora",female,,0,0,41423,10.29,,Q
+544,1,2,"Dunmore, Miss. Nora Eleanor",female,62,0,0,A/5 14197,64.21,,Q
+545,0,2,"Halloran, Mr. Jasper",male,,0,0,A/5 1638,72.69,,S
+546,1,2,"Halloran, Miss. Violet",female,14,0,0,A/5 34408,25.68,,S
+547,1,2,"Norcross, Miss. Sybil",female,9,3,2,W./C. 30766,53.64,,S
+548,0,3,"Norcross, Mr. Edwin Theodore",male,,0,0,F.C.C. 28214,28.10,,S
+549,1,1,"Mallory, Miss. Rosalind",female,,0,2,233718,233.08,E101,Q
+550,1,2,"Kilbride, Miss. Edith",female,11,1,2,356429,70.66,,S
+551,1,2,"Gillespie, Mrs. Eliza",female,66,0,0,278045,66.17,,C
+552,0,1,"Greaves, Mr. Edmund George",male,22,0,0,265850,254.88,,S
+553,1,2,"Brannock, Mrs. Margaret",female,,1,1,248115,16.81,,S
+554,1,1,"Prescott, Mr. Walter",male,,3,1,323781,89.74,A130,S
+555,0,3,"Gillespie, Mrs. Hugo (Eleanor Yeoman)",female,49,0,0,148094,14.81,,S
+556,1,2,"Oakhurst, Miss. Margaret",female,4,4,1,S.C./PARIS 5677,38.96,,C
+557,1,1,"Wyndham, Mrs. Olive",female,65,2,0,S.C./PARIS 38373,205.15,,S
+558,1,2,"Lockhart, Mrs. Eliza",female,42,0,0,370945,43.37,,S
+559,0,1,"Abernath, Mr. Milo",male,,0,3,287240,114.98,A123,S
+560,1,3,"Garrick, Mr. Leopold",male,73,1,0,STON/O2. 10174,21.00,,S
+561,0,3,"Fairbanks, Mr. Cecil Henry",male,,0,1,42714,29.77,,S
+562,1,3,"Merriweather, Mrs. Edith",female,66,3,0,285044,30.39,,S
+563,0,3,"Carrow, Mr. Theodore Bertram",male,32,0,0,287523,14.33,,S
+564,0,3,"Lindqvist, Mr. Matthias",male,46,0,0,300188,32.51,,S
+565,0,3,"Pendleton, Mr. Percival Isaac",male,65,1,0,152142,27.85,,S
+566,1,1,"Pemberly, Master. Edwin",male,8,0,2,292759,261.25,E10,C
+567,0,1,"Merriweather, Mr. Isaac Silas",male,13,0,2,126554,118.13,C88,S
+568,1,1,"Pendleton, Mr. Edmund",male,,1,0,250754,188.84,C103,S
+569,0,3,"Nettleton, Major. Arthur Milo",male,34,0,0,S.C./PARIS 13346,35.07,,C
+570,1,2,"Vasquez, Mrs. Margaret",female,20,0,0,295523,19.28,,S
+571,0,3,"Radcliffe, Mr. Edwin",male,42,0,0,67858,32.95,,S
+572,0,3,"Oakhurst, Mrs. Georgina",female,30,1,0,STON/O2. 18828,9.89,,S
+573,0,3,"Farraday, Mrs. Clara",female,28,0,0,106632,18.40,,C
+574,0,1,"Coldharbour, Mr. George",male,19,1,0,C.A. 23715,131.92,D79,Q
+575,0,3,"Coldharbour, Mrs. Oscar (Agnes Farraday)",female,71,0,0,W./C. 2512,28.75,,S
+576,0,3,"Lacombe, Mr. Harold Albert",male,56,0,0,325660,27.69,G37,S
+577,0,3,"Zellweger, Col. Matthias",male,41,0,0,PC 3219,28.39,,S
+578,0,3,"Farraday, Mr. Henry",male,40,0,0,372360,26.04,,S
+579,0,3,"Pendleton, Mr. George Henry",male,61,0,0,92078,12.67,,C
+580,0,3,"Coldharbour, Mrs. Dorothea",female,62,0,2,76152,29.28,,S
+581,1,1,"Fairbanks, Mr. Cecil",male,72,1,1,STON/O2. 27155,255.20,,S
+582,0,3,"Zellweger, Mr. Leopold",male,,0,1,73824,15.09,,C
+583,1,2,"Rourke, Miss. Margaret",female,36,0,0,106399,28.01,F69,S
+584,1,1,"Tremaine, Miss. Nora",female,13,0,0,132981,252.60,,C
+585,0,2,"Whitcombe, Mr. George",male,15,0,0,343676,71.95,,S
+586,0,2,"Sandoval, Mr. Matthias Oscar",male,15,0,0,76786,15.52,,C
+587,0,3,"Mallory, Miss. Adelaide",female,3,0,3,336070,20.73,,S
+588,1,3,"Underhill, Mr. Clement",male,68,0,0,129925,30.20,,C
+589,0,3,"Halloran, Mrs. Sybil",female,24,0,0,132502,38.86,G21,S
+590,0,1,"Oakhurst, Mr. Lionel Frederick",male,38,0,0,297932,123.77,D65,S
+591,0,1,"Vasquez, Mr. Rupert",male,48,1,0,383207,152.55,D18,Q
+592,0,3,"Holloway, Mr. Leopold",male,64,0,4,380913,35.64,,S
+593,0,3,"Underhill, Mr. Milo",male,53,0,0,W./C. 17646,27.45,,S
+594,1,3,"Underhill, Mr. Oscar Victor",male,48,0,0,W./C. 1287,13.47,,C
+595,0,2,"Coldharbour, Mr. Jasper",male,,0,0,278916,69.94,,C
+596,0,1,"Merriweather, Mr. Matthias",male,65,0,1,57194,237.30,,S
+597,0,2,"Lindqvist, Mr. Matthias",male,55,0,1,347261,24.24,,C
+598,0,1,"Zellweger, Mr. Lionel",male,55,0,0,261372,183.62,C93,C
+599,0,3,"Brannock, Miss. Edith",female,48,1,1,129914,26.85,,S
+600,0,3,"Castellan, Mrs. Felix (Nora Fairbanks)",female,31,1,0,285350,25.93,,S
+601,0,3,"Wyndham, Master. Silas Felix",male,1,4,1,135224,39.22,,C
+602,0,3,"Sorensen, Mrs. Ernest (Harriet Carrow)",female,,0,0,74066,12.85,,S
+603,0,2,"Quayle, Mr. Frederick",male,,0,0,229976,38.30,,S
+604,1,1,"Pendleton, Miss. Beatrice Winifred",female,3,0,0,38704,155.57,A48,S
+605,0,3,"Halloran, Mr. Leopold",male,70,0,0,A/5 34780,29.12,,S
+606,0,3,"Lacombe, Miss. Beatrice",female,,0,0,317023,12.03,,S
+607,0,3,"Brightwater, Mr. Bertram",male,51,0,0,119503,23.95,,S
+608,1,3,"Holloway, Master. Lionel",male,8,3,1,STON/O2. 33655,32.43,,S
+609,0,3,"Lindqvist, Mr. Arthur",male,74,1,0,189008,19.17,,S
+610,1,2,"Bellamy, Miss. Rosalind Adelaide",female,12,0,0,C.A. 37094,18.18,,S
+611,0,3,"Yeoman, Ms. Eliza",female,33,0,0,STON/O2. 1171,19.09,,C
+612,1,3,"Thackery, Mrs. Florence",female,72,1,0,37487,10.35,,Q
+613,1,3,"Coldharbour, Miss. Violet Philippa",female,69,0,0,S.C./PARIS 9475,33.35,,S
+614,0,3,"Maddox, Mr. Matthias Rupert",male,35,0,0,58593,17.92,,S
+615,1,3,"Waverly, Master. Bertram",male,7,2,2,296887,13.68,,S
+616,1,3,"Fennimore, Mr. Rupert Edmund",male,26,0,0,34354,15.45,,S
+617,1,3,"Rourke, Mr. Albert Hugo",male,23,0,0,215366,28.64,,S
+618,1,2,"Garrick, Mrs. Lillian",female,37,0,0,99144,33.13,,C
+619,0,3,"Abernath, Mr. Walter Hugo",male,40,0,0,A/5 7819,26.77,,C
+620,1,3,"Jessamy, Mr. Lionel",male,28,1,0,388492,7.62,,Q
+621,0,1,"Brightwater, Mr. Arthur",male,53,0,0,A/5 38733,163.20,D128,S
+622,0,3,"Maddox, Master. Matthias",male,1,0,1,SOTON/O.Q. 10082,28.44,,S
+623,0,3,"Lockhart, Mrs. Leopold (Lavinia Oakhurst)",female,23,0,0,329895,11.36,,S
+624,1,1,"Nettleton, Mr. Edmund",male,42,4,0,C.A. 30836,142.62,C145,C
+625,1,3,"Whitcombe, Mr. Percival",male,42,0,0,W./C. 27445,15.92,,S
+626,0,2,"Wyndham, Master. Rupert Milo",male,4,0,1,F.C.C. 913,34.88,,S
+627,1,1,"Brannock, Miss. Lavinia",female,2,1,0,338495,129.23,,C
+628,0,3,"Garrick, Mr. Harold Edmund",male,,0,0,W./C. 8360,33.07,,S
+629,1,1,"Tremaine, Miss. Nora",female,62,0,1,85360,37.37,C127,S
+630,0,3,"Waverly, Master. Matthias Oscar",male,9,1,2,122284,26.57,,S
+631,0,3,"Prescott, Mr. Jasper",male,,0,1,C.A. 20098,27.64,,S
+632,0,2,"Whitcombe, Mr. Matthias",male,65,0,0,260438,68.79,E6,S
+633,1,1,"Brannock, Mrs. Constance",female,46,0,0,362385,197.03,D116,S
+634,0,3,"Bellamy, Mrs. Violet",female,36,0,0,230645,33.88,,S
+635,0,1,"Maddox, Mr. George",male,73,0,0,118358,215.72,E89,S
+636,0,3,"Brannock, Miss. Josephine Agnes",female,,0,1,203287,20.10,,S
+637,1,3,"Ivers, Master. Albert",male,3,1,1,A/5 10483,27.00,,S
+638,0,3,"Kingsley, Mr. Walter Clement",male,,0,0,264969,24.10,,S
+639,0,2,"Lindqvist, Miss. Florence",female,12,0,0,293683,66.31,,S
+640,0,3,"Waverly, Mr. Walter Nathaniel",male,70,4,0,145326,15.18,,C
+641,0,3,"Carrow, Mrs. Mabel",female,,0,0,322408,12.93,,S
+642,0,3,"Radcliffe, Col. Oscar",male,43,0,1,S.C./PARIS 12766,39.53,,S
+643,0,3,"Gillespie, Master. Clement Lionel",male,2,0,2,329237,32.03,,S
+644,0,3,"Lacombe, Mr. Felix",male,,0,1,341432,36.54,,S
+645,1,1,"Carrow, Mrs. Olive",female,73,0,0,W./C. 25931,45.11,C104,Q
+646,0,3,"Rourke, Mr. Harold Percival",male,31,0,1,161971,12.03,,S
+647,0,3,"Brightwater, Mr. Victor",male,46,0,0,81924,23.70,,S
+648,0,1,"Lockhart, Mr. Milo",male,46,2,0,C.A. 24502,161.61,C118,S
+649,0,3,"Halloran, Mr. Hugo Cecil",male,26,1,0,192958,12.40,F90,S
+650,1,1,"Fairbanks, Miss. Ida",female,18,1,0,176411,168.16,D81,Q
+651,1,1,"Yeoman, Mrs. Edmund (Rosalind Fairbanks)",female,,1,0,240437,30.06,D102,S
+652,0,3,"Dewhurst, Miss. Beatrice",female,15,0,0,21054,16.57,,S
+653,0,3,"Wyndham, Mr. Clement",male,41,0,0,299950,20.35,,S
+654,1,1,"Garrick, Mr. Edmund",male,41,0,0,193788,252.06,,S
+655,0,2,"Brightwater, Mrs. Nora",female,63,0,0,STON/O2. 34861,63.00,D129,S
+656,1,3,"Jessamy, Mr. Arthur",male,,0,0,23184,28.49,,S
+657,0,3,"Mallory, Mr. Walter",male,65,0,1,216206,21.12,,S
+658,0,2,"Lacombe, Mr. Leopold Percival",male,41,0,0,W./C. 10356,19.74,,Q
+659,0,2,"Lacombe, Mr. Albert Matthias",male,19,0,0,237560,72.95,,C
+660,1,2,"Quayle, Mrs. Violet",female,50,0,0,358839,27.23,,C
+661,0,3,"Greaves, Mrs. Constance",female,28,0,0,250205,15.78,,S
+662,0,3,"Bellamy, Mr. Felix",male,14,0,1,A/5 587,39.04,,Q
+663,1,1,"Dewhurst, Miss. Eliza",female,3,0,0,278176,199.88,E14,S
+664,0,3,"Bellamy, Mr. Milo",male,42,0,0,108558,8.66,,S
+665,0,3,"Dunmore, Mr. Leopold",male,,0,0,140226,22.16,,S
+666,0,2,"Whitcombe, Mrs. Edith",female,35,0,0,245997,36.06,,S
+667,0,1,"Lockhart, Mr. Leopold",male,63,1,0,181142,89.27,,S
+668,1,3,"Tremaine, Miss. Matilda",female,14,0,0,266401,37.06,,S
+669,0,2,"Waverly, Mr. Victor",male,36,0,0,24717,22.07,,C
+670,0,2,"Maddox, Mr. Albert",male,43,1,2,STON/O2. 1308,23.60,,C
+671,1,1,"Oakhurst, Miss. Imogen Florence",female,7,0,0,286393,216.75,B23,S
+672,0,2,"Coldharbour, Mr. Edwin",male,13,0,0,382419,62.16,,C
+673,1,1,"Greaves, Mr. Felix Henry",male,58,1,2,F.C.C. 32928,58.91,B102,S
+674,0,2,"Sorensen, Mr. Isaac Frederick",male,29,1,0,35547,55.92,,Q
+675,1,3,"Hartigan, Mrs. Clara",female,19,3,0,PC 37397,19.82,,S
+676,1,3,"Quayle, Mr. George",male,,0,0,203780,19.38,,S
+677,0,3,"Yeoman, Mr. Bertram Hugo",male,70,0,0,SOTON/O.Q. 37822,23.72,,S
+678,0,3,"Gillespie, Mr. Rupert",male,37,0,0,W./C. 12948,23.99,,C
+679,0,1,"Kilbride, Miss. Adelaide",female,72,3,0,166617,159.84,E18,S
+680,0,1,"Greaves, Mr. Leopold Victor",male,,1,0,228508,71.19,,C
+681,0,3,"Hartigan, Mr. Albert Percival",male,13,0,1,178783,7.95,,S
+682,0,1,"Nettleton, Mr. Edmund Harold",male,53,0,2,23976,214.53,,Q
+683,0,3,"Elsworth, Mr. Leopold",male,,2,0,176172,38.56,,S
+684,0,2,"Zellweger, Mrs. Agnes",female,40,1,1,387479,67.46,,S
+685,0,1,"Gillespie, Master. Henry Victor",male,9,0,2,35006,73.91,D30,S
+686,0,3,"Carrow, Mr. Theodore",male,,1,0,SOTON/O.Q. 19204,10.84,,S
+687,0,3,"Radcliffe, Master. Walter",male,9,0,2,338781,10.11,,Q
+688,0,3,"Garrick, Mrs. Winifred",female,30,0,0,315365,31.44,,C
+689,1,3,"Elsworth, Dr. George",male,46,0,0,47160,18.47,,S
+690,1,1,"Dunmore, Mrs. Josephine",female,52,0,0,375949,53.01,B44,S
+691,0,2,"Nettleton, Mr. Leopold",male,59,0,1,SOTON/O.Q. 21731,26.61,,S
+692,1,1,"Pemberly, Miss. Beatrice Violet",female,7,1,0,276849,219.81,C101,C
+693,1,2,"Radcliffe, Miss. Philippa",female,13,0,0,C.A. 10032,58.70,,S
+694,1,2,"Carrow, Mrs. Clara",female,33,1,0,C.A. 28496,36.20,,S
+695,0,3,"Coldharbour, Mr. Theodore",male,54,0,0,364183,32.97,,S
+696,1,1,"Kingsley, Miss. Dorothea",female,46,0,2,307047,102.90,E51,C
+697,0,2,"Radcliffe, Mr. George",male,,1,0,224556,55.23,,C
+698,1,1,"Lacombe, Mrs. Josephine",female,37,0,1,84601,152.37,A140,C
+699,1,3,"Radcliffe, Mrs. Constance",female,66,0,0,302324,25.32,,Q
+700,0,3,"Pendleton, Master. Milo",male,8,1,1,315059,7.81,,S
+701,0,3,"Merriweather, Master. Lionel Henry",male,2,0,2,PC 33494,34.25,,S
+702,0,3,"Lacombe, Mr. Henry Matthias",male,49,0,0,187022,29.73,,S
+703,0,1,"Garrick, Mr. Rupert",male,28,0,1,268392,255.02,,S
+704,1,3,"Prescott, Master. Edwin",male,7,0,2,74823,14.47,,S
+705,0,3,"Coldharbour, Mr. Nathaniel",male,14,0,0,241327,34.59,,S
+706,0,2,"Wyndham, Mr. Frederick Hugo",male,27,3,0,STON/O2. 22392,29.93,,S
+707,1,2,"Garrick, Mrs. Lillian",female,58,0,0,54206,24.46,,Q
+708,1,3,"Underhill, Master. Arthur",male,1,0,1,189270,26.63,,S
+709,0,2,"Farraday, Mr. Percival Hugo",male,33,0,0,358177,22.80,,S
+710,0,2,"Whitcombe, Mr. Edmund Felix",male,45,1,0,39335,38.52,,S
+711,0,1,"Kingsley, Mr. Clement Edmund",male,47,0,1,26038,177.49,C122,S
+712,0,3,"Nettleton, Mr. Oscar",male,59,0,2,83152,8.27,,S
+713,1,2,"Radcliffe, Master. Lionel Albert",male,2,2,2,360424,66.70,,S
+714,0,2,"Elsworth, Mr. Jasper",male,,0,2,180942,34.19,,C
+715,1,2,"Wyndham, Mrs. Sybil",female,44,0,0,130127,21.59,,C
+716,0,3,"Jessamy, Mrs. Violet",female,30,0,0,188108,11.97,,S
+717,0,3,"Radcliffe, Mr. Edwin Clement",male,,0,0,S.C./PARIS 38597,38.89,,S
+718,0,1,"Gillespie, Master. Oscar Milo",male,11,4,1,47970,153.78,,S
+719,1,1,"Prescott, Master. Henry",male,9,2,1,277527,252.66,C23,S
+720,0,3,"Brannock, Mr. Jasper Silas",male,49,1,2,STON/O2. 23286,14.65,,S
+721,0,2,"Norcross, Mr. Matthias Ernest",male,,1,0,237767,72.80,,S
+722,0,3,"Pendleton, Master. Percival",male,5,0,2,STON/O2. 36591,12.80,,S
+723,0,2,"Dewhurst, Mr. Ernest",male,19,1,0,82623,33.16,,Q
+724,1,3,"Castellan, Mr. Theodore Isaac",male,25,0,1,303189,14.39,,S
+725,0,3,"Wyndham, Mr. Matthias",male,74,0,0,252608,11.85,,S
+726,0,3,"Castellan, Mr. Hugo",male,37,0,0,393114,24.88,,S
+727,1,3,"Wyndham, Mrs. Ida",female,73,0,0,40562,39.41,,S
+728,0,3,"Ashdown, Mr. Percival",male,62,0,1,195347,37.45,,S
+729,0,3,"Zellweger, Mr. Arthur",male,70,0,0,143569,22.04,,Q
+730,1,3,"Ivers, Mrs. Rosalind",female,31,1,0,F.C.C. 11670,31.53,,Q
+731,0,3,"Quayle, Master. Theodore",male,4,0,2,180148,39.29,,S
+732,0,3,"Rourke, Mr. Percival",male,67,0,0,W./C. 3969,34.67,,S
+733,1,3,"Greaves, Mrs. Harriet",female,71,0,0,34260,17.86,,S
+734,0,3,"Pemberly, Mr. Edwin",male,47,0,1,253093,20.04,,S
+735,1,3,"Norcross, Mr. Hugo",male,20,1,0,247572,18.27,,S
+736,1,2,"Jessamy, Master. Percival Albert",male,3,0,1,C.A. 23334,20.44,,Q
+737,1,3,"Sorensen, Master. Milo",male,9,0,1,A/5 14894,20.45,,Q
+738,1,1,"Hartigan, Miss. Margaret",female,17,0,0,F.C.C. 20669,250.36,B85,C
+739,1,3,"Waverly, Master. Leopold",male,5,3,2,PC 15543,20.69,,S
+740,1,1,"Kilbride, Mrs. Nora",female,53,1,0,281095,148.61,E71,S
+741,0,1,"Coldharbour, Miss. Violet",female,70,0,0,246509,118.01,,S
+742,1,3,"Kilbride, Mr. Theodore",male,63,0,0,91005,9.51,,S
+743,1,1,"Norcross, Mr. Edwin",male,,0,0,278555,74.72,E50,C
+744,0,3,"Wyndham, Miss. Lavinia",female,58,0,0,4283,18.90,,Q
+745,0,3,"Jessamy, Mr. Isaac Walter",male,62,0,0,PC 17328,36.51,,S
+746,1,1,"Gillespie, Master. Edmund Matthias",male,4,0,1,23845,237.51,C148,S
+747,1,1,"Radcliffe, Miss. Beatrice",female,7,1,2,336268,113.92,A26,Q
+748,0,3,"Greaves, Mr. Harold",male,65,0,3,STON/O2. 35491,38.88,,S
+749,0,2,"Underhill, Mr. Cecil Jasper",male,59,0,1,S.C./PARIS 20568,47.40,,S
+750,0,2,"Underhill, Mr. Nathaniel Harold",male,,0,0,181919,18.71,,Q
+751,1,1,"Merriweather, Miss. Edith",female,6,0,0,A/5 33060,163.19,C2,S
+752,0,3,"Nettleton, Rev. Lionel",male,40,0,0,PC 24820,17.14,,C
+753,0,3,"Castellan, Mrs. Harriet",female,32,0,4,A/5 27364,13.57,,Q
+754,0,1,"Fairbanks, Mr. Percival",male,21,1,1,106013,154.57,,C
+755,1,2,"Garrick, Mr. Milo",male,54,0,0,F.C.C. 1879,23.92,,S
+756,0,3,"Bellamy, Mrs. Adelaide",female,27,1,0,399356,8.47,,S
+757,0,3,"Lacombe, Mrs. Agnes",female,38,0,0,276948,8.45,,S
+758,0,1,"Hartigan, Mr. Albert",male,45,0,0,315120,163.00,A52,S
+759,1,1,"Brightwater, Mr. Hugo Henry",male,,0,0,W./C. 22575,200.89,E49,S
+760,0,3,"Greaves, Master. Victor",male,3,0,2,PC 21261,16.69,,S
+761,1,3,"Lindqvist, Mr. Leopold",male,20,1,0,119221,33.04,,S
+762,1,3,"Abernath, Mr. Matthias",male,,0,0,W./C. 25639,33.20,,S
+763,1,3,"Carrow, Miss. Mabel",female,41,0,4,STON/O2. 13683,33.97,E10,C
+764,0,3,"Ivers, Mr. Isaac",male,24,0,0,384007,17.14,,S
+765,0,2,"Lockhart, Miss. Violet",female,48,1,0,188974,23.11,,S
+766,1,3,"Holloway, Master. Cecil",male,4,2,2,374155,9.38,,S
+767,0,2,"Waverly, Mr. Leopold",male,,0,0,W./C. 7359,22.28,,S
+768,0,2,"Quayle, Mr. Lionel",male,49,0,0,85150,51.04,F11,S
+769,0,1,"Lacombe, Capt. Harold Felix",male,56,0,2,S.C./PARIS 11380,211.50,,S
+770,1,2,"Norcross, Miss. Nora",female,3,0,0,112914,54.04,,Q
+771,1,2,"Lockhart, Miss. Harriet",female,56,0,0,PC 8381,13.60,F114,S
+772,0,1,"Kilbride, Mr. Milo",male,,0,0,F.C.C. 38947,152.77,C61,S
+773,1,1,"Kilbride, Miss. Clara Philippa",female,,1,0,331094,121.75,E42,S
+774,1,2,"Fennimore, Mrs. Sybil",female,,1,1,3487,63.43,,C
+775,0,3,"Bellamy, Mr. Albert",male,39,0,0,A/5 13831,39.18,,S
+776,0,3,"Carrow, Master. Theodore",male,1,2,2,257790,7.25,,C
+777,0,3,"Vasquez, Mrs. George (Winifred Pemberly)",female,28,0,0,S.C./PARIS 28393,12.40,,C
+778,1,2,"Elsworth, Miss. Lavinia Constance",female,6,0,1,128352,26.86,D71,S
+779,1,1,"Elsworth, Mr. Frederick",male,41,1,0,264956,154.75,B105,S
+780,0,3,"Garrick, Capt. Matthias",male,58,0,0,A/5 30883,20.48,,S
+781,1,3,"Rourke, Miss. Clara",female,40,0,0,26777,13.82,,S
+782,0,3,"Sorensen, Mr. George Albert",male,46,1,0,179742,39.62,,S
+783,1,1,"Yeoman, Countess. Dorothea Constance",female,19,0,1,STON/O2. 38563,70.58,D104,C
+784,1,3,"Prescott, Mrs. Rupert (Winifred Wyndham)",female,57,0,1,25111,9.15,,S
+785,1,2,"Pendleton, Miss. Mabel Ida",female,10,0,2,116120,68.25,,Q
+786,1,3,"Carrow, Mr. Victor",male,,0,0,108118,28.88,,S
+787,0,1,"Castellan, Mr. Harold Leopold",male,51,0,2,S.C./PARIS 36088,62.06,,S
+788,1,2,"Whitcombe, Mrs. Lillian",female,,3,0,86991,60.69,,
+789,1,2,"Gillespie, Mr. Milo",male,,0,0,A/5 1835,54.89,,C
+790,0,3,"Brightwater, Rev. George Matthias",male,46,0,0,72154,16.60,,S
+791,1,3,"Underhill, Miss. Olive Sybil",female,,1,0,189491,37.25,G75,S
+792,1,2,"Quayle, Mrs. Dorothea",female,,4,0,256091,26.42,,S
+793,0,3,"Lindqvist, Master. Oscar",male,9,2,1,264510,33.98,,S
+794,1,3,"Castellan, Mrs. Rosalind",female,20,0,0,43792,25.76,F42,Q
+795,1,2,"Radcliffe, Miss. Nora",female,9,1,1,W./C. 5198,14.90,,S
+796,0,3,"Ashdown, Mr. Albert",male,68,1,0,262729,16.71,,S
+797,0,2,"Vasquez, Mr. Harold Harold",male,15,1,2,26761,14.91,,Q
+798,0,2,"Carrow, Mr. Clement Victor",male,37,0,0,S.C./PARIS 34346,44.57,,C
+799,1,3,"Sorensen, Mrs. Agnes",female,34,0,0,W./C. 25513,10.10,,C
+800,0,3,"Kilbride, Mrs. Margaret",female,34,1,0,F.C.C. 777,13.75,,S
+801,1,3,"Vasquez, Mr. Nathaniel",male,24,2,0,317657,20.97,,S
+802,1,2,"Fennimore, Mrs. Lavinia",female,51,1,1,224705,55.07,,S
+803,0,3,"Elsworth, Mr. Percival",male,,0,0,349438,35.09,,S
+804,0,3,"Castellan, Mr. Milo Edmund",male,38,0,1,PC 14522,33.82,,S
+805,0,3,"Holloway, Mr. Arthur",male,70,3,0,44041,16.93,,C
+806,1,2,"Waverly, Mr. Victor Leopold",male,61,0,0,SOTON/O.Q. 11600,24.34,,S
+807,0,3,"Maddox, Mr. Clement",male,72,1,0,SOTON/O.Q. 36768,8.80,,S
+808,0,3,"Carrow, Miss. Edith",female,50,0,0,A/5 9486,37.55,E34,Q
+809,1,3,"Kilbride, Miss. Beatrice",female,,0,0,222410,32.59,,S
+810,1,1,"Dewhurst, Mr. Milo",male,43,0,0,214997,158.53,C121,C
+811,1,2,"Whitcombe, Mr. Matthias",male,40,0,0,S.C./PARIS 19425,56.11,,S
+812,1,2,"Radcliffe, Mrs. Florence",female,56,0,0,333343,47.04,,C
+813,0,3,"Brightwater, Mr. Henry",male,25,0,0,264939,30.81,,S
+814,0,2,"Carrow, Mr. Frederick",male,16,0,0,C.A. 5948,39.06,,Q
+815,1,3,"Sorensen, Mrs. Adelaide",female,70,0,0,289922,8.76,,S
+816,1,3,"Hartigan, Miss. Mabel",female,12,1,0,99987,27.12,,C
+817,0,3,"Prescott, Mr. Edwin Felix",male,16,1,4,SOTON/O.Q. 17728,21.25,,S
+818,1,1,"Radcliffe, Mrs. Violet",female,35,0,3,W./C. 22201,238.03,B34,C
+819,0,2,"Abernath, Mr. Albert Bertram",male,14,0,0,S.C./PARIS 1428,16.82,,S
+820,0,1,"Rourke, Mr. Oscar",male,70,1,0,327438,98.40,,S
+821,0,3,"Tremaine, Mr. Frederick",male,,4,0,338043,36.03,,S
+822,0,3,"Nettleton, Mr. Henry Milo",male,70,1,0,PC 26680,28.78,,Q
+823,0,2,"Pemberly, Mr. Harold",male,50,2,0,219040,68.65,,S
+824,0,1,"Underhill, Mr. Henry",male,21,0,1,PC 28464,143.47,E148,Q
+825,1,3,"Yeoman, Mrs. Clara",female,,5,0,338414,18.68,,S
+826,1,2,"Hartigan, Miss. Sybil Winifred",female,16,0,0,25446,41.37,,S
+827,0,2,"Lindqvist, Mr. Henry",male,49,1,0,174950,22.78,,C
+828,0,2,"Dunmore, Mr. Theodore",male,18,0,0,182830,12.46,,S
+829,1,2,"Radcliffe, Master. Albert",male,4,0,1,298768,67.67,,S
+830,0,3,"Dunmore, Mr. Clement Nathaniel",male,,0,0,45181,10.31,G83,C
+831,0,3,"Kilbride, Mr. Edwin",male,29,0,0,210302,12.96,,S
+832,0,3,"Whitcombe, Mr. Lionel Theodore",male,52,3,4,35571,32.08,,S
+833,1,3,"Greaves, Mrs. Ida",female,32,0,1,77655,20.21,,S
+834,1,3,"Rourke, Mrs. Matilda",female,25,0,0,371715,39.04,,S
+835,0,3,"Fairbanks, Mr. Isaac Edmund",male,55,0,0,S.C./PARIS 39949,20.47,,S
+836,0,3,"Merriweather, Mr. Rupert Clement",male,24,0,0,W./C. 6240,27.32,,C
+837,1,2,"Sorensen, Mr. Victor",male,67,1,0,152008,19.53,,Q
+838,0,2,"Castellan, Mr. George",male,23,0,0,PC 38781,28.54,,S
+839,0,3,"Brightwater, Mr. Isaac Bertram",male,16,0,1,26454,20.92,,Q
+840,0,3,"Dewhurst, Mr. Walter",male,34,0,0,170289,13.14,,S
+841,0,3,"Hartigan, Mr. Oscar Lionel",male,15,0,2,PC 36715,35.55,,Q
+842,0,3,"Merriweather, Mr. Clement",male,63,2,0,W./C. 7232,18.68,,Q
+843,1,3,"Dewhurst, Mrs. Eleanor",female,58,0,0,362809,22.50,,C
+844,1,3,"Fairbanks, Mr. Albert Nathaniel",male,58,0,2,112516,21.56,,C
+845,1,3,"Radcliffe, Mr. Felix",male,42,0,0,264474,23.42,,C
+846,0,2,"Tremaine, Mr. Milo",male,,1,0,SOTON/O.Q. 29204,51.78,,C
+847,0,2,"Brightwater, Mr. Isaac",male,29,0,0,F.C.C. 19987,10.53,,S
+848,1,1,"Whitcombe, Miss. Winifred",female,,0,0,76050,96.49,A71,S
+849,1,1,"Waverly, Miss. Lavinia",female,72,1,0,313363,61.79,B40,S
+850,1,3,"Maddox, Mrs. Theodore (Lavinia Jessamy)",female,34,0,0,14899,21.54,G66,C
+851,0,3,"Norcross, Mr. Cecil",male,39,0,0,PC 15824,27.70,,S
+852,0,3,"Brightwater, Mr. Silas",male,50,0,0,153922,32.59,,C
+853,0,3,"Coldharbour, Capt. Jasper",male,,2,2,S.C./PARIS 4224,26.77,,S
+854,1,3,"Lacombe, Mrs. Adelaide",female,74,0,0,159836,22.71,,C
+855,0,3,"Prescott, Mr. Leopold",male,,1,0,250087,16.19,,S
+856,1,1,"Elsworth, Miss. Ida Matilda",female,28,0,4,339555,73.31,E105,S
+857,1,2,"Jessamy, Miss. Violet Philippa",female,25,0,0,205800,20.15,D107,S
+858,0,3,"Lacombe, Mr. Walter Rupert",male,23,0,4,227568,27.42,,S
+859,1,3,"Dunmore, Miss. Harriet",female,14,0,0,15780,35.20,,S
+860,1,2,"Maddox, Mr. Leopold",male,48,2,0,STON/O2. 5044,29.49,,S
+861,0,3,"Zellweger, Mr. Cecil Silas",male,21,0,1,140465,38.72,,S
+862,1,1,"Vasquez, Miss. Sybil",female,,0,0,A/5 17938,126.43,C147,S
+863,0,3,"Oakhurst, Mr. Albert Percival",male,,0,0,298562,39.04,,S
+864,1,3,"Tremaine, Mrs. Olive",female,60,1,0,152441,14.48,,S
+865,0,3,"Kilbride, Ms. Agnes Constance",female,73,0,0,W./C. 36531,35.07,,S
+866,0,1,"Hartigan, Mr. Rupert",male,28,0,1,26455,71.04,D51,C
+867,0,1,"Dewhurst, Master. Hugo George",male,9,0,2,PC 2361,149.27,A117,S
+868,1,3,"Brannock, Mrs. Imogen",female,40,0,1,234274,19.49,,S
+869,0,3,"Garrick, Mrs. Philippa",female,,0,0,S.C./PARIS 1959,27.27,,S
+870,0,3,"Kingsley, Mr. Hugo",male,24,2,0,63193,27.31,,C
+871,0,3,"Fairbanks, Mr. Isaac",male,,3,0,A/5 13183,24.66,,S
+872,0,3,"Yeoman, Mr. Bertram",male,61,0,0,227682,30.48,,S
+873,1,2,"Oakhurst, Miss. Mabel",female,74,0,0,276619,19.49,,S
+874,0,3,"Waverly, Mr. Leopold",male,48,0,0,C.A. 14521,37.91,,S
+875,0,3,"Dewhurst, Mr. Henry",male,,0,0,PC 35879,34.69,,C
+876,0,2,"Rourke, Miss. Clara",female,2,0,2,227189,24.78,,S
+877,1,2,"Ivers, Miss. Edith",female,14,1,0,W./C. 27150,37.93,,S
+878,1,3,"Carrow, Mrs. Margaret",female,49,1,2,398673,39.53,,C
+879,1,3,"Vasquez, Mrs. Florence",female,67,3,1,231503,33.76,,S
+880,0,3,"Zellweger, Mr. Matthias Nathaniel",male,54,1,1,329230,26.96,,S
+881,0,3,"Norcross, Mr. Silas",male,33,1,0,S.C./PARIS 31173,31.65,,S
+882,1,1,"Kilbride, Miss. Matilda",female,,0,0,83845,53.29,B62,S
+883,0,3,"Ivers, Mr. Hugo Matthias",male,36,0,0,103135,25.22,,S
+884,0,3,"Jessamy, Mr. Theodore",male,,1,0,12478,8.33,,S
+885,0,3,"Kingsley, Mr. Lionel Silas",male,50,3,0,F.C.C. 2055,36.81,,Q
+886,1,2,"Castellan, Master. Victor Rupert",male,,0,1,F.C.C. 18851,25.46,,S
+887,0,3,"Waverly, Mr. Walter",male,70,0,0,172039,9.73,,Q
+888,1,1,"Merriweather, Master. Leopold Silas",male,12,1,2,49813,42.33,B96,C
+889,1,2,"Fairbanks, Miss. Ida",female,,0,0,C.A. 2834,31.59,,S
+890,1,1,"Kilbride, Master. Lionel Walter",male,,0,2,277316,142.26,D72,S
+891,1,3,"Vasquez, Master. Matthias",male,7,0,2,176131,36.62,,Q
+892,0,2,"Brannock, Mr. Isaac",male,48,0,0,343579,58.65,F37,S
+893,0,3,"Brightwater, Mr. Percival",male,24,2,1,W./C. 14651,28.20,,S
+894,1,3,"Waverly, Master. Milo Cecil",male,9,1,2,44057,11.42,,S
+895,0,1,"Sandoval, Mr. Henry Hugo",male,70,0,0,102651,101.19,A102,S
+896,0,3,"Dewhurst, Mr. Theodore",male,64,1,0,W./C. 4507,7.81,,S
+897,1,1,"Lockhart, Miss. Mabel Violet",female,11,1,0,STON/O2. 19264,255.20,E102,C
+898,1,1,"Holloway, Mr. Oscar Matthias",male,47,0,2,153133,31.72,,S
+899,0,3,"Kingsley, Miss. Olive",female,27,0,0,244359,31.74,,Q
+900,1,3,"Elsworth, Mrs. Constance",female,47,0,0,284124,24.37,,Q
