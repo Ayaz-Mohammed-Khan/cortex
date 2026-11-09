@@ -1,0 +1,211 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "groupby-key",
+      "difficulty": "easy",
+      "question": "Which column makes the best grouping key for a question like \"what is the average rating for each certificate\"?",
+      "options": [
+        "A column where nearly every row has a different value, so each row gets its own group.",
+        "A numeric column with continuous values, because numbers can be compared and therefore sort groups most precisely.",
+        "A categorical column with a modest set of repeating labels, such as the certificate itself.",
+        "Any column at all, because the grouping always merges rows by position."
+      ],
+      "answer": 2,
+      "explanation": "Groups are formed from repeated labels. A column with unique values creates one group per row, which summarizes nothing, and grouping does not work by position. Continuous numbers are usually binned first.",
+      "misconception": "A grouping key should repeat; a unique key defeats the purpose."
+    },
+    {
+      "type": "mcq",
+      "concept": "groupby-object",
+      "difficulty": "easy",
+      "question": "What does `films.groupby(\"certificate\")` return by itself, before any aggregation?",
+      "options": [
+        "A table with one row per certificate containing the mean of every column.",
+        "A GroupBy object that records the split; no statistic is computed until you call one.",
+        "A dictionary that maps each certificate to the number of rows it contains, computed immediately.",
+        "A sorted copy of the table with the certificate column moved to the index."
+      ],
+      "answer": 1,
+      "explanation": "`groupby` builds a recipe describing the split. Computation happens when you call an aggregation, `agg`, `apply`, or similar, on it. It is not a table of means, a dictionary, or a sorted copy.",
+      "misconception": "`groupby` alone computes nothing."
+    },
+    {
+      "type": "scenario",
+      "concept": "select-then-aggregate",
+      "difficulty": "medium",
+      "scenario": "You need total gross per country. A colleague writes `films.groupby(\"country\").sum(numeric_only=True)[\"gross_musd\"]` and another writes `films.groupby(\"country\")[\"gross_musd\"].sum()`.",
+      "question": "Which is better, and why?",
+      "options": [
+        "They are identical in cost, because pandas notices the later column selection and computes only the requested column in both.",
+        "The first, because summing every numeric column at once is faster than a single column.",
+        "The second, because it raises an error for the first form when text columns are present.",
+        "The second, because selecting the column first avoids computing the sums of every other numeric column."
+      ],
+      "answer": 3,
+      "explanation": "Both give the same numbers, but the first aggregates every numeric column and then discards all but one. Selecting first computes only what you need, which matters on wide tables.",
+      "misconception": "Aggregate only the columns you need."
+    },
+    {
+      "type": "mcq",
+      "concept": "max-vs-idxmax",
+      "difficulty": "medium",
+      "question": "`films.groupby(\"decade\")[\"rating\"].max()` gives each decade's top rating. How do you get the film that earned it?",
+      "options": [
+        "Use `idxmax()` on the grouped column to get the row label, then look the row up with `loc`.",
+        "Use `max()` on the title column of each group, since the maximum title always belongs to the film with the maximum rating.",
+        "Use `sum()` on the grouped rating column, because it sorts the rows by value.",
+        "Nothing extra is needed, because `max()` already returns the whole row for each group."
+      ],
+      "answer": 0,
+      "explanation": "`max()` returns a value, not a row. `idxmax()` returns the index label of the maximum, which `loc` turns into the full row. The maximum title is just the alphabetically last name.",
+      "misconception": "An aggregate returns values, not the rows they came from."
+    },
+    {
+      "type": "mcq",
+      "concept": "count-vs-value-counts",
+      "difficulty": "medium",
+      "question": "How do `films.groupby(\"certificate\")[\"title\"].count()` and `films[\"certificate\"].value_counts()` differ in their output order?",
+      "options": [
+        "Both sort by count, largest first, because counting always ranks groups.",
+        "The groupby count sorts by count and `value_counts` sorts by label.",
+        "The groupby count sorts by group label, while `value_counts` sorts by count, largest first.",
+        "Neither sorts: both return groups in the order they first appear in the table."
+      ],
+      "answer": 2,
+      "explanation": "`groupby` orders its groups by key by default, and `value_counts` orders by frequency. Also, `count()` skips missing values while `size()` does not.",
+      "misconception": "GroupBy results are sorted by key, not by size."
+    },
+    {
+      "type": "mcq",
+      "concept": "first-vs-nth",
+      "difficulty": "hard",
+      "question": "A column has missing values at the top of a group. How do `gb[\"col\"].first()` and `gb.nth(0)` behave?",
+      "options": [
+        "`first()` returns the first non-missing value, while `nth(0)` returns the literal first row, gap included.",
+        "Both return the literal first row, so a leading gap would appear in both results.",
+        "`first()` returns the literal first row, while `nth(0)` skips missing values and returns the next row.",
+        "Both skip missing values and return the first row that has data in every column."
+      ],
+      "answer": 0,
+      "explanation": "`first()` and `last()` take the first or last non-missing value per column. `nth(n)` selects by position, so a missing value in that position is returned as is.",
+      "misconception": "`first()` skips missing values; positional selection does not."
+    },
+    {
+      "type": "scenario",
+      "concept": "get-group",
+      "difficulty": "medium",
+      "scenario": "You need the sub-table for one certificate, `\"PG-13\"`, from an existing GroupBy object, and you will fetch several such groups.",
+      "question": "What is a good way to do it?",
+      "options": [
+        "Call `gb.groups[\"PG-13\"]`, which returns the complete sub-table for that certificate as a DataFrame.",
+        "Call `gb.get_group(\"PG-13\")`, which returns the sub-table and reuses the split that already exists.",
+        "Call `gb.size()[\"PG-13\"]`, because the size is the sub-table for that group.",
+        "Call `gb.describe()`, because it prints every group's rows in full."
+      ],
+      "answer": 1,
+      "explanation": "`get_group` returns the rows of one group. `groups` is a dictionary of row labels rather than a table, `size` gives only a count, and `describe` summarizes statistics.",
+      "misconception": "`groups` holds labels, not rows."
+    },
+    {
+      "type": "mcq",
+      "concept": "agg-forms",
+      "difficulty": "medium",
+      "question": "You want the sum of `votes` and the mean of `runtime_min` per country in one call. Which form fits?",
+      "options": [
+        "`gb.agg([\"sum\", \"mean\"])`, which applies each function to the one column you pick.",
+        "`gb.sum().mean()`, which chains the two statistics through one result and keeps both of the grouped columns.",
+        "`gb.agg({\"votes\": \"sum\", \"runtime_min\": \"mean\"})`, a dictionary of column to function.",
+        "`gb.apply(\"sum\", \"mean\")`, which accepts two function names in order."
+      ],
+      "answer": 2,
+      "explanation": "A dictionary maps each column to its own function. A list applies every function to the same columns, chaining collapses the groups after the first statistic, and `apply` does not take a pair of names.",
+      "misconception": "Use a dictionary when columns need different statistics."
+    },
+    {
+      "type": "mcq",
+      "concept": "looping-groups",
+      "difficulty": "easy",
+      "question": "In `for name, group in films.groupby(\"decade\")`, what are `name` and `group`?",
+      "options": [
+        "The column name `\"decade\"` and a Series of its values.",
+        "The group key, and a DataFrame holding just the rows of that group.",
+        "The number of rows in the group, and the first row of the group.",
+        "The group key, and a dictionary of row labels for that group."
+      ],
+      "answer": 1,
+      "explanation": "Iterating a GroupBy yields each key with the sub-table for it. The loop variable `group` is a regular DataFrame you can filter or aggregate.",
+      "misconception": "Each loop step gives a full sub-table, not a count or a dictionary."
+    },
+    {
+      "type": "scenario",
+      "concept": "apply-vs-transform",
+      "difficulty": "hard",
+      "scenario": "You want each film's votes ranked within its own decade, as a new column aligned with the original rows.",
+      "question": "Which is the cleaner approach?",
+      "options": [
+        "`films.groupby(\"decade\")[\"votes\"].max()`, which returns a rank for every film.",
+        "`films.groupby(\"decade\")[\"votes\"].agg(\"rank\")`, which collapses each group to its rank.",
+        "A `for` loop over the groups that appends only the top film from each decade into a new, shorter table.",
+        "`films.groupby(\"decade\")[\"votes\"].rank(ascending=False)`, which returns one value per original row."
+      ],
+      "answer": 3,
+      "explanation": "Operations that return one result per row, such as `rank` or `transform`, come back aligned with the original index and can be assigned to a new column. `max` collapses groups, and a loop that keeps one film loses the rest.",
+      "misconception": "Aggregations shrink the table; transformations keep its length."
+    },
+    {
+      "type": "mcq",
+      "concept": "multi-key-groupby",
+      "difficulty": "medium",
+      "question": "What does grouping by two columns, `groupby([\"country\", \"certificate\"])[\"rating\"].mean()`, return?",
+      "options": [
+        "A Series with a two-level MultiIndex, which `reset_index()` flattens into ordinary columns.",
+        "A table with the country as the index and one column per certificate.",
+        "Two separate Series, one summarizing each grouping column on its own, with no combined groups at all.",
+        "A single number, the mean of all combinations pooled together."
+      ],
+      "answer": 0,
+      "explanation": "Each distinct pair is a group, and the keys become a two-level index. `reset_index()` turns the levels into columns. A wide table needs `unstack`, and nothing is pooled into one number.",
+      "misconception": "Several keys produce a MultiIndex, not separate results."
+    },
+    {
+      "type": "scenario",
+      "concept": "min-sample-size",
+      "difficulty": "hard",
+      "scenario": "You rank leads by their average metascore and a lead with a single film tops the table with a perfect 90.",
+      "question": "What is the sound way to rank them?",
+      "options": [
+        "Keep the ranking as is, because the highest average is always the best performer.",
+        "Convert the averages to medians, because a median of a single film is considered more reliable than a mean.",
+        "Sort by the lowest standard deviation, because a single film has no spread.",
+        "Require a minimum number of films per group first, because an average over one item is noise."
+      ],
+      "answer": 3,
+      "explanation": "Small groups produce extreme averages by chance. Filtering to groups with enough rows, as the note does with a count threshold, makes the comparison fair. A median of one value is the same value.",
+      "misconception": "Averages from tiny groups are unreliable."
+    },
+    {
+      "type": "mcq",
+      "concept": "ipl-bowler-merge",
+      "difficulty": "medium",
+      "question": "The deliveries file records the batting team but not the bowling team. How does the note find the bowling team?",
+      "options": [
+        "It reads the bowler column, because every bowler's name in the file contains the name of the team as well.",
+        "It merges the match table on `ID` and takes whichever of Team1 and Team2 is not the batting team.",
+        "It groups by innings and assumes that innings 1 is always played by the home team in every match.",
+        "It cannot be recovered from the files, so any question about opponents has to be skipped entirely."
+      ],
+      "answer": 1,
+      "explanation": "The match table lists both teams for each `ID`. The bowling side is the one that is not batting, which a conditional with `np.where` can assign. Innings numbers do not identify teams.",
+      "misconception": "Missing information can often be recovered with a merge."
+    },
+    {
+      "type": "card",
+      "concept": "split-apply-combine",
+      "difficulty": "hard",
+      "question": "Describe the split-apply-combine strategy and name one pandas call for each kind of function you can apply.",
+      "answer": "Split the rows into groups by a key, apply a function to each group, and combine the results. An aggregation such as `mean` or `agg` returns one value per group, `transform` returns one value per original row, and `apply` handles custom functions that return a scalar or a table.",
+      "explanation": "Choosing between them depends on whether the result should shrink to one row per group or keep the original length."
+    }
+  ]
+}

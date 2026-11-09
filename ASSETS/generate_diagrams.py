@@ -161,6 +161,7 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "split_apply_combine.png": _NUMPY,
     "dataframe_anatomy.png": _NUMPY,
     "series_anatomy.png": _NUMPY,
 }
@@ -3613,6 +3614,67 @@ def dataframe_anatomy():
     save(fig, "dataframe_anatomy.png")
 
 
+def split_apply_combine():
+    """Split a keyed table into groups, apply a mean to each, combine."""
+    rows = [("U", 6.0), ("A", 7.0), ("U", 8.0), ("R", 5.0), ("A", 9.0), ("R", 7.0)]
+    colors = {"U": BLUE, "A": ORANGE, "R": GREEN}
+    fig, ax = plt.subplots(figsize=(11, 4.6))
+    ax.set_xlim(0, 14)
+    ax.set_ylim(0, 6.4)
+    ax.axis("off")
+
+    def cell(x, y, w, text, color, fs=10):
+        ax.add_patch(FancyBboxPatch((x, y), w, 0.62, boxstyle="square,pad=0",
+                                    facecolor=color, edgecolor="black",
+                                    alpha=0.85, lw=1.0))
+        ax.text(x + w / 2, y + 0.31, text, ha="center", va="center",
+                color="white", fontsize=fs, family="monospace")
+
+    # original table
+    ax.text(1.4, 5.9, "table", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+    for i, (k, v) in enumerate(rows):
+        y = 5.0 - i * 0.78
+        cell(0.3, y, 1.0, k, colors[k])
+        cell(1.35, y, 1.0, f"{v:.0f}", colors[k])
+
+    # split groups
+    ax.text(6.0, 5.9, "1. split by key", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+    order = ["U", "A", "R"]
+    means = {}
+    for g, key in enumerate(order):
+        vals = [v for k, v in rows if k == key]
+        means[key] = sum(vals) / len(vals)
+        top = 4.7 - g * 1.75
+        for j, v in enumerate(vals):
+            cell(4.7, top - j * 0.78, 1.0, key, colors[key])
+            cell(5.75, top - j * 0.78, 1.0, f"{v:.0f}", colors[key])
+        ax.annotate("", xy=(4.65, top + 0.1), xytext=(2.5, 3.7),
+                    arrowprops=dict(arrowstyle="-|>", color=colors[key], lw=1.2,
+                                    connectionstyle="arc3,rad=0.1"))
+        # apply
+        ax.annotate("", xy=(8.5, top - 0.1), xytext=(6.9, top - 0.1),
+                    arrowprops=dict(arrowstyle="-|>", color=GREY, lw=1.2))
+        ax.text(7.7, top + 0.15, "mean", ha="center", fontsize=9, color=GREY)
+        cell(8.6, top - 0.35, 1.0, f"{means[key]:.1f}", colors[key])
+    ax.text(8.9, 5.9, "2. apply", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+
+    # combine
+    ax.text(12.2, 5.9, "3. combine", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+    for g, key in enumerate(order):
+        y = 4.4 - g * 0.85
+        cell(11.2, y, 1.0, key, colors[key])
+        cell(12.25, y, 1.0, f"{means[key]:.1f}", colors[key])
+        ax.annotate("", xy=(11.1, y + 0.31), xytext=(9.7, 4.35 - g * 1.75 - 0.04),
+                    arrowprops=dict(arrowstyle="-|>", color=colors[key], lw=1.2,
+                                    connectionstyle="arc3,rad=0.1"))
+    ax.set_title("GroupBy: split, apply, combine")
+    save(fig, "split_apply_combine.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3726,4 +3788,5 @@ if __name__ == "__main__":
     broadcasting_stretch()
     series_anatomy()
     dataframe_anatomy()
+    split_apply_combine()
     print("\nAll diagrams generated.")
