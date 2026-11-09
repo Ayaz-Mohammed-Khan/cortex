@@ -65,6 +65,7 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   'NumPy Tricks': ['Advanced NumPy'],
   // The pandas notes continue the chain from NumPy Tricks, each building on the one before.
   'Pandas Series': ['NumPy Tricks'],
+  'Pandas DataFrame': ['Pandas Series'],
 
   // ── OOP & Advanced Python ─────────────────────────────────────────────
   // Two strands off the OOP base. The class strand is linear; the advanced

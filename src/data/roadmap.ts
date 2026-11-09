@@ -476,7 +476,9 @@ export const spine: Step[] = [
       'Sorting & set functions',
       'Series & DataFrame objects',
       'read_csv() & data loading',
-      'Selecting, filtering & boolean indexing',
+      // The pandas DataFrame note teaches selection and boolean filtering under one
+      // section; without this the bullet lands on Advanced NumPy's "Boolean indexing".
+      { label: 'Selecting, filtering & boolean indexing', at: 'Filtering a DataFrame' },
       'sort, index, reset_index',
       'isnull, dropna, fillna',
       'drop_duplicates, value_counts, apply',

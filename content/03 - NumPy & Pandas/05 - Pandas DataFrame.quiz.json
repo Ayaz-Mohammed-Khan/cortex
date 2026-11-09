@@ -1,0 +1,211 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "dataframe-structure",
+      "difficulty": "easy",
+      "question": "How does a DataFrame differ from a two-dimensional NumPy array?",
+      "options": [
+        "A DataFrame can only hold numbers, while a NumPy array can hold text as well.",
+        "A DataFrame has labelled rows and columns and allows a different dtype in each column.",
+        "A DataFrame is always one-dimensional internally and only displays itself as a table.",
+        "A DataFrame stores every column as one shared dtype so that sums are always exact."
+      ],
+      "answer": 1,
+      "explanation": "A DataFrame is a table of Series that share a row index; each column keeps its own dtype, so text, integers, and floats can sit side by side. A NumPy array has one dtype for all cells and no labels.",
+      "misconception": "Mixed dtypes per column is the DataFrame's key difference from a 2D array."
+    },
+    {
+      "type": "mcq",
+      "concept": "column-selection",
+      "difficulty": "easy",
+      "question": "What do `films[\"lead\"]` and `films[[\"lead\"]]` return?",
+      "options": [
+        "Both return a Series, because each call names a single column.",
+        "A DataFrame for the first and a Series for the second, because a list always adds a dimension.",
+        "A Series for the first and a one-column DataFrame for the second, because a list selects a DataFrame.",
+        "Both return a DataFrame, because square brackets on a DataFrame always return a table."
+      ],
+      "answer": 2,
+      "explanation": "A single name returns a Series; a list of names returns a DataFrame, even when the list has one item. This matters when later code expects a table or a column.",
+      "misconception": "The brackets inside the brackets change the result type."
+    },
+    {
+      "type": "scenario",
+      "concept": "loc-vs-iloc",
+      "difficulty": "medium",
+      "scenario": "A DataFrame is indexed by names `[\"ada\", \"bo\", \"cal\", \"dee\", \"eli\"]`. You want rows from `bo` through `dee`, including `dee`.",
+      "question": "Which expression does that?",
+      "options": [
+        "`df.iloc[\"bo\":\"dee\"]`, because slices on names work with position-based access.",
+        "`df.loc[\"bo\":\"dee\"]`, because label slices with `loc` include the end label.",
+        "`df.loc[1:3]`, because `loc` accepts positions when the index holds strings.",
+        "`df.iloc[1:3]`, because the end position is included just as it is for labels."
+      ],
+      "answer": 1,
+      "explanation": "`loc` selects by label and includes the end label, so it returns bo, cal, and dee. `iloc` takes integer positions only, and its end is excluded, so `iloc[1:3]` would stop before `dee`.",
+      "misconception": "`loc` includes its end; `iloc` excludes it."
+    },
+    {
+      "type": "mcq",
+      "concept": "boolean-and",
+      "difficulty": "medium",
+      "question": "Why does `m[(m[\"Season\"] == \"2015\") and (m[\"City\"] == \"Kolkata\")]` raise a `ValueError`?",
+      "options": [
+        "Because `Season` holds strings, and strings cannot be compared with `==` inside a DataFrame filter.",
+        "Because the filter needs a third condition, since two conditions cannot be combined by a single operator.",
+        "Because `and` tries to reduce a whole Series to one `True` or `False`; use `&` with parentheses instead.",
+        "Because DataFrames cannot be filtered by two columns at once, only by a single column."
+      ],
+      "answer": 2,
+      "explanation": "Python's `and` needs a single truth value, which a Series does not have. The bitwise `&` works element by element, and each condition needs parentheses because `&` binds more tightly than `==`.",
+      "misconception": "Use `&`, `|`, and `~` for element-wise logic on Series."
+    },
+    {
+      "type": "mcq",
+      "concept": "axis",
+      "difficulty": "medium",
+      "question": "For a table of students (rows) and subjects (columns), what does `marks.mean(axis=1)` give?",
+      "options": [
+        "One average per subject, computed down each column.",
+        "One average per student, computed across that student's subjects.",
+        "A single number, the average of every cell in the table.",
+        "A table of the same shape, with each cell replaced by its row average."
+      ],
+      "answer": 1,
+      "explanation": "Axis 1 runs across the columns, so each row collapses to one value: a per-student average. Axis 0, the default, runs down the rows and gives a per-subject result.",
+      "misconception": "`axis=1` reduces across a row; the default `axis=0` reduces down a column."
+    },
+    {
+      "type": "scenario",
+      "concept": "filter-count",
+      "difficulty": "easy",
+      "scenario": "You filter a match table with `dl = m[m[\"method\"] == \"D/L\"]` and want to know how many matches qualify.",
+      "question": "Which expression answers that?",
+      "options": [
+        "`dl.shape[0]`, because `shape` is rows then columns and the first value is the row count.",
+        "`dl.shape[1]`, because the second value of `shape` counts the matching records.",
+        "`dl.values`, because the number of values equals the number of matches.",
+        "`dl.dtypes`, because it reports one entry per matching row."
+      ],
+      "answer": 0,
+      "explanation": "`shape` is `(rows, columns)`, so `shape[0]` is the number of rows. `shape[1]` is the number of columns, `values` returns the data itself, and `dtypes` lists one dtype per column.",
+      "misconception": "Rows come first in `shape`."
+    },
+    {
+      "type": "mcq",
+      "concept": "compare-columns",
+      "difficulty": "hard",
+      "question": "Among toss winners who chose to field, you compute `(sub[\"TossWinner\"] == sub[\"WinningTeam\"]).mean()` and get 0.55. What does that number mean?",
+      "options": [
+        "55 percent of all matches in the file were won by the team that fielded first.",
+        "The toss winner's name matches the winner's name in 55 rows, a raw count.",
+        "55 percent of the fielding toss winners in this subset also won the match.",
+        "The toss decision caused the win in 55 percent of matches, so fielding is the better choice."
+      ],
+      "answer": 2,
+      "explanation": "The comparison gives a boolean per row, and the mean of booleans is the share of `True`. It applies to the subset of fielding toss winners, in this sample. It is a count only if you use `sum`, and it does not show causation.",
+      "misconception": "A share in a subset describes association in the sample, not cause."
+    },
+    {
+      "type": "mcq",
+      "concept": "str-contains",
+      "difficulty": "medium",
+      "question": "The `genres` column holds text like `\"Mystery, Musical\"`. How do you keep every film that lists Comedy anywhere in that text?",
+      "options": [
+        "`films[films[\"genres\"] == \"Comedy\"]`, because equality finds the word inside longer text.",
+        "`films[films[\"genres\"].str.contains(\"Comedy\")]`, because it tests for a substring in each value.",
+        "`films[films[\"genres\"].isin(\"Comedy\")]`, because `isin` looks for a word inside each string.",
+        "`films.loc[\"Comedy\"]`, because `loc` can search the text of every column."
+      ],
+      "answer": 1,
+      "explanation": "`==` matches only entire values, so films listing several genres would be missed. `str.contains` checks for a substring. `isin` expects a list of whole values, and `loc` selects by row label.",
+      "misconception": "Equality tests the whole cell; `str.contains` tests part of it."
+    },
+    {
+      "type": "scenario",
+      "concept": "derived-column-nan",
+      "difficulty": "hard",
+      "scenario": "You build `df[\"first\"] = df[\"genres\"].str.split(\", \").apply(lambda p: p[0])`, but the column contains missing values and the call fails.",
+      "question": "What is the sound fix?",
+      "options": [
+        "Convert the whole table with `astype(\"int32\")`, which removes missing values.",
+        "Sort the DataFrame by `genres` first, which moves the missing values out of the way.",
+        "Use `iloc` instead, because positional access ignores missing values.",
+        "Drop or fill the missing values first, for example with `dropna(subset=[\"genres\"])`."
+      ],
+      "answer": 3,
+      "explanation": "A missing value is a float `NaN`, which has no `split` result to index. Remove or fill those rows before applying the function. Sorting only moves them, `astype` to an integer type would fail on missing values, and `iloc` does not change the data.",
+      "misconception": "Row-by-row functions break on `NaN` unless it is handled first."
+    },
+    {
+      "type": "mcq",
+      "concept": "insert",
+      "difficulty": "easy",
+      "question": "What does `df.insert(1, \"decade\", values)` do that `df[\"decade\"] = values` does not?",
+      "options": [
+        "It places the new column at position 1 instead of at the end.",
+        "It copies the DataFrame first, so the original table stays untouched.",
+        "It allows values of a different length than the table, padding with missing values.",
+        "It sorts the columns alphabetically after adding the new one."
+      ],
+      "answer": 0,
+      "explanation": "`insert` chooses the position of the new column. It changes the DataFrame in place and returns `None`, requires matching length, and does not reorder other columns.",
+      "misconception": "Assignment always appends; only `insert` sets the position."
+    },
+    {
+      "type": "mcq",
+      "concept": "category-dtype",
+      "difficulty": "medium",
+      "question": "Why does converting `Venue` to the `category` dtype shrink memory so much in the match table?",
+      "options": [
+        "It deletes the rows with repeated venue names, keeping one row per venue.",
+        "It stores each venue name as a float, which needs fewer bytes than text.",
+        "It truncates every venue name to a fixed short length.",
+        "It stores each distinct name once and keeps a small integer code per row."
+      ],
+      "answer": 3,
+      "explanation": "Text that repeats is stored once in a lookup of categories, and each row holds a compact code. No rows are removed, names are not truncated, and floats do not shrink text.",
+      "misconception": "Category saves memory through codes, not by dropping data."
+    },
+    {
+      "type": "mcq",
+      "concept": "values-dtype",
+      "difficulty": "medium",
+      "question": "What dtype does `films.values` have for a table with text and numeric columns?",
+      "options": [
+        "`int64`, because the numeric columns take priority over the text.",
+        "`object`, because one NumPy array must hold a single type that fits every column.",
+        "`float64`, because pandas converts text to numbers when building the array.",
+        "A separate dtype for each column, because NumPy supports mixed columns."
+      ],
+      "answer": 1,
+      "explanation": "`values` returns one NumPy array. With mixed columns the only common type is `object`. Per-column dtypes live on the DataFrame (`dtypes`), not on the array.",
+      "misconception": "Column dtypes are a DataFrame feature; the plain array loses them."
+    },
+    {
+      "type": "scenario",
+      "concept": "info-vs-describe",
+      "difficulty": "easy",
+      "scenario": "You load an unfamiliar table and want to see which columns have missing values and what each dtype is.",
+      "question": "Which call gives that overview in one step?",
+      "options": [
+        "`describe()`, because it lists non-null counts and dtypes for every column.",
+        "`head()`, because the first rows show every missing value in the table.",
+        "`info()`, because it prints non-null counts, dtypes, and memory use per column.",
+        "`rename()`, because it reports the labels that need to be changed."
+      ],
+      "answer": 2,
+      "explanation": "`info()` reports non-null counts, dtypes, and memory. `describe()` summarizes numeric columns with statistics, `head()` shows only a few rows, and `rename()` relabels.",
+      "misconception": "`describe` summarizes values; `info` summarizes structure."
+    },
+    {
+      "type": "card",
+      "concept": "loc-vs-iloc",
+      "difficulty": "hard",
+      "question": "Explain the difference between `loc` and `iloc`, including how each treats the end of a slice.",
+      "answer": "`iloc` selects by integer position and excludes the end of a slice, like a Python list. `loc` selects by row or column label and includes the end label. Both take a row selector and a column selector separated by a comma.",
+      "explanation": "When the index is the default 0, 1, 2, and so on, the two look alike, but the end rule still differs."
+    }
+  ]
+}

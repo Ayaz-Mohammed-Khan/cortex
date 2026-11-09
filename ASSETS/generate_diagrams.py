@@ -161,6 +161,7 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "dataframe_anatomy.png": _NUMPY,
     "series_anatomy.png": _NUMPY,
 }
 
@@ -3567,6 +3568,51 @@ def series_anatomy():
     save(fig, "series_anatomy.png")
 
 
+def dataframe_anatomy():
+    """A DataFrame as three Series columns sharing one row index, with the
+    labels that loc uses and the positions that iloc uses."""
+    cols = [("cafe", ["Brew Lab", "Bean There", "Cup & Co"], BLUE),
+            ("seats", ["40", "25", "60"], GREEN),
+            ("rating", ["4.6", "4.1", "4.8"], PURPLE)]
+    labels = ["a", "b", "c"]
+    fig, ax = plt.subplots(figsize=(10.5, 4.4))
+    ax.set_xlim(0, 12.4)
+    ax.set_ylim(0, 6)
+    ax.axis("off")
+    ax.text(1.0, 5.3, "row index", ha="center", fontsize=10, color=ORANGE,
+            fontweight="bold")
+    for r, lab in enumerate(labels):
+        y = 3.6 - r * 1.0
+        ax.add_patch(FancyBboxPatch((0.4, y), 1.2, 0.85, boxstyle="square,pad=0",
+                                    facecolor=ORANGE, edgecolor="black",
+                                    alpha=0.85, lw=1.1))
+        ax.text(1.0, y + 0.42, lab, ha="center", va="center", color="white",
+                fontsize=11, family="monospace")
+        ax.text(0.2, y + 0.42, str(r), ha="right", va="center", color=GREY,
+                fontsize=9)
+    x = 1.9
+    for name, vals, color in cols:
+        w = 2.3 if name == "cafe" else 1.5
+        ax.text(x + w / 2, 5.3, name, ha="center", fontsize=10, color=color,
+                fontweight="bold")
+        ax.text(x + w / 2, 4.85, "a Series", ha="center", fontsize=8, color=GREY)
+        for r, v in enumerate(vals):
+            y = 3.6 - r * 1.0
+            ax.add_patch(FancyBboxPatch((x, y), w, 0.85, boxstyle="square,pad=0",
+                                        facecolor=color, edgecolor="black",
+                                        alpha=0.85, lw=1.1))
+            ax.text(x + w / 2, y + 0.42, v, ha="center", va="center",
+                    color="white", fontsize=10, family="monospace")
+        x += w + 0.3
+    ax.text(8.2, 4.0, "df.loc[\"b\"]  by label,\nend label included", fontsize=10,
+            family="monospace", color=ORANGE)
+    ax.text(8.2, 2.6, "df.iloc[1]  by position,\nend excluded", fontsize=10,
+            family="monospace", color=GREY)
+    ax.text(0.2, 0.3, "grey numbers: positions 0, 1, 2", fontsize=9, color=GREY)
+    ax.set_title("A DataFrame: Series that share one row index")
+    save(fig, "dataframe_anatomy.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3679,4 +3725,5 @@ if __name__ == "__main__":
     boolean_mask()
     broadcasting_stretch()
     series_anatomy()
+    dataframe_anatomy()
     print("\nAll diagrams generated.")
