@@ -1,0 +1,227 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "value-counts-dataframe",
+      "difficulty": "easy",
+      "question": "What does `value_counts()` return when it is called on a whole DataFrame instead of one column?",
+      "options": [
+        "The number of missing values in each column of the DataFrame.",
+        "A count for every distinct value across all columns pooled together.",
+        "A count of how many times each distinct combination of row values occurs.",
+        "An error, because `value_counts` is defined only for a single Series."
+      ],
+      "answer": 2,
+      "explanation": "On a DataFrame, `value_counts` treats each row as a combination of values and counts the repeats. Missing-value counts come from `isnull().sum()`, values are not pooled across columns, and the method does exist for DataFrames.",
+      "misconception": "A DataFrame counts rows, not individual cell values."
+    },
+    {
+      "type": "scenario",
+      "concept": "aligned-addition",
+      "difficulty": "medium",
+      "scenario": "You add `tosses = m[\"TossWinner\"].value_counts()` to `wins = m[\"WinningTeam\"].value_counts()`. One team name appears in `tosses` but never in `wins`.",
+      "question": "What happens for that team, and how do you avoid it?",
+      "options": [
+        "The team is dropped from the result silently, and nothing can recover it.",
+        "The team's count is doubled, because a missing label is treated as a copy of the first.",
+        "The team's value is `NaN`; use `tosses.add(wins, fill_value=0)` to treat the missing side as zero.",
+        "pandas raises a `KeyError`, so you must first filter both Series to the same labels."
+      ],
+      "answer": 2,
+      "explanation": "Series arithmetic aligns by index label. A label present on only one side produces `NaN`. The `add` method accepts `fill_value`, which replaces the missing side with zero before adding.",
+      "misconception": "Aligned arithmetic matches labels, not positions, and gaps become `NaN`."
+    },
+    {
+      "type": "mcq",
+      "concept": "sort-na",
+      "difficulty": "easy",
+      "question": "Where do missing values land after `df.sort_values(\"score\")` by default?",
+      "options": [
+        "At the top, because missing values count as smaller than every number.",
+        "At the end, and `na_position=\"first\"` moves them to the top.",
+        "They are removed, because sorting only keeps rows that have values.",
+        "They stay in their original row positions while other rows are reordered."
+      ],
+      "answer": 1,
+      "explanation": "By default missing values sort last. The `na_position` argument chooses first or last. Sorting never removes rows, and missing rows move like any other.",
+      "misconception": "Sorting reorders every row, including those with `NaN`."
+    },
+    {
+      "type": "scenario",
+      "concept": "multi-column-sort",
+      "difficulty": "medium",
+      "scenario": "You need films grouped by certificate in alphabetical order, and within each certificate the highest rating first.",
+      "question": "Which call does this?",
+      "options": [
+        "`sort_values([\"certificate\", \"rating\"], ascending=False)`, which applies one direction to both columns.",
+        "`sort_values([\"certificate\", \"rating\"], ascending=[True, False])`, one flag per column.",
+        "`sort_values(\"certificate\").sort_values(\"rating\", ascending=False)`, which keeps the first order.",
+        "`sort_index([\"certificate\", \"rating\"])`, because both columns are labels."
+      ],
+      "answer": 1,
+      "explanation": "A list of columns paired with a list of `ascending` flags sorts by the first column, then breaks ties by the second, each in its own direction. A second separate sort would discard the first order, and `sort_index` works on labels.",
+      "misconception": "Chaining two sorts does not preserve the first sort's grouping."
+    },
+    {
+      "type": "mcq",
+      "concept": "rank-ties",
+      "difficulty": "medium",
+      "question": "Four batters tie for the 2nd to 5th lowest totals. What does `rank()` give each of them by default, and what does `rank(method=\"min\")` give?",
+      "options": [
+        "Default 2.0 for all four and `min` gives 3.5 for all four, since the methods are swapped.",
+        "Default 3.5 for all four (the average of ranks 2 to 5) and `min` gives 2.0 for all four.",
+        "Default 2, 3, 4, and 5 in the order the rows appear, and `min` does the same.",
+        "Default 5.0 for all four and `min` gives 2.0, since ties take the highest rank."
+      ],
+      "answer": 1,
+      "explanation": "The default method averages the ranks the tied group spans: (2 + 3 + 4 + 5) / 4 is 3.5. `method=\"min\"` gives the group the lowest rank, 2. Neither default numbers tied rows 2 through 5 separately.",
+      "misconception": "Tied rows share a rank; the default shares the average."
+    },
+    {
+      "type": "mcq",
+      "concept": "reset-index",
+      "difficulty": "easy",
+      "question": "What does `reset_index(drop=True)` do compared with `reset_index()`?",
+      "options": [
+        "It deletes the rows whose index values repeat, keeping the first of each.",
+        "It moves the index into a column named `index` and then also removes the labels of every other column.",
+        "It resets the column names to 0, 1, 2 and keeps the old row index unchanged.",
+        "It restores the 0, 1, 2 numbering and discards the old index instead of keeping it as a column."
+      ],
+      "answer": 3,
+      "explanation": "Without `drop=True`, the old index becomes a regular column. With it, the old index is thrown away. Neither option removes duplicated rows or touches the column names.",
+      "misconception": "`drop=True` drops the old index, not rows."
+    },
+    {
+      "type": "scenario",
+      "concept": "swap-index",
+      "difficulty": "hard",
+      "scenario": "A table is indexed by region and has a `code` column. You want `code` as the index but you must keep the region values as a regular column.",
+      "question": "Which approach keeps both?",
+      "options": [
+        "`df.set_index(\"code\")` alone, because it moves the old index into a column automatically.",
+        "`df.reset_index(drop=True).set_index(\"code\")`, because dropping the index keeps its values safe.",
+        "`df.rename(index=\"code\")`, because renaming the index swaps it with the column.",
+        "`df.reset_index().set_index(\"code\")`, which first turns the region index into a column."
+      ],
+      "answer": 3,
+      "explanation": "`set_index` replaces the current index and discards it. Calling `reset_index()` first moves the region values into a column, so the later `set_index` keeps them. `drop=True` would lose them.",
+      "misconception": "`set_index` alone discards the existing index."
+    },
+    {
+      "type": "mcq",
+      "concept": "unique-nunique",
+      "difficulty": "medium",
+      "question": "For `pd.Series([4, 7, 4, np.nan, 9, 7])`, how do `nunique()` and `len(unique())` compare?",
+      "options": [
+        "`nunique()` gives 3 and `len(unique())` gives 4, because only `unique` keeps `NaN`.",
+        "Both give 4, because `NaN` counts as a value in both cases.",
+        "`nunique()` gives 4 and `len(unique())` gives 3, because `unique` drops `NaN`.",
+        "Both give 3, because neither method looks at missing values."
+      ],
+      "answer": 0,
+      "explanation": "`unique()` returns every distinct value including `NaN`, so its length is 4. `nunique()` skips `NaN` unless `dropna=False`, so it returns 3.",
+      "misconception": "`unique` keeps `NaN`; `nunique` ignores it by default."
+    },
+    {
+      "type": "mcq",
+      "concept": "dropna-how",
+      "difficulty": "medium",
+      "question": "How do `dropna(how=\"any\")` and `dropna(how=\"all\")` differ on a DataFrame?",
+      "options": [
+        "`any` drops a row if at least one value is missing; `all` drops it only if every value is missing.",
+        "`any` drops a row only if every value is missing; `all` drops it if one value is missing.",
+        "`any` removes missing columns; `all` removes missing rows, and both ignore the other axis.",
+        "They are the same, because a row with one missing value is entirely missing."
+      ],
+      "answer": 0,
+      "explanation": "`any` is the strict default and removes a row at the first gap. `all` removes only rows with nothing in them. Both work on rows by default, and they give different results whenever a row is partly filled.",
+      "misconception": "`how=\"any\"` is the default and is the more aggressive option."
+    },
+    {
+      "type": "scenario",
+      "concept": "fillna-zero",
+      "difficulty": "hard",
+      "scenario": "A loans table has missing values in `member` (text), `days` (a duration), and `fine`. A colleague proposes `loans.fillna(0)` on the whole table.",
+      "question": "What is the problem with that proposal?",
+      "options": [
+        "It fails with an error, because `fillna` cannot be applied to a whole DataFrame at once.",
+        "It fills only the numeric columns and leaves the text column untouched, so gaps would remain in it afterwards.",
+        "It removes the rows with gaps instead of filling them, which loses data without warning.",
+        "It writes a 0 into the text column and the duration column alike, and then raises an error on the first non-numeric column."
+      ],
+      "answer": 3,
+      "explanation": "A zero in `days` looks like a valid duration and a zero in `member` is a meaningless name. Fill each column with a value that fits it, such as a placeholder text, the mean, or 0 only where zero is a sound default.",
+      "misconception": "A fill value becomes data; choose it per column."
+    },
+    {
+      "type": "mcq",
+      "concept": "ffill-bfill",
+      "difficulty": "easy",
+      "question": "Given readings `[20.1, NaN, NaN, 22.4, NaN]`, what does `bfill()` leave in the last position?",
+      "options": [
+        "22.4, because backward fill copies the previous valid value forward in position into the final gap.",
+        "20.1, because backward fill reaches back across the whole series to the very first valid value.",
+        "`NaN`, because backward fill copies the next value and the last position has none after it.",
+        "0, because filling past the end of the data defaults to zero."
+      ],
+      "answer": 2,
+      "explanation": "Backward fill takes each gap's value from the next valid entry. The last position has nothing after it, so it stays `NaN`. Forward fill (`ffill`) is the one that would copy 22.4 into it.",
+      "misconception": "`bfill` looks ahead; `ffill` looks behind."
+    },
+    {
+      "type": "scenario",
+      "concept": "drop-duplicates-latest",
+      "difficulty": "hard",
+      "scenario": "A table has many matches per venue. You want only the most recent match for each venue.",
+      "question": "Which sequence is correct?",
+      "options": [
+        "Call `drop_duplicates(subset=[\"Venue\"])` first, then sort by date to find the newest.",
+        "Sort by date in descending order, then `drop_duplicates(subset=[\"Venue\"], keep=\"first\")`.",
+        "Call `drop_duplicates(keep=False)` so that every venue with repeats is removed.",
+        "Use `unique()` on the `Venue` column, which returns the latest row for each name."
+      ],
+      "answer": 1,
+      "explanation": "`drop_duplicates` keeps the first row it sees for each key, so the order must be set first. Sorting newest to oldest and keeping the first gives the latest per venue. Dropping first keeps arbitrary rows, and `keep=False` removes all repeated venues.",
+      "misconception": "Which row survives depends on the order of the table."
+    },
+    {
+      "type": "mcq",
+      "concept": "apply-precedence",
+      "difficulty": "hard",
+      "question": "A sigmoid is written as `1 / 1 + np.exp(-v)`. At `v = 0` the result is 2.0, not 0.5. Why?",
+      "options": [
+        "`np.exp` returns a negative number for a zero input, which flips the sign of the whole expression.",
+        "`apply` evaluates the lambda twice for each value, which doubles the output.",
+        "The division `1 / 1` runs first and then `np.exp(0)` is added, so the denominator needed parentheses.",
+        "The sigmoid formula is only defined for strictly positive input, so zero gives an unreliable answer."
+      ],
+      "answer": 2,
+      "explanation": "Division binds tighter than addition, so the expression means (1 / 1) + exp(-v), which is 1 + 1 at zero. The correct form is `1 / (1 + np.exp(-v))`, which gives 0.5.",
+      "misconception": "Always parenthesize a denominator that contains addition."
+    },
+    {
+      "type": "mcq",
+      "concept": "apply-axis",
+      "difficulty": "medium",
+      "question": "What does `df.apply(func, axis=1)` pass to `func` on each call?",
+      "options": [
+        "One whole row as a Series, so the function can read several columns together.",
+        "One whole column as a Series, so the function sees every row of that column.",
+        "A single cell value, as `Series.apply` does, so the function reads one number.",
+        "The full DataFrame once, so the function loops over the rows itself."
+      ],
+      "answer": 0,
+      "explanation": "With `axis=1` the function is called once per row, receiving that row as a Series indexed by column names. With the default `axis=0` it receives columns. A single value is the Series version.",
+      "misconception": "`axis=1` means row-wise for `apply`."
+    },
+    {
+      "type": "card",
+      "concept": "copy",
+      "difficulty": "hard",
+      "question": "Why call `.copy()` on a slice or a filtered table before you edit it, and what happens if you do not?",
+      "answer": "A slice or filter may share data with the original, so an edit can change both or trigger a chained-assignment warning. `.copy()` makes an independent object, so edits stay local and the original is untouched.",
+      "explanation": "The habit removes any doubt about whether an object is a view or a copy."
+    }
+  ]
+}
