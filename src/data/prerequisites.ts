@@ -68,6 +68,7 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   'Pandas DataFrame': ['Pandas Series'],
   'DataFrame Methods': ['Pandas DataFrame'],
   'GroupBy': ['DataFrame Methods'],
+  'Merging & Joining': ['GroupBy'],
 
   // ── OOP & Advanced Python ─────────────────────────────────────────────
   // Two strands off the OOP base. The class strand is linear; the advanced

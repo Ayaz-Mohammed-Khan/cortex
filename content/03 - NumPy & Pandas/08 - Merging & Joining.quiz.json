@@ -1,0 +1,227 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "concat-vs-merge",
+      "difficulty": "easy",
+      "question": "How does `pd.concat` differ from `merge`?",
+      "options": [
+        "`concat` joins tables by matching values in a shared key column, while `merge` glues tables together by position.",
+        "`concat` glues tables together by position and labels, while `merge` matches rows by the values in key columns.",
+        "`concat` works only on Series, while `merge` is the only function that accepts whole DataFrames as input.",
+        "`concat` always removes duplicate rows from the result, while `merge` always keeps every duplicate that it finds."
+      ],
+      "answer": 1,
+      "explanation": "`concat` stacks or places tables side by side using their positions and labels. `merge` pairs rows whose key values are equal, like a database join. Both accept DataFrames, and neither removes duplicates on its own.",
+      "misconception": "`merge` is the key-matching tool; `concat` is the gluing tool."
+    },
+    {
+      "type": "mcq",
+      "concept": "ignore-index",
+      "difficulty": "easy",
+      "question": "You stack two monthly logs with `pd.concat([m1, m2])` and see index values repeat. What does `ignore_index=True` change?",
+      "options": [
+        "It sorts the rows by value, so repeated index entries become adjacent to each other.",
+        "It drops the second table's rows whenever their index values already exist in the first table.",
+        "It converts the index to strings, so repeated numbers no longer clash with each other.",
+        "It renumbers the stacked rows from 0, so the index is unique again."
+      ],
+      "answer": 3,
+      "explanation": "Each input keeps its own index, so values such as 0, 1, 2 appear twice. `ignore_index=True` discards those labels and numbers the result 0 to n minus 1. No rows are dropped or sorted.",
+      "misconception": "Repeated index values are harmless to the data, but they confuse label lookups."
+    },
+    {
+      "type": "scenario",
+      "concept": "concat-keys",
+      "difficulty": "medium",
+      "scenario": "You build `tagged = pd.concat([m1, m2], keys=[\"first\", \"second\"])` and need the fourth row of the second month (label 3).",
+      "question": "Which expression fetches it?",
+      "options": [
+        "`tagged.iloc[(\"second\", 3)]`, because `iloc` accepts a tuple of the two labels.",
+        "`tagged[\"second\"][3]`, because square brackets always select a single row by position.",
+        "`tagged.loc[(\"second\", 3)]`, because `loc` accepts a tuple of the two index labels.",
+        "`tagged.head(3)`, because the second table always begins at the third row."
+      ],
+      "answer": 2,
+      "explanation": "`keys` builds a two-level index, so labels are tuples and `loc` is the label-based accessor. `iloc` takes integer positions, not labels, and `head` shows the top of the first table.",
+      "misconception": "`iloc` is positions only; use `loc` for labels."
+    },
+    {
+      "type": "mcq",
+      "concept": "concat-axis1",
+      "difficulty": "medium",
+      "question": "Two tables of 25 and 28 rows are joined with `pd.concat([a, b], axis=1)`. What does the result look like?",
+      "options": [
+        "A 28-row table where the 25-row table's columns are `NaN` for the last three rows.",
+        "A 25-row table, because `concat` truncates to the shorter table to keep the columns aligned.",
+        "A 53-row table, because `axis=1` still stacks the tables one under the other.",
+        "An error, because the column names of the two tables must be identical to place them next to each other."
+      ],
+      "answer": 0,
+      "explanation": "With `axis=1`, rows are aligned by index and columns are added. The shorter table has no rows for the extra labels, so those cells become `NaN`. Matching column names are not required.",
+      "misconception": "`axis=1` extends columns, and unmatched labels fill with `NaN`."
+    },
+    {
+      "type": "scenario",
+      "concept": "inner-join",
+      "difficulty": "medium",
+      "scenario": "Month two has registrations for student ids 26, 27, and 28, but the roster only has ids 1 to 25. You run `m2.merge(students, on=\"student_id\")`.",
+      "question": "What happens to those three registrations?",
+      "options": [
+        "They are kept with missing names, because every merge keeps all rows of the left table.",
+        "They are replaced by the three students whose ids are closest in value.",
+        "They are dropped, because the default inner join keeps only keys present in both tables.",
+        "pandas raises a `KeyError`, because every key on the left must exist on the right."
+      ],
+      "answer": 2,
+      "explanation": "The default is `how=\"inner\"`, which keeps only matched keys. Use `how=\"left\"` to keep the unmatched registrations with `NaN` names. Merge never raises an error for unmatched keys, and it does not guess close ids.",
+      "misconception": "The default merge discards unmatched rows from both sides."
+    },
+    {
+      "type": "mcq",
+      "concept": "left-vs-right",
+      "difficulty": "medium",
+      "question": "Which pair of calls returns the same set of rows?",
+      "options": [
+        "`m2.merge(students, how=\"left\")` and `students.merge(m2, how=\"left\")`, because left joins are symmetric.",
+        "`m2.merge(students, how=\"right\")` and `students.merge(m2, how=\"left\")`, because they keep the same table's rows.",
+        "`m2.merge(students, how=\"inner\")` and `students.merge(m2, how=\"outer\")`, because inner and outer match.",
+        "`m2.merge(students, how=\"outer\")` and `students.merge(m2, how=\"inner\")`, because order does not matter."
+      ],
+      "answer": 1,
+      "explanation": "A right join on `m2` keeps every row of `students`, and a left join starting from `students` does the same. Left and right differ only in which table is named first. Inner and outer keep different row sets.",
+      "misconception": "Left and right joins are mirror images of one another."
+    },
+    {
+      "type": "mcq",
+      "concept": "outer-join",
+      "difficulty": "easy",
+      "question": "What does an outer join keep?",
+      "options": [
+        "Only the keys present in both tables, discarding all unmatched rows.",
+        "Every row from both tables, with `NaN` wherever one side has no match.",
+        "Only the rows of the left table, with `NaN` where the right has no match.",
+        "Only the unmatched rows, so you can see what failed to pair up."
+      ],
+      "answer": 1,
+      "explanation": "An outer join is the union of the keys, so nothing is lost from either side. The first option describes inner, the third describes left, and the last is not a standard join.",
+      "misconception": "Outer means everything, not just the leftovers."
+    },
+    {
+      "type": "scenario",
+      "concept": "self-join",
+      "difficulty": "hard",
+      "scenario": "A roster has `student_id`, `name`, and `partner`, where `partner` is another student's id. You want each student's name beside their partner's name.",
+      "question": "How do you do it?",
+      "options": [
+        "Merge the table with itself using `left_on=\"partner\"` and `right_on=\"student_id\"`, and add `suffixes` to tell the two name columns apart.",
+        "Use `concat` with `axis=1` on two copies of the table, because the partner ids match row positions.",
+        "Call `groupby(\"partner\")` and take the first name, because grouping pairs a student with their partner.",
+        "Sort the table by `partner` and read the names in adjacent rows, because partners end up next to each other."
+      ],
+      "answer": 0,
+      "explanation": "A self join matches the partner id on the left to the student id on the right. Because both sides are the same table, `suffixes` renames the clashing columns. Positions and sort order do not reflect partner relationships, and `groupby` does not pair rows.",
+      "misconception": "A table can be merged with itself when one column refers to another row's key."
+    },
+    {
+      "type": "mcq",
+      "concept": "join-method",
+      "difficulty": "medium",
+      "question": "How does `DataFrame.join` match rows by default?",
+      "options": [
+        "By the index of the right table, as a left join, with `on` naming a column of the left table when needed.",
+        "By any column names the two tables share, as an inner join, without needing any index.",
+        "By row position only, ignoring all labels and column names in both tables.",
+        "By the first column of each table, as an outer join, whatever its name or type."
+      ],
+      "answer": 0,
+      "explanation": "`join` is index-based and defaults to a left join. Pass `on` to use a column of the left table against the right table's index. If the tables share column names, `lsuffix` and `rsuffix` are required.",
+      "misconception": "`join` matches on the index, not on shared column names."
+    },
+    {
+      "type": "mcq",
+      "concept": "suffixes",
+      "difficulty": "easy",
+      "question": "Two tables both have a `name` column and you merge them on `student_id`. What does `suffixes` control?",
+      "options": [
+        "Which of the two `name` columns survives, since the other is discarded.",
+        "The text added to the clashing column names so both can appear in the result.",
+        "The order of the rows in the result, using the suffix as a sort key.",
+        "The data type of the key column, so the two keys can be compared."
+      ],
+      "answer": 1,
+      "explanation": "Both columns are kept, and `suffixes` is appended to each clashing name, such as `name_x` and `name_y` by default. It does not drop columns, sort rows, or change dtypes.",
+      "misconception": "Clashing columns are renamed, not overwritten."
+    },
+    {
+      "type": "mcq",
+      "concept": "set-difference",
+      "difficulty": "medium",
+      "question": "What does `np.setdiff1d(courses[\"course_id\"], m1[\"course_id\"])` return?",
+      "options": [
+        "The ids that appear in both arrays, which is the intersection of the two.",
+        "The ids of the courses that were registered more than once in the first month.",
+        "A combined list of every id from both arrays, with repeated values removed.",
+        "The course ids that are missing from the first month's registrations."
+      ],
+      "answer": 3,
+      "explanation": "`setdiff1d(a, b)` returns the sorted unique values of `a` that are not in `b`. Here that is every course nobody registered for in month one. The intersection is `intersect1d` and the union is `union1d`.",
+      "misconception": "Set difference is directional: a minus b is not b minus a."
+    },
+    {
+      "type": "scenario",
+      "concept": "group-by-id-and-name",
+      "difficulty": "hard",
+      "scenario": "You count registrations per course by running `value_counts()` on the merged `course_name` column, but two different courses share a name.",
+      "question": "What goes wrong, and what is the fix?",
+      "options": [
+        "Nothing goes wrong, because names are unique in every catalogue by definition.",
+        "The two courses are merged into one count; group by `course_id` and `course_name` together to keep them apart.",
+        "pandas raises an error because duplicate names make the merge ambiguous, so you must rename one.",
+        "Only the first course with the name is counted, so you must sort by price before counting."
+      ],
+      "answer": 1,
+      "explanation": "Counting by name alone treats both courses as one. Including the id in the group key keeps distinct courses separate while still showing the name in the result.",
+      "misconception": "Names are labels, not keys; ids identify records."
+    },
+    {
+      "type": "mcq",
+      "concept": "duplicate-keys",
+      "difficulty": "hard",
+      "question": "A key value appears 2 times in the left table and 3 times in the right table. How many rows does an inner merge produce for it?",
+      "options": [
+        "Two rows, because the left table decides how many rows each key gets.",
+        "Three rows, because the right table decides how many rows each key gets.",
+        "One row, because each key is matched only once and duplicates are discarded.",
+        "Six rows, because every left row pairs with every matching right row."
+      ],
+      "answer": 3,
+      "explanation": "A merge forms every pairing of matching rows, so 2 times 3 gives 6. Comparing row counts before and after a merge reveals this multiplication.",
+      "misconception": "Duplicate keys multiply rather than collapse."
+    },
+    {
+      "type": "scenario",
+      "concept": "sample-merge-counts",
+      "difficulty": "medium",
+      "scenario": "The match table has 950 rows and the deliveries file covers 83 of those matches. You merge them on `ID`.",
+      "question": "What row counts do you expect for the match table merged with the distinct match ids from the deliveries, as inner and as left?",
+      "options": [
+        "Both give 950, because the match table is the larger one.",
+        "Inner gives 950 and left gives 83, because left keeps only matches that have deliveries.",
+        "Inner gives 83 and left gives 950, because left keeps every match.",
+        "Both give 83, because merging always keeps only the smaller table."
+      ],
+      "answer": 2,
+      "explanation": "Inner keeps only the 83 matches present in both tables. Left keeps all 950 matches from the left table and fills the right side with `NaN`. The size of a table does not decide the join result.",
+      "misconception": "The join type decides which rows survive, not table size."
+    },
+    {
+      "type": "card",
+      "concept": "join-types",
+      "difficulty": "hard",
+      "question": "List the four values of `how` in `merge` and say which rows each keeps.",
+      "answer": "`inner` keeps only keys present in both tables. `left` keeps every row of the left table, `right` keeps every row of the right table, and `outer` keeps every row of both. Unmatched cells are filled with `NaN`.",
+      "explanation": "Inner is the default, and left and right differ only by which table is named first."
+    }
+  ]
+}

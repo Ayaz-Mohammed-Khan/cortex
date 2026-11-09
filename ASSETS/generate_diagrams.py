@@ -161,9 +161,11 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "join_types.png": _NUMPY,
     "split_apply_combine.png": _NUMPY,
     "dataframe_anatomy.png": _NUMPY,
     "series_anatomy.png": _NUMPY,
+    "concat_axes.png": _NUMPY,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -3675,6 +3677,85 @@ def split_apply_combine():
     save(fig, "split_apply_combine.png")
 
 
+def join_types():
+    """Two small keyed tables and the rows kept by inner, left, right, outer."""
+    left = {1: "a", 2: "b", 3: "c"}
+    right = {2: "x", 3: "y", 4: "z"}
+    kinds = [("inner", [2, 3]), ("left", [1, 2, 3]),
+             ("right", [2, 3, 4]), ("outer", [1, 2, 3, 4])]
+    fig, axes = plt.subplots(1, 4, figsize=(12.5, 3.9))
+    for ax, (kind, keys) in zip(axes, kinds):
+        ax.set_xlim(0, 6)
+        ax.set_ylim(0, 6.2)
+        ax.axis("off")
+        ax.set_title(f'how="{kind}"', fontsize=11, family="monospace")
+        for i, k in enumerate(keys):
+            y = 4.4 - i * 0.95
+            l = left.get(k)
+            r = right.get(k)
+            for x, txt, col in ((0.3, str(k), GREY),
+                                (1.6, l if l else "NaN", BLUE if l else "#BBBBBB"),
+                                (3.2, r if r else "NaN", ORANGE if r else "#BBBBBB")):
+                w = 1.2 if x < 3 else 1.2
+                ax.add_patch(FancyBboxPatch((x, y), w, 0.8, boxstyle="square,pad=0",
+                                            facecolor=col, edgecolor="black",
+                                            alpha=0.85, lw=1.0))
+                ax.text(x + w / 2, y + 0.4, txt, ha="center", va="center",
+                        color="white", fontsize=10, family="monospace")
+        ax.text(0.9, 5.45, "key", ha="center", fontsize=9, color=GREY)
+        ax.text(2.2, 5.45, "left", ha="center", fontsize=9, color=BLUE)
+        ax.text(3.8, 5.45, "right", ha="center", fontsize=9, color=ORANGE)
+    fig.suptitle("Left table keys 1, 2, 3 and right table keys 2, 3, 4", y=1.02,
+                 fontsize=11)
+    save(fig, "join_types.png")
+
+
+def concat_axes():
+    """concat axis=0 stacks rows, axis=1 sits side by side, merge matches keys."""
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.8))
+    titles = ["concat, axis=0\nstack rows", "concat, axis=1\nplace side by side",
+              "merge\nmatch rows by key"]
+
+    def block(ax, x, y, w, h, text, color):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="square,pad=0",
+                                    facecolor=color, edgecolor="black",
+                                    alpha=0.85, lw=1.1))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+                color="white", fontsize=10, family="monospace")
+
+    for ax, t in zip(axes, titles):
+        ax.set_xlim(0, 8)
+        ax.set_ylim(0, 6)
+        ax.axis("off")
+        ax.set_title(t, fontsize=11)
+    ax = axes[0]
+    block(ax, 2, 4.0, 4, 1.2, "table A", BLUE)
+    block(ax, 2, 2.6, 4, 1.2, "table B", ORANGE)
+    ax.annotate("", xy=(7.3, 2.6), xytext=(7.3, 5.2),
+                arrowprops=dict(arrowstyle="<|-|>", color=GREY, lw=1.2))
+    ax.text(7.5, 3.8, "more\nrows", fontsize=8, color=GREY, va="center")
+    ax.text(4, 1.4, "same columns,\nrows added", ha="center", fontsize=9, color=GREY)
+    ax = axes[1]
+    block(ax, 0.6, 2.6, 3, 2.6, "table A", BLUE)
+    block(ax, 3.9, 2.6, 3, 2.6, "table B", ORANGE)
+    ax.annotate("", xy=(6.9, 1.9), xytext=(0.6, 1.9),
+                arrowprops=dict(arrowstyle="<|-|>", color=GREY, lw=1.2))
+    ax.text(3.75, 1.2, "aligned by index,\ncolumns added", ha="center", fontsize=9,
+            color=GREY)
+    ax = axes[2]
+    block(ax, 0.4, 3.9, 3, 1.1, "A: key 1", BLUE)
+    block(ax, 0.4, 2.7, 3, 1.1, "A: key 2", BLUE)
+    block(ax, 4.6, 3.9, 3, 1.1, "B: key 2", ORANGE)
+    block(ax, 4.6, 2.7, 3, 1.1, "B: key 1", ORANGE)
+    ax.annotate("", xy=(4.5, 3.3), xytext=(3.5, 4.4),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.4))
+    ax.annotate("", xy=(4.5, 4.4), xytext=(3.5, 3.3),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.4))
+    ax.text(4, 1.7, "rows with equal keys\nare paired", ha="center", fontsize=9,
+            color=GREY)
+    save(fig, "concat_axes.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3789,4 +3870,6 @@ if __name__ == "__main__":
     series_anatomy()
     dataframe_anatomy()
     split_apply_combine()
+    join_types()
+    concat_axes()
     print("\nAll diagrams generated.")
