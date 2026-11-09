@@ -27,27 +27,55 @@
  *
  * ── Packages (D5) ───────────────────────────────────────────────────────────
  * Before each run, `loadPackagesFromImports(code)` inspects the submitted code
- * and loads only the packages it imports (numpy, pandas, matplotlib, seaborn,
- * scipy, scikit-learn, …) from the Pyodide distribution. matplotlib uses the
+ * and loads only the packages it imports (numpy, pandas, matplotlib, scipy,
+ * scikit-learn, …) from the Pyodide distribution (seaborn is not in it). A cell
+ * that calls `cortex_data` also gets pandas loaded for it (see Datasets
+ * below). matplotlib uses the
  * non-interactive Agg backend so `plt.show()` yields a capturable PNG instead
  * of trying to open a window.
+ *
+ * ── Datasets (`cortex_data`) ────────────────────────────────────────────────
+ * Cells load bundled datasets with `cortex_data("name", **read_csv_kwargs)`.
+ * The Python run is synchronous, so the data is PREFETCHED here first:
+ * `prepareDatasets` scans the code for literal names (pure helpers in
+ * `@/lib/runnable-code/datasets`), loads pandas (even without an explicit
+ * import), fetches `/datasets/manifest.json` once, downloads each missing file
+ * from the SITE origin (`self.location.origin`, never relative to this hashed
+ * script under `/_astro/`), and writes it into Pyodide's virtual FS at
+ * `/datasets/<file>`. Files, the manifest, and the pandas load are cached for
+ * the worker's lifetime, so reruns need no network. All of this finishes
+ * before `executing` is posted, so it never counts against the soft run
+ * timeout. Failures surface as calm, already-friendly copy (`DatasetLoadError`)
+ * and every failed step is retried on the next Run.
  */
 /// <reference lib="webworker" />
 
 import {
+  DATASET_MANIFEST_PATH,
   PYODIDE_INDEX_URL,
   PYODIDE_VERSION,
   type RunError,
   type RunRequest,
   type RunResult,
 } from '@/lib/runnable-code/protocol';
+import {
+  datasetFsPath,
+  datasetUrl,
+  extractDatasetNames,
+  mentionsCortexData,
+  parseManifest,
+  type DatasetEntry,
+  type DatasetManifest,
+} from '@/lib/runnable-code/datasets';
 
 // Minimal structural type for the bits of the Pyodide API we touch. Pyodide is
 // loaded from the CDN at runtime, so there is no npm types package to import.
 interface PyodideAPI {
   loadPackagesFromImports(code: string): Promise<unknown>;
+  loadPackage(names: string[]): Promise<unknown>;
   runPythonAsync(code: string): Promise<unknown>;
   globals: { get(name: string): unknown };
+  FS: { mkdirTree(path: string): void; writeFile(path: string, data: Uint8Array): void };
 }
 
 type LoadPyodideFn = (opts: { indexURL: string }) => Promise<PyodideAPI>;
@@ -177,7 +205,204 @@ except Exception:
 # matching a notebook-like session feel within a single page. input is exposed
 # in the namespace too so the override is used even if a run rebinds builtins.
 _CORTEX_NS = {"__name__": "__main__", "input": _cortex_input}
+
+# Bundled datasets. This block MUST stay last: it uses json/os (imported on the
+# first line), _cortex_builtins, and _CORTEX_NS, which are defined above. The
+# worker installs the registry from manifest.json and writes each requested
+# file into /datasets/ BEFORE the run, because the run itself is synchronous.
+_CORTEX_DATASETS = {}  # name -> file, installed by the worker from manifest.json
+
+def _cortex_set_datasets(payload):
+    """Install the dataset registry (JSON {name: file}) from the worker."""
+    global _CORTEX_DATASETS
+    _CORTEX_DATASETS = dict(json.loads(payload))
+
+def cortex_data(name, **read_csv_kwargs):
+    """Load a bundled Cortex dataset as a pandas DataFrame (same kwargs as read_csv)."""
+    import pandas as pd
+    if not isinstance(name, str):
+        raise TypeError('cortex_data() needs the dataset name as a string, e.g. cortex_data("ipl_matches").')
+    if not _CORTEX_DATASETS:
+        raise RuntimeError(
+            'Write the dataset name as a literal string, e.g. cortex_data("ipl_matches"), '
+            'so the runner can load it before your code starts.')
+    file = _CORTEX_DATASETS.get(name)
+    if file is None:
+        raise ValueError("No dataset named " + repr(name) + ". Available datasets: "
+                         + ", ".join(sorted(_CORTEX_DATASETS)) + ".")
+    path = "/datasets/" + file
+    if not os.path.exists(path):
+        raise RuntimeError(
+            "The dataset " + repr(name) + " was not loaded before the run. Write its name as a "
+            'literal string, e.g. cortex_data("' + name + '"), and run again.')
+    return pd.read_csv(path, **read_csv_kwargs)
+
+_cortex_builtins.cortex_data = cortex_data
+_CORTEX_NS["cortex_data"] = cortex_data
 `;
+
+// ── Dataset prefetch (see the header) ───────────────────────────────────────
+
+/** A dataset-preparation failure whose message is already user-facing copy. */
+class DatasetLoadError extends Error {}
+
+/** pandas has been loaded once (cortex_data needs it even without an import). */
+let pandasLoaded = false;
+/** Lazily fetched + validated manifest; reset to null on any failure so the
+ *  next Run retries (a parse failure only succeeds once a fixed manifest is
+ *  deployed). */
+let manifestPromise: Promise<DatasetManifest> | null = null;
+/** The registry has been installed in Python for the current manifest. */
+let registryInstalled = false;
+/** Dataset names already written into the virtual FS. */
+const written = new Set<string>();
+/** In-flight downloads, so two cells starting at once share one fetch. */
+const inflight = new Map<string, Promise<void>>();
+/** `/datasets` exists in the virtual FS. */
+let fsDirReady = false;
+
+/** Fetch and validate the manifest once per worker (retried after failure). */
+function getManifest(): Promise<DatasetManifest> {
+  if (manifestPromise) return manifestPromise;
+  const url = new URL(DATASET_MANIFEST_PATH, self.location.origin).href;
+  const attempt = (async (): Promise<DatasetManifest> => {
+    let res: Response;
+    try {
+      res = await fetch(url, { cache: 'no-cache', credentials: 'same-origin' });
+    } catch (err) {
+      console.warn('[cortex] dataset manifest fetch failed', err);
+      throw new DatasetLoadError("Couldn't load the dataset list. Check your connection and run again.");
+    }
+    if (!res.ok) {
+      console.warn('[cortex] dataset manifest fetch failed', res.status);
+      throw new DatasetLoadError("Couldn't load the dataset list. Check your connection and run again.");
+    }
+    try {
+      return parseManifest(await res.json());
+    } catch (err) {
+      console.error('[cortex] dataset manifest is invalid', err);
+      throw new DatasetLoadError("The dataset list is invalid, so datasets can't be loaded right now.");
+    }
+  })();
+  manifestPromise = attempt;
+  attempt.catch(() => {
+    if (manifestPromise === attempt) manifestPromise = null;
+  });
+  return attempt;
+}
+
+/** Download one dataset and write it into the virtual FS (shared if in flight). */
+function fetchAndWrite(pyodide: PyodideAPI, entry: DatasetEntry): Promise<void> {
+  const existing = inflight.get(entry.name);
+  if (existing) return existing;
+  const job = (async (): Promise<void> => {
+    const url = datasetUrl(self.location.origin, entry.file, entry.sha256);
+    let res: Response;
+    try {
+      res = await fetch(url, { credentials: 'same-origin' });
+    } catch (err) {
+      console.warn('[cortex] dataset fetch failed', url, err);
+      throw new DatasetLoadError(
+        `Couldn't download the dataset "${entry.name}". Check your connection and run again.`,
+      );
+    }
+    if (!res.ok) {
+      console.warn('[cortex] dataset fetch failed', url, res.status);
+      throw new DatasetLoadError(
+        `Couldn't download the dataset "${entry.name}" (HTTP ${res.status}). Check your connection and run again.`,
+      );
+    }
+    let buffer: ArrayBuffer;
+    try {
+      buffer = await res.arrayBuffer();
+    } catch (err) {
+      console.warn('[cortex] dataset read failed', url, err);
+      throw new DatasetLoadError(
+        `Couldn't download the dataset "${entry.name}". Check your connection and run again.`,
+      );
+    }
+    if (buffer.byteLength !== entry.bytes) {
+      console.warn('[cortex] dataset size mismatch', url, entry.bytes, buffer.byteLength);
+      throw new DatasetLoadError(
+        `The dataset "${entry.name}" did not download completely. Run again to retry.`,
+      );
+    }
+    try {
+      if (!fsDirReady) {
+        pyodide.FS.mkdirTree('/datasets');
+        fsDirReady = true;
+      }
+      pyodide.FS.writeFile(datasetFsPath(entry.file), new Uint8Array(buffer));
+    } catch (err) {
+      console.error('[cortex] dataset FS write failed', err);
+      throw err;
+    }
+    written.add(entry.name);
+  })();
+  inflight.set(entry.name, job);
+  // Drop the entry when settled: success is then answered by `written`, and a
+  // failure is retried by the next Run.
+  void job.then(
+    () => inflight.delete(entry.name),
+    () => inflight.delete(entry.name),
+  );
+  return job;
+}
+
+/**
+ * Make every dataset the code names available in the FS before the run.
+ * Posts `loading-data` once, up front, only when network work is pending.
+ */
+async function prepareDatasets(pyodide: PyodideAPI, req: RunRequest): Promise<void> {
+  if (!mentionsCortexData(req.code)) return;
+  const names = extractDatasetNames(req.code);
+
+  // Decide whether network work is pending BEFORE awaiting anything. Until the
+  // manifest is known, `!pandasLoaded || manifest unresolved` already holds on
+  // every first-run path, so one check here covers them all.
+  // `registryInstalled` implies the manifest promise has already resolved, so
+  // this await settles immediately and never waits on the network.
+  const known: DatasetManifest | null =
+    manifestPromise && registryInstalled ? await manifestPromise.catch(() => null) : null;
+  const needsNetwork =
+    !pandasLoaded ||
+    known === null ||
+    names.some((n) => known.datasets.some((d) => d.name === n) && !written.has(n));
+  if (needsNetwork) {
+    self.postMessage({ type: 'status', phase: 'loading-data', id: req.id });
+  }
+
+  if (!pandasLoaded) {
+    try {
+      await pyodide.loadPackage(['pandas']);
+    } catch (err) {
+      console.warn('[cortex] pandas load failed', err);
+      throw new DatasetLoadError(
+        "Couldn't load pandas, which cortex_data() needs. Check your connection and run again.",
+      );
+    }
+    pandasLoaded = true;
+  }
+
+  const manifest = await getManifest();
+  if (!registryInstalled) {
+    const registry: Record<string, string> = {};
+    for (const d of manifest.datasets) registry[d.name] = d.file;
+    const install = pyodide.globals.get('_cortex_set_datasets') as (payload: string) => void;
+    install(JSON.stringify(registry));
+    registryInstalled = true;
+  }
+
+  const byName = new Map(manifest.datasets.map((d) => [d.name, d] as const));
+  const missing: DatasetEntry[] = [];
+  for (const n of names) {
+    const entry = byName.get(n);
+    // Unknown names are skipped: the Python helper raises the friendly
+    // "No dataset named ..." error listing what is available.
+    if (entry && !written.has(n)) missing.push(entry);
+  }
+  await Promise.all(missing.map((entry) => fetchAndWrite(pyodide, entry)));
+}
 
 /** Boot Pyodide once: dynamic-import the ESM entry from the CDN, then setup. */
 async function bootPyodide(): Promise<PyodideAPI> {
@@ -226,6 +451,11 @@ async function handleRun(req: RunRequest): Promise<void> {
       // may still run (or will raise a clear ImportError we surface below).
     }
 
+    // Datasets named in `cortex_data("...")` calls: load pandas, fetch the
+    // manifest and any missing files into the FS. Also BEFORE `executing`, so
+    // the download is never charged against the run timeout.
+    await prepareDatasets(pyodide, req);
+
     // Packages are ready; the next thing is the user's actual code. Tell the
     // island to START the run timeout now (boot + package download excluded),
     // and reset the execution clock so `timeMs` measures only the run.
@@ -270,7 +500,7 @@ async function handleRun(req: RunRequest): Promise<void> {
     const error: RunError = {
       id: req.id,
       ok: false,
-      error: friendlyError(err),
+      error: err instanceof DatasetLoadError ? err.message : friendlyError(err),
       stderr: '',
       timeMs: Math.round(performance.now() - started),
     };

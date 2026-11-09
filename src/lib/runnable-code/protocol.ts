@@ -41,6 +41,17 @@ export const RUN_TIMEOUT_MS = 15_000;
  *  House style: straight quotes, three literal dots, no em dash. */
 export const BOOT_STATUS_TEXT = 'Warming up Python... this happens once.';
 
+/** Status pill copy while datasets (and pandas) download for `cortex_data`.
+ *  House style: three literal dots, no em dash. */
+export const DATASET_STATUS_TEXT = 'Loading dataset...';
+
+/** Root-absolute path the bundled datasets are served from
+ *  (`public/datasets/` is copied to `/datasets/` by Astro). */
+export const DATASETS_PATH = '/datasets/';
+
+/** Root-absolute path of the dataset manifest the worker fetches lazily. */
+export const DATASET_MANIFEST_PATH = '/datasets/manifest.json';
+
 /**
  * A pandas DataFrame (or Series) extracted as STRUCTURED data, never as a raw
  * HTML string. The island rebuilds a `<table>` from these fields using
@@ -74,11 +85,17 @@ export interface RunRequest {
  * package download (which can take tens of seconds for heavy libraries like
  * matplotlib) is charged against the 15s RUN limit — the limit guards runaway
  * user code, not infrastructure downloads (D6).
+ *
+ * `loading-data` is posted at most once per run, only when dataset preparation
+ * for `cortex_data(...)` needs the network (pandas not yet loaded, dataset list
+ * not yet fetched, or a dataset file not yet downloaded), and always BEFORE
+ * `executing`. Dataset downloads therefore never count against the run limit
+ * either.
  */
 export interface StatusMessage {
   type: 'status';
-  phase: 'booting' | 'ready' | 'executing';
-  /** Present only for `executing`: the run id whose timeout should now arm. */
+  phase: 'booting' | 'ready' | 'loading-data' | 'executing';
+  /** Present for `loading-data` and `executing`: the run id the status belongs to. */
   id?: number;
 }
 

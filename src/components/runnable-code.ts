@@ -33,6 +33,7 @@
 
 import {
   BOOT_STATUS_TEXT,
+  DATASET_STATUS_TEXT,
   RUN_TIMEOUT_MS,
   type DataFrameTable,
   type RunError,
@@ -53,6 +54,10 @@ const NORUN_MARKER = '# cortex:norun';
 /** Re-exported so the status copy has a single source and the test can assert
  *  the exact string the pill shows on the first Run. */
 export const bootStatusText = BOOT_STATUS_TEXT;
+
+/** Re-exported for the same reason: the pill copy while a `cortex_data(...)`
+ *  dataset (or pandas itself) downloads before the run. */
+export const datasetStatusText = DATASET_STATUS_TEXT;
 
 /**
  * True when the FIRST non-empty line of the code is exactly `# cortex:norun`
@@ -157,6 +162,9 @@ interface Pending {
   resolve: (r: RunResult) => void;
   reject: (e: RunError) => void;
   timer: number;
+  /** Optional per-run phase callback so the cell can update its status pill
+   *  (dataset download, then execution). */
+  onPhase?: (phase: 'loading-data' | 'executing') => void;
 }
 
 /** Arm the soft run-timeout for one pending run. Separated out so it can be
@@ -202,6 +210,11 @@ function getWorker(): Worker {
         // timeout NOW so neither boot nor package download counts against the
         // 15s run limit (the limit guards runaway user code, D6).
         armTimeout(msg.id);
+        pending.get(msg.id)?.onPhase?.('executing');
+      } else if (msg.phase === 'loading-data' && typeof msg.id === 'number') {
+        // Datasets (or pandas) are downloading for this run. The timeout is
+        // NOT armed yet: it arms on `executing`, after the download.
+        pending.get(msg.id)?.onPhase?.('loading-data');
       }
       return;
     }
@@ -221,7 +234,10 @@ function getWorker(): Worker {
  * on timeout we reject this run with a friendly message and leave the worker
  * usable (any late result for this id is ignored).
  */
-function runInWorker(code: string): Promise<RunResult> {
+function runInWorker(
+  code: string,
+  onPhase?: (phase: 'loading-data' | 'executing') => void,
+): Promise<RunResult> {
   const w = getWorker();
   const id = nextRequestId++;
   return new Promise<RunResult>((resolve, reject) => {
@@ -229,7 +245,7 @@ function runInWorker(code: string): Promise<RunResult> {
     // timeout is armed by `armTimeout` either right now (worker already booted)
     // or from the `ready` handler once the one-time boot completes. This keeps
     // the possibly-long Pyodide boot out of the per-run 15s budget (D6).
-    pending.set(id, { resolve, reject, timer: 0 });
+    pending.set(id, { resolve, reject, timer: 0, onPhase });
     const req: RunRequest = { id, code };
     w.postMessage(req);
     // The per-run soft timeout is armed later, when the worker posts the
@@ -484,7 +500,16 @@ async function doRun(pre: HTMLPreElement, state: CellState, runButton: HTMLButto
   if (!state.live) makeEditable(pre, state);
 
   try {
-    const res = await runInWorker(code);
+    // While a `cortex_data(...)` dataset downloads, the pill reads "Loading
+    // dataset..."; once the code starts it returns to "Running...". Boot copy
+    // is left alone (a booting cell keeps its warm-up message until live).
+    const res = await runInWorker(code, (phase) => {
+      if (phase === 'loading-data') {
+        setStatus(state, datasetStatusText, 'run');
+      } else if (state.status.textContent === datasetStatusText) {
+        setStatus(state, 'Running...', 'run');
+      }
+    });
     markLive(state);
     renderResult(state, res);
   } catch (e) {
