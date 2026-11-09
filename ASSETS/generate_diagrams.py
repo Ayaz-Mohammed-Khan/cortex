@@ -161,6 +161,7 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "series_anatomy.png": _NUMPY,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -3529,6 +3530,43 @@ def broadcasting_stretch():
     save(fig, "broadcasting_stretch.png")
 
 
+def series_anatomy():
+    """A Series drawn as a column: index labels on the left, values in boxes,
+    with the name and dtype called out. The index is the idea NumPy lacks."""
+    labels = ["mon", "tue", "wed", "thu", "fri"]
+    values = [42, 0, 65, 30, 88]
+    fig, ax = plt.subplots(figsize=(8.6, 4.6))
+    ax.set_xlim(0, 9)
+    ax.set_ylim(0, 6.4)
+    ax.axis("off")
+    ax.text(2.2, 5.9, "index", ha="center", fontsize=11, color=ORANGE,
+            fontweight="bold")
+    ax.text(4.2, 5.9, "values", ha="center", fontsize=11, color=BLUE,
+            fontweight="bold")
+    for k, (lab, v) in enumerate(zip(labels, values)):
+        y = 4.6 - k * 0.95
+        ax.add_patch(FancyBboxPatch((1.5, y), 1.4, 0.8, boxstyle="square,pad=0",
+                                    facecolor=ORANGE, edgecolor="black",
+                                    alpha=0.85, lw=1.1))
+        ax.text(2.2, y + 0.4, lab, ha="center", va="center", color="white",
+                fontsize=11, family="monospace")
+        ax.add_patch(FancyBboxPatch((3.2, y), 2.0, 0.8, boxstyle="square,pad=0",
+                                    facecolor=BLUE, edgecolor="black",
+                                    alpha=0.85, lw=1.1))
+        ax.text(4.2, y + 0.4, str(v), ha="center", va="center", color="white",
+                fontsize=11, family="monospace")
+    ax.annotate("name: cycling distance (km)", xy=(5.25, 5.0), xytext=(5.9, 5.7),
+                fontsize=10, color=GREEN,
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.3))
+    ax.annotate("dtype: int64", xy=(5.25, 0.7), xytext=(5.9, 0.2),
+                fontsize=10, color=PURPLE,
+                arrowprops=dict(arrowstyle="-|>", color=PURPLE, lw=1.3))
+    ax.text(6.0, 3.0, "s[\"wed\"] -> 65\ns.iloc[2] -> 65", fontsize=10,
+            family="monospace", color=GREY)
+    ax.set_title("A Series: labelled values with a name and a dtype")
+    save(fig, "series_anatomy.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3640,4 +3678,5 @@ if __name__ == "__main__":
     fancy_indexing()
     boolean_mask()
     broadcasting_stretch()
+    series_anatomy()
     print("\nAll diagrams generated.")

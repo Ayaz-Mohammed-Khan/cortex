@@ -1,0 +1,220 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "series-vs-ndarray",
+      "difficulty": "easy",
+      "question": "What does a pandas Series add on top of a NumPy array?",
+      "options": [
+        "A label for every value (the index), plus a name and a dtype that travel with the data.",
+        "A guarantee that every value is stored as a Python object, which makes arithmetic more precise.",
+        "Support for several dimensions at once, so a Series can hold a full table of rows and columns.",
+        "Automatic sorting of values on creation, so the data is always ordered from smallest to largest."
+      ],
+      "answer": 0,
+      "explanation": "A Series is a one-dimensional array with an index, a name, and a dtype. It is not stored as Python objects (numeric Series use NumPy dtypes), it is one-dimensional (a DataFrame is the two-dimensional object), and it keeps the order you gave it.",
+      "misconception": "The index is the new idea; the numbers themselves are still NumPy-style typed values."
+    },
+    {
+      "type": "mcq",
+      "concept": "series-creation",
+      "difficulty": "easy",
+      "question": "You call `pd.Series({\"jan\": 310, \"feb\": 280})`. What become the index and the values?",
+      "options": [
+        "The values become the index and the keys become the data, because pandas reads a dictionary backwards.",
+        "The index is 0 and 1, and each key and value pair is stored together as a tuple in one slot.",
+        "The keys become the index and the values become the data, with the dtype inferred from the values.",
+        "pandas raises an error, because a Series can only be built from a list or a NumPy array."
+      ],
+      "answer": 2,
+      "explanation": "A dictionary maps directly onto a Series: keys are the labels and values are the data. Pairs are not stored as tuples, the default 0 and 1 index is only used when no labels are given, and dictionaries are an accepted input.",
+      "misconception": "Dictionary keys become the index, not the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "count-vs-size",
+      "difficulty": "medium",
+      "question": "A Series holds `[21.5, NaN, 23.0, 22.5]`. What do `size` and `count()` return?",
+      "options": [
+        "Both return 3, because missing values are dropped when the Series is created.",
+        "`size` returns 4 and `count()` returns 3, because only `count()` skips missing values.",
+        "`size` returns 3 and `count()` returns 4, because `count()` also counts the missing slot.",
+        "Both return 4, because the two names are aliases for the same calculation."
+      ],
+      "answer": 1,
+      "explanation": "`size` counts every slot, including `NaN`. `count()` counts only non-missing items. The difference between them is the number of gaps. Missing values are kept at creation, so neither result is 3 for both.",
+      "misconception": "`size` and `count()` agree only when nothing is missing."
+    },
+    {
+      "type": "scenario",
+      "concept": "membership-index",
+      "difficulty": "medium",
+      "scenario": "A Series `lead` has film titles as its index and lead actor names as its values. You test `\"Fen Everly\" in lead` and get `False`, even though that actor appears in the data.",
+      "question": "What explains the result, and what is the fix?",
+      "options": [
+        "The `in` operator tests the index, so test the values with `\"Fen Everly\" in lead.values` instead.",
+        "The name has a typo in the data, so `in` cannot find it; clean the strings first and test again.",
+        "The `in` operator only works on numeric Series, so convert the Series with `astype` before testing.",
+        "The Series needs sorting first, because `in` uses a binary search that requires ordered data."
+      ],
+      "answer": 0,
+      "explanation": "For a Series, `in` checks labels, not values. Titles are the labels, so an actor name is not found. Testing against `.values` checks the data. Sorting and numeric dtypes are irrelevant to membership.",
+      "misconception": "`x in series` asks about the index, as it does for a dictionary's keys."
+    },
+    {
+      "type": "mcq",
+      "concept": "sorted-returns-list",
+      "difficulty": "easy",
+      "question": "What type does the built-in `sorted(s)` return when `s` is a Series?",
+      "options": [
+        "A new Series with the same index, reordered by value.",
+        "A NumPy array, because a Series is built on top of NumPy.",
+        "A tuple, because sorting makes the result immutable.",
+        "A plain Python list of the sorted values, with the index dropped."
+      ],
+      "answer": 3,
+      "explanation": "`sorted()` is a Python built-in that iterates the values and builds a list. To keep labels, use the Series method `sort_values()`, which returns a Series.",
+      "misconception": "Python built-ins return Python types; Series methods return Series."
+    },
+    {
+      "type": "scenario",
+      "concept": "inplace",
+      "difficulty": "medium",
+      "scenario": "A teammate writes `s = s.sort_values(inplace=True)` and then finds that `s` is `None`.",
+      "question": "Why did this happen?",
+      "options": [
+        "Sorting failed silently because the Series held missing values, and pandas replaced it with `None`.",
+        "With `inplace=True` the method changes the original and returns `None`, so the assignment overwrote `s` with `None`.",
+        "`sort_values` cannot be used on a named Series, so the call returned nothing at all.",
+        "The sort created a view, and views are cleared once the original variable is reassigned."
+      ],
+      "answer": 1,
+      "explanation": "In-place methods modify the object and return `None`. Assigning that return value destroys your reference. Either call the method without assignment or drop `inplace=True` and assign the returned Series.",
+      "misconception": "`inplace=True` and assignment are alternatives; combining them loses the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "mode-result",
+      "difficulty": "medium",
+      "question": "`subs.mode()` prints `0    62` on the left of the value. What is that `0`?",
+      "options": [
+        "The number of times the mode appears in the data.",
+        "A position in the result Series, because several values can tie and `mode()` returns a Series.",
+        "The label of the day in the original Series where the mode first occurs.",
+        "A flag meaning that no value repeated more than once in the data."
+      ],
+      "answer": 1,
+      "explanation": "`mode()` returns a Series so that ties can be listed. The `0` is that result's own index position. It is not a frequency, not a label from the original, and not a flag.",
+      "misconception": "The index of a result is not a count."
+    },
+    {
+      "type": "scenario",
+      "concept": "negative-indexing",
+      "difficulty": "medium",
+      "scenario": "A Series `n` has the integer index `[10, 20, 30]`. You need its last item and write `n[-1]`.",
+      "question": "What happens, and what should you write?",
+      "options": [
+        "It returns the last item, exactly like a Python list, so no change is needed.",
+        "It returns the first item, because negative numbers wrap around to the start of the Series.",
+        "It returns an empty Series, because the label -1 matches nothing and pandas treats that as no rows.",
+        "It raises a `KeyError`, because -1 is looked up as a label; use `n.iloc[-1]` for position."
+      ],
+      "answer": 3,
+      "explanation": "With an integer index, square brackets look up labels. There is no label -1, so pandas raises `KeyError`. `.iloc` is always positional, so `n.iloc[-1]` returns the last item.",
+      "misconception": "Brackets on an integer-indexed Series are label-based, not position-based."
+    },
+    {
+      "type": "mcq",
+      "concept": "between-inclusive",
+      "difficulty": "easy",
+      "question": "How does `s.between(20, 29)` treat the endpoints?",
+      "options": [
+        "It keeps 20 but drops 29, like a Python `range`.",
+        "It drops 20 but keeps 29, because the lower bound is exclusive.",
+        "It keeps both 20 and 29, because both ends are inclusive.",
+        "It drops both 20 and 29 unless you pass an extra argument."
+      ],
+      "answer": 2,
+      "explanation": "`between` returns `True` for values from the lower to the upper bound, both inclusive by default. This differs from slicing, where the end is excluded.",
+      "misconception": "`between` is not a half-open range like `range` or a slice."
+    },
+    {
+      "type": "scenario",
+      "concept": "clip",
+      "difficulty": "hard",
+      "scenario": "A daily counts Series has a few huge spikes. You want to keep every day in the data but stop the spikes from dominating a chart.",
+      "question": "Which approach fits?",
+      "options": [
+        "Filter with a boolean mask to drop the spiky days, which keeps the Series length unchanged.",
+        "Use `clip(lower, upper)` with percentile bounds, which pulls extreme values to the bounds and keeps every row.",
+        "Call `drop_duplicates()`, since a spike is a repeated value that should be removed.",
+        "Use `fillna(0)`, because extreme values are a kind of missing data."
+      ],
+      "answer": 1,
+      "explanation": "`clip` limits values to a range without removing rows. A mask drops rows and shortens the Series, `drop_duplicates` removes repeated values rather than extreme ones, and `fillna` only changes missing entries.",
+      "misconception": "Capping and filtering are different: capping keeps the row."
+    },
+    {
+      "type": "mcq",
+      "concept": "drop-duplicates",
+      "difficulty": "medium",
+      "question": "For `pd.Series([501, 502, 501, 503, 502, 501])`, which items does `drop_duplicates(keep=\"last\")` keep?",
+      "options": [
+        "The items at labels 0, 1, and 3, which are the first occurrences.",
+        "Only the value 503, because it is the only value that never repeats.",
+        "The items at labels 2, 3, and 4, which are the middle occurrences.",
+        "The items at labels 3, 4, and 5, which are the last occurrence of each value."
+      ],
+      "answer": 3,
+      "explanation": "`keep=\"last\"` keeps the final occurrence of each value: 503 at label 3, 502 at label 4, and 501 at label 5. Only `keep=False` would leave just the values that never repeat.",
+      "misconception": "`keep` chooses which copy survives; it does not drop every repeated value."
+    },
+    {
+      "type": "mcq",
+      "concept": "isin",
+      "difficulty": "easy",
+      "question": "Why is `runs.isin([44, 55, 66])` preferred over `(runs == 44) | (runs == 55) | (runs == 66)`?",
+      "options": [
+        "It returns a different result, because `isin` tests for approximate matches.",
+        "It gives the same mask in one readable call that scales to long lists of values.",
+        "It is the only way to compare a Series with more than one value.",
+        "It modifies the Series in place, which saves memory compared with a chain."
+      ],
+      "answer": 1,
+      "explanation": "Both produce the same boolean mask. `isin` stays readable as the list grows and avoids the parentheses a chain needs. It does not do approximate matching and does not change the Series.",
+      "misconception": "`isin` is a shorthand for exact matches, not a different test."
+    },
+    {
+      "type": "scenario",
+      "concept": "copies-and-views",
+      "difficulty": "hard",
+      "scenario": "You take `part = s.tail(3)` and set `part.iloc[0] = -1`. You do not want the original `s` to change.",
+      "question": "What is the safest way to write this?",
+      "options": [
+        "Use `part = s.tail(3)` and trust that slices are always copies.",
+        "Call `s.sort_index()` first so that the slice cannot share data with the original.",
+        "Use `part = s.tail(3).copy()` so the edit touches an independent object.",
+        "Set `inplace=True` on the slice so pandas protects the original."
+      ],
+      "answer": 2,
+      "explanation": "Whether a slice is a view or a copy depends on internals, so `.copy()` makes the intent explicit and guarantees independence. Sorting does not decouple objects, and `inplace=True` is not an argument of item assignment.",
+      "misconception": "Slices may share data with the original; `.copy()` is the guarantee."
+    },
+    {
+      "type": "card",
+      "concept": "squeeze",
+      "difficulty": "medium",
+      "question": "`read_csv` returns a DataFrame. How do you get a Series from a one-column file, and from a two-column file?",
+      "answer": "For a one-column file, call `.squeeze(\"columns\")` on the result, which replaces the removed `squeeze=True` argument. For a two-column file, pass `index_col` to make one column the index, then squeeze the remaining column. The column header becomes the Series name.",
+      "explanation": "The same keyword arguments work with the `cortex_data` helper used in the runnable cells."
+    },
+    {
+      "type": "card",
+      "concept": "boolean-mean",
+      "difficulty": "hard",
+      "question": "How do you count how many items satisfy a condition in a Series, and how do you get the share of items that satisfy it?",
+      "answer": "Build a boolean mask such as `s < 10`. Its `sum()` counts the `True` values, because `True` counts as 1, and its `mean()` gives the share of items that satisfy the condition.",
+      "explanation": "This avoids filtering and then taking the length."
+    }
+  ]
+}
