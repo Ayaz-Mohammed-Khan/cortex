@@ -1,0 +1,210 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "tuples-vs-multiindex",
+      "difficulty": "easy",
+      "question": "A Series is indexed by tuples such as `(\"Leeds\", \"Q1\")`. Why does `s[\"Leeds\"]` raise a `KeyError`?",
+      "options": [
+        "Because tuples cannot be used as index labels at all, so the Series is invalid from the start.",
+        "Because string labels can only be looked up with `iloc`, never with square brackets on a Series.",
+        "Because a Series with more than one entry per warehouse cannot be indexed by the warehouse name alone.",
+        "Because each tuple is one opaque label, not a two-level index, so a real MultiIndex is needed for partial lookup."
+      ],
+      "answer": 3,
+      "explanation": "pandas treats a tuple label as one whole label unless the index is a MultiIndex. A MultiIndex stores levels separately, so a partial key such as the warehouse alone selects a branch.",
+      "misconception": "Tuple labels look hierarchical but are not."
+    },
+    {
+      "type": "mcq",
+      "concept": "from-product",
+      "difficulty": "medium",
+      "question": "`pd.MultiIndex.from_product([[\"Leeds\", \"Porto\", \"Turin\"], [\"Q1\", \"Q2\", \"Q3\", \"Q4\"]])` has how many entries, and why?",
+      "options": [
+        "7 entries, because it joins the two lists end to end into one list of labels.",
+        "4 entries, because it pairs the lists item by item and stops at the shorter one.",
+        "12 entries, because it forms every combination of a warehouse and a quarter.",
+        "3 entries, because only the first list becomes the index and the second becomes its levels."
+      ],
+      "answer": 2,
+      "explanation": "`from_product` builds the Cartesian product: every item of the first list with every item of the second, so 3 times 4 gives 12. Pairing item by item is what `from_tuples` with a zipped list does.",
+      "misconception": "A product multiplies, it does not concatenate or zip."
+    },
+    {
+      "type": "mcq",
+      "concept": "partial-selection",
+      "difficulty": "easy",
+      "question": "For a Series with a (site, quarter) MultiIndex, what does `units[\"Porto\"]` return?",
+      "options": [
+        "A single number, because a lone label always selects one value.",
+        "All of Porto's rows, indexed by quarter, because the outer label selects a whole branch.",
+        "An error, because a MultiIndex needs both labels in a tuple for any lookup.",
+        "The Porto value for the first quarter only, because pandas takes the first match."
+      ],
+      "answer": 1,
+      "explanation": "A single outer label returns the sub-Series under it. To pick a single value you pass the full tuple, as in `units[(\"Porto\", \"Q2\")]`.",
+      "misconception": "An outer label selects a branch; the full tuple selects a leaf."
+    },
+    {
+      "type": "scenario",
+      "concept": "unstack",
+      "difficulty": "medium",
+      "scenario": "You have a Series with a (site, quarter) MultiIndex and want a table with one row per site and one column per quarter.",
+      "question": "Which call produces it?",
+      "options": [
+        "`units.stack()`, because stacking spreads the inner level across the columns.",
+        "`units.unstack()`, because it moves the innermost index level into the columns.",
+        "`units.reset_index(drop=True)`, because dropping the index lays the values out as a table.",
+        "`units.transpose()`, because transposing turns the Series into a table of the same shape."
+      ],
+      "answer": 1,
+      "explanation": "`unstack` moves the innermost level to the columns by default, giving sites as rows and quarters as columns. `stack` is the inverse, and the other calls do not reshape the levels.",
+      "misconception": "`unstack` widens; `stack` makes data taller."
+    },
+    {
+      "type": "mcq",
+      "concept": "unstack-level",
+      "difficulty": "medium",
+      "question": "What does `units.unstack(level=0)` do differently from `units.unstack()` on a (site, quarter) Series?",
+      "options": [
+        "It moves the outer level (site) into the columns, so quarters become the rows.",
+        "It moves the inner level (quarter) into the columns, which is the default behavior again.",
+        "It removes the outer level from the index and discards its labels from the result.",
+        "It sorts the outer level before unstacking, so the result has alphabetically ordered rows."
+      ],
+      "answer": 0,
+      "explanation": "The default moves the innermost level. `level=0` chooses the outer level instead, so the table is transposed in meaning: sites across, quarters down.",
+      "misconception": "`level` picks which index level moves to the columns."
+    },
+    {
+      "type": "mcq",
+      "concept": "stack-to-series",
+      "difficulty": "medium",
+      "question": "A DataFrame has a two-level column index. What do you get after stacking it twice?",
+      "options": [
+        "A DataFrame with the same two column levels, because stacking only reorders them.",
+        "A DataFrame with no columns, because every level is removed from the data.",
+        "A Series whose index has the original rows plus both former column levels.",
+        "A Series with only the original row labels, because the column labels are discarded."
+      ],
+      "answer": 2,
+      "explanation": "Each `stack` folds one column level into the row index. After both levels are folded in, only one column of values remains, which is a Series with a three-level index here.",
+      "misconception": "Stacking keeps the labels by moving them into the index."
+    },
+    {
+      "type": "mcq",
+      "concept": "index-and-columns",
+      "difficulty": "easy",
+      "question": "Why can a DataFrame have a MultiIndex on its columns just as it can on its rows?",
+      "options": [
+        "Because the column labels are stored as a special text type that supports levels.",
+        "Because pandas converts the columns into rows whenever you request a second level.",
+        "Because the rows and columns are the same kind of object, an index, so both can have levels.",
+        "Because only numeric data can have levels, and columns are always numeric in pandas."
+      ],
+      "answer": 2,
+      "explanation": "Row labels and column labels are both Index objects, so a MultiIndex works on either axis or on both. That is how four-dimensional data fits into a two-dimensional table.",
+      "misconception": "Rows and columns are symmetric in how they are labelled."
+    },
+    {
+      "type": "scenario",
+      "concept": "loc-tuple",
+      "difficulty": "medium",
+      "scenario": "A DataFrame has a (site, quarter) row MultiIndex and you want the single row for Porto in Q2.",
+      "question": "Which expression is correct?",
+      "options": [
+        "`df.loc[(\"Porto\", \"Q2\")]`, because `loc` accepts a tuple that names both levels.",
+        "`df.iloc[(\"Porto\", \"Q2\")]`, because `iloc` accepts a tuple of labels for each level.",
+        "`df[\"Porto\", \"Q2\"]`, because square brackets always select a row by its labels.",
+        "`df.loc[\"Porto\"].iloc[\"Q2\"]`, because `iloc` selects the label inside the branch."
+      ],
+      "answer": 0,
+      "explanation": "`loc` is label based and takes a tuple for a multi-level row label. `iloc` takes integer positions, and plain brackets select columns on a DataFrame.",
+      "misconception": "Use `loc` for labels and `iloc` for positions, even with a MultiIndex."
+    },
+    {
+      "type": "mcq",
+      "concept": "sort-multiindex",
+      "difficulty": "medium",
+      "question": "How do you sort a (site, quarter) index with sites in descending order and quarters in ascending order?",
+      "options": [
+        "`df.sort_index(ascending=[False, True])`, with one flag per index level.",
+        "`df.sort_index(ascending=False).sort_index(ascending=True)`, applying the two sorts in turn.",
+        "`df.sort_values(\"site\", ascending=False)`, because the index levels are columns in disguise.",
+        "`df.sort_index(level=0, ascending=True)`, because the level argument sets the direction."
+      ],
+      "answer": 0,
+      "explanation": "A list of flags sets the direction for each level in order. Two chained sorts would let the second undo the first, and `sort_values` works on column data, not index levels.",
+      "misconception": "A list of `ascending` flags gives per-level control."
+    },
+    {
+      "type": "mcq",
+      "concept": "swaplevel",
+      "difficulty": "easy",
+      "question": "What does `swaplevel(axis=1)` do to a DataFrame with a two-level column index?",
+      "options": [
+        "It swaps the rows and columns of the whole table, like a transpose.",
+        "It sorts the columns alphabetically within each outer label and leaves the inner labels untouched.",
+        "It exchanges the two levels of the column labels, so the inner label becomes the outer one.",
+        "It removes the outer column level and keeps only the inner labels for every remaining column."
+      ],
+      "answer": 2,
+      "explanation": "`swaplevel` exchanges two index levels. The default `axis=0` acts on the rows and `axis=1` acts on the columns. Sorting afterwards groups the new outer labels together.",
+      "misconception": "`swaplevel` reorders levels; `transpose` swaps axes."
+    },
+    {
+      "type": "mcq",
+      "concept": "wide-vs-long",
+      "difficulty": "easy",
+      "question": "Which description matches a long table?",
+      "options": [
+        "One row per entity with a separate column for every measurement, such as one column per date.",
+        "Few rows and many columns, ready to read like a spreadsheet.",
+        "One row per measurement, with a column naming what was measured and a column holding its value.",
+        "Many columns with the same name, one for every observation."
+      ],
+      "answer": 2,
+      "explanation": "Long data has one measurement per row. Wide data has one column per measurement. The first two options describe wide data, and column names are meant to be unique.",
+      "misconception": "Long means many rows, not many columns."
+    },
+    {
+      "type": "scenario",
+      "concept": "melt",
+      "difficulty": "medium",
+      "scenario": "A table has a `site` column and one column per quarter. You want columns named `site`, `quarter`, and `units`, with one row per site and quarter.",
+      "question": "Which call does it?",
+      "options": [
+        "`wide.pivot(index=\"site\", columns=\"quarter\", values=\"units\")`, because it relabels the columns.",
+        "`wide.melt()`, because the default melts only the columns that are not the first one.",
+        "`wide.stack(\"site\")`, because it folds the site column into the index.",
+        "`wide.melt(id_vars=\"site\", var_name=\"quarter\", value_name=\"units\")`, which keeps site and names the new columns."
+      ],
+      "answer": 3,
+      "explanation": "`id_vars` keeps the identifier column, `var_name` names the column that holds the old column labels, and `value_name` names the values column. The default melts every column, including the identifier, and `pivot` goes the other way.",
+      "misconception": "Without `id_vars`, the identifier columns get melted too."
+    },
+    {
+      "type": "mcq",
+      "concept": "pivot-inverse",
+      "difficulty": "medium",
+      "question": "What is the relationship between `melt` and `pivot`?",
+      "options": [
+        "They are the same operation, and `pivot` is only an alias for `melt` in older versions.",
+        "`pivot` is the inverse of `melt`: it turns long data back into wide data using index, columns, and values.",
+        "`pivot` makes data longer and `melt` makes it wider, the opposite of what the two names suggest.",
+        "Both reshape data, but only `pivot` is able to handle more than one identifier column at a time."
+      ],
+      "answer": 1,
+      "explanation": "`melt` goes from wide to long and `pivot` goes from long to wide. `pivot` needs unique index and column pairs; `pivot_table` handles repeated pairs by aggregating.",
+      "misconception": "Melt and pivot undo each other."
+    },
+    {
+      "type": "card",
+      "concept": "melt-and-merge",
+      "difficulty": "hard",
+      "question": "Two wide files hold the same entities, one with cases and one with deaths, each with one column per date. How do you put both measurements side by side per entity and date?",
+      "answer": "Melt each file with the same `id_vars` and a `var_name` for the date, giving each a distinct `value_name` such as cases and deaths. Then merge the two long tables on all the identifier columns plus the date column, so each row carries both measurements.",
+      "explanation": "Merging on every identifying key avoids mismatches and duplicate rows."
+    }
+  ]
+}

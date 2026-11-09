@@ -161,11 +161,13 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "multiindex_stack_unstack.png": _NUMPY,
     "join_types.png": _NUMPY,
     "split_apply_combine.png": _NUMPY,
     "dataframe_anatomy.png": _NUMPY,
     "series_anatomy.png": _NUMPY,
     "concat_axes.png": _NUMPY,
+    "long_vs_wide_melt.png": _NUMPY,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -3756,6 +3758,116 @@ def concat_axes():
     save(fig, "concat_axes.png")
 
 
+def multiindex_stack_unstack():
+    """A two-level Series on the left, the same numbers as a table on the right.
+    unstack moves the inner level to the columns; stack folds it back."""
+    sites = ["Leeds", "Porto"]
+    quarters = ["Q1", "Q2", "Q3"]
+    vals = {("Leeds", "Q1"): 310, ("Leeds", "Q2"): 280, ("Leeds", "Q3"): 295,
+            ("Porto", "Q1"): 520, ("Porto", "Q2"): 540, ("Porto", "Q3"): 505}
+    fig, ax = plt.subplots(figsize=(11, 4.4))
+    ax.set_xlim(0, 14)
+    ax.set_ylim(0, 6.2)
+    ax.axis("off")
+
+    def cell(x, y, w, h, text, color, fs=10):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="square,pad=0",
+                                    facecolor=color, edgecolor="black",
+                                    alpha=0.85, lw=1.0))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+                color="white", fontsize=fs, family="monospace")
+
+    ax.text(2.6, 5.7, "Series with a MultiIndex", ha="center", fontsize=10,
+            color=GREY, fontweight="bold")
+    ax.text(0.9, 5.2, "site", ha="center", fontsize=9, color=ORANGE)
+    ax.text(2.3, 5.2, "quarter", ha="center", fontsize=9, color=PURPLE)
+    ax.text(3.8, 5.2, "units", ha="center", fontsize=9, color=BLUE)
+    row = 0
+    for s in sites:
+        for q in quarters:
+            y = 4.2 - row * 0.72
+            cell(0.3, y, 1.2, 0.64, s, ORANGE, 9)
+            cell(1.65, y, 1.3, 0.64, q, PURPLE, 9)
+            cell(3.1, y, 1.3, 0.64, str(vals[(s, q)]), BLUE, 9)
+            row += 1
+
+    ax.annotate("", xy=(8.1, 3.9), xytext=(4.8, 3.9),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.6))
+    ax.text(6.45, 4.15, "unstack()", ha="center", fontsize=11, color=GREEN,
+            family="monospace")
+    ax.annotate("", xy=(4.8, 2.9), xytext=(8.1, 2.9),
+                arrowprops=dict(arrowstyle="-|>", color=RED, lw=1.6))
+    ax.text(6.45, 2.4, "stack()", ha="center", fontsize=11, color=RED,
+            family="monospace")
+
+    ax.text(11.0, 5.7, "DataFrame", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+    for j, q in enumerate(quarters):
+        cell(9.6 + j * 1.3, 4.7, 1.2, 0.64, q, PURPLE, 9)
+    for i, s in enumerate(sites):
+        cell(8.3, 3.9 - i * 0.72, 1.2, 0.64, s, ORANGE, 9)
+        for j, q in enumerate(quarters):
+            cell(9.6 + j * 1.3, 3.9 - i * 0.72, 1.2, 0.64, str(vals[(s, q)]),
+                 BLUE, 9)
+    ax.set_title("The inner index level moves to the columns and back")
+    save(fig, "multiindex_stack_unstack.png")
+
+
+def long_vs_wide_melt():
+    """A wide table (one column per quarter) melts into a long table, one
+    measurement per row; pivot goes the other way."""
+    sites = ["Leeds", "Porto"]
+    quarters = ["Q1", "Q2", "Q3"]
+    vals = {("Leeds", "Q1"): 310, ("Leeds", "Q2"): 280, ("Leeds", "Q3"): 295,
+            ("Porto", "Q1"): 520, ("Porto", "Q2"): 540, ("Porto", "Q3"): 505}
+    fig, ax = plt.subplots(figsize=(11, 4.8))
+    ax.set_xlim(0, 14)
+    ax.set_ylim(1.2, 6.4)
+    ax.axis("off")
+
+    def cell(x, y, w, h, text, color, fs=9):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="square,pad=0",
+                                    facecolor=color, edgecolor="black",
+                                    alpha=0.85, lw=1.0))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+                color="white", fontsize=fs, family="monospace")
+
+    ax.text(2.6, 6.0, "wide", ha="center", fontsize=11, color=GREY,
+            fontweight="bold")
+    cell(0.3, 5.0, 1.1, 0.64, "site", ORANGE)
+    for j, q in enumerate(quarters):
+        cell(1.5 + j * 1.1, 5.0, 1.0, 0.64, q, PURPLE)
+    for i, s in enumerate(sites):
+        cell(0.3, 4.2 - i * 0.72, 1.1, 0.64, s, ORANGE)
+        for j, q in enumerate(quarters):
+            cell(1.5 + j * 1.1, 4.2 - i * 0.72, 1.0, 0.64, str(vals[(s, q)]), BLUE)
+
+    ax.annotate("", xy=(7.0, 4.6), xytext=(5.3, 4.6),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.6))
+    ax.text(6.15, 4.9, "melt", ha="center", fontsize=11, color=GREEN,
+            family="monospace")
+    ax.annotate("", xy=(5.3, 3.4), xytext=(7.0, 3.4),
+                arrowprops=dict(arrowstyle="-|>", color=RED, lw=1.6))
+    ax.text(6.15, 2.9, "pivot", ha="center", fontsize=11, color=RED,
+            family="monospace")
+
+    ax.text(10.2, 6.0, "long", ha="center", fontsize=11, color=GREY,
+            fontweight="bold")
+    for k, (txt, col) in enumerate([("site", ORANGE), ("quarter", PURPLE),
+                                    ("units", BLUE)]):
+        cell(8.0 + k * 1.5, 5.2, 1.4, 0.55, txt, col)
+    r = 0
+    for s in sites:
+        for q in quarters:
+            y = 4.45 - r * 0.62
+            cell(8.0, y, 1.4, 0.55, s, ORANGE)
+            cell(9.5, y, 1.4, 0.55, q, PURPLE)
+            cell(11.0, y, 1.4, 0.55, str(vals[(s, q)]), BLUE)
+            r += 1
+    ax.set_title("Wide data has a column per quarter; long data has a row per measurement")
+    save(fig, "long_vs_wide_melt.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3872,4 +3984,6 @@ if __name__ == "__main__":
     split_apply_combine()
     join_types()
     concat_axes()
+    multiindex_stack_unstack()
+    long_vs_wide_melt()
     print("\nAll diagrams generated.")
