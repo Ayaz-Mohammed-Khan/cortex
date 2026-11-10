@@ -47,12 +47,12 @@ The import convention is universal: `import numpy as np`. The simplest construct
 ```python
 import numpy as np
 
-a = np.array([1, 2, 3])
-print(a)
+ages = np.array([34, 29, 41, 52])
+print(ages)
 ```
 
 ```text
-[1 2 3]
+[34 29 41 52]
 ```
 
 Nest lists to build higher dimensions. One level of nesting gives a 2D array (a matrix), two levels give a 3D array.
@@ -60,29 +60,29 @@ Nest lists to build higher dimensions. One level of nesting gives a 2D array (a 
 ```python
 import numpy as np
 
-b = np.array([[1, 2, 3], [4, 5, 6]])
-print(b)
+table = np.array([[10, 20, 30, 40], [50, 60, 70, 80]])
+print(table)
 
-c = np.array([[[1, 2], [3, 4]], [[5, 6], [7, 8]]])
-print(c)
+crate = np.array([[[1, 3], [5, 7]], [[2, 4], [6, 8]]])
+print(crate)
 ```
 
 ```text
-[[1 2 3]
- [4 5 6]]
-[[[1 2]
-  [3 4]]
+[[10 20 30 40]
+ [50 60 70 80]]
+[[[1 3]
+  [5 7]]
 
- [[5 6]
-  [7 8]]]
+ [[2 4]
+  [6 8]]]
 ```
 
 Pass `dtype=` to force a type at creation. Here integers become floats.
 
 ```python
 # cortex:norun
-np.array([1, 2, 3], dtype=float)
-# array([1., 2., 3.])
+np.array([4, 5, 6], dtype=float)
+# array([4., 5., 6.])
 ```
 
 Typing out every element is impractical, so NumPy provides routines that generate arrays.
@@ -96,35 +96,36 @@ Typing out every element is impractical, so NumPy provides routines that generat
 | `np.linspace(start, stop, num)` | `num` values spaced evenly between `start` and `stop` inclusive |
 | `np.identity(n)` | the `n` by `n` identity matrix |
 
-`np.arange` takes a step, exactly like the built-in `range`.
+`np.arange` takes a step, exactly like the built-in `range`. Counting down works too, with a negative step.
 
 ```python
 import numpy as np
 
-np.arange(1, 11, 2)
+print(np.arange(3, 30, 4))
+print(np.arange(50, 0, -12))
 ```
 
 ```text
-array([1, 3, 5, 7, 9])
+[ 3  7 11 15 19 23 27]
+[50 38 26 14  2]
 ```
 
-Chain `.reshape` to fold a flat range into any shape whose sizes multiply to the element count. Here 16 elements become a 2 by 2 by 2 by 2 array.
+Chain `.reshape` to fold a flat range into any shape whose sizes multiply to the element count. Here 24 elements become a 2 by 3 by 4 array: two blocks, each with three rows and four columns.
 
 ```python
 import numpy as np
 
-np.arange(16).reshape(2, 2, 2, 2)
+np.arange(24).reshape(2, 3, 4)
 ```
 
 ```text
-array([[[[ 0,  1],
-         [ 2,  3]],
-        [[ 4,  5],
-         [ 6,  7]]],
-       [[[ 8,  9],
-         [10, 11]],
-        [[12, 13],
-         [14, 15]]]])
+array([[[ 0,  1,  2,  3],
+        [ 4,  5,  6,  7],
+        [ 8,  9, 10, 11]],
+
+       [[12, 13, 14, 15],
+        [16, 17, 18, 19],
+        [20, 21, 22, 23]]])
 ```
 
 `np.ones` and `np.zeros` take a shape tuple and are the usual way to pre-allocate an array you will fill later.
@@ -132,35 +133,31 @@ array([[[[ 0,  1],
 ```python
 import numpy as np
 
-np.ones((3, 4))
+print(np.ones((2, 5)))
+print(np.zeros((4, 2)))
 ```
 
 ```text
-array([[1., 1., 1., 1.],
-       [1., 1., 1., 1.],
-       [1., 1., 1., 1.]])
+[[1. 1. 1. 1. 1.]
+ [1. 1. 1. 1. 1.]]
+[[0. 0.]
+ [0. 0.]
+ [0. 0.]
+ [0. 0.]]
 ```
+
+`np.random.random` fills a shape with random floats between 0 and 1. The values change on every run unless you fix the generator first with `np.random.seed`, which is what the example does so you can compare your output with the one shown.
 
 ```python
 import numpy as np
 
-np.zeros((3, 4))
+np.random.seed(7)
+np.random.random((2, 5))
 ```
 
 ```text
-array([[0., 0., 0., 0.],
-       [0., 0., 0., 0.],
-       [0., 0., 0., 0.]])
-```
-
-`np.random.random` fills a shape with random floats between 0 and 1. Its output changes every run, so the values below are illustrative.
-
-```python
-# cortex:norun
-np.random.random((3, 4))
-# array([[0.85721156, 0.31248316, 0.08807828, 0.35230774],
-#        [0.96813914, 0.44681708, 0.56396358, 0.53020065],
-#        [0.03277116, 0.28543753, 0.09521082, 0.87967034]])
+array([[0.07630829, 0.77991879, 0.43840923, 0.72346518, 0.97798951],
+       [0.53849587, 0.50112046, 0.07205113, 0.26843898, 0.4998825 ]])
 ```
 
 `np.linspace` differs from `np.arange` in what you fix. With `arange` you choose the step and NumPy decides how many values you get. With `linspace` you choose how many values you want and NumPy computes the spacing to fit them between the endpoints inclusive.
@@ -168,11 +165,13 @@ np.random.random((3, 4))
 ```python
 import numpy as np
 
-np.linspace(-10, 10, 10, dtype=int)
+print(np.linspace(0, 100, 5))
+print(np.linspace(5, 6, 4))
 ```
 
 ```text
-array([-10,  -8,  -6,  -4,  -2,   1,   3,   5,   7,  10])
+[  0.  25.  50.  75. 100.]
+[5.         5.33333333 5.66666667 6.        ]
 ```
 
 `np.identity` returns a square matrix with ones on the diagonal and zeros elsewhere.
@@ -180,60 +179,55 @@ array([-10,  -8,  -6,  -4,  -2,   1,   3,   5,   7,  10])
 ```python
 import numpy as np
 
-np.identity(3)
+np.identity(4)
 ```
 
 ```text
-array([[1., 0., 0.],
-       [0., 1., 0.],
-       [0., 0., 1.]])
+array([[1., 0., 0., 0.],
+       [0., 1., 0., 0.],
+       [0., 0., 1., 0.],
+       [0., 0., 0., 1.]])
 ```
 
 ---
 
 ## Array attributes
 
-Every array carries metadata you read through attributes, not function calls. The examples below use three arrays of different ranks.
+Every array carries metadata you read through attributes, not function calls. The example below builds three arrays of different ranks and prints their attributes.
 
 ```python
-# cortex:norun
-a1 = np.arange(10, dtype=np.int32)         # 1D, 10 ints
-a2 = np.arange(12, dtype=float).reshape(3, 4)  # 2D, 3 by 4 floats
-a3 = np.arange(8).reshape(2, 2, 2)         # 3D, 2 by 2 by 2
+import numpy as np
+
+ids = np.arange(6, dtype=np.int32)                 # 1D, 6 ints
+grid = np.arange(20, dtype=float).reshape(4, 5)    # 2D, 4 by 5 floats
+cube = np.arange(24, dtype=np.int64).reshape(2, 3, 4)  # 3D, 2 by 3 by 4
+
+print(cube.ndim)
+print(cube.shape)
+print(grid.size)
+print(cube.itemsize)
+print(ids.dtype, grid.dtype, cube.dtype)
 ```
 
-| Attribute | Returns | Example value |
+```text
+3
+(2, 3, 4)
+20
+8
+int32 float64 int64
+```
+
+| Attribute | Returns | Value for the arrays above |
 | :--- | :--- | :--- |
-| `ndim` | number of dimensions (axes) | `a3.ndim` is `3` |
-| `shape` | size along each axis, as a tuple | `a3.shape` is `(2, 2, 2)` |
-| `size` | total number of elements | `a2.size` is `12` |
-| `itemsize` | bytes used by one element | `a3.itemsize` is `8` |
-| `dtype` | the element data type | `a1.dtype` is `int32` |
+| `ndim` | number of dimensions (axes) | `cube.ndim` is `3` |
+| `shape` | size along each axis, as a tuple | `cube.shape` is `(2, 3, 4)` |
+| `size` | total number of elements | `grid.size` is `20` |
+| `itemsize` | bytes used by one element | `cube.itemsize` is `8` |
+| `dtype` | the element data type | `ids.dtype` is `int32` |
 
-`ndim` counts the axes, which equals the depth of nesting.
+`ndim` counts the axes, which equals the depth of nesting. `shape` gives the length of every axis, and the product of the shape equals `size`: `2 * 3 * 4` is 24 elements in `cube`.
 
-```python
-# cortex:norun
-a3.ndim
-# 3
-```
-
-`shape` gives the length of every axis. The product of the shape equals `size`.
-
-```python
-# cortex:norun
-a3.shape
-# (2, 2, 2)
-```
-
-`itemsize` reports the bytes per element, which follows directly from the `dtype`. An `int64` element takes 8 bytes, an `int32` element takes 4.
-
-```python
-# cortex:norun
-print(a1.dtype)   # int32
-print(a2.dtype)   # float64
-print(a3.dtype)   # int64
-```
+`itemsize` reports the bytes per element, which follows directly from the `dtype`. An `int64` or `float64` element takes 8 bytes, an `int32` element takes 4. Multiply `size` by `itemsize` to get the total bytes, which NumPy also reports as `nbytes`.
 
 ---
 
@@ -242,13 +236,19 @@ print(a3.dtype)   # int64
 Casting an array to another type is useful when you want to shrink memory (store small integers as `int8`) or move between integers and floats. **`astype`** returns a new array with the requested `dtype`; it does not change the original in place.
 
 ```python
-# cortex:norun
-a3 = np.arange(8).reshape(2, 2, 2)
-a3.astype(np.int32)
-# array([[[0, 1],
-#         [2, 3]],
-#        [[4, 5],
-#         [6, 7]]], dtype=int32)
+import numpy as np
+
+levels = np.arange(100, 106, dtype=np.int64)
+small = levels.astype(np.int8)
+print(levels.dtype, levels.nbytes)
+print(small.dtype, small.nbytes)
+print(levels.astype(float))
+```
+
+```text
+int64 48
+int8 6
+[100. 101. 102. 103. 104. 105.]
 ```
 
 > [!tip]
@@ -263,19 +263,19 @@ Arithmetic and comparison operators work on whole arrays at once, element by ele
 ```python
 import numpy as np
 
-a1 = np.arange(12).reshape(3, 4)
-a2 = np.arange(12, 24).reshape(3, 4)
-print(a1 + a2)
-print(a1 * a2)
+p = np.arange(1, 13).reshape(3, 4)
+q = np.arange(20, 8, -1).reshape(3, 4)
+print(p + q)
+print(p * q)
 ```
 
 ```text
-[[12 14 16 18]
- [20 22 24 26]
- [28 30 32 34]]
-[[  0  13  28  45]
- [ 64  85 108 133]
- [160 189 220 253]]
+[[21 21 21 21]
+ [21 21 21 21]
+ [21 21 21 21]]
+[[ 20  38  54  68]
+ [ 80  90  98 104]
+ [108 110 110 108]]
 ```
 
 Comparison operators work the same way and return a boolean array of the same shape, one `True` or `False` per element. That boolean array is the basis of the filtering you will meet in [[Advanced NumPy]].
@@ -289,19 +289,19 @@ NumPy distinguishes two cases, and both avoid an explicit loop.
 - **Scalar operation:** one array and one plain number. The number is applied to every element.
 - **Vector operation:** two arrays of the same shape. The operator is applied position by position.
 
-A scalar arithmetic operation applies the number everywhere. Squaring an array squares each element.
+A scalar arithmetic operation applies the number everywhere. Cubing an array cubes each element.
 
 ```python
 import numpy as np
 
-a1 = np.arange(12).reshape(3, 4)
-a1 ** 2
+p = np.arange(1, 13).reshape(3, 4)
+p ** 3
 ```
 
 ```text
-array([[  0,   1,   4,   9],
-       [ 16,  25,  36,  49],
-       [ 64,  81, 100, 121]])
+array([[   1,    8,   27,   64],
+       [ 125,  216,  343,  512],
+       [ 729, 1000, 1331, 1728]])
 ```
 
 A scalar relational operation compares every element against the number and returns a boolean array.
@@ -309,33 +309,29 @@ A scalar relational operation compares every element against the number and retu
 ```python
 import numpy as np
 
-a2 = np.arange(12, 24).reshape(3, 4)
-a2 == 15
+q = np.arange(20, 8, -1).reshape(3, 4)
+q >= 15
 ```
 
 ```text
-array([[False, False, False,  True],
-       [False, False, False, False],
+array([[ True,  True,  True,  True],
+       [ True,  True, False, False],
        [False, False, False, False]])
 ```
 
-A vector operation combines two arrays element by element. Here each element of `a1` is raised to the matching element of `a2`.
+A vector operation combines two arrays element by element. Here each element of `base` is raised to the matching element of `power`.
 
 ```python
 import numpy as np
 
-a1 = np.arange(12).reshape(3, 4)
-a2 = np.arange(12, 24).reshape(3, 4)
-a1 ** a2
+base = np.array([[3, 7, 11], [15, 19, 23]], dtype=np.int64)
+power = np.array([[4, 9, 17], [24, 28, 40]], dtype=np.int64)
+base ** power
 ```
 
 ```text
-array([[                   0,                    1,                16384,
-                    14348907],
-       [          4294967296,         762939453125,      101559956668416,
-           11398895185373143],
-       [ 1152921504606846976, -1261475310744950487,  1864712049423024128,
-         6839173302027254275]])
+array([[                  81,             40353607,   505447028499293771],
+       [-4797504088901905791, -6131528708192907151, -2425797740717627583]])
 ```
 
 > [!warning]
@@ -345,54 +341,72 @@ array([[                   0,                    1,                16384,
 
 ## Array functions
 
-NumPy provides reductions that collapse an array to a summary and element-wise functions that transform every value. The examples use a 3 by 3 array of random integers, so treat the exact numbers as illustrative; the shapes and behavior are what matter.
-
-```python
-# cortex:norun
-a1 = np.random.random((3, 3))
-a1 = np.round(a1 * 100)
-a1
-# array([[43., 28., 71.],
-#        [27., 93., 36.],
-#        [31., 18.,  7.]])
-```
+NumPy provides reductions that collapse an array to a summary and element-wise functions that transform every value. The examples below each rebuild the same 3 by 3 array of whole numbers, so every output is reproducible. The shapes and behavior are what matter.
 
 **Reductions** such as `np.sum`, `np.prod`, `np.max`, and `np.min` collapse the array. The `axis` argument chooses the direction of the collapse: `axis=0` reduces down the columns, `axis=1` reduces across the rows. With no `axis`, the whole array reduces to one number.
 
 ![A 2D array labelled with axis 0 running down the rows and axis 1 running across the columns](./ASSETS/array_axes.png)
 
 ```python
-# cortex:norun
-np.prod(a1, axis=0)   # product down each column
-# array([35991., 46872., 17892.])
+import numpy as np
+
+m = np.array([[12, 45, 8], [67, 23, 90], [34, 56, 19]])
+print(np.sum(m, axis=0))   # total of each column
+print(np.max(m, axis=1))   # largest in each row
+print(np.min(m))           # smallest overall
 ```
 
-**Statistical functions** `np.mean`, `np.median`, `np.std`, and `np.var` take the same `axis` argument. Here the variance is computed across each row.
-
-```python
-# cortex:norun
-np.var(a1, axis=1)
-# array([317.55555556, 854.        ,  96.22222222])
+```text
+[113 124 117]
+[45 90 56]
+8
 ```
 
-**Trigonometric functions** such as `np.sin` and `np.cos` apply element-wise and return an array of the same shape.
+**Statistical functions** `np.mean`, `np.median`, `np.std`, and `np.var` take the same `axis` argument. Here the mean and the variance are computed across each row.
 
 ```python
-# cortex:norun
-np.sin(a1)
-# array([[-0.83177474,  0.27090579,  0.95105465],
-#        [ 0.95637593, -0.94828214, -0.99177885],
-#        [-0.40403765, -0.75098725,  0.6569866 ]])
+import numpy as np
+
+m = np.array([[12, 45, 8], [67, 23, 90], [34, 56, 19]])
+print(np.mean(m, axis=1))
+print(np.var(m, axis=1))
 ```
 
-**Logarithm and exponential** functions `np.log` and `np.exp` also apply to every element.
+```text
+[21.66666667 60.         36.33333333]
+[274.88888889 772.66666667 230.88888889]
+```
+
+**Trigonometric functions** such as `np.sin` and `np.cos` apply element-wise and return an array of the same shape. They expect radians, so a quarter turn is `np.pi / 2`.
 
 ```python
-# cortex:norun
-np.exp(a1)
-# array([[4.72783947e+18, 1.44625706e+12, 6.83767123e+30],
-#        [5.32048241e+11, 2.45124554e+40, 4.31123155e+15],
-#        [2.90488497e+13, 6.56599691e+07, 1.09663316e+03]])
+import numpy as np
+
+angles = np.array([0, np.pi / 6, np.pi / 2, np.pi])
+print(np.round(np.sin(angles), 3))
+print(np.round(np.cos(angles), 3))
+```
+
+```text
+[0.  0.5 1.  0. ]
+[ 1.     0.866  0.    -1.   ]
+```
+
+**Logarithm and exponential** functions `np.log` and `np.exp` also apply to every element, and they undo each other.
+
+```python
+import numpy as np
+
+m = np.array([[12, 45, 8], [67, 23, 90], [34, 56, 19]])
+print(np.round(np.log(m), 2))
+print(np.exp(np.array([0, 1, 2, 5])))
+```
+
+```text
+[[2.48 3.81 2.08]
+ [4.2  3.14 4.5 ]
+ [3.53 4.03 2.94]]
+[  1.           2.71828183   7.3890561  148.4131591 ]
 ```
 
 ---
@@ -401,41 +415,53 @@ np.exp(a1)
 
 Three functions round floating-point arrays, each with a different rule.
 
-- **`np.round`** rounds to the nearest integer (or to a given number of decimals).
+- **`np.round`** rounds to the nearest integer (or to a given number of decimals). A value exactly halfway goes to the nearest even integer.
 - **`np.floor`** rounds down toward negative infinity.
 - **`np.ceil`** rounds up toward positive infinity.
 
-Because the input below is random, the exact numbers vary per run.
+The negative numbers show the difference most clearly: flooring moves them further from zero, ceiling moves them closer.
 
 ```python
-# cortex:norun
-np.ceil(np.random.random((2, 3)) * 100)
-# array([[48.,  4.,  6.],
-#        [ 3., 18., 82.]])
+import numpy as np
+
+vals = np.array([2.5, -1.7, 3.14, 8.5, 0.49, -4.5])
+print(np.round(vals))
+print(np.floor(vals))
+print(np.ceil(vals))
+print(np.round(vals, 1))
+```
+
+```text
+[ 2. -2.  3.  8.  0. -4.]
+[ 2. -2.  3.  8.  0. -5.]
+[ 3. -1.  4.  9.  1. -4.]
+[ 2.5 -1.7  3.1  8.5  0.5 -4.5]
 ```
 
 ---
 
 ## The dot product
 
-The **dot product** multiplies two matrices in the linear-algebra sense, not element by element. For `np.dot(A, B)` the arrays must be conformable: the number of columns of `A` must equal the number of rows of `B`. A `(3, 4)` array times a `(4, 3)` array yields a `(3, 3)` result.
+The **dot product** multiplies two matrices in the linear-algebra sense, not element by element. For `np.dot(A, B)` the arrays must be conformable: the number of columns of `A` must equal the number of rows of `B`. A `(2, 3)` array times a `(3, 4)` array yields a `(2, 4)` result, because each of the 2 rows of `A` is combined with each of the 4 columns of `B`.
 
 ```python
 import numpy as np
 
-a2 = np.arange(12).reshape(3, 4)
-a3 = np.arange(12, 24).reshape(4, 3)
-np.dot(a2, a3)
+left = np.arange(1, 7).reshape(2, 3)
+right = np.arange(12).reshape(3, 4)
+result = np.dot(left, right)
+print(result)
+print(result.shape)
 ```
 
 ```text
-array([[114, 120, 126],
-       [378, 400, 422],
-       [642, 680, 718]])
+[[ 32  38  44  50]
+ [ 68  83  98 113]]
+(2, 4)
 ```
 
 > [!warning]
-> If the inner dimensions do not match, for example a `(3, 4)` array times a `(3, 4)` array, NumPy raises a `ValueError`. Check that the columns of the left operand equal the rows of the right operand before calling `np.dot`.
+> If the inner dimensions do not match, for example a `(2, 3)` array times another `(2, 3)` array, NumPy raises a `ValueError`. Check that the columns of the left operand equal the rows of the right operand before calling `np.dot`.
 
 ---
 
@@ -443,63 +469,79 @@ array([[114, 120, 126],
 
 Indexing pulls out single elements; slicing pulls out ranges. Both extend the rules from [[Lists]] to multiple dimensions, with one index or slice per axis, separated by commas.
 
-For a 1D array, indexing is identical to a list.
+For a 1D array, indexing is identical to a list. For a 2D array, give a row index and a column index: `t[2, 3]` reads row 2, column 3. For a 3D array, supply three indices, one per axis.
 
 ```python
-# cortex:norun
-a1 = np.arange(10)
-a1[2]
-# 2
+import numpy as np
+
+v = np.arange(10, 100, 10)         # 10, 20, ..., 90
+t = np.arange(20).reshape(4, 5)
+c = np.arange(24).reshape(2, 3, 4)
+
+print(v[3])
+print(t[2, 3])
+print(c[1, 2, 0])
+print(c[0, 1, 3])
 ```
 
-For a 2D array, give a row index and a column index. `a2[1, 0]` reads row 1, column 0.
-
-```python
-# cortex:norun
-a2 = np.arange(12).reshape(3, 4)
-a2[1, 0]
-# 4
-```
-
-For a 3D array, supply three indices, one per axis.
-
-```python
-# cortex:norun
-a3 = np.arange(8).reshape(2, 2, 2)
-a3[1, 0, 1]   # 5
-a3[1, 1, 0]   # 6
+```text
+40
+13
+20
+7
 ```
 
 **Slicing** uses `start:stop:step` on each axis, with `stop` excluded. A 1D slice with a step skips elements.
 
+On a 2D array, the first slice selects rows and the second selects columns. A lone `:` means the whole axis, and a plain integer picks one position and drops that axis from the result.
+
 ```python
-# cortex:norun
-a1 = np.arange(10)
-a1[2:5:2]
-# array([2, 4])
+import numpy as np
+
+v = np.arange(10, 100, 10)
+t = np.arange(20).reshape(4, 5)
+
+print(v[1:8:3])
+print(t[1:3, ::2])
+print(t[::2, 1::2])
+print(t[3, ::2])
+print(t[0, :])
+print(t[:, 1])
+print(t[1:, 2:4])
 ```
 
-On a 2D array, the first slice selects rows and the second selects columns. A lone `:` means the whole axis.
-
-```python
-# cortex:norun
-a2 = np.arange(12).reshape(3, 4)
-a2[0:2, 1::2]   # array([[1, 3], [5, 7]])
-a2[::2, 1::2]   # array([[ 1,  3], [ 9, 11]])
-a2[1, ::3]      # array([4, 7])
-a2[0, :]        # array([0, 1, 2, 3])   first row
-a2[:, 2]        # array([ 2,  6, 10])   third column
-a2[1:, 1:3]     # array([[ 5,  6], [ 9, 10]])
+```text
+[20 50 80]
+[[ 5  7  9]
+ [10 12 14]]
+[[ 1  3]
+ [11 13]]
+[15 17 19]
+[0 1 2 3 4]
+[ 1  6 11 16]
+[[ 7  8]
+ [12 13]
+ [17 18]]
 ```
 
 On a 3D array, slice each of the three axes. Mixing an integer and slices drops that axis from the result.
 
 ```python
-# cortex:norun
-a3 = np.arange(27).reshape(3, 3, 3)
-a3[::2, 0, ::2]   # array([[ 0,  2], [18, 20]])
-a3[2, 1:, 1:]     # array([[22, 23], [25, 26]])
-a3[0, 1, :]       # array([3, 4, 5])
+import numpy as np
+
+c = np.arange(24).reshape(2, 3, 4)
+
+print(c[:, 1, ::2])
+print(c[1, 1:, 2:])
+print(c[0, 2, :])
+```
+
+```text
+[[ 4  6]
+ [16 18]]
+[[18 19]
+ [22 23]]
+[ 8  9 10 11]
 ```
 
 ---
@@ -511,15 +553,15 @@ A plain `for` loop over an array iterates along **axis 0**, the outermost axis. 
 ```python
 import numpy as np
 
-a2 = np.arange(12).reshape(3, 4)
-for row in a2:
+t = np.arange(1, 13).reshape(3, 4)
+for row in t:
     print(row)
 ```
 
 ```text
-[0 1 2 3]
-[4 5 6 7]
-[ 8  9 10 11]
+[1 2 3 4]
+[5 6 7 8]
+[ 9 10 11 12]
 ```
 
 To visit every element regardless of rank, use **`np.nditer`**, which flattens the iteration to one element at a time.
@@ -527,20 +569,18 @@ To visit every element regardless of rank, use **`np.nditer`**, which flattens t
 ```python
 import numpy as np
 
-a3 = np.arange(8).reshape(2, 2, 2)
-for x in np.nditer(a3):
+crate = np.array([[[4, 8, 15]], [[16, 23, 42]]])
+for x in np.nditer(crate):
     print(x)
 ```
 
 ```text
-0
-1
-2
-3
 4
-5
-6
-7
+8
+15
+16
+23
+42
 ```
 
 ---
@@ -560,15 +600,18 @@ Transpose flips a matrix across its diagonal.
 ```python
 import numpy as np
 
-a2 = np.arange(12).reshape(3, 4)
-a2.T
+r = np.arange(1, 9).reshape(2, 4)
+print(r)
+print(r.T)
 ```
 
 ```text
-array([[ 0,  4,  8],
-       [ 1,  5,  9],
-       [ 2,  6, 10],
-       [ 3,  7, 11]])
+[[1 2 3 4]
+ [5 6 7 8]]
+[[1 5]
+ [2 6]
+ [3 7]
+ [4 8]]
 ```
 
 `ravel` collapses any shape into a single 1D array, reading in row-major order.
@@ -576,13 +619,13 @@ array([[ 0,  4,  8],
 ```python
 import numpy as np
 
-a3 = np.arange(27).reshape(3, 3, 3)
-a3.ravel()
+cube = np.arange(100, 124).reshape(2, 3, 4)
+cube.ravel()
 ```
 
 ```text
-array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
-       17, 18, 19, 20, 21, 22, 23, 24, 25, 26])
+array([100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112,
+       113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123])
 ```
 
 ---
@@ -601,15 +644,14 @@ Horizontal stacking widens the arrays.
 ```python
 import numpy as np
 
-a4 = np.arange(12).reshape(3, 4)
-a5 = np.arange(12, 24).reshape(3, 4)
-np.hstack((a4, a5))
+left = np.arange(1, 7).reshape(2, 3)
+right = np.arange(-6, 0).reshape(2, 3)
+np.hstack((left, right))
 ```
 
 ```text
-array([[ 0,  1,  2,  3, 12, 13, 14, 15],
-       [ 4,  5,  6,  7, 16, 17, 18, 19],
-       [ 8,  9, 10, 11, 20, 21, 22, 23]])
+array([[ 1,  2,  3, -6, -5, -4],
+       [ 4,  5,  6, -3, -2, -1]])
 ```
 
 Vertical stacking deepens them.
@@ -617,54 +659,59 @@ Vertical stacking deepens them.
 ```python
 import numpy as np
 
-a4 = np.arange(12).reshape(3, 4)
-a5 = np.arange(12, 24).reshape(3, 4)
-np.vstack((a4, a5))
+left = np.arange(1, 7).reshape(2, 3)
+right = np.arange(-6, 0).reshape(2, 3)
+np.vstack((left, right))
 ```
 
 ```text
-array([[ 0,  1,  2,  3],
-       [ 4,  5,  6,  7],
-       [ 8,  9, 10, 11],
-       [12, 13, 14, 15],
-       [16, 17, 18, 19],
-       [20, 21, 22, 23]])
+array([[ 1,  2,  3],
+       [ 4,  5,  6],
+       [-6, -5, -4],
+       [-3, -2, -1]])
 ```
 
-`np.hsplit` returns a list of arrays. The count must divide the number of columns evenly. A `(3, 4)` array split into 2 gives two `(3, 2)` arrays.
+`np.hsplit` returns a list of arrays. The count must divide the number of columns evenly. A `(2, 6)` array split into 3 gives three `(2, 2)` arrays.
 
 ```python
 import numpy as np
 
-a4 = np.arange(12).reshape(3, 4)
-np.hsplit(a4, 2)
+wide = np.arange(10, 22).reshape(2, 6)
+np.hsplit(wide, 3)
 ```
 
 ```text
-[array([[0, 1],
-       [4, 5],
-       [8, 9]]), array([[ 2,  3],
-       [ 6,  7],
-       [10, 11]])]
+[array([[10, 11],
+       [16, 17]]), array([[12, 13],
+       [18, 19]]), array([[14, 15],
+       [20, 21]])]
 ```
 
-`np.vsplit` is the vertical counterpart, and the count must divide the number of rows. A `(4, 6)` array split into 2 gives two `(2, 6)` arrays.
+`np.vsplit` is the vertical counterpart, and the count must divide the number of rows. A `(6, 4)` array split into 3 gives three `(2, 4)` arrays.
 
 ```python
 import numpy as np
 
-a6 = np.arange(24).reshape(4, 6)
-np.vsplit(a6, 2)
+tall = np.arange(24).reshape(6, 4)
+for piece in np.vsplit(tall, 3):
+    print(piece)
+    print()
 ```
 
 ```text
-[array([[ 0,  1,  2,  3,  4,  5],
-       [ 6,  7,  8,  9, 10, 11]]), array([[12, 13, 14, 15, 16, 17],
-       [18, 19, 20, 21, 22, 23]])]
+[[0 1 2 3]
+ [4 5 6 7]]
+
+[[ 8  9 10 11]
+ [12 13 14 15]]
+
+[[16 17 18 19]
+ [20 21 22 23]]
+
 ```
 
 > [!warning]
-> Both split functions require an even division. Splitting a 4-column array into 3 pieces raises a `ValueError` because 4 is not divisible by 3. Choose a count that divides the relevant axis.
+> Both split functions require an even division. Splitting a 6-column array into 4 pieces raises a `ValueError` because 6 is not divisible by 4. Choose a count that divides the relevant axis.
 
 ---
 

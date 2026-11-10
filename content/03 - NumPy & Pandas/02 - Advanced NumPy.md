@@ -26,51 +26,59 @@ The leap from a beginner to a fluent NumPy user is not more functions, it is a s
 
 A NumPy array beats a Python list on three fronts: speed, memory, and convenience.
 
-**Speed.** Summing two sequences of ten million numbers with a Python loop over lists is slow because the interpreter dereferences and type-checks every element. The same sum on two NumPy arrays is one vectorized expression, `a + b`, that runs a compiled loop over contiguous memory. The array version is tens of times faster. The benchmark below is machine-dependent, so the exact seconds vary, but the ratio is the point.
+**Speed.** Totalling the squares of three million numbers with a Python loop is slow because the interpreter fetches, type-checks, and multiplies every element as a separate Python object. The same job on a NumPy array is one vectorized expression, `np.sum(arr * arr)`, that runs a compiled loop over contiguous memory. The array version is tens of times faster. The benchmark below is machine-dependent, so the exact seconds vary, but the ratio is the point.
 
 ```python
 # cortex:norun
 import numpy as np
 import time
 
-# Python lists
-a = [i for i in range(10000000)]
-b = [i for i in range(10000000, 20000000)]
-c = []
-start = time.time()
-for i in range(len(a)):
-    c.append(a[i] + b[i])
-print(time.time() - start)
-# 3.2699835300445557
+n = 3_000_000
 
-# NumPy arrays
-a = np.arange(10000000)
-b = np.arange(10000000, 20000000)
-start = time.time()
-c = a + b
-print(time.time() - start)
-# 0.06481003761291504
+# Python list and a loop
+nums = list(range(n))
+start = time.perf_counter()
+total = 0
+for x in nums:
+    total += x * x
+print(time.perf_counter() - start)
+# 0.2743346691131592
+
+# NumPy array and one expression
+arr = np.arange(n, dtype=np.int64)
+start = time.perf_counter()
+total = int(np.sum(arr * arr))
+print(time.perf_counter() - start)
+# 0.008917093276977539
 ```
 
-On that run the NumPy version was about 54 times faster. The gap widens as the arrays grow.
+On that run the NumPy version was about 31 times faster. The gap widens as the arrays grow.
 
-**Memory.** An array of ten million Python integers in a list costs about 81.5 MB, because each element is a full Python object with its own header. The same ten million values in a NumPy array with `dtype=np.int8` cost about 10 MB, since each element is a single byte in one packed block.
+**Memory.** A list stores a table of references, and each reference points to a separate Python integer object with its own header. `sys.getsizeof` on the list counts only the reference table, so the integer objects add to it on top. A NumPy array stores the bare values in one packed block, and its `dtype` sets how many bytes each value takes.
 
 ```python
-# cortex:norun
-import numpy as np
 import sys
+import numpy as np
 
-a = [i for i in range(10000000)]
-print(sys.getsizeof(a))
-# 81528048
+n = 1_000_000
+nums = list(range(n))
 
-a = np.arange(10000000, dtype=np.int8)
-print(sys.getsizeof(a))
-# 10000104
+print(sys.getsizeof(nums))       # the reference table alone
+print(sys.getsizeof(nums[-1]))   # one integer object
+print(np.arange(n, dtype=np.int64).nbytes)
+print(np.arange(n, dtype=np.int8).nbytes)
 ```
 
-**Convenience.** Vectorization is also less code. Adding two arrays is `a + b`, with no loop, no index bookkeeping, and no accumulator list. Operations read like the mathematics they express, which is the convenience that makes NumPy the base of the scientific Python stack.
+```text
+8000056
+28
+8000000
+1000000
+```
+
+For a million values the list needs roughly 8 MB for its references plus about 28 MB for the integer objects, around 36 MB in all. The same values in an `int64` array cost 8 MB, and in an `int8` array just 1 MB (this works only when the values fit in a byte).
+
+**Convenience.** Vectorization is also less code. Totalling two columns is `a + b`, with no loop, no index bookkeeping, and no accumulator list. Operations read like the mathematics they express, which is the convenience that makes NumPy the base of the scientific Python stack.
 
 | | Python list | NumPy array |
 | :--- | :--- | :--- |
@@ -86,12 +94,18 @@ print(sys.getsizeof(a))
 Before the new techniques, recall the normal indexing and slicing from [[NumPy Fundamentals]]. On a 2D array you pass one index or slice per axis, separated by a comma: the first selects rows, the second selects columns.
 
 ```python
-# cortex:norun
 import numpy as np
 
-a = np.arange(24).reshape(6, 4)
-a[1, 2]       # 6, the element at row 1, column 2
-a[1:3, 1:3]   # the 2 by 2 block from rows 1 to 2, columns 1 to 2
+m = np.arange(30).reshape(5, 6)
+print(m[2, 3])       # the element at row 2, column 3
+print(m[1:4, 2:5])   # the 3 by 3 block from rows 1 to 3, columns 2 to 4
+```
+
+```text
+15
+[[ 8  9 10]
+ [14 15 16]
+ [20 21 22]]
 ```
 
 Advanced indexing goes beyond single elements and contiguous slices. The two forms below, fancy and boolean indexing, let you pull arbitrary elements and filter by condition.
@@ -102,51 +116,64 @@ Advanced indexing goes beyond single elements and contiguous slices. The two for
 
 **Fancy indexing** means indexing with a list or array of indices instead of a single integer or a slice. It pulls out arbitrary rows or columns in any order, even with repeats, which a slice cannot do.
 
-Pass a list of column indices after the row slice to select those columns. Here `[0, 2, 3]` keeps columns 0, 2, and 3 and drops column 1.
+Pass a list of column indices after the row slice to select those columns. Here `[4, 0, 2]` keeps columns 4, 0, and 2 in exactly that order and drops the rest.
 
 ```python
 import numpy as np
 
-a = np.arange(24).reshape(6, 4)
-a[:, [0, 2, 3]]
+stock = np.arange(10, 70, 2).reshape(6, 5)
+stock[:, [4, 0, 2]]
 ```
 
 ```text
-array([[ 0,  2,  3],
-       [ 4,  6,  7],
-       [ 8, 10, 11],
-       [12, 14, 15],
-       [16, 18, 19],
-       [20, 22, 23]])
+array([[18, 10, 14],
+       [28, 20, 24],
+       [38, 30, 34],
+       [48, 40, 44],
+       [58, 50, 54],
+       [68, 60, 64]])
 ```
 
 ![A row of six cells with values 10 to 60, an index array of 0, 2, 4 pulling out the values 10, 30, and 50 into a smaller result](./ASSETS/fancy_indexing.png)
 
-The index list can reorder or repeat. `a[[2, 0, 2]]` returns row 2, then row 0, then row 2 again. This is how you reorder rows, build a sample with replacement, or gather specific records by position.
-
-A basic slice and a fancy index also differ in what they hand back. A slice such as `a[1:3]` is a **view**: it shares memory with `a`, so writing into it changes `a`. Fancy indexing such as `a[[1, 2]]`, and boolean indexing too, returns a new **copy**, so edits to the result leave `a` untouched.
+The index list can reorder or repeat. `stock[[2, 0, 2]]` returns row 2, then row 0, then row 2 again. This is how you reorder rows, build a sample with replacement, or gather specific records by position.
 
 ```python
 import numpy as np
 
-a = np.arange(6)
-s = a[1:3]      # slice: a view
-s[0] = 100
-print(a)
-
-b = np.arange(6)
-f = b[[1, 2]]   # fancy index: a copy
-f[0] = 100
-print(b)
+stock = np.arange(10, 70, 2).reshape(6, 5)
+stock[[2, 0, 2]]
 ```
 
 ```text
-[  0 100   2   3   4   5]
-[0 1 2 3 4 5]
+array([[30, 32, 34, 36, 38],
+       [10, 12, 14, 16, 18],
+       [30, 32, 34, 36, 38]])
+```
+
+A basic slice and a fancy index also differ in what they hand back. A slice such as `lane[2:5]` is a **view**: it shares memory with `lane`, so writing into it changes `lane`. Fancy indexing such as `lane[[2, 3, 4]]`, and boolean indexing too, returns a new **copy**, so edits to the result leave the original untouched.
+
+```python
+import numpy as np
+
+lane = np.arange(10, 70, 10)
+window = lane[2:5]          # slice: a view
+window[0] = -1
+print(lane)
+
+other = np.arange(10, 70, 10)
+picked = other[[2, 3, 4]]   # fancy index: a copy
+picked[0] = -1
+print(other)
+```
+
+```text
+[10 20 -1 40 50 60]
+[10 20 30 40 50 60]
 ```
 
 > [!warning]
-> Editing a slice silently edits the original array. Call `.copy()` on the slice, as in `a[1:3].copy()`, when you need an independent array.
+> Editing a slice silently edits the original array. Call `.copy()` on the slice, as in `lane[2:5].copy()`, when you need an independent array.
 
 ---
 
@@ -154,83 +181,78 @@ print(b)
 
 **Boolean indexing** filters an array with a boolean mask: a same-shaped array of `True` and `False` values, usually produced by a comparison. Indexing with the mask returns a 1D array of the elements where the mask is `True`.
 
-The mask comes from a relational operation, exactly the scalar comparison from [[NumPy Fundamentals]]. The examples use a fixed array so the outputs are reproducible.
+The mask comes from a relational operation, exactly the scalar comparison from [[NumPy Fundamentals]]. The examples use a fixed array of temperature readings so the outputs are reproducible.
 
 ```python
 import numpy as np
 
-a = np.array([[76, 98, 99, 39],
-              [91, 46, 88, 23],
-              [45,  6, 83,  1],
-              [37, 43, 78, 85],
-              [54, 73, 61, 53],
-              [40, 93, 85, 77]])
-# all values greater than 50
-a[a > 50]
+temps = np.array([[18, 31, 25, 40],
+                  [12, 36, 29, 22],
+                  [33, 15, 38, 27],
+                  [24, 41, 19, 30],
+                  [35, 21, 28, 16]])
+# all readings above 30
+temps[temps > 30]
 ```
 
 ```text
-array([76, 98, 99, 91, 88, 83, 78, 85, 54, 73, 61, 53, 93, 85, 77])
+array([31, 40, 36, 33, 38, 41, 35])
 ```
 
 ![An array of six values, a boolean mask of the same shape marking which are greater than ten, and the shorter filtered result](./ASSETS/boolean_mask.png)
 
-A condition on the remainder selects the even numbers.
+A condition on the remainder selects the odd numbers.
 
 ```python
 import numpy as np
 
-a = np.array([[76, 98, 99, 39],
-              [91, 46, 88, 23],
-              [45,  6, 83,  1],
-              [37, 43, 78, 85],
-              [54, 73, 61, 53],
-              [40, 93, 85, 77]])
-# even numbers
-a[a % 2 == 0]
+temps = np.array([[18, 31, 25, 40],
+                  [12, 36, 29, 22],
+                  [33, 15, 38, 27],
+                  [24, 41, 19, 30],
+                  [35, 21, 28, 16]])
+# odd readings
+temps[temps % 2 == 1]
 ```
 
 ```text
-array([76, 98, 46, 88,  6, 78, 54, 40])
+array([31, 25, 29, 33, 15, 27, 41, 19, 35, 21])
 ```
 
-Combine conditions with the bitwise operators `&` (and), `|` (or), and `~` (not). Each condition must be wrapped in parentheses because `&` binds tighter than the comparison. Here the mask keeps values that are both greater than 50 and even.
+Combine conditions with the bitwise operators `&` (and), `|` (or), and `~` (not). Each condition must be wrapped in parentheses because `&` binds tighter than the comparison. Here the mask keeps values that are both above 25 and odd.
 
 ```python
 import numpy as np
 
-a = np.array([[76, 98, 99, 39],
-              [91, 46, 88, 23],
-              [45,  6, 83,  1],
-              [37, 43, 78, 85],
-              [54, 73, 61, 53],
-              [40, 93, 85, 77]])
-# greater than 50 and even
-a[(a > 50) & (a % 2 == 0)]
+temps = np.array([[18, 31, 25, 40],
+                  [12, 36, 29, 22],
+                  [33, 15, 38, 27],
+                  [24, 41, 19, 30],
+                  [35, 21, 28, 16]])
+# above 25 and odd
+temps[(temps > 25) & (temps % 2 == 1)]
 ```
 
 ```text
-array([76, 98, 88, 78, 54])
+array([31, 29, 33, 27, 41, 35])
 ```
 
-The `~` operator negates a mask. Here it keeps the values that are not divisible by 7.
+The `~` operator negates a mask. Here it keeps the values that are not divisible by 3.
 
 ```python
 import numpy as np
 
-a = np.array([[76, 98, 99, 39],
-              [91, 46, 88, 23],
-              [45,  6, 83,  1],
-              [37, 43, 78, 85],
-              [54, 73, 61, 53],
-              [40, 93, 85, 77]])
-# not divisible by 7
-a[~(a % 7 == 0)]
+temps = np.array([[18, 31, 25, 40],
+                  [12, 36, 29, 22],
+                  [33, 15, 38, 27],
+                  [24, 41, 19, 30],
+                  [35, 21, 28, 16]])
+# not divisible by 3
+temps[~(temps % 3 == 0)]
 ```
 
 ```text
-array([76, 99, 39, 46, 88, 23, 45,  6, 83,  1, 37, 43, 78, 85, 54, 73, 61,
-       53, 40, 93, 85])
+array([31, 25, 40, 29, 22, 38, 41, 19, 35, 28, 16])
 ```
 
 > [!warning]
@@ -247,14 +269,14 @@ When the shapes already match, the operation is a plain elementwise combine.
 ```python
 import numpy as np
 
-a = np.arange(6).reshape(2, 3)
-b = np.arange(6, 12).reshape(2, 3)
-print(a + b)
+u = np.arange(1, 7).reshape(2, 3)
+v = np.arange(10, 70, 10).reshape(2, 3)
+print(u + v)
 ```
 
 ```text
-[[ 6  8 10]
- [12 14 16]]
+[[11 22 33]
+ [44 55 66]]
 ```
 
 When the shapes differ, broadcasting can still make them fit. A `(1, 3)` row added to a `(2, 3)` array is reused for every row of the larger array.
@@ -262,30 +284,31 @@ When the shapes differ, broadcasting can still make them fit. A `(1, 3)` row add
 ```python
 import numpy as np
 
-a = np.arange(6).reshape(2, 3)
-b = np.arange(3).reshape(1, 3)
-print(a + b)
+u = np.arange(1, 7).reshape(2, 3)
+shift = np.array([[100, 200, 300]])
+print(u + shift)
 ```
 
 ```text
-[[0 2 4]
- [3 5 7]]
+[[101 202 303]
+ [104 205 306]]
 ```
 
-The most striking case stretches both operands at once. A `(1, 3)` row and a `(3, 1)` column broadcast to a full `(3, 3)` grid, each contributing along one direction.
+The most striking case stretches both operands at once. A `(4, 1)` column and a `(1, 3)` row broadcast to a full `(4, 3)` grid, each contributing along one direction.
 
 ```python
 import numpy as np
 
-a = np.arange(3).reshape(1, 3)
-b = np.arange(3).reshape(3, 1)
-print(a + b)
+col = np.array([[0], [10], [20], [30]])
+row = np.array([[1, 2, 3]])
+print(col + row)
 ```
 
 ```text
-[[0 1 2]
- [1 2 3]
- [2 3 4]]
+[[ 1  2  3]
+ [11 12 13]
+ [21 22 23]
+ [31 32 33]]
 ```
 
 ![A column of shape 3 by 1 stretched across and a row of shape 1 by 3 stretched down, combining into a 3 by 3 grid of elementwise sums](./ASSETS/broadcasting_stretch.png)
@@ -297,21 +320,24 @@ NumPy compares the shapes of the two arrays axis by axis, starting from the trai
 1. **Match the number of dimensions.** If one array has fewer dimensions, NumPy prepends axes of size 1 to its shape until both have the same number of axes. So a 1D `(3,)` array is treated as `(1, 3)` when combined with a 2D array.
 2. **Match each axis.** For every axis, the sizes must be equal, or one of them must be 1. An axis of size 1 is stretched to match the other. If two axes differ and neither is 1, the shapes are incompatible and NumPy raises a `ValueError`.
 
-A 1D `(3,)` array adds cleanly to a `(4, 3)` array: rule 1 pads it to `(1, 3)`, then rule 2 stretches the leading 1 to 4.
+A 1D `(3,)` array adds cleanly to a `(4, 3)` array: rule 1 pads it to `(1, 3)`, then rule 2 stretches the leading 1 to 4. Here a per-subject bonus is added to the marks of four students.
 
 ```python
 import numpy as np
 
-a = np.arange(12).reshape(4, 3)
-b = np.arange(3)
-print(a + b)
+marks = np.array([[70, 82, 65],
+                  [91, 58, 77],
+                  [60, 88, 94],
+                  [73, 69, 81]])
+bonus = np.array([5, 0, 10])
+print(marks + bonus)
 ```
 
 ```text
-[[ 0  2  4]
- [ 3  5  7]
- [ 6  8 10]
- [ 9 11 13]]
+[[ 75  82  75]
+ [ 96  58  87]
+ [ 65  88 104]
+ [ 78  69  91]]
 ```
 
 Broadcasting fails when a non-unit axis does not match. Each pairing below triggers a `ValueError`, so read them rather than run them.
@@ -320,14 +346,14 @@ Broadcasting fails when a non-unit axis does not match. Each pairing below trigg
 # cortex:norun
 import numpy as np
 
-# (3, 4) with (3,) -> padded to (1, 3); trailing 4 vs 3 mismatch
-np.arange(12).reshape(3, 4) + np.arange(3)
+# (2, 5) with (2,) -> padded to (1, 2); trailing 5 vs 2 mismatch
+np.ones((2, 5)) + np.ones(2)
 
 # (3, 4) with (4, 3) -> trailing 4 vs 3 mismatch
-np.arange(12).reshape(3, 4) + np.arange(12).reshape(4, 3)
+np.ones((3, 4)) + np.ones((4, 3))
 
-# (4, 4) with (2, 2) -> 4 vs 2 on both axes, neither is 1
-np.arange(16).reshape(4, 4) + np.arange(4).reshape(2, 2)
+# (6, 6) with (3, 3) -> 6 vs 3 on both axes, neither is 1
+np.ones((6, 6)) + np.ones((3, 3))
 ```
 
 > [!tip]
@@ -342,12 +368,12 @@ Because NumPy functions are vectorized, a formula written once applies to a whol
 ```python
 import numpy as np
 
-a = np.arange(5)
-np.sin(a)
+x = np.linspace(0, np.pi, 5)
+print(np.round(np.cos(x), 3))
 ```
 
 ```text
-array([ 0.        ,  0.84147098,  0.90929743,  0.14112001, -0.7568025 ])
+[ 1.     0.707  0.    -0.707 -1.   ]
 ```
 
 The **sigmoid** function maps any real number into the open interval from 0 to 1, which is why it turns a score into a probability. It is defined as
@@ -361,14 +387,14 @@ where $x$ is the input value (a real number) and $\sigma(x)$ is the output in th
 ```python
 import numpy as np
 
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
 
-sigmoid(np.array([-2, -1, 0, 1, 2]))
+sigmoid(np.array([-4, -0.5, 0, 2, 6]))
 ```
 
 ```text
-array([0.11920292, 0.26894142, 0.5       , 0.73105858, 0.88079708])
+array([0.01798621, 0.37754067, 0.5       , 0.88079708, 0.99752738])
 ```
 
 The **mean squared error** measures how far predictions sit from the true values, averaged over all samples. It is defined as
@@ -385,13 +411,13 @@ import numpy as np
 def mse(actual, predicted):
     return np.mean((actual - predicted) ** 2)
 
-actual = np.array([3, 5, 2, 8])
-predicted = np.array([2, 5, 4, 7])
+actual = np.array([12.0, 7.5, 9.0, 15.0])
+predicted = np.array([11.0, 9.0, 9.0, 18.0])
 print(mse(actual, predicted))
 ```
 
 ```text
-1.5
+3.0625
 ```
 
 The **binary cross-entropy** loss scores probability predictions for a two-class problem, punishing a confident wrong answer heavily. It is defined as
@@ -405,14 +431,14 @@ where $n$ is the number of samples, $y_i$ is the true label (0 or 1) of sample $
 ```python
 import numpy as np
 
-y_true = np.array([1, 0, 1, 1, 0])
-y_pred = np.array([0.9, 0.1, 0.8, 0.7, 0.2])
-bce = -np.mean(y_true * np.log(y_pred) + (1 - y_true) * np.log(1 - y_pred))
+labels = np.array([0, 1, 1, 0])
+probs = np.array([0.2, 0.6, 0.95, 0.4])
+bce = -np.mean(labels * np.log(probs) + (1 - labels) * np.log(1 - probs))
 print(round(bce, 6))
 ```
 
 ```text
-0.202737
+0.324022
 ```
 
 ---
@@ -424,12 +450,14 @@ Real data has gaps. NumPy marks a missing numeric value with **`np.nan`** (not a
 ```python
 import numpy as np
 
-a = np.array([1, 2, 3, 4, np.nan, 6])
-a
+readings = np.array([21.5, np.nan, 19.0, 23.5, np.nan, 20.0])
+print(readings)
+print(readings.sum())
 ```
 
 ```text
-array([ 1.,  2.,  3.,  4., nan,  6.])
+[21.5  nan 19.  23.5  nan 20. ]
+nan
 ```
 
 You cannot test for `np.nan` with `==`, because `np.nan` does not equal anything, including itself. Use **`np.isnan`**, which returns a boolean mask marking the missing entries. Negate that mask with `~` to keep only the present values, which is boolean indexing again.
@@ -437,12 +465,15 @@ You cannot test for `np.nan` with `==`, because `np.nan` does not equal anything
 ```python
 import numpy as np
 
-a = np.array([1, 2, 3, 4, np.nan, 6])
-a[~np.isnan(a)]
+readings = np.array([21.5, np.nan, 19.0, 23.5, np.nan, 20.0])
+clean = readings[~np.isnan(readings)]
+print(clean)
+print(clean.mean())
 ```
 
 ```text
-array([1., 2., 3., 4., 6.])
+[21.5 19.  23.5 20. ]
+21.0
 ```
 
 ---
@@ -451,63 +482,63 @@ array([1., 2., 3., 4., 6.])
 
 NumPy pairs naturally with `matplotlib`: build the x values with `np.linspace`, compute the y values with a vectorized expression, and hand both to `plt.plot`. The fences below emit a figure rather than text, and in-browser figure capture is out of scope, so they are marked copy-only; run them in a notebook to see the curve.
 
-A straight line, `y = x`, is the simplest case.
+A straight line with a slope and an offset, `y = 2x + 1`, is the simplest case.
 
 ```python
 # cortex:norun
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-10, 10, 100)
-y = x
+x = np.linspace(-5, 5, 200)
+y = 2 * x + 1
 plt.plot(x, y)
 ```
 
-A parabola, `y = x` squared, bends upward on both sides of zero.
+A cubic, `y = x` cubed, bends down on the left of zero and up on the right.
 
 ```python
 # cortex:norun
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-10, 10, 100)
-y = x ** 2
+x = np.linspace(-5, 5, 200)
+y = x ** 3
 plt.plot(x, y)
 ```
 
-The sine curve, `y = sin(x)`, oscillates between -1 and 1.
+The cosine curve, `y = cos(x)`, oscillates between -1 and 1.
 
 ```python
 # cortex:norun
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-10, 10, 100)
-y = np.sin(x)
+x = np.linspace(-5, 5, 200)
+y = np.cos(x)
 plt.plot(x, y)
 ```
 
-Plotting `y = x * log(x)` is only defined for positive `x`. For the negative half of the range, `np.log` returns `np.nan` with a runtime warning, and matplotlib simply leaves that part of the curve blank.
+Plotting `y = sqrt(x)` is only defined for non-negative `x`. For the negative half of the range, `np.sqrt` returns `np.nan` with a runtime warning, and matplotlib simply leaves that part of the curve blank.
 
 ```python
 # cortex:norun
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-10, 10, 100)
-y = x * np.log(x)
+x = np.linspace(-5, 5, 200)
+y = np.sqrt(x)
 plt.plot(x, y)
 ```
 
-The sigmoid curve has the S shape that squashes any input into the range from 0 to 1.
+The hyperbolic tangent, `y = tanh(x)`, is the sigmoid's rescaled cousin (`tanh(x)` equals `2 * sigmoid(2x) - 1`). It has the same S shape, squashing any input into the range from -1 to 1.
 
 ```python
 # cortex:norun
 import numpy as np
 import matplotlib.pyplot as plt
 
-x = np.linspace(-10, 10, 100)
-y = 1 / (1 + np.exp(-x))
+x = np.linspace(-5, 5, 200)
+y = np.tanh(x)
 plt.plot(x, y)
 ```
 
@@ -520,25 +551,24 @@ plt.plot(x, y)
 ```python
 import numpy as np
 
-x = np.arange(3)
-y = np.arange(4)
-xx, yy = np.meshgrid(x, y)
+cols = np.array([10, 20, 30])
+rows = np.array([1, 2])
+xx, yy = np.meshgrid(cols, rows)
 print(xx)
 print(yy)
+print(xx * yy)
 ```
 
 ```text
-[[0 1 2]
- [0 1 2]
- [0 1 2]
- [0 1 2]]
-[[0 0 0]
- [1 1 1]
- [2 2 2]
- [3 3 3]]
+[[10 20 30]
+ [10 20 30]]
+[[1 1 1]
+ [2 2 2]]
+[[10 20 30]
+ [20 40 60]]
 ```
 
-Every position `(row, col)` in the grid now has its x coordinate in `xx` and its y coordinate in `yy`, so a vectorized expression such as `xx ** 2 + yy ** 2` evaluates the function at all points at once.
+Every position `(row, col)` in the grid now has its x coordinate in `xx` and its y coordinate in `yy`, so a vectorized expression such as `xx * yy` (printed last) evaluates the function at all points at once.
 
 ---
 

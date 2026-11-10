@@ -18,19 +18,19 @@ created: 2026-10-13
 
 NumPy ships hundreds of functions, and most people know only a handful. Each function below replaces custom code you would otherwise write with loops and counters, so knowing it exists makes you faster and your code shorter. Treat this note as a reference toolkit: every section gives the intuition, a small table or list of options, and one self-contained example you can edit and rerun.
 
-Most examples share two fixed arrays, so the outputs stay reproducible. `a` is a 1D array of 15 integers and `b` is a 2D array of shape `(6, 4)`.
+Most examples share two fixed arrays, so the outputs stay reproducible. `v` is a 1D array of 15 integers and `g` is a 2D array of shape `(6, 4)`.
 
 ```python
 # cortex:norun
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
 ```
 
 > [!note] Temporary versus permanent operations
@@ -53,14 +53,14 @@ There is no `reverse=True` parameter. For descending order, sort and then revers
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(np.sort(a))
-print(np.sort(a)[::-1])
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+print(np.sort(v))
+print(np.sort(v)[::-1])
 ```
 
 ```text
-[ 2  5  9 11 21 28 30 37 38 50 53 68 78 92 94]
-[94 92 78 68 53 50 38 37 30 28 21 11  9  5  2]
+[ 9 13 17 24 31 39 45 50 58 64 67 73 82 88 96]
+[96 88 82 73 67 64 58 50 45 39 31 24 17 13  9]
 ```
 
 On a 2D array, `axis` decides the direction. With `axis=0` every column is sorted from top to bottom independently, so rows no longer stay together.
@@ -68,38 +68,38 @@ On a 2D array, `axis` decides the direction. With `axis=0` every column is sorte
 ```python
 import numpy as np
 
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
-np.sort(b, axis=0)
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
+np.sort(g, axis=0)
 ```
 
 ```text
-array([[ 8, 18,  2,  6],
-       [12, 52, 31,  7],
-       [29, 63, 42,  9],
-       [38, 71, 44, 55],
-       [40, 87, 47, 72],
-       [61, 93, 83, 85]])
+array([[14,  4, 12,  8],
+       [27, 35, 41, 19],
+       [31, 57, 69, 22],
+       [53, 60, 72, 26],
+       [78, 64, 83, 38],
+       [90, 86, 95, 47]])
 ```
 
-Leave out `axis` and each row is sorted instead: the first row becomes `[ 6, 12, 42, 52]`.
+Leave out `axis` and each row is sorted instead: the first row becomes `[ 8, 27, 41, 64]`.
 
 **`np.append`** adds values at the end of an array, like `list.append`, but returns a new array.
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-np.append(a, 200)
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+np.append(v, 150)
 ```
 
 ```text
-array([ 11,  53,  28,  50,  38,  37,  94,  92,   5,  30,  68,   9,  78,
-         2,  21, 200])
+array([ 64,  17,  82,  45,   9,  73,  31,  58,  96,  24,  67,  13,  50,
+        88,  39, 150])
 ```
 
 To add a column to a 2D array, pass a block with one column per row and set `axis=1`. Without `axis`, `np.append` flattens both inputs to 1D first and tacks the new values onto the end, which is rarely what you want.
@@ -107,26 +107,26 @@ To add a column to a 2D array, pass a block with one column per row and set `axi
 ```python
 import numpy as np
 
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
-# a new column of ones, one value per row
-np.append(b, np.ones((b.shape[0], 1)), axis=1)
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
+# a new column of 0.5, one value per row
+np.append(g, np.full((g.shape[0], 1), 0.5), axis=1)
 ```
 
 ```text
-array([[12., 52., 42.,  6.,  1.],
-       [29., 18., 47., 55.,  1.],
-       [61., 93., 83.,  9.,  1.],
-       [38., 63., 44., 85.,  1.],
-       [ 8., 87., 31., 72.,  1.],
-       [40., 71.,  2.,  7.,  1.]])
+array([[27. , 64. , 41. ,  8. ,  0.5],
+       [90. , 35. , 72. , 19. ,  0.5],
+       [53. , 86. , 12. , 47. ,  0.5],
+       [31. , 60. , 95. , 22. ,  0.5],
+       [78. ,  4. , 69. , 38. ,  0.5],
+       [14. , 57. , 83. , 26. ,  0.5]])
 ```
 
-The result is a float array because `np.ones` produces floats, and an array holds one `dtype`. Swap `np.ones` for `np.random.random((b.shape[0], 1))` to append a column of random values instead.
+The result is a float array because the new column holds floats, and an array holds one `dtype`. Swap `np.full` for `np.random.random((g.shape[0], 1))` to append a column of random values instead.
 
 ---
 
@@ -140,19 +140,19 @@ The result is a float array because `np.ones` produces floats, and an array hold
 ```python
 import numpy as np
 
-c = np.arange(6).reshape(2, 3)
-d = np.arange(6, 12).reshape(2, 3)
-print(np.concatenate((c, d), axis=0))
-print(np.concatenate((c, d), axis=1))
+p = np.array([[3, 1, 4], [1, 5, 9]])
+q = np.array([[2, 6, 5], [3, 5, 8]])
+print(np.concatenate((p, q), axis=0))
+print(np.concatenate((p, q), axis=1))
 ```
 
 ```text
-[[ 0  1  2]
- [ 3  4  5]
- [ 6  7  8]
- [ 9 10 11]]
-[[ 0  1  2  6  7  8]
- [ 3  4  5  9 10 11]]
+[[3 1 4]
+ [1 5 9]
+ [2 6 5]
+ [3 5 8]]
+[[3 1 4 2 6 5]
+ [1 5 9 3 5 8]]
 ```
 
 Because one function covers both directions, practitioners tend to prefer `np.concatenate` over the stacking functions from [[NumPy Fundamentals]]. The arrays must match on every axis except the one you join along.
@@ -168,38 +168,38 @@ Because one function covers both directions, practitioners tend to prefer `np.co
 | `np.where(condition)` | The index positions where the condition is `True`, as a tuple with one array per axis. |
 | `np.where(condition, x, y)` | A new array that takes `x` where the condition is `True` and `y` where it is `False`. |
 
-With one argument it finds positions. Here it reports where the values exceed 50.
+With one argument it finds positions. Here it reports where the values fall below 20.
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-np.where(a > 50)
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+np.where(v < 20)
 ```
 
 ```text
-(array([ 1,  6,  7, 10, 12]),)
+(array([ 1,  4, 11]),)
 ```
 
-With three arguments it becomes a vectorized if-else. Read `np.where(a > 50, 0, a)` as "if the value is greater than 50, use 0, otherwise keep the value from `a`".
+With three arguments it becomes a vectorized if-else. Read `np.where(v >= 60, 60, v)` as "if the value is 60 or more, use 60, otherwise keep the value from `v`".
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-# replace every value greater than 50 with 0
-print(np.where(a > 50, 0, a))
-# replace every even value with 0
-print(np.where(a % 2 == 0, 0, a))
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+# cap every value at 60
+print(np.where(v >= 60, 60, v))
+# keep the even values and mark the odd ones with -1
+print(np.where(v % 2 == 0, v, -1))
 ```
 
 ```text
-[11  0 28 50 38 37  0  0  5 30  0  9  0  2 21]
-[11 53  0  0  0 37  0  0  5  0  0  9  0  0 21]
+[60 17 60 45  9 60 31 58 60 24 60 13 50 60 39]
+[64 -1 82 -1 -1 -1 -1 58 96 24 -1 -1 50 88 -1]
 ```
 
 > [!tip] np.where versus a boolean mask
-> A boolean mask such as `a[a > 50]` keeps only the matching values, so the result is shorter. `np.where(a > 50, 0, a)` keeps every position and swaps values, so the result has the same shape as `a`. Choose the mask to filter and `np.where` to transform. Both `x` and `y` can be arrays, so the same pattern builds complex rules in one line.
+> A boolean mask such as `v[v >= 60]` keeps only the matching values, so the result is shorter. `np.where(v >= 60, 60, v)` keeps every position and swaps values, so the result has the same shape as `v`. Choose the mask to filter and `np.where` to transform. Both `x` and `y` can be arrays, so the same pattern builds complex rules in one line.
 
 ---
 
@@ -210,16 +210,16 @@ print(np.where(a % 2 == 0, 0, a))
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(np.argmax(a))     # position of the largest value
-print(a[np.argmax(a)])  # the largest value itself
-print(np.argmin(a))     # position of the smallest value
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+print(np.argmax(v))     # position of the largest value
+print(v[np.argmax(v)])  # the largest value itself
+print(np.argmin(v))     # position of the smallest value
 ```
 
 ```text
-6
-94
-13
+8
+96
+4
 ```
 
 On a 2D array, `axis` gives one index per column or per row.
@@ -230,19 +230,19 @@ On a 2D array, `axis` gives one index per column or per row.
 ```python
 import numpy as np
 
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
-print(np.argmax(b, axis=0))
-print(np.argmax(b, axis=1))
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
+print(np.argmax(g, axis=0))
+print(np.argmax(g, axis=1))
 ```
 
 ```text
-[2 2 2 3]
-[1 3 1 3 1 1]
+[1 2 3 2]
+[1 0 1 2 0 2]
 ```
 
 In practice you reach for `argmax` and `argmin` most often on a single column of data, to answer "which record holds the highest value". In classification, `np.argmax` over a row of class probabilities gives the predicted class.
@@ -254,17 +254,17 @@ In practice you reach for `argmax` and `argmin` most often on a single column of
 
 ## Cumulative functions
 
-A **cumulative sum** replaces each element with the running total up to and including that position. If a batsman scores 25, 18, 59, 61, 0, 52, and 100 runs in successive matches, the cumulative sum is the career total after each match. Daily subscriber gains, daily sales, and other running totals work the same way.
+A **cumulative sum** replaces each element with the running total up to and including that position. If you deposit 120, 80, 0, 45, 200, and 15 into a savings jar over six weeks, the cumulative sum is the balance at the end of each week. Daily sales, steps walked, and other running totals work the same way.
 
 ```python
 import numpy as np
 
-runs = np.array([25, 18, 59, 61, 0, 52, 100])
-np.cumsum(runs)
+deposits = np.array([120, 80, 0, 45, 200, 15])
+np.cumsum(deposits)
 ```
 
 ```text
-array([ 25,  43, 102, 163, 163, 215, 315])
+array([120, 200, 200, 245, 445, 460])
 ```
 
 **`np.cumsum`** computes it in one call. On a 2D array, `axis=1` runs the total across each row and `axis=0` runs it down each column. With no `axis`, NumPy flattens the array to 1D first and runs one total over every element.
@@ -272,56 +272,60 @@ array([ 25,  43, 102, 163, 163, 215, 315])
 ```python
 import numpy as np
 
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
-print(np.cumsum(b, axis=1))
-print(np.cumsum(b))
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
+print(np.cumsum(g, axis=1))
+print(np.cumsum(g))
 ```
 
 ```text
-[[ 12  64 106 112]
- [ 29  47  94 149]
- [ 61 154 237 246]
- [ 38 101 145 230]
- [  8  95 126 198]
- [ 40 111 113 120]]
-[  12   64  106  112  141  159  206  261  322  415  498  507  545  608
-  652  737  745  832  863  935  975 1046 1048 1055]
+[[ 27  91 132 140]
+ [ 90 125 197 216]
+ [ 53 139 151 198]
+ [ 31  91 186 208]
+ [ 78  82 151 189]
+ [ 14  71 154 180]]
+[  27   91  132  140  230  265  337  356  409  495  507  554  585  645
+  740  762  840  844  913  951  965 1022 1105 1131]
 ```
 
-**`np.cumprod`** is the same idea with multiplication: each element becomes the product of everything up to it.
+**`np.cumprod`** is the same idea with multiplication: each element becomes the product of everything up to it. Compounding growth is the classic use. Four yearly growth factors of 1.10, 1.05, 0.98, and 1.20 multiply into the value of one unit invested at the start, after each year.
 
 ```python
 import numpy as np
 
-np.cumprod(np.array([1, 2, 3, 4, 5]))
+factors = np.array([1.10, 1.05, 0.98, 1.20])
+np.cumprod(factors)
 ```
 
 ```text
-array([  1,   2,   6,  24, 120])
+array([1.1    , 1.155  , 1.1319 , 1.35828])
 ```
 
-Running products grow fast, and an integer array has a fixed size. On the 15-value array `a`, the product passes the limit of a 64-bit integer by the 13th element, wraps around, and turns negative. The output below is from a platform with 64-bit default integers; the browser runtime uses 32-bit integers and overflows sooner.
+Running products grow fast, and an integer array has a fixed size. Multiplying the whole numbers from 10 to 30 passes the limit of a 64-bit integer at the element for 25, wraps around, and soon turns negative. The example pins `dtype=np.int64` so the result is the same on every platform; the browser runtime defaults to 32-bit integers and would overflow sooner.
 
 ```python
-# cortex:norun
-np.cumprod(a)
+import numpy as np
+
+np.cumprod(np.arange(10, 31, dtype=np.int64))
 ```
 
 ```text
-array([                  11,                  583,                16324,
-                     816200,             31015600,           1147577200,
-               107872256800,        9924247625600,       49621238128000,
-           1488637143840000,   101227325781120000,   911045932030080000,
-       -2725393596491966464, -5450787192983932928, -3786066610405281792])
+array([                  10,                  110,                 1320,
+                      17160,               240240,              3603600,
+                   57657600,            980179200,          17643225600,
+               335221286400,        6704425728000,      140792940288000,
+           3097444686336000,    71241227785728000,  1709789466857472000,
+        5851248524017696768,  4558509034783703040, -6047464576806879232,
+       -3308311487206653952, -3707312760445206528,  -538918371098886144])
 ```
 
 > [!warning]
-> NumPy integer overflow is silent: no error, only wrong numbers. Convert to floats with `a.astype(float)` before a long running product, or work in logarithms.
+> NumPy integer overflow is silent: no error, only wrong numbers. Convert to floats with `arr.astype(float)` before a long running product, or work in logarithms.
 
 ---
 
@@ -339,52 +343,52 @@ where $n$ is the number of values below $x$ and $N$ is the total number of value
 - The **50th percentile** is the **median**, the middle value.
 - The **100th percentile** is the maximum, since nothing lies above it.
 
-**`np.percentile(a, q)`** goes the other way: given a percentage `q`, it returns the value at that percentile.
+**`np.percentile(v, q)`** goes the other way: given a percentage `q`, it returns the value at that percentile.
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(np.percentile(a, 0))
-print(np.percentile(a, 50))
-print(np.median(a))
-print(np.percentile(a, 100))
-print(np.percentile(a, [25, 75]))
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+print(np.percentile(v, 0))
+print(np.percentile(v, 50))
+print(np.median(v))
+print(np.percentile(v, 100))
+print(np.percentile(v, [25, 75]))
 ```
 
 ```text
-2.0
-37.0
-37.0
-94.0
-[16.  60.5]
+9.0
+50.0
+50.0
+96.0
+[27.5 70. ]
 ```
 
-The 25th percentile, 16.0, is not in the data. When the requested position falls between two sorted values (here 11 and 21), NumPy interpolates linearly between them. The 25th and 75th percentiles are the first and third **quartiles**; their gap is the **interquartile range**, the core of the five-number summary and the box plot you meet in statistics. Percentiles also set the bounds for clipping outliers, covered under clipping values below.
+The 25th percentile, 27.5, is not in the data. When the requested position falls between two sorted values (here 24 and 31), NumPy interpolates linearly between them. The 25th and 75th percentiles are the first and third **quartiles**; their gap is the **interquartile range**, the core of the five-number summary and the box plot you meet in statistics. Percentiles also set the bounds for clipping outliers, covered under clipping values below.
 
 ---
 
 ## Histograms
 
-A **histogram** is a frequency count over ranges. You split the number line into **bins**, such as 0 to 10, 10 to 20, and so on, then count how many values fall into each bin. Drawn as bars, the counts show the shape of the distribution.
+A **histogram** is a frequency count over ranges. You split the number line into **bins**, such as 0 to 25, 25 to 50, and so on, then count how many values fall into each bin. Drawn as bars, the counts show the shape of the distribution.
 
 **`np.histogram`** does the counting, not the drawing. Pass the bin edges with `bins`, and it returns two arrays: the count in each bin and the edges themselves.
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-counts, edges = np.histogram(a, bins=[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100])
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+counts, edges = np.histogram(v, bins=[0, 25, 50, 75, 100])
 print(counts)
 print(edges)
 ```
 
 ```text
-[3 1 2 3 0 2 1 1 0 2]
-[  0  10  20  30  40  50  60  70  80  90 100]
+[4 3 5 3]
+[  0  25  50  75 100]
 ```
 
-Read it pairwise: three values (2, 5, and 9) lie in the 0 to 10 bin, one (11) in 10 to 20, and so on. Each bin includes its left edge and excludes its right edge, except the last bin, which includes both. Wider bins give a coarser picture: `bins=[0, 50, 100]` returns counts `[9, 6]`. Hand `counts` and `edges` to a plotting library to draw the bars.
+Read it pairwise: four values (9, 13, 17, and 24) lie in the 0 to 25 bin, three (31, 39, and 45) in 25 to 50, and so on. Each bin includes its left edge and excludes its right edge, except the last bin, which includes both, so the 50 lands in the 50 to 75 bin. Wider bins give a coarser picture: `bins=[0, 50, 100]` returns counts `[7, 8]`. Hand `counts` and `edges` to a plotting library to draw the bars.
 
 ---
 
@@ -403,17 +407,32 @@ The **correlation coefficient** measures how strongly two quantities move togeth
 ```python
 import numpy as np
 
-salary = np.array([20000, 40000, 25000, 35000, 60000])
-experience = np.array([1, 3, 2, 4, 2])
-np.corrcoef(salary, experience)
+hours = np.array([2, 4, 5, 7, 9])
+marks = np.array([52, 60, 68, 79, 91])
+np.corrcoef(hours, marks)
 ```
 
 ```text
-array([[1.        , 0.25344572],
-       [0.25344572, 1.        ]])
+array([[1.        , 0.99667797],
+       [0.99667797, 1.        ]])
 ```
 
-Here salary and experience have a weak positive correlation of about 0.25: more experience tends to come with a somewhat higher salary. Pass three quantities and you get a 3 by 3 matrix, one row and column per quantity.
+Here study hours and exam marks have a very strong positive correlation of about 0.997: more hours go with higher marks almost in lockstep. Pass three quantities and you get a 3 by 3 matrix, one row and column per quantity. Adding the number of classes each student missed shows a strong negative link.
+
+```python
+import numpy as np
+
+hours = np.array([2, 4, 5, 7, 9])
+marks = np.array([52, 60, 68, 79, 91])
+missed = np.array([6, 4, 5, 1, 0])
+np.corrcoef([hours, marks, missed])
+```
+
+```text
+array([[ 1.        ,  0.99667797, -0.94372423],
+       [ 0.99667797,  1.        , -0.93380688],
+       [-0.94372423, -0.93380688,  1.        ]])
+```
 
 ---
 
@@ -426,65 +445,65 @@ These functions bring the set operations from [[Tuples, Sets & Dicts]] to arrays
 ```python
 import numpy as np
 
-e = np.array([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6])
-np.unique(e)
+tags = np.array([4, 4, 9, 2, 2, 2, 7, 9, 4])
+np.unique(tags)
 ```
 
 ```text
-array([1, 2, 3, 4, 5, 6])
+array([2, 4, 7, 9])
 ```
 
-**`np.isin`** checks many values at once. `np.isin(a, items)` returns a boolean mask that is `True` wherever an element of `a` appears in `items`. Use the mask to pull out the matches.
+**`np.isin`** checks many values at once. `np.isin(v, items)` returns a boolean mask that is `True` wherever an element of `v` appears in `items`. Use the mask to pull out the matches.
 
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-items = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
-a[np.isin(a, items)]
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+items = [13, 24, 50, 64, 99]
+v[np.isin(v, items)]
 ```
 
 ```text
-array([50, 30])
+array([64, 24, 13, 50])
 ```
 
 The remaining functions combine two arrays.
 
-| Function | Returns | For `m = [1, 2, 3, 4, 5]`, `n = [3, 4, 5, 6, 7]` |
+| Function | Returns | For `s1 = [1, 3, 5, 7, 9]`, `s2 = [5, 7, 9, 11, 13]` |
 | :--- | :--- | :--- |
-| `np.union1d(m, n)` | Values in either array | `[1, 2, 3, 4, 5, 6, 7]` |
-| `np.intersect1d(m, n)` | Values in both arrays | `[3, 4, 5]` |
-| `np.setdiff1d(n, m)` | Values in the first array but not the second | `[6, 7]` |
-| `np.setxor1d(m, n)` | Values in exactly one array, never in both | `[1, 2, 6, 7]` |
+| `np.union1d(s1, s2)` | Values in either array | `[1, 3, 5, 7, 9, 11, 13]` |
+| `np.intersect1d(s1, s2)` | Values in both arrays | `[5, 7, 9]` |
+| `np.setdiff1d(s2, s1)` | Values in the first array but not the second | `[11, 13]` |
+| `np.setxor1d(s1, s2)` | Values in exactly one array, never in both | `[1, 3, 11, 13]` |
 
 ```python
 import numpy as np
 
-m = np.array([1, 2, 3, 4, 5])
-n = np.array([3, 4, 5, 6, 7])
-print(np.union1d(m, n))
-print(np.intersect1d(m, n))
-print(np.setdiff1d(n, m))
-print(np.setdiff1d(m, n))
-print(np.setxor1d(m, n))
+s1 = np.array([1, 3, 5, 7, 9])
+s2 = np.array([5, 7, 9, 11, 13])
+print(np.union1d(s1, s2))
+print(np.intersect1d(s1, s2))
+print(np.setdiff1d(s2, s1))
+print(np.setdiff1d(s1, s2))
+print(np.setxor1d(s1, s2))
 ```
 
 ```text
-[1 2 3 4 5 6 7]
-[3 4 5]
-[6 7]
-[1 2]
-[1 2 6 7]
+[ 1  3  5  7  9 11 13]
+[5 7 9]
+[11 13]
+[1 3]
+[ 1  3 11 13]
 ```
 
-Order matters for `np.setdiff1d`: swapping the arguments swaps the answer. The difference between a union and an XOR is the common values: the union keeps `3, 4, 5` once, while the XOR drops them.
+Order matters for `np.setdiff1d`: swapping the arguments swaps the answer. The difference between a union and an XOR is the common values: the union keeps `5, 7, 9` once, while the XOR drops them.
 
 **`np.in1d`** is the older membership test, the array version of Python's `in` operator. It works like `np.isin` on 1D input and returns a mask. It is deprecated since NumPy 2.0 and raises a `DeprecationWarning`, so write `np.isin` in new code.
 
 ```python
 # cortex:norun
-m[np.in1d(m, 1)]   # array([1])
-np.in1d(m, 10)     # array([False, False, False, False, False])
+s1[np.in1d(s1, 7)]   # array([7])
+np.in1d(s1, 4)       # array([False, False, False, False, False])
 ```
 
 ---
@@ -496,44 +515,44 @@ np.in1d(m, 10)     # array([False, False, False, False, False])
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-np.flip(a)
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+np.flip(v)
 ```
 
 ```text
-array([21,  2, 78,  9, 68, 30,  5, 92, 94, 37, 38, 50, 28, 53, 11])
+array([39, 88, 50, 13, 67, 24, 96, 58, 31, 73,  9, 45, 82, 17, 64])
 ```
 
 On a 2D array the axis decides which way it flips.
 
-| Call | Effect on `b` |
+| Call | Effect on `g` |
 | :--- | :--- |
-| `np.flip(b)` | Reverses every axis: the rows and the columns, so the last element moves to the front. |
-| `np.flip(b, axis=0)` | Reverses the row order: the bottom row comes to the top. |
-| `np.flip(b, axis=1)` | Reverses each row: the last column comes first. |
+| `np.flip(g)` | Reverses every axis: the rows and the columns, so the last element moves to the front. |
+| `np.flip(g, axis=0)` | Reverses the row order: the bottom row comes to the top. |
+| `np.flip(g, axis=1)` | Reverses each row: the last column comes first. |
 
 ```python
 import numpy as np
 
-b = np.array([[12, 52, 42,  6],
-              [29, 18, 47, 55],
-              [61, 93, 83,  9],
-              [38, 63, 44, 85],
-              [ 8, 87, 31, 72],
-              [40, 71,  2,  7]])
-np.flip(b, axis=1)
+g = np.array([[27, 64, 41,  8],
+              [90, 35, 72, 19],
+              [53, 86, 12, 47],
+              [31, 60, 95, 22],
+              [78,  4, 69, 38],
+              [14, 57, 83, 26]])
+np.flip(g, axis=0)
 ```
 
 ```text
-array([[ 6, 42, 52, 12],
-       [55, 47, 18, 29],
-       [ 9, 83, 93, 61],
-       [85, 44, 63, 38],
-       [72, 31, 87,  8],
-       [ 7,  2, 71, 40]])
+array([[14, 57, 83, 26],
+       [78,  4, 69, 38],
+       [31, 60, 95, 22],
+       [53, 86, 12, 47],
+       [90, 35, 72, 19],
+       [27, 64, 41,  8]])
 ```
 
-Change `axis=1` to `axis=0` to see the row of 40 move to the top, or drop `axis` to flip both ways at once.
+Change `axis=0` to `axis=1` to reverse each row instead, or drop `axis` to flip both ways at once.
 
 ---
 
@@ -544,13 +563,13 @@ Change `axis=1` to `axis=0` to see the row of 40 move to the top, or drop `axis`
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-np.put(a, [0, 1], [110, 530])   # no output: a is changed in place
-print(a)
+w = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+np.put(w, [1, 4, 6], [-5, -6, -7])   # no output: w is changed in place
+print(w)
 ```
 
 ```text
-[110 530  28  50  38  37  94  92   5  30  68   9  78   2  21]
+[64 -5 82 45 -6 73 -7 58 96 24 67 13 50 88 39]
 ```
 
 The positions need not be next to each other; any list of indices works.
@@ -560,17 +579,17 @@ The positions need not be next to each other; any list of indices works.
 ```python
 import numpy as np
 
-a = np.array([110, 530, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(np.delete(a, [0, 2, 4]))
-print(a)  # unchanged
+w = np.array([64, -5, 82, 45, -6, 73, -7, 58, 96, 24, 67, 13, 50, 88, 39])
+print(np.delete(w, [1, 3, 5]))
+print(w)  # unchanged
 ```
 
 ```text
-[530  50  37  94  92   5  30  68   9  78   2  21]
-[110 530  28  50  38  37  94  92   5  30  68   9  78   2  21]
+[64 82 -6 -7 58 96 24 67 13 50 88 39]
+[64 -5 82 45 -6 73 -7 58 96 24 67 13 50 88 39]
 ```
 
-Indices 0, 2, and 4 held 110, 28, and 38, so those three are gone. To delete by condition rather than by position, use a boolean mask or `np.where`.
+Indices 1, 3, and 5 held -5, 45, and 73, so those three are gone. To delete by condition rather than by position, use a boolean mask or `np.where`.
 
 ---
 
@@ -581,15 +600,15 @@ Indices 0, 2, and 4 held 110, 28, and 38, so those three are gone. To delete by 
 ```python
 import numpy as np
 
-a = np.array([110, 530, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-np.clip(a, a_min=25, a_max=75)
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+np.clip(v, a_min=30, a_max=70)
 ```
 
 ```text
-array([75, 75, 28, 50, 38, 37, 75, 75, 25, 30, 68, 25, 75, 25, 25])
+array([64, 30, 70, 45, 30, 70, 31, 58, 70, 30, 67, 30, 50, 70, 39])
 ```
 
-Both 110 and 530 drop to 75, and 5, 9, 2, and 21 rise to 25. Clipping tames outliers without deleting rows: compute bounds with `np.percentile` (for example the 1st and 99th) and clip to them. Deep learning uses the same idea to keep values, such as gradients, from growing too large.
+The values 82, 73, 96, and 88 drop to 70, and 17, 9, 24, and 13 rise to 30. Clipping tames outliers without deleting rows: compute bounds with `np.percentile` (for example the 1st and 99th) and clip to them. Deep learning uses the same idea to keep values, such as gradients, from growing too large.
 
 ---
 
@@ -614,10 +633,10 @@ These utilities come up less often, but each replaces several lines of manual co
 ```python
 import numpy as np
 
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(a.shape)
-print(np.expand_dims(a, axis=0).shape)
-print(np.expand_dims(a, axis=1).shape)
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+print(v.shape)
+print(np.expand_dims(v, axis=0).shape)
+print(np.expand_dims(v, axis=1).shape)
 ```
 
 ```text
@@ -626,17 +645,17 @@ print(np.expand_dims(a, axis=1).shape)
 (15, 1)
 ```
 
-The practical reason is batching. Most machine-learning models expect a **batch** of samples, a 2D array with one row per sample, even when you predict for one. A single student described by IQ and marks is shape `(2,)`; `np.expand_dims` turns it into a batch of one, shape `(1, 2)`. Image models do the same, adding a leading batch axis to a single image.
+The practical reason is batching. Most machine-learning models expect a **batch** of samples, a 2D array with one row per sample, even when you predict for one. A single house described by its floor area and bedroom count is shape `(2,)`; `np.expand_dims` turns it into a batch of one, shape `(1, 2)`. Image models do the same, adding a leading batch axis to a single image.
 
 ```python
 import numpy as np
 
-student = np.array([110, 8.5])   # IQ and marks for one student
-np.expand_dims(student, axis=0)
+house = np.array([1200, 3])   # floor area in square feet and bedrooms
+np.expand_dims(house, axis=0)
 ```
 
 ```text
-array([[110. ,   8.5]])
+array([[1200,    3]])
 ```
 
 ### Swapping axes
@@ -646,16 +665,16 @@ array([[110. ,   8.5]])
 ```python
 import numpy as np
 
-s = np.arange(6).reshape(2, 3)
+s = np.arange(10, 16).reshape(2, 3)
 print(np.swapaxes(s, 0, 1))
-print(np.swapaxes(np.zeros((2, 3, 4)), 0, 2).shape)
+print(np.swapaxes(np.zeros((5, 2, 3)), 0, 2).shape)
 ```
 
 ```text
-[[0 3]
- [1 4]
- [2 5]]
-(4, 3, 2)
+[[10 13]
+ [11 14]
+ [12 15]]
+(3, 2, 5)
 ```
 
 ### Uniform random numbers
@@ -665,12 +684,12 @@ print(np.swapaxes(np.zeros((2, 3, 4)), 0, 2).shape)
 ```python
 import numpy as np
 
-np.random.seed(0)
-np.random.uniform(1, 10, 5)
+np.random.seed(11)
+np.random.uniform(20, 30, 4)
 ```
 
 ```text
-array([5.93932154, 7.4367043 , 6.42487038, 5.90394865, 4.81289319])
+array([21.80269689, 20.19475241, 24.63218526, 27.24933929])
 ```
 
 ### Counting non-zero values
@@ -680,15 +699,15 @@ array([5.93932154, 7.4367043 , 6.42487038, 5.90394865, 4.81289319])
 ```python
 import numpy as np
 
-z = np.array([0, 3, 0, 5, 7, 0])
-print(np.count_nonzero(z))
-a = np.array([11, 53, 28, 50, 38, 37, 94, 92, 5, 30, 68, 9, 78, 2, 21])
-print(np.count_nonzero(a > 50))
+flags = np.array([1, 0, 0, 4, 0, 2, 9])
+print(np.count_nonzero(flags))
+v = np.array([64, 17, 82, 45, 9, 73, 31, 58, 96, 24, 67, 13, 50, 88, 39])
+print(np.count_nonzero(v > 60))
 ```
 
 ```text
-3
-5
+4
+6
 ```
 
 It also takes `axis`: `np.count_nonzero(m, axis=0)` returns one count per column of `m`.
@@ -703,19 +722,19 @@ It also takes `axis`: `np.count_nonzero(m, axis=0)` returns one count per column
 ```python
 import numpy as np
 
-x = np.array([1, 2, 3])
+x = np.array([7, 8])
 print(np.tile(x, 3))
 print(np.repeat(x, 3))
-print(np.repeat(x, [1, 2, 3]))
+print(np.repeat(x, [3, 1]))
 print(np.tile(x, (2, 2)))
 ```
 
 ```text
-[1 2 3 1 2 3 1 2 3]
-[1 1 1 2 2 2 3 3 3]
-[1 2 2 3 3 3]
-[[1 2 3 1 2 3]
- [1 2 3 1 2 3]]
+[7 8 7 8 7 8]
+[7 7 7 8 8 8]
+[7 7 7 8]
+[[7 8 7 8]
+ [7 8 7 8]]
 ```
 
 ### Comparing arrays
@@ -728,17 +747,17 @@ print(np.tile(x, (2, 2)))
 | `np.array_equal(x, y)` | A single `True` only if both arrays have the same shape and every element is exactly equal. |
 | `np.allclose(x, y)` | A single `True` only if every pair of elements is equal within a small tolerance. |
 
-Floating-point arithmetic is not exact: `0.1 + 0.2` is stored as `0.30000000000000004`. An exact comparison then fails where `np.allclose` succeeds, which is why you compare computed floats with `np.allclose`.
+Floating-point arithmetic is not exact: `0.1 * 3` is stored as `0.30000000000000004`. An exact comparison then fails where `np.allclose` succeeds, which is why you compare computed floats with `np.allclose`.
 
 ```python
 import numpy as np
 
-x = np.array([0.1 + 0.2, 1.0])
-y = np.array([0.3, 1.0])
+x = np.array([0.1 * 3, 4.0])
+y = np.array([0.3, 4.0])
 print(np.equal(x, y))
 print(np.array_equal(x, y))
 print(np.allclose(x, y))
-print(np.array_equal(np.array([1, 2, 3]), np.array([1, 2, 3])))
+print(np.array_equal(np.array([5, 6]), np.array([5, 6])))
 ```
 
 ```text

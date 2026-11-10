@@ -50,12 +50,12 @@
       "type": "mcq",
       "concept": "np-where",
       "difficulty": "easy",
-      "question": "For `a = np.array([11, 53, 28, 94])`, what does `np.where(a > 50)` return?",
+      "question": "For `v = np.array([64, 17, 82, 45])`, what does `np.where(v < 50)` return?",
       "options": [
-        "The values greater than 50, `array([53, 94])`, the same result as the boolean mask `a[a > 50]`.",
+        "The values below 50, `array([17, 45])`, the same result as the boolean mask `v[v < 50]`.",
         "A boolean array, `array([False, True, False, True])`, marking which positions satisfy the condition.",
-        "The positions of the values greater than 50, as a tuple holding one index array: `(array([1, 3]),)`.",
-        "The count of values greater than 50, which is 2, the same result as calling `np.count_nonzero(a > 50)`."
+        "The positions of the values below 50, as a tuple holding one index array: `(array([1, 3]),)`.",
+        "The count of values below 50, which is 2, the same result as calling `np.count_nonzero(v < 50)`."
       ],
       "answer": 2,
       "explanation": "With only a condition, `np.where` returns the index positions where it is `True`, wrapped in a tuple with one array per axis. The values come from a boolean mask, the boolean array is the condition itself, and the count comes from `np.count_nonzero`.",
@@ -82,7 +82,7 @@
       "concept": "argmax-argmin",
       "difficulty": "easy",
       "question": "What does `np.argmax(a)` return, and how do you get the largest value from it?",
-      "answer": "It returns the index of the largest element, not the element itself. For `a = [11, 53, 28, 50, 38, 37, 94, ...]` it returns 6. To get the value, index the array with it: `a[np.argmax(a)]` gives 94. `np.argmin` does the same for the smallest element."
+      "answer": "It returns the index of the largest element, not the element itself. For `v = [64, 17, 82, 45, 9, 73, 31, 58, 96, ...]` it returns 8. To get the value, index the array with it: `v[np.argmax(v)]` gives 96. `np.argmin` does the same for the smallest element."
     },
     {
       "type": "mcq",
@@ -103,22 +103,22 @@
       "type": "mcq",
       "concept": "cumsum-cumprod",
       "difficulty": "easy",
-      "question": "A batsman scores 25, 18, and 59 runs in three matches. What does `np.cumsum(np.array([25, 18, 59]))` return?",
+      "question": "You put 120, 80, and 45 into a savings jar in three successive weeks. What does `np.cumsum(np.array([120, 80, 45]))` return?",
       "options": [
-        "`array([25, 43, 102])`, the career total after each match, each element adding all scores up to it.",
-        "`102`, the single grand total of every score, the same result as `np.sum` of the three scores.",
-        "`array([25, 450, 26550])`, the running product of the scores after each match in the sequence.",
-        "`array([25, 18, 59])`, the original scores, because a cumulative sum needs an `axis` on a 1D array."
+        "`array([120, 200, 245])`, the balance after each week, each element adding all deposits up to it.",
+        "`245`, the single grand total of every deposit, the same result as `np.sum` of the three deposits.",
+        "`array([120, 9600, 432000])`, the running product of the deposits after each week in the sequence.",
+        "`array([120, 80, 45])`, the original deposits, because a cumulative sum needs an `axis` on a 1D array."
       ],
       "answer": 0,
-      "explanation": "A cumulative sum keeps one element per input, each the running total up to that position: 25, then 25 plus 18, then all three. `np.sum` collapses to one number, the running product is `np.cumprod`, and a 1D array needs no `axis`.",
+      "explanation": "A cumulative sum keeps one element per input, each the running total up to that position: 120, then 120 plus 80, then all three. `np.sum` collapses to one number, the running product is `np.cumprod`, and a 1D array needs no `axis`.",
       "misconception": "A cumulative function keeps the array's length; a plain reduction collapses it."
     },
     {
       "type": "scenario",
       "concept": "cumsum-cumprod",
       "difficulty": "hard",
-      "scenario": "You compute `np.cumprod` on an integer array of 15 values between 2 and 94. The later entries come out negative even though every input is positive, and no error appears.",
+      "scenario": "You compute `np.cumprod` on an `int64` array holding the whole numbers from 10 to 30. The later entries come out negative even though every input is positive, and no error appears.",
       "question": "What happened, and what is a fix?",
       "options": [
         "`np.cumprod` subtracts every other element by design, so negative values are expected; use `np.cumsum` instead.",
@@ -142,7 +142,7 @@
         "`np.percentile(a, 50)` equals `np.median(a)`, and `np.percentile(a, 0)` returns the minimum value of `a`."
       ],
       "answer": 3,
-      "explanation": "The 50th percentile is the median and the 0th is the minimum; the 100th is the maximum of the data, not the number 100. The median differs from the mean in general. When the position falls between two sorted values, NumPy interpolates, which is why the 25th percentile of the example array is 16.0, a value not in the data.",
+      "explanation": "The 50th percentile is the median and the 0th is the minimum; the 100th is the maximum of the data, not the number 100. The median differs from the mean in general. When the position falls between two sorted values, NumPy interpolates, which is why the 25th percentile of the example array is 27.5, a value not in the data.",
       "misconception": "The 50th percentile is the median, not the mean."
     },
     {
@@ -164,15 +164,15 @@
       "type": "mcq",
       "concept": "set-functions",
       "difficulty": "medium",
-      "question": "For `m = np.array([1, 2, 3, 4, 5])` and `n = np.array([3, 4, 5, 6, 7])`, what does `np.setxor1d(m, n)` return?",
+      "question": "For `s1 = np.array([1, 3, 5, 7, 9])` and `s2 = np.array([5, 7, 9, 11, 13])`, what does `np.setxor1d(s1, s2)` return?",
       "options": [
-        "`array([1, 2, 6, 7])`, the values that appear in exactly one of the two arrays and never in both.",
-        "`array([1, 2, 3, 4, 5, 6, 7])`, every value in either array, with the shared values kept only once.",
-        "`array([3, 4, 5])`, the values that appear in both arrays, which is what an exclusive or keeps.",
-        "`array([6, 7])`, the values in `n` that are missing from `m`, which is the set difference of the pair."
+        "`array([1, 3, 11, 13])`, the values that appear in exactly one of the two arrays and never in both.",
+        "`array([1, 3, 5, 7, 9, 11, 13])`, every value in either array, with the shared values kept only once.",
+        "`array([5, 7, 9])`, the values that appear in both arrays, which is what an exclusive or keeps.",
+        "`array([11, 13])`, the values in `s2` that are missing from `s1`, which is the set difference of the pair."
       ],
       "answer": 0,
-      "explanation": "An exclusive or keeps values in one array but not both, so it drops the shared 3, 4, and 5. The full list is `np.union1d`, the shared values are `np.intersect1d`, and `[6, 7]` is `np.setdiff1d(n, m)`.",
+      "explanation": "An exclusive or keeps values in one array but not both, so it drops the shared 5, 7, and 9. The full list is `np.union1d`, the shared values are `np.intersect1d`, and `[11, 13]` is `np.setdiff1d(s2, s1)`.",
       "misconception": "A union keeps the common values once; an XOR drops them."
     },
     {
@@ -210,12 +210,12 @@
       "type": "mcq",
       "concept": "put-delete",
       "difficulty": "hard",
-      "question": "You run `np.put(a, [0, 1], [110, 530])` and then `np.delete(a, [0, 2])` without assigning either result. What is the state of `a` afterwards?",
+      "question": "You run `np.put(w, [1, 4], [-5, -6])` and then `np.delete(w, [0, 2])` without assigning either result. What is the state of `w` afterwards?",
       "options": [
         "Unchanged from the start, because both functions return new arrays and the results were never assigned.",
-        "Its first two elements are 110 and 530, and it still has every element, because only `np.put` edits in place.",
-        "It is two elements shorter with 110 and 530 at the front, because both functions change the array in place.",
-        "It is two elements shorter with its original first values, because `np.delete` undoes the earlier `np.put` call."
+        "Its elements at positions 1 and 4 are -5 and -6, and it still has every element, because only `np.put` edits in place.",
+        "It is two elements shorter with -5 and -6 inside it, because both functions change the array in place.",
+        "It is two elements shorter with its original values, because `np.delete` undoes the earlier `np.put` call."
       ],
       "answer": 1,
       "explanation": "`np.put` edits the original array in place and returns `None`, so the new values stick. `np.delete` returns a new array and leaves `a` untouched, so without assignment nothing is removed. Neither function undoes the other.",
@@ -242,7 +242,7 @@
       "concept": "other-functions",
       "difficulty": "hard",
       "question": "Why do you often need `np.expand_dims` before passing a single sample to a machine-learning model, and how does `np.tile` differ from `np.repeat`?",
-      "answer": "Most models expect a batch: a 2D array with one row per sample. A single sample of shape (2,) must become shape (1, 2), which `np.expand_dims(x, axis=0)` does by inserting a size-1 axis. `np.tile` repeats the whole array as a block (`[1, 2, 3, 1, 2, 3]`), while `np.repeat` repeats each element in turn (`[1, 1, 2, 2, 3, 3]`)."
+      "answer": "Most models expect a batch: a 2D array with one row per sample. A single sample of shape (2,) must become shape (1, 2), which `np.expand_dims(x, axis=0)` does by inserting a size-1 axis. `np.tile` repeats the whole array as a block (`[7, 8, 7, 8]`), while `np.repeat` repeats each element in turn (`[7, 7, 8, 8]`)."
     }
   ]
 }

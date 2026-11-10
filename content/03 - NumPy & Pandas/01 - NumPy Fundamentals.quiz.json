@@ -57,15 +57,15 @@
       "type": "mcq",
       "concept": "shape-ndim",
       "difficulty": "easy",
-      "question": "For `a = np.arange(8).reshape(2, 2, 2)`, what are `a.ndim`, `a.shape`, and `a.size`?",
+      "question": "For `cube = np.arange(24).reshape(2, 3, 4)`, what are `cube.ndim`, `cube.shape`, and `cube.size`?",
       "options": [
-        "`ndim` is 3, `shape` is `(2, 2, 2)`, and `size` is 8.",
-        "`ndim` is 8, `shape` is `(2, 2, 2)`, and `size` is 3.",
-        "`ndim` is `(2, 2, 2)`, `shape` is 3, and `size` is 8.",
-        "`ndim` is 2, `shape` is `(2, 2, 2)`, and `size` is 6."
+        "`ndim` is 3, `shape` is `(2, 3, 4)`, and `size` is 24.",
+        "`ndim` is 24, `shape` is `(2, 3, 4)`, and `size` is 3.",
+        "`ndim` is `(2, 3, 4)`, `shape` is 3, and `size` is 24.",
+        "`ndim` is 2, `shape` is `(2, 3, 4)`, and `size` is 9."
       ],
       "answer": 0,
-      "explanation": "`ndim` counts the axes, which is 3 here. `shape` gives the length of each axis as a tuple, `(2, 2, 2)`. `size` is the total number of elements, the product of the shape, which is 8.",
+      "explanation": "`ndim` counts the axes, which is 3 here. `shape` gives the length of each axis as a tuple, `(2, 3, 4)`. `size` is the total number of elements, the product of the shape, which is 24.",
       "misconception": "`ndim` is a single integer count of axes, `shape` is the tuple of axis lengths, and `size` is their product."
     },
     {
@@ -88,12 +88,12 @@
       "type": "mcq",
       "concept": "scalar-vs-vector-ops",
       "difficulty": "easy",
-      "question": "What does the expression `a == 15` return when `a` is a NumPy array?",
+      "question": "What does the expression `readings > 15` return when `readings` is a NumPy array?",
       "options": [
-        "A single `True` or `False` saying whether the array contains the value 15 anywhere.",
-        "A boolean array the same shape as `a`, with `True` where an element equals 15 and `False` elsewhere.",
+        "A single `True` or `False` saying whether the array contains a value above 15 anywhere.",
+        "A boolean array the same shape as `readings`, with `True` where an element exceeds 15 and `False` elsewhere.",
         "An error, because an array cannot be compared against a plain number without a loop.",
-        "A new array containing only the elements of `a` that are equal to 15."
+        "A new array containing only the elements of `readings` that are greater than 15."
       ],
       "answer": 1,
       "explanation": "A relational operator applied to an array and a scalar compares every element against that scalar and returns a boolean array of the same shape. That boolean array is the raw material for boolean indexing covered in Advanced NumPy; it is not a single truth value and does not itself filter the array.",
@@ -103,7 +103,7 @@
       "type": "scenario",
       "concept": "scalar-vs-vector-ops",
       "difficulty": "medium",
-      "scenario": "You write `a1 ** a2` on two integer arrays and some results come back negative even though both inputs are positive.",
+      "scenario": "You write `base ** power` on two integer arrays and some results come back negative even though both inputs are positive.",
       "question": "What has happened?",
       "options": [
         "NumPy quietly switched the array over to signed exponents, and that switch flips the sign of every other element in the computed result.",
@@ -112,7 +112,7 @@
         "The `**` operator computes a matrix dot product on arrays, and the dot product of two positive integer matrices can come out negative."
       ],
       "answer": 2,
-      "explanation": "`a1 ** a2` raises each element of `a1` to the matching element of `a2`. Large bases with large exponents exceed the range of a 64-bit integer, and NumPy wraps around rather than promoting to arbitrary precision the way a Python `int` would, so you see negative and wrapped values. Watch the dtype when exponents grow.",
+      "explanation": "`base ** power` raises each element of `base` to the matching element of `power`. Large bases with large exponents exceed the range of a 64-bit integer, and NumPy wraps around rather than promoting to arbitrary precision the way a Python `int` would, so you see negative and wrapped values. Watch the dtype when exponents grow.",
       "misconception": "Fixed-width integer dtypes overflow silently; `**` is still element-wise, not a dot product."
     },
     {
@@ -122,12 +122,12 @@
       "question": "For `np.dot(A, B)` to work, how must the shapes of `A` and `B` relate, and what is the result shape?",
       "options": [
         "`A` and `B` must have identical shapes, and the result has that same shape as both of them.",
-        "The columns of `A` must equal the rows of `B`; a `(3, 4)` times a `(4, 3)` gives a `(3, 3)` result.",
+        "The columns of `A` must equal the rows of `B`; a `(2, 3)` times a `(3, 4)` gives a `(2, 4)` result.",
         "The rows of `A` must equal the columns of `B`, and the result is always a single scalar value.",
         "Either array can be any shape, because `np.dot` broadcasts them the way element-wise operators do."
       ],
       "answer": 1,
-      "explanation": "The dot product is matrix multiplication, so the inner dimensions must match: the number of columns of the left operand must equal the number of rows of the right operand. A `(3, 4)` times a `(4, 3)` produces a `(3, 3)` result. Mismatched inner dimensions raise a `ValueError`.",
+      "explanation": "The dot product is matrix multiplication, so the inner dimensions must match: the number of columns of the left operand must equal the number of rows of the right operand. A `(2, 3)` times a `(3, 4)` produces a `(2, 4)` result. Mismatched inner dimensions raise a `ValueError`.",
       "misconception": "The dot product needs conformable inner dimensions, not identical shapes, and it does not broadcast like `+` or `*`."
     },
     {
@@ -150,15 +150,15 @@
       "type": "mcq",
       "concept": "slicing-2d",
       "difficulty": "hard",
-      "question": "For `a2 = np.arange(12).reshape(3, 4)`, what does `a2[:, 2]` return?",
+      "question": "For `t = np.arange(20).reshape(4, 5)`, what does `t[:, 1]` return?",
       "options": [
-        "The third row of the array, since the single index after the comma selects a row.",
-        "The element at position 2 flattened from the whole array, which is the value 2.",
-        "A 3 by 1 column block preserving two dimensions, because a comma always keeps the rank.",
-        "The third column `array([2, 6, 10])`, because `:` keeps all rows and `2` picks column index 2."
+        "The second row of the array, since the single index after the comma selects a row.",
+        "The element at position 1 flattened from the whole array, which is the value 1.",
+        "A 4 by 1 column block preserving two dimensions, because a comma always keeps the rank.",
+        "The second column `array([1, 6, 11, 16])`, because `:` keeps all rows and `1` picks column index 1."
       ],
       "answer": 3,
-      "explanation": "The first entry before the comma selects rows and the second selects columns. `:` keeps every row, and the integer `2` picks column index 2 from each, giving `array([2, 6, 10])`. Using an integer rather than a slice drops that axis, so the result is 1D, not a 3 by 1 block.",
+      "explanation": "The first entry before the comma selects rows and the second selects columns. `:` keeps every row, and the integer `1` picks column index 1 from each, giving `array([1, 6, 11, 16])`. Using an integer rather than a slice drops that axis, so the result is 1D, not a 4 by 1 block.",
       "misconception": "In 2D indexing the first slot is rows and the second is columns, and an integer index collapses its axis."
     },
     {
