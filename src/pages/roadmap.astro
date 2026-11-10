@@ -236,15 +236,17 @@ const H = cursor - MIN_STEP_GAP + BOTTOM_PAD;
 const trunkTop = stepLayouts[0]?.y ?? TOP;
 const trunkBottom = stepLayouts[stepLayouts.length - 1]?.y ?? TOP;
 
-// A gently CURVY trunk: it passes through SPINE_X at every track (so each cell
-// still sits on the fibre) but bows a little to alternating sides in the gaps
-// between tracks, so the axon meanders like a real nerve instead of a ruler.
 // Signal train timing. TRUNK_DUR is how long ONE spark takes to travel the
 // whole trunk (slow = calm). TRUNK_INTERVAL is how often a new spark is
 // released, so DUR/INTERVAL sparks ride the fibre at once (a periodic stream).
+// The branch sparks reuse TRUNK_INTERVAL as their own pulse period.
 const TRUNK_DUR = 16; // seconds, one spark top -> bottom (slower)
 const TRUNK_INTERVAL = 2; // seconds between spark releases
 const TRUNK_SPARKS = Math.round(TRUNK_DUR / TRUNK_INTERVAL); // sparks visible at once
+
+// A gently CURVY trunk: it passes through SPINE_X at every track (so each cell
+// still sits on the fibre) but bows a little to alternating sides in the gaps
+// between tracks, so the axon meanders like a real nerve instead of a ruler.
 const TRUNK_BOW = 26; // px of horizontal sway at each mid-gap
 const trunkPath = (() => {
   const ys = stepLayouts.map((s) => s.y);
@@ -286,7 +288,8 @@ interface PlacedNode {
   concepts: Concept[];
 }
 interface Connector {
-  /** Stable id so a signal spark can follow this dendrite via <mpath>. */
+  /** Stable id for this dendrite. The branch spark does not reference it: it
+   *  uses this connector's path `d` inline on its animateMotion. */
   id?: string;
   d: string;
   dashed: boolean;
@@ -1084,8 +1087,11 @@ const recallBanks: Record<string, Quiz> = Object.fromEntries([...site.quizzes]);
             )}
             {/* A synaptic spark fires down each LIVE dendrite the moment the
                 trunk pulse reaches its track (begin = beginAt), then travels the
-                branch quickly and rests at the bouton until the next pass. Same
-                6s cycle as the trunk, so it reads as the trunk triggering it.
+                branch quickly and rests at the bouton until the next pass. A
+                trunk spark takes TRUNK_DUR seconds to travel the trunk and one is
+                released every TRUNK_INTERVAL seconds; the branch spark pulses
+                every TRUNK_INTERVAL seconds, offset by beginAt, so it reads as
+                the trunk triggering it.
                 Coming-soon branches (no note yet) carry no signal. */}
             {c.id && c.bouton?.live && (
               <circle
