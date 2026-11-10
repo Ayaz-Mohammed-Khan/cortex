@@ -381,7 +381,7 @@ subs.mode()
 Name: new_subscribers, dtype: int64
 ```
 
-`mode()` returns a Series because several values can tie for most frequent. The `0` on the left is just a position in that result, not a count.
+`mode()` returns a Series because several values can tie for most frequent. The `0` on the left is only a position in that result, not a count.
 
 `count()` differs from `size` when data is missing, because `count()` ignores `NaN` (not a number, pandas' marker for a missing value) and `size` does not. Likewise `product()` of data containing a `0` is `0`.
 

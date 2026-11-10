@@ -625,6 +625,9 @@ Row-wise `apply` is flexible but slower than vectorized column math, so reach fo
 
 ## More useful methods
 
+> [!tip] Placing a column
+> `insert(position, name, values)` adds a column at a chosen position instead of the end; [[Pandas DataFrame]] shows it in use.
+
 ### Filtering with isin
 
 `isin` keeps rows whose value appears in a list. It reads better than a chain of `|` comparisons.

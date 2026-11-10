@@ -649,4 +649,4 @@ The dictionary form changes several columns in one call, mapping each column nam
 ---
 
 > [!info] Continues to
-> Next is [[DataFrame Methods]], the everyday methods for sorting, cleaning, and reshaping what you have just selected.
+> Next is [[DataFrame Methods]], the everyday methods for sorting, cleaning, and reshaping what you have selected.

@@ -172,7 +172,7 @@ Date
 2014-01-06  79.08  January    Monday        1
 ```
 
-To find the same calendar date in every year, build the dates with `pd.DateOffset(years=1)` and keep the ones present in the data. A fixed `Timedelta` cannot do this because years have unequal lengths. Non-trading days simply drop out.
+To find the same calendar date in every year, build the dates with `pd.DateOffset(years=1)` and keep the ones present in the data. A fixed `Timedelta` cannot do this because years have unequal lengths. Non-trading days drop out.
 
 ```python
 import pandas as pd
@@ -572,7 +572,7 @@ from nltk.tokenize import word_tokenize
 word_tokenize("battery lasts for days")
 ```
 
-**Stop words** are very common words (the, is, for) that add little meaning. Removing them means checking each word against a list. A Python `set` makes each check fast, whereas searching a list scans it every time, which is slow when repeated for every word of every review.
+**Stop words** are extremely common words (the, is, for) that add little meaning. Removing them means checking each word against a list. A Python `set` makes each check fast, whereas searching a list scans it every time, which is slow when repeated for every word of every review.
 
 ```python
 import pandas as pd

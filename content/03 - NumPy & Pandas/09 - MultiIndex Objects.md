@@ -32,7 +32,7 @@ Every other example builds a small table inline: a made-up chain of warehouses w
 
 Suppose a warehouse chain tracks units shipped. One key, the quarter, is enough for a single warehouse, so a **Series** (one dimension) works. Adding the warehouse as a second key makes it a table, so a **DataFrame** (two dimensions) fits. A third key, the year, has no home in either.
 
-A first idea is to use tuples as the index labels. That looks hierarchical but is not: pandas treats each tuple as one opaque label, so asking for just the first part finds nothing.
+A first idea is to use tuples as the index labels. That looks hierarchical but is not: pandas treats each tuple as one opaque label, so asking for only the first part finds nothing.
 
 ```python
 # cortex:norun
