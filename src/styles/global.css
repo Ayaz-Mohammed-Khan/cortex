@@ -1138,6 +1138,17 @@ article[data-pagefind-body] > h1 {
   max-width: 100%;
   margin: 0.25rem 0 0.5rem;
 }
+/* Footer under a truncated table ("365 rows x 1 column"), like pandas prints
+   under a cut-down frame. Quiet, so it reads as a caption, not a result. */
+.note-body .rc-output .rc-df-note {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.74rem;
+  color: var(--slate-500);
+}
+[data-theme="dark"] .note-body .rc-output .rc-df-note {
+  color: var(--slate-400);
+}
 .note-body .rc-output .rc-df {
   border-collapse: collapse;
   font-family: var(--font-mono, ui-monospace, monospace);

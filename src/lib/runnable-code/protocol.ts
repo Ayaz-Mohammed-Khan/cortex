@@ -66,6 +66,13 @@ export interface DataFrameTable {
   /** Cell values as strings, row-major; `rows[r][c]` aligns to `index[r]` /
    *  `columns[c]`. */
   rows: string[][];
+  /** The FULL size of the original frame as `[rows, columns]`, before any
+   *  truncation. Optional so older payloads and tests stay valid. */
+  shape?: [number, number];
+  /** True when the worker cut the frame down pandas-style (first and last rows
+   *  with a "..." gap row, and/or a "..." gap column). The "..." cells are then
+   *  part of `rows` / `columns` / `index`. */
+  truncated?: boolean;
 }
 
 /** Island → worker: run this code. `id` correlates the response. */

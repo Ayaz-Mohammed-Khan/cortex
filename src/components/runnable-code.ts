@@ -147,6 +147,18 @@ export function buildTable(table: DataFrameTable, doc: Document = document): HTM
   return el;
 }
 
+/**
+ * The footer line for a truncated DataFrame, mirroring pandas' own
+ * `[365 rows x 1 columns]` repr line, or null when the table is shown whole (or
+ * the worker did not report a size). Pure and DOM-free so it is unit-testable.
+ * Singular/plural is handled so a one-column frame reads "1 column".
+ */
+export function tableFootnote(table: DataFrameTable): string | null {
+  if (!table.truncated || !table.shape) return null;
+  const [rows, cols] = table.shape;
+  return `${rows} ${rows === 1 ? 'row' : 'rows'} x ${cols} ${cols === 1 ? 'column' : 'columns'}`;
+}
+
 // ── Shared worker singleton (module scope; survives page-load swaps) ─────────
 
 let worker: Worker | null = null;
@@ -422,6 +434,15 @@ function renderResult(state: CellState, res: RunResult): void {
     wrap.className = 'rc-df-wrap';
     wrap.appendChild(buildTable(res.table));
     out.appendChild(wrap);
+    // A truncated frame gets pandas' own footer, e.g. "365 rows x 1 column", so
+    // the reader knows the "..." gap hides real data and how much.
+    const note = tableFootnote(res.table);
+    if (note) {
+      const foot = document.createElement('p');
+      foot.className = 'rc-df-note';
+      foot.textContent = note; // text only.
+      out.appendChild(foot);
+    }
     produced = true;
   }
 

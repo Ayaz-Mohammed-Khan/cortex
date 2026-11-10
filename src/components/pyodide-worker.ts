@@ -138,16 +138,59 @@ def _cortex_table(obj):
     if not isinstance(obj, pd.DataFrame):
         return None
     df = obj
-    # Cap the rendered size so a huge frame cannot flood the worker message.
-    max_rows, max_cols = 200, 40
-    if df.shape[0] > max_rows:
-        df = df.head(max_rows)
-    if df.shape[1] > max_cols:
-        df = df.iloc[:, :max_cols]
-    columns = [str(c) for c in df.columns.tolist()]
-    index = [str(i) for i in df.index.tolist()]
-    rows = [[("" if v is None else str(v)) for v in row] for row in df.values.tolist()]
-    return {"columns": columns, "index": index, "rows": rows}
+    total_rows, total_cols = df.shape
+
+    # Truncate the way pandas' own repr does, so a long result is a short
+    # table with a "..." gap instead of hundreds of rows that make the note
+    # tall. The limits come from pandas' display options (so a learner's
+    # pd.set_option calls are honoured): a frame longer than display.max_rows
+    # shows display.min_rows rows (the first half and the last half), and one
+    # wider than display.max_columns shows that many columns split the same way.
+    # 0 or None mean "auto" or "unlimited" in pandas; here they fall back to
+    # fixed safe limits so a huge frame can never flood the worker message.
+    max_rows = pd.get_option("display.max_rows")
+    min_rows = pd.get_option("display.min_rows")
+    max_cols = pd.get_option("display.max_columns")
+    row_limit = 500 if max_rows is None else (max_rows or 60)
+    col_limit = 60 if max_cols is None else (max_cols or 20)
+
+    cut_rows = total_rows > row_limit
+    cut_cols = total_cols > col_limit
+
+    row_pos = list(range(total_rows))
+    head_n = tail_n = 0
+    if cut_rows:
+        n = min(min_rows or row_limit, row_limit)
+        head_n, tail_n = (n + 1) // 2, n // 2
+        row_pos = list(range(head_n)) + list(range(total_rows - tail_n, total_rows))
+
+    col_pos = list(range(total_cols))
+    head_c = 0
+    if cut_cols:
+        head_c = (col_limit + 1) // 2
+        col_pos = list(range(head_c)) + list(range(total_cols - col_limit // 2, total_cols))
+
+    sub = df.iloc[row_pos, col_pos]
+    columns = [str(c) for c in sub.columns.tolist()]
+    index = [str(i) for i in sub.index.tolist()]
+    rows = [[("" if v is None else str(v)) for v in row] for row in sub.values.tolist()]
+
+    # Insert the "..." gap column and gap row at the cut points.
+    if cut_cols:
+        columns.insert(head_c, "...")
+        for row in rows:
+            row.insert(head_c, "...")
+    if cut_rows:
+        index.insert(head_n, "...")
+        rows.insert(head_n, ["..."] * len(columns))
+
+    return {
+        "columns": columns,
+        "index": index,
+        "rows": rows,
+        "shape": [total_rows, total_cols],
+        "truncated": bool(cut_rows or cut_cols),
+    }
 
 def _cortex_run(code):
     """Run user code with captured output; return a JSON string of the result."""
