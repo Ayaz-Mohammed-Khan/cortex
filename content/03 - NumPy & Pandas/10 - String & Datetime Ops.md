@@ -165,6 +165,18 @@ plt.tight_layout()
 plt.show()
 ```
 
+```text
+Income/Expense   Expense   Income
+weekday                          
+Monday           5282.95    966.0
+Tuesday          6744.65  10600.0
+Wednesday        6915.47    825.0
+Thursday         5780.51   3790.0
+Friday           4547.00   2363.0
+Saturday        15521.02  18900.0
+Sunday          14232.40  17310.0
+```
+
 > [!note] Mangled duplicate headers
 > The ledger file has two columns called `Note` and two called `Account`. When pandas reads a CSV with repeated header names it renames the later ones `Note.1` and `Account.1`, so every column name stays unique.
 
