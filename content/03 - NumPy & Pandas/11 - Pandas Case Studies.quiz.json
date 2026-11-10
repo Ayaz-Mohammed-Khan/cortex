@@ -1,0 +1,227 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "timedelta",
+      "difficulty": "easy",
+      "question": "What do you get when you subtract one Timestamp from another?",
+      "options": [
+        "Another Timestamp, which marks the midpoint between the two moments.",
+        "A plain integer count of seconds, with no unit attached to it.",
+        "A Timedelta, a length of time with attributes such as `days`.",
+        "A DatetimeIndex that lists every day between the two dates."
+      ],
+      "answer": 2,
+      "explanation": "The difference of two Timestamps is a Timedelta. On a whole column, `.dt.days` turns the Timedeltas into numbers. It is not a Timestamp, a bare integer, or an index of days.",
+      "misconception": "A difference of dates is a duration, not a date."
+    },
+    {
+      "type": "scenario",
+      "concept": "dateoffset",
+      "difficulty": "hard",
+      "scenario": "You want the rows for the same calendar date, 15 September, in every year of a stock series.",
+      "question": "Why is `pd.DateOffset(years=1)` better than adding `pd.Timedelta(days=365)` repeatedly?",
+      "options": [
+        "A Timedelta cannot be added to a Timestamp, so only an offset works at all for this task.",
+        "DateOffset moves by calendar years, so leap years do not shift the date, whereas 365 fixed days drift by a day.",
+        "DateOffset is simply faster to run, but both give exactly the same calendar dates in every single year.",
+        "A Timedelta always adds 366 days, which overshoots the target date in every ordinary non-leap year."
+      ],
+      "answer": 1,
+      "explanation": "An offset follows the calendar, so one year after 15 September is 15 September again. A fixed 365-day Timedelta drifts after each leap year. Timedeltas can be added to Timestamps; they simply measure fixed lengths of time.",
+      "misconception": "A year is not a fixed number of days."
+    },
+    {
+      "type": "mcq",
+      "concept": "partial-string-indexing",
+      "difficulty": "medium",
+      "question": "With a DatetimeIndex, what does `px.loc[\"2021-03\"]` return?",
+      "options": [
+        "Only the first row of March 2021, because a partial date string is matched to one single row.",
+        "A `KeyError`, because a month on its own is not a complete label for a DatetimeIndex lookup.",
+        "The rows of the whole month, because a partial date string selects every timestamp inside it.",
+        "All rows from March 2021 to the end of the series, because a partial date means a start point."
+      ],
+      "answer": 2,
+      "explanation": "A date string with less precision than the index selects every entry within that period. This works for years, months, and days. It does not stop at the first row or run to the end.",
+      "misconception": "Partial date strings select a period, not a point."
+    },
+    {
+      "type": "mcq",
+      "concept": "asfreq-vs-resample",
+      "difficulty": "medium",
+      "question": "How does `asfreq(\"B\")` differ from `resample(\"ME\").sum()`?",
+      "options": [
+        "`asfreq` forces a regular frequency and keeps or fills the values, while `resample` aggregates values over windows.",
+        "`asfreq` aggregates values into months, while `resample` only relabels the index without any computation.",
+        "They are two spellings of the same operation, so they always give identical results on any series.",
+        "`asfreq` works on columns only, while `resample` works on the index only and never on the values."
+      ],
+      "answer": 0,
+      "explanation": "`asfreq` selects values at the new frequency, creating empty slots to fill when needed. `resample` groups the data into windows and applies an aggregate such as `sum` or `mean`.",
+      "misconception": "Only `resample` aggregates."
+    },
+    {
+      "type": "scenario",
+      "concept": "downsampling",
+      "difficulty": "medium",
+      "scenario": "You call `px[\"Volume\"].resample(\"ME\")` and print the result, but you see a resampler object instead of numbers.",
+      "question": "What is missing?",
+      "options": [
+        "A call to `reset_index()`, because resampling needs an ordinary column index before it can run.",
+        "A `fillna` call, because resampling produces missing values first that must be filled in advance.",
+        "An `inplace=True` argument, because resampling changes the series in place unless that is stated.",
+        "An aggregation such as `.sum()` or `.mean()`, because downsampling must say how to combine each window."
+      ],
+      "answer": 3,
+      "explanation": "Like `groupby`, `resample` builds a recipe and needs an aggregate to produce values. Downsampling combines many rows into one, so pandas must be told how.",
+      "misconception": "`resample` is lazy until an aggregation is chosen."
+    },
+    {
+      "type": "mcq",
+      "concept": "upsampling",
+      "difficulty": "medium",
+      "question": "After upsampling daily prices to 12-hour steps, the new half-day slots are empty. Which tools fill them?",
+      "options": [
+        "`sum()` or `mean()`, because they combine each empty slot with the neighbors on either side.",
+        "`ffill()`, `bfill()`, or `interpolate()`, which carry values forward, backward, or between known points.",
+        "`drop_duplicates()`, because the empty slots are repeated rows that should be removed from it.",
+        "`rolling()`, because a rolling window creates the missing readings from the surrounding values."
+      ],
+      "answer": 1,
+      "explanation": "Upsampling creates slots with no data, so you fill them by copying neighbors or drawing a line between them. Aggregations are for downsampling, and neither duplicates nor rolling windows invent readings.",
+      "misconception": "Downsampling aggregates; upsampling fills."
+    },
+    {
+      "type": "mcq",
+      "concept": "rolling-nan",
+      "difficulty": "easy",
+      "question": "Why are the first 19 values of `close.rolling(20).mean()` `NaN`?",
+      "options": [
+        "Because the first 19 prices were missing in the original data and the window passes them on.",
+        "Because a full window of 20 values is not available until the 20th row.",
+        "Because `rolling` skips the first 19 rows on purpose, to avoid bias in the moving average.",
+        "Because the mean of fewer than 20 values is undefined for every series, however it is built."
+      ],
+      "answer": 1,
+      "explanation": "By default, a rolling statistic needs a full window. The first complete window ends at the 20th row. The data is not missing, and the mean of fewer values exists but is not computed unless `min_periods` is lowered.",
+      "misconception": "`NaN` at the start comes from the window, not the data."
+    },
+    {
+      "type": "mcq",
+      "concept": "rolling-vs-ewm",
+      "difficulty": "medium",
+      "question": "How does `ewm(span=20).mean()` differ from `rolling(20).mean()`?",
+      "options": [
+        "It weights all 20 values in the window equally, while `rolling` weights the recent values more heavily.",
+        "It weights recent values more heavily and decays older ones, while `rolling` weights the window's values equally.",
+        "It averages over the whole history equally, while `rolling` uses only the single latest value.",
+        "It returns the median of each window instead, while `rolling` returns the mean of the window."
+      ],
+      "answer": 1,
+      "explanation": "An exponentially weighted average gives recent observations more influence, so it reacts faster. A simple rolling mean treats every value in its window equally.",
+      "misconception": "Exponential weighting favors recent data."
+    },
+    {
+      "type": "scenario",
+      "concept": "shift",
+      "difficulty": "medium",
+      "scenario": "You want each day's change in closing price, computed as today minus yesterday.",
+      "question": "Which expression does that?",
+      "options": [
+        "`close - close.shift(-1)`, because a negative shift looks backward at yesterday's value instead.",
+        "`close.shift(1) - close`, because the shifted copy holds today's value and the original is yesterday's.",
+        "`close - close.shift(1)`, because `shift(1)` moves each value down so a row sees the previous one.",
+        "`close.rolling(1).sum()`, because a window of one value gives the change from the previous day."
+      ],
+      "answer": 2,
+      "explanation": "`shift(1)` pushes values down one row, so each row can see yesterday's value. Subtracting it from today's gives the daily change. A negative shift looks forward, and the other forms reverse the sign or return the price itself.",
+      "misconception": "`shift(1)` brings the previous value to the current row."
+    },
+    {
+      "type": "scenario",
+      "concept": "settingwithcopy",
+      "difficulty": "hard",
+      "scenario": "You filter a log to one user and then assign `u[\"gap\"] = ...` on the result. pandas prints a `SettingWithCopyWarning`.",
+      "question": "What is the right fix?",
+      "options": [
+        "Ignore the warning, because the original table is always modified as intended in these cases.",
+        "Call `dropna()` on the filtered table before the assignment, because missing values cause the warning.",
+        "Add `inplace=True` to the assignment so that pandas knows the change is intentional and silences it.",
+        "Create the filtered table with `.copy()`, which states that you are editing an independent object."
+      ],
+      "answer": 3,
+      "explanation": "The warning means pandas cannot tell whether the filtered table is a view of the original. Copying makes it independent and silences the warning, with clear intent.",
+      "misconception": "Assigning to a filtered slice is ambiguous without `.copy()`."
+    },
+    {
+      "type": "mcq",
+      "concept": "header-none",
+      "difficulty": "easy",
+      "question": "A login file has no header row. Which call reads it correctly?",
+      "options": [
+        "`pd.read_csv(path, header=None, names=[\"row\", \"user\", \"stamp\"])`, which supplies the names.",
+        "`pd.read_csv(path)`, because pandas always infers sensible column names from the data itself.",
+        "`pd.read_csv(path, index_col=None)`, because turning off the index column also turns off the header.",
+        "`pd.read_csv(path, skiprows=1)`, because the header of a login file is always on the second line."
+      ],
+      "answer": 0,
+      "explanation": "Without `header=None`, the first data row is used as column names. `names` then supplies the labels. `index_col` and `skiprows` do not control header handling in this way.",
+      "misconception": "pandas assumes the first row is a header unless told otherwise."
+    },
+    {
+      "type": "mcq",
+      "concept": "stop-word-set",
+      "difficulty": "medium",
+      "question": "Why does the note store stop words in a `set` rather than a list?",
+      "options": [
+        "A set keeps the words in alphabetical order, which the filtering step needs in order to work.",
+        "A set allows duplicate words, which makes the stop-word list more complete than a list could be.",
+        "A set can be indexed by position, which a list cannot, so each word is found by its place.",
+        "Membership tests on a set are fast, whereas a list is scanned from the start for every word."
+      ],
+      "answer": 3,
+      "explanation": "Checking `word in some_set` takes about the same time however large the set is, while a list checks items one by one. When the test runs for every word of every review, the difference adds up.",
+      "misconception": "Choose the container for the operation you repeat."
+    },
+    {
+      "type": "scenario",
+      "concept": "html-regex",
+      "difficulty": "hard",
+      "scenario": "You remove HTML tags from \"<b>Terrible</b> support\" with the pattern `<.*>` and the whole string disappears.",
+      "question": "What is the problem, and what fixes it?",
+      "options": [
+        "The pattern is greedy and spans first bracket to last; the lazy form `<.*?>` removes each tag.",
+        "The pattern is case sensitive, so add `case=False` to keep the text that sits between the tags.",
+        "The `str.replace` method cannot use regular expressions at all, so a Python loop is needed instead.",
+        "The text needs `strip()` first, because brackets that sit next to spaces confuse the pattern."
+      ],
+      "answer": 0,
+      "explanation": "`.*` matches as much as it can, so one match spans from the first `<` to the last `>`. Adding `?` makes it lazy, stopping at the first closing bracket. Case and whitespace are not the issue.",
+      "misconception": "Greedy patterns swallow everything between the outermost delimiters."
+    },
+    {
+      "type": "mcq",
+      "concept": "stemming-vs-lemmatization",
+      "difficulty": "medium",
+      "question": "How do stemming and lemmatization differ?",
+      "options": [
+        "Stemming uses a dictionary to return real words, while lemmatization chops endings by fixed rules.",
+        "Stemming chops endings by rules and may leave a non-word; lemmatization returns a real base form.",
+        "They always produce identical output, but lemmatization is much slower to run on a large corpus.",
+        "Stemming removes stop words from the text, while lemmatization removes the punctuation from it."
+      ],
+      "answer": 1,
+      "explanation": "A stemmer cuts endings with fixed rules, giving fast but crude results such as \"charg\". A lemmatizer looks words up and returns valid base forms. Neither is a stop-word or punctuation filter.",
+      "misconception": "A stem need not be a word."
+    },
+    {
+      "type": "card",
+      "concept": "messy-amounts",
+      "difficulty": "hard",
+      "question": "A funding table has amounts such as \"1,200,000\" and \"undisclosed\". How do you make the column numeric and safe to group?",
+      "answer": "Strip the commas with `str.replace(\",\", \"\", regex=False)`, then convert with `pd.to_numeric(..., errors=\"coerce\")` so unreadable entries such as \"undisclosed\" become `NaN` instead of raising an error. Group and sum afterwards, since sums skip `NaN`, and report how many amounts were missing.",
+      "explanation": "Cleaning before grouping prevents text values from breaking the aggregation."
+    }
+  ]
+}

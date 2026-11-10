@@ -169,6 +169,8 @@ IMAGE_FOLDERS = {
     "series_anatomy.png": _NUMPY,
     "concat_axes.png": _NUMPY,
     "long_vs_wide_melt.png": _NUMPY,
+    "resample_up_down.png": _NUMPY,
+    "rolling_window.png": _NUMPY,
 }
 
 # Fallback for any new image not yet mapped above.
@@ -3919,6 +3921,57 @@ def pivot_table_fold():
     save(fig, "pivot_table_fold.png")
 
 
+def resample_up_down():
+    """Downsampling: many daily values aggregate to one monthly value.
+    Upsampling: few values spread over finer slots that need filling."""
+    rng = np.random.default_rng(3)
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 3.9))
+    ax = axes[0]
+    days = np.arange(30)
+    vals = 50 + np.cumsum(rng.normal(0, 2, 30))
+    ax.plot(days, vals, "o", color=GREY, markersize=3.5, label="daily values")
+    for lo, hi, c in ((0, 10, BLUE), (10, 20, ORANGE), (20, 30, GREEN)):
+        ax.axvspan(lo - 0.5, hi - 0.5, color=c, alpha=0.12)
+        ax.hlines(vals[lo:hi].mean(), lo - 0.5, hi - 0.5, color=c, lw=3)
+    ax.set_title('Downsampling: resample("10D").mean()')
+    ax.set_xlabel("day")
+    ax.legend(loc="upper left", frameon=False)
+    ax = axes[1]
+    x = np.array([0, 1, 2, 3])
+    y = np.array([60, 66, 63, 70])
+    xf = np.arange(0, 3.01, 0.5)
+    ax.plot(xf, np.interp(xf, x, y), "-", color=ORANGE, lw=1.5, label="interpolated")
+    ax.plot(xf, np.where(np.isin(xf, x), np.interp(xf, x, y), np.nan), "o",
+            color=BLUE, markersize=8, label="original")
+    ax.plot(xf[~np.isin(xf, x)], np.interp(xf, x, y)[~np.isin(xf, x)], "o",
+            color="white", markeredgecolor=ORANGE, markersize=8, label="new empty slot, filled")
+    ax.set_title('Upsampling: resample("12h").interpolate()')
+    ax.set_xlabel("day")
+    ax.legend(loc="lower right", frameon=False)
+    save(fig, "resample_up_down.png")
+
+
+def rolling_window():
+    """A noisy line, a window of five points, and the smoother moving average."""
+    rng = np.random.default_rng(8)
+    x = np.arange(30)
+    y = 10 + 0.15 * x + rng.normal(0, 1.2, 30)
+    avg = np.convolve(y, np.ones(5) / 5, mode="valid")
+    fig, ax = plt.subplots(figsize=(9, 3.9))
+    ax.plot(x, y, "-o", color=GREY, markersize=3.5, lw=1, label="values")
+    ax.plot(x[4:], avg, "-", color=ORANGE, lw=2.5, label="rolling(5).mean()")
+    ax.axvspan(14.5, 19.5, color=BLUE, alpha=0.15)
+    ax.annotate("window of 5\nslides right", xy=(17, y[15:20].max() + 0.2),
+                xytext=(17, y.max() + 1.0), ha="center", color=BLUE, fontsize=9,
+                arrowprops=dict(arrowstyle="-|>", color=BLUE, lw=1.2))
+    ax.annotate("first 4 results are NaN", xy=(2, y[2]), xytext=(2.5, y.min() - 1.4),
+                color=GREY, fontsize=9)
+    ax.set_ylim(y.min() - 2, y.max() + 2.5)
+    ax.set_title("Rolling window: each point averages the last five values")
+    ax.legend(loc="upper left", frameon=False)
+    save(fig, "rolling_window.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -4038,4 +4091,6 @@ if __name__ == "__main__":
     multiindex_stack_unstack()
     long_vs_wide_melt()
     pivot_table_fold()
+    resample_up_down()
+    rolling_window()
     print("\nAll diagrams generated.")
