@@ -161,6 +161,7 @@ IMAGE_FOLDERS = {
     "fancy_indexing.png": _NUMPY,
     "boolean_mask.png": _NUMPY,
     "broadcasting_stretch.png": _NUMPY,
+    "pivot_table_fold.png": _NUMPY,
     "multiindex_stack_unstack.png": _NUMPY,
     "join_types.png": _NUMPY,
     "split_apply_combine.png": _NUMPY,
@@ -3868,6 +3869,56 @@ def long_vs_wide_melt():
     save(fig, "long_vs_wide_melt.png")
 
 
+def pivot_table_fold():
+    """A long table of (class, sex, fare) rows folded by pivot_table into a
+    grid: class on the rows, sex on the columns, the mean fare in each cell."""
+    rows = [("1", "F", 150), ("1", "M", 130), ("1", "F", 170), ("2", "M", 40),
+            ("2", "F", 44), ("2", "M", 48)]
+    fig, ax = plt.subplots(figsize=(11, 4.4))
+    ax.set_xlim(0, 14)
+    ax.set_ylim(0.8, 6.2)
+    ax.axis("off")
+    col = {"F": ORANGE, "M": BLUE}
+
+    def cell(x, y, w, h, text, color, fs=9):
+        ax.add_patch(FancyBboxPatch((x, y), w, h, boxstyle="square,pad=0",
+                                    facecolor=color, edgecolor="black",
+                                    alpha=0.85, lw=1.0))
+        ax.text(x + w / 2, y + h / 2, text, ha="center", va="center",
+                color="white", fontsize=fs, family="monospace")
+
+    ax.text(2.4, 5.8, "long table", ha="center", fontsize=10, color=GREY,
+            fontweight="bold")
+    for k, h in enumerate(["class", "sex", "fare"]):
+        cell(0.3 + k * 1.4, 5.0, 1.3, 0.55, h, GREY)
+    for i, (c, s, f) in enumerate(rows):
+        y = 4.3 - i * 0.65
+        cell(0.3, y, 1.3, 0.55, c, PURPLE)
+        cell(1.7, y, 1.3, 0.55, s, col[s])
+        cell(3.1, y, 1.3, 0.55, str(f), GREEN)
+
+    ax.annotate("", xy=(8.2, 3.6), xytext=(5.0, 3.6),
+                arrowprops=dict(arrowstyle="-|>", color=GREEN, lw=1.8))
+    ax.text(6.6, 4.1, 'pivot_table(index="class",\ncolumns="sex",\nvalues="fare")',
+            ha="center", fontsize=8.5, family="monospace", color=GREEN)
+
+    ax.text(11.0, 5.8, "pivot table (mean)", ha="center", fontsize=10,
+            color=GREY, fontweight="bold")
+    cell(9.2, 5.0, 1.3, 0.55, "class", GREY)
+    cell(10.6, 5.0, 1.3, 0.55, "F", ORANGE)
+    cell(12.0, 5.0, 1.3, 0.55, "M", BLUE)
+    cell(9.2, 4.3, 1.3, 0.55, "1", PURPLE)
+    cell(10.6, 4.3, 1.3, 0.55, "160", GREEN)
+    cell(12.0, 4.3, 1.3, 0.55, "130", GREEN)
+    cell(9.2, 3.65, 1.3, 0.55, "2", PURPLE)
+    cell(10.6, 3.65, 1.3, 0.55, "44", GREEN)
+    cell(12.0, 3.65, 1.3, 0.55, "44", GREEN)
+    ax.text(11.0, 2.8, "each cell = the mean fare of the\nrows with that class and sex",
+            ha="center", fontsize=9, color=GREY)
+    ax.set_title("pivot_table: fold a long table into a grid of aggregates")
+    save(fig, "pivot_table_fold.png")
+
+
 if __name__ == "__main__":
     bernoulli_pmf()
     binomial_shapes()
@@ -3986,4 +4037,5 @@ if __name__ == "__main__":
     concat_axes()
     multiindex_stack_unstack()
     long_vs_wide_melt()
+    pivot_table_fold()
     print("\nAll diagrams generated.")

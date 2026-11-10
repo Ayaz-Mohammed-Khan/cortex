@@ -70,6 +70,7 @@ export const TOPIC_PREREQUISITES: PrerequisiteMap = {
   'GroupBy': ['DataFrame Methods'],
   'Merging & Joining': ['GroupBy'],
   'MultiIndex Objects': ['Merging & Joining'],
+  'String & Datetime Ops': ['MultiIndex Objects'],
 
   // ── OOP & Advanced Python ─────────────────────────────────────────────
   // Two strands off the OOP base. The class strand is linear; the advanced

@@ -1,0 +1,226 @@
+{
+  "questions": [
+    {
+      "type": "mcq",
+      "concept": "pivot-vs-groupby",
+      "difficulty": "easy",
+      "question": "Which expression gives the same table as `df.pivot_table(index=\"cabin_class\", columns=\"sex\", values=\"fare\")`?",
+      "options": [
+        "`df.groupby(\"cabin_class\")[\"fare\"].mean()`, because the default pivot aggregate groups by the row key only and ignores the columns key.",
+        "`df.groupby([\"cabin_class\", \"sex\"])[\"fare\"].sum()`, because pivoting adds up the values in each cell.",
+        "`df.sort_values([\"cabin_class\", \"sex\"])[\"fare\"]`, because a pivot is a two-key sort of the column.",
+        "`df.groupby([\"cabin_class\", \"sex\"])[\"fare\"].mean().unstack()`, because a pivot is a two-key group followed by an unstack."
+      ],
+      "answer": 3,
+      "explanation": "A pivot table is a two-key groupby whose second key is moved into the columns with `unstack`, and the default aggregate is the mean. A one-key groupby has no columns key, a sum is a different aggregate, and sorting aggregates nothing.",
+      "misconception": "The default `aggfunc` of `pivot_table` is the mean, not the sum."
+    },
+    {
+      "type": "mcq",
+      "concept": "margins",
+      "difficulty": "easy",
+      "question": "What does `margins=True` add to a pivot table?",
+      "options": [
+        "An `All` row and column with the overall aggregate for each row, column, and the whole table.",
+        "A blank border of missing values around the whole table, added purely to make it easier to read.",
+        "A column showing the standard deviation of every row in the table.",
+        "A second copy of the table sorted in descending order of the cell values."
+      ],
+      "answer": 0,
+      "explanation": "Margins add subtotals computed with the same `aggfunc`, labelled `All`, along both axes. They do not add padding, a spread column, or a sorted copy.",
+      "misconception": "The `All` cells are aggregates of the underlying rows, not averages of the displayed cells."
+    },
+    {
+      "type": "scenario",
+      "concept": "fill-value",
+      "difficulty": "medium",
+      "scenario": "A pivot of expense totals by weekday and income-or-expense shows `NaN` in cells where no entries exist, and you want the chart to treat those as zero.",
+      "question": "What should you pass?",
+      "options": [
+        "`dropna=True`, because it removes the weekdays that have no entries from the finished chart entirely.",
+        "`margins=True`, because the `All` row replaces any empty cell with a total.",
+        "`fill_value=0`, because it replaces empty cells with zero in the finished table.",
+        "`aggfunc=\"count\"`, because a count of nothing is always zero."
+      ],
+      "answer": 2,
+      "explanation": "`fill_value` fills the cells that have no data after aggregation. `dropna` removes whole columns of missing results rather than filling them, margins add totals, and changing the aggregate changes the meaning of every cell.",
+      "misconception": "Empty combinations produce `NaN` unless you fill them."
+    },
+    {
+      "type": "mcq",
+      "concept": "aggfunc-dict",
+      "difficulty": "medium",
+      "question": "How do you get the mean fare and the total survivors in one pivot table?",
+      "options": [
+        "Pass `aggfunc=[\"mean\", \"sum\"]` without any `values` argument, and pandas matches the functions to the columns.",
+        "Run two pivot tables and add them together, because one call can use only one aggregate.",
+        "Pass `aggfunc={\"fare\": \"mean\", \"survived\": \"sum\"}`, a dictionary of column to function.",
+        "Pass `values=[\"fare\", \"survived\"]` and `aggfunc=\"mean\"`, which averages both columns together."
+      ],
+      "answer": 2,
+      "explanation": "A dictionary assigns each value column its own aggregate. A list applies every function to every column, and a single aggregate treats both columns the same way.",
+      "misconception": "`aggfunc` can be a dictionary, not only one function."
+    },
+    {
+      "type": "mcq",
+      "concept": "str-handles-missing",
+      "difficulty": "easy",
+      "question": "A column has a missing name. What happens with `names.str.upper()` compared with `[n.upper() for n in names]`?",
+      "options": [
+        "Both raise an `AttributeError` on the missing value, because `None` has no `upper`.",
+        "Both skip the missing value and return a shorter list, so the result has no gap where it used to be.",
+        "The `.str` version returns `NaN` for the missing value, while the list comprehension raises an `AttributeError`.",
+        "The `.str` version raises an error, while the list comprehension fills the gap with an empty string."
+      ],
+      "answer": 2,
+      "explanation": "The `.str` accessor propagates missing values, so the column keeps its length with a gap. A plain comprehension calls `upper` on `None` and fails.",
+      "misconception": "Vectorized string methods are missing-value safe."
+    },
+    {
+      "type": "scenario",
+      "concept": "split-expand",
+      "difficulty": "medium",
+      "scenario": "Each name looks like `Mallory, Mr. Lionel` and you want the text after the first comma, split once at the first full stop, in two separate columns.",
+      "question": "Which approach fits?",
+      "options": [
+        "`s.str.split(\".\", n=1, expand=True)`, which splits at the first full stop only and returns two columns.",
+        "`s.str.split(\".\")`, which returns two separate columns automatically because there is a single full stop in each name.",
+        "`s.str.get(1)`, which returns the second piece of every name without needing a split.",
+        "`s.str.replace(\".\", \" \")`, which separates the title into a new column of its own and leaves the rest alone."
+      ],
+      "answer": 0,
+      "explanation": "`n=1` limits the number of splits and `expand=True` turns the pieces into columns. Without `expand` the result is a Series of lists, and `get` needs lists to index into.",
+      "misconception": "`split` returns lists unless you pass `expand=True`."
+    },
+    {
+      "type": "mcq",
+      "concept": "regex-flag",
+      "difficulty": "medium",
+      "question": "Why does the note pass `regex=False` to `str.replace` when swapping `\"Capt\"` for `\"Officer\"`?",
+      "options": [
+        "Because regular expressions cannot match capital letters at all, so plain text matching is the only possible choice.",
+        "Because plain text should be matched literally; a character such as `.` would otherwise be read as a pattern.",
+        "Because `regex=False` makes the replacement case-insensitive for every title in the column, whatever its capitalization.",
+        "Because `str.replace` raises an error unless the argument is set explicitly in every call."
+      ],
+      "answer": 1,
+      "explanation": "The default for pattern matching changed between pandas versions, so being explicit avoids surprises. With `regex=False` characters like `.` are literal. It has nothing to do with case, and the call works without it.",
+      "misconception": "Special characters in a replacement string can be read as regex."
+    },
+    {
+      "type": "mcq",
+      "concept": "contains-case",
+      "difficulty": "easy",
+      "question": "What does `names.str.contains(\"lionel\", case=False)` return?",
+      "options": [
+        "A boolean Series that is `True` where the name contains the text, ignoring letter case.",
+        "A Series of the names that contain the text, with all other names removed.",
+        "The position of the text inside each name as a number, or -1 where the text is missing from a name.",
+        "A single `True` or `False` that says whether any one name in the whole column contains the text."
+      ],
+      "answer": 0,
+      "explanation": "`contains` returns one boolean per element. To keep the matching rows, use that mask inside square brackets. Positions come from `find`, and `any()` would give a single result.",
+      "misconception": "`contains` returns a mask, not the filtered rows."
+    },
+    {
+      "type": "scenario",
+      "concept": "regex-anchors",
+      "difficulty": "hard",
+      "scenario": "You need family names that start and end with a consonant. A colleague uses `contains(\"[^aeiou]\")` and gets almost every name.",
+      "question": "Why, and what pattern fixes it?",
+      "options": [
+        "The pattern is case sensitive, so adding `case=False` is the only fix that is needed to restrict it to the edges.",
+        "`contains` cannot use character classes at all, so the check has to be written as an explicit Python loop.",
+        "The pattern matches any consonant anywhere; anchors give `^[^aeiou].*[^aeiou]$` to test only the first and last characters.",
+        "The pattern needs `str.extract` instead, because `contains` returns the wrong type whenever a class is used."
+      ],
+      "answer": 2,
+      "explanation": "Without anchors, a name matches if it contains any consonant anywhere. `^` pins the start and `$` pins the end, so the pattern tests only the edges. Case sensitivity is a separate concern.",
+      "misconception": "Unanchored patterns match anywhere in the string."
+    },
+    {
+      "type": "mcq",
+      "concept": "timestamp-types",
+      "difficulty": "medium",
+      "question": "Which statement about the date types is correct?",
+      "options": [
+        "Python `datetime` is the fastest of the three types, so pandas uses it internally for large arrays of dates.",
+        "NumPy `datetime64` stores dates as 64-bit integers, and the pandas `Timestamp` builds on it with richer methods.",
+        "The pandas `Timestamp` has day precision only, so times of day always need a separate type of their own.",
+        "All three types are interchangeable and differ only in what they are called."
+      ],
+      "answer": 1,
+      "explanation": "NumPy's `datetime64` gives vectorized storage and arithmetic. `Timestamp` combines that with the convenience of `datetime` and has nanosecond precision. Python `datetime` objects are slow at scale.",
+      "misconception": "Pandas dates are NumPy-backed, not Python-object-backed."
+    },
+    {
+      "type": "mcq",
+      "concept": "date-range-freq",
+      "difficulty": "medium",
+      "question": "How do `pd.date_range(\"2024-03-01\", \"2024-03-12\", freq=\"B\")` and `freq=\"D\"` differ?",
+      "options": [
+        "`\"B\"` gives business days, skipping Saturdays and Sundays, while `\"D\"` gives every calendar day.",
+        "`\"B\"` gives every second day, while `\"D\"` gives every day, starting from the first date.",
+        "`\"B\"` gives dates in backward order from the end date, while `\"D\"` gives dates in forward order.",
+        "They give the same dates, because the frequency only changes how the index prints."
+      ],
+      "answer": 0,
+      "explanation": "`\"B\"` is business-day frequency, so weekends are skipped. `\"D\"` is the calendar-day default. The frequency changes which dates exist, not just how they print.",
+      "misconception": "Frequency codes choose which dates are generated."
+    },
+    {
+      "type": "scenario",
+      "concept": "to-datetime-coerce",
+      "difficulty": "medium",
+      "scenario": "A text column of dates contains a few entries such as \"not a date\", and `pd.to_datetime` stops with an error.",
+      "question": "What is the safest way to convert it and keep going?",
+      "options": [
+        "Delete the column and re-enter all of the dates by hand, since pandas cannot read a column of mixed text.",
+        "Use `pd.to_datetime(col, errors=\"coerce\")`, which turns unreadable entries into `NaT` so you can inspect them.",
+        "Use `astype(int)` first, because a number is always readable as a date.",
+        "Call `fillna(0)` on the text column, because zeros are valid dates."
+      ],
+      "answer": 1,
+      "explanation": "`errors=\"coerce\"` replaces unparseable values with `NaT`, the missing marker for dates, so conversion completes and the bad rows are easy to find. Integers and zeros are not parsed as dates in the same way.",
+      "misconception": "Bad values can be turned into missing markers instead of stopping the run."
+    },
+    {
+      "type": "mcq",
+      "concept": "dt-accessor",
+      "difficulty": "easy",
+      "question": "Once a column holds real datetimes, how do you get the weekday name of every row?",
+      "options": [
+        "`col.str.day_name()`, because weekday names are text and so belong to the `.str` accessor.",
+        "`col.day_name`, because the weekday is an attribute of the whole column.",
+        "`col.dt.day_name()`, because the `.dt` accessor exposes the parts of datetimes.",
+        "`col.apply(day_name)`, because pandas provides a global function with that name for every column."
+      ],
+      "answer": 2,
+      "explanation": "`.dt` is the datetime accessor, parallel to `.str` for text. It offers `year`, `month_name()`, `day_name()`, `is_month_end`, and more. The `.str` accessor works only on strings.",
+      "misconception": "Datetime parts live on `.dt`, not `.str`."
+    },
+    {
+      "type": "mcq",
+      "concept": "to-datetime-format",
+      "difficulty": "hard",
+      "question": "Why is `pd.to_datetime(col, format=\"%m/%d/%Y %H:%M\")` better than leaving the format out for a ledger with dates like `3/2/2022 10:11`?",
+      "options": [
+        "It states whether `3/2` means March 2 or 2 March, avoiding guesses, and parses faster.",
+        "It converts the column to plain strings, which makes the later extraction of date parts easier.",
+        "It silently drops rows that do not match the pattern, which cleans the ledger.",
+        "It is required, because pandas cannot read any slash-separated date without it."
+      ],
+      "answer": 0,
+      "explanation": "A date such as 3/2/2022 is ambiguous between month-first and day-first layouts. Giving the format removes the ambiguity and lets the parser skip format inference. Without a format, pandas can still read it, and unmatched rows raise errors rather than being dropped.",
+      "misconception": "Ambiguous date text should have an explicit format."
+    },
+    {
+      "type": "card",
+      "concept": "str-vs-dt",
+      "difficulty": "hard",
+      "question": "Explain what the `.str` and `.dt` accessors are for, and what they have in common.",
+      "answer": "`.str` exposes vectorized text methods such as `lower`, `split`, `contains`, and `replace`, and `.dt` exposes the parts and calendar properties of datetime values such as `year`, `month_name`, and `is_month_end`. Both work on a whole column at once and propagate missing values, so no Python loop is needed.",
+      "explanation": "Both accessors only work on a column that already has the matching dtype."
+    }
+  ]
+}
